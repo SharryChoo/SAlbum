@@ -1,5 +1,6 @@
 package frank.demo.photopicker.activity;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import frank.demo.photopicker.model.PictureFolderModel;
@@ -14,7 +15,7 @@ public class PicturePickerPresenter {
     private PicturePickerModel mModel = new PicturePickerModel();
 
     public PicturePickerPresenter(PicturePickerViewInterface view) {
-        mView = view;
+        mView = new WeakReference<PicturePickerViewInterface>(view).get();
     }
 
     /**
@@ -63,20 +64,6 @@ public class PicturePickerPresenter {
     }
 
     /**
-     * 显示Dialog
-     */
-    public void showDialog() {
-        mView.openDialog();
-    }
-
-    /**
-     * 关闭Dialog
-     */
-    public void closeDialog() {
-        mView.closeDialog();
-    }
-
-    /**
      * 初始化已选择的图片列表
      */
     public void initPickedList(List<String> pickedUriList) {
@@ -88,10 +75,6 @@ public class PicturePickerPresenter {
         void showCurrentFolderPicture(List<String> currentPictureList);
 
         void pictureStateChanged();
-
-        void openDialog();
-
-        void closeDialog();
     }
 
 }

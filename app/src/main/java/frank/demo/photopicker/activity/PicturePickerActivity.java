@@ -27,7 +27,7 @@ import frank.demo.photopicker.utils.DialogUtil;
 /**
  * Created by 99538 on 2017/7/25.
  */
-public class PicturePicker extends BaseActivity implements PicturePickerPresenter.PicturePickerViewInterface{
+public class PicturePickerActivity extends BaseActivity implements PicturePickerPresenter.PicturePickerViewInterface{
 
     public static final int MAX_PICKED_COUNT = 9;
     @MyApp.ViewResId(R.id.picked_text) private TextView mPickedText;
@@ -84,7 +84,20 @@ public class PicturePicker extends BaseActivity implements PicturePickerPresente
         mClickRegion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPresenter.showDialog();
+                mMenuButton.setChecked(true);
+                View contentView = LayoutInflater.from(PicturePickerActivity.this).inflate(R.layout.dialog_picture_dir_list, null);
+                RecyclerView recyclerView = (RecyclerView) contentView.findViewById(R.id.picture_dir_rv);
+                recyclerView.setLayoutManager(new LinearLayoutManager(PicturePickerActivity.this));
+                recyclerView.setAdapter(new DialogPickDirAdapter(mPresenter));
+                DialogUtil.getInstance().displayDialogWindowWidth(PicturePickerActivity.this, contentView, Gravity.BOTTOM);
+                DialogUtil.getInstance().getDialog().setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        mFolderName.setText(mPresenter.getCurrentFolderName());
+                        mMenuButton.setChecked(false);
+                        DialogUtil.getInstance().dismissDialog();
+                    }
+                });
             }
         });
 
@@ -100,38 +113,13 @@ public class PicturePicker extends BaseActivity implements PicturePickerPresente
     @Override
     public void showCurrentFolderPicture(List<String> currentPictureList) {
         mList.clear();
-        for(String uri : currentPictureList) {
-            mList.add(uri);
-        }
+        mList.addAll(currentPictureList);
         mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void pictureStateChanged() {
         mPickedText.setText("当前已选择图片" + mPresenter.fetchPickedList().size() + "/" + MAX_PICKED_COUNT);
-    }
-
-    @Override
-    public void openDialog() {
-        mMenuButton.setChecked(true);
-        View contentView = LayoutInflater.from(this).inflate(R.layout.dialog_picture_dir_list, null);
-        RecyclerView recyclerView = (RecyclerView) contentView.findViewById(R.id.picture_dir_rv);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new DialogPickDirAdapter(mPresenter));
-        DialogUtil.getInstance().displayDialogWindowWidth(this, contentView, Gravity.BOTTOM);
-        DialogUtil.getInstance().getDialog().setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                mPresenter.closeDialog();
-            }
-        });
-    }
-
-    @Override
-    public void closeDialog() {
-        mFolderName.setText(mPresenter.getCurrentFolderName());
-        mMenuButton.setChecked(false);
-        DialogUtil.getInstance().dismissDialog();
     }
 
 }

@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import frank.demo.photopicker.R;
-import frank.demo.photopicker.activity.PicturePicker;
+import frank.demo.photopicker.activity.PicturePickerActivity;
 import frank.demo.photopicker.activity.PicturePickerPresenter;
 import frank.demo.photopicker.app_manager.MyApp;
 
@@ -54,7 +54,7 @@ public class ActivityPicturePickerAdapter extends RecyclerView.Adapter {
                     vh.mPick.setChecked(false);
                     //回调给Activity已移除该图片
                     mPresenter.pictureRemove(uri);
-                } else if(!vh.mPick.isChecked() && mPresenter.fetchPickedList().size() < PicturePicker.MAX_PICKED_COUNT) {
+                } else if(!vh.mPick.isChecked() && mPresenter.fetchPickedList().size() < PicturePickerActivity.MAX_PICKED_COUNT) {
                     vh.mPick.setChecked(true);
                     //回调给Activity已选中了该图片
                     mPresenter.picturePicked(uri);

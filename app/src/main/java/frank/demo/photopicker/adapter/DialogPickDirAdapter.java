@@ -13,6 +13,7 @@ import frank.demo.photopicker.R;
 import frank.demo.photopicker.activity.PicturePickerPresenter;
 import frank.demo.photopicker.app_manager.MyApp;
 import frank.demo.photopicker.model.PictureFolderModel;
+import frank.demo.photopicker.utils.DialogUtil;
 
 /**
  * Created by 99538 on 2017/7/25.
@@ -43,7 +44,7 @@ public class DialogPickDirAdapter extends RecyclerView.Adapter{
             @Override
             public void onClick(View view) {
                 mPresenter.showCurrentFolder(position);
-                mPresenter.closeDialog();
+                DialogUtil.getInstance().dismissDialog();
             }
         });
     }
