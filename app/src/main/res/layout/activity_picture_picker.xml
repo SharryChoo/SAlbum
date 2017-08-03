@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!--toolbar-->
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="79dp"
+            android:paddingTop="23dp"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
+
+            <TextView
+                android:id="@+id/picked_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="图片选择器"
+                android:textColor="#FFF"
+                android:textSize="18dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:id="@+id/ensure_picked"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center_vertical"
+                android:paddingRight="10dp"
+                android:textColor="#FFF"
+                android:textSize="15dp"
+                android:text="确定"/>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#a9000000"
+        android:paddingLeft="20dp">
+
+        <LinearLayout
+            android:id="@+id/can_click_region"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <android.support.design.widget.CheckableImageButton
+                android:id="@+id/menu_button"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/selector_bottom_menu_toggle" />
+
+            <TextView
+                android:id="@+id/folder_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="全部图片"
+                android:textColor="#FFF"
+                android:textSize="15dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</android.support.design.widget.CoordinatorLayout>
