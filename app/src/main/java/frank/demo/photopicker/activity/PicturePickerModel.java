@@ -13,7 +13,7 @@ import frank.demo.photopicker.app_manager.MyApp;
 import frank.demo.photopicker.model.PictureFolderModel;
 
 /**
- * Created by 99538 on 2017/8/3.
+ * Created by FrankChoo on 2017/8/3.
  */
 
 public class PicturePickerModel {
