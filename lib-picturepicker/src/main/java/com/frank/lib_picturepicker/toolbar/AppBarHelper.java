@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.widget.toolbar;
+package com.frank.lib_picturepicker.toolbar;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -18,9 +18,10 @@ import java.lang.ref.SoftReference;
  */
 public class AppBarHelper {
 
+    private final int DEFAULT_OPTIONS = 0;
     private Window mWindow;
     private Activity mActivity;
-    private int mOptions = 0;
+    private int mOptions = DEFAULT_OPTIONS;
 
     public static AppBarHelper with(Context context) {
         return new AppBarHelper(context);
@@ -154,7 +155,7 @@ public class AppBarHelper {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void apply() {
         if (!isLollipop()) return;
-        if (mOptions != 0) {
+        if (mOptions != DEFAULT_OPTIONS) {
             View decorView = mWindow.getDecorView();
             decorView.setSystemUiVisibility(mOptions);
         }
@@ -172,8 +173,7 @@ public class AppBarHelper {
         // 根基需求计算透明度
         int alpha = (int) (baseAlpha * alphaPercent);
         // 根基透明度拼接新的color
-        int color = alpha << 24 | (baseColor & 0xffffff);
-        return color;
+        return alpha << 24 | (baseColor & 0xffffff);
     }
 
     private boolean isLollipop() {

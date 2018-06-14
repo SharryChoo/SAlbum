@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/E:/Android/AndroidStudio/plugins/android/lib/android.jar!/images/material_design_icons/toggle/ic_radio_button_checked_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/E:/Android/AndroidStudio/plugins/android/lib/android.jar!/images/material_design_icons/device/ic_signal_cellular_4_bar_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_radio_button_checked_black_24dp" />
+                            <entry key="outputName" value="activity_picture_picker_bottom_arrow" />
                             <entry key="sourceFile" value="C:\Users\Frank\Desktop\未选中.svg" />
                           </map>
                         </option>

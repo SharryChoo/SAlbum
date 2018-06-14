@@ -22,14 +22,12 @@ public interface PicturePickerContract {
          * @param folderName
          * @param uris
          */
-        void displayCheckedFolder(String folderName, List<String> uris);
+        void displaySelectedFolder(String folderName, List<String> uris);
 
         /**
          * 更新标题文本
-         *
-         * @param content
          */
-        void updateTitleText(String content);
+        void updateTextContent(int curPicked, int total);
 
         /**
          * 展示消息通知
@@ -43,7 +41,7 @@ public interface PicturePickerContract {
          *
          * @param isVisible
          */
-        void updatePreviewVisible(boolean isVisible);
+        void updateTextViewVisibility(boolean isVisible);
     }
 
     interface IPresenter {
@@ -104,17 +102,21 @@ public interface PicturePickerContract {
          */
         void performPictureRemoved(String imagePath);
 
-        /**
-         * 获取标题文本字符串
-         *
-         * @return
-         */
-        String fetchTitleText();
     }
 
     interface IModel {
 
         void init(Context context, final ModelInitializeCallback listener);
+
+        /**
+         * 设置图片选择的阈值
+         */
+        void setThreshold(int threshold);
+
+        /**
+         * 获取图片选择的阈值
+         */
+        int getThreshold();
 
         /**
          * 获取当前需要显示的文件模型

@@ -20,7 +20,6 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
 
     private PicturePickerContract.IView mView;
     private PicturePickerModel mModel = new PicturePickerModel();
-    private int mThreshold = 0;
     private Handler mMainLooperHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -47,11 +46,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
      */
     @Override
     public void setupThreshold(int threshold) {
-        // 验证一下阈值是否异常
-        if (getPickedPictures().size() > threshold) {
-            throw new RuntimeException("Your picked picture count is over your set threshold!");
-        }
-        this.mThreshold = threshold;
+        mModel.setThreshold(threshold);
     }
 
     /**
@@ -70,7 +65,9 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                         // 展示第一个图片文件夹
                         PictureFolder allPictureFolder = mModel.getPictureFolderAt(0);
                         if (mView == null) return;
-                        mView.displayCheckedFolder(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
+                        mView.displaySelectedFolder(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
+                        mView.updateTextContent(mModel.getPickedPictures().size(), mModel.getThreshold());
+                        mView.updateTextViewVisibility(mModel.getPickedPictures().size() > 0);
                     }
                 });
             }
@@ -97,7 +94,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     public void fetchPicturePathsAt(int position) {
         PictureFolder target = mModel.getPictureFolderAt(position);
         if (mView == null) return;
-        mView.displayCheckedFolder(target.getFolderName(), target.getImagePaths());
+        mView.displaySelectedFolder(target.getFolderName(), target.getImagePaths());
     }
 
     /**
@@ -125,12 +122,13 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
      */
     @Override
     public boolean performPicturePicked(String imagePath) {
-        if (getPickedPictures().size() == mThreshold) {
-            mView.showMsg("最多只可选择 " + mThreshold + " 张图片");
+        if (getPickedPictures().size() == mModel.getThreshold()) {
+            mView.showMsg("最多只可选择 " + mModel.getThreshold() + " 张图片");
             return false;
         }
         mModel.addPickedPicture(imagePath);
-        mView.updateTitleText(fetchTitleText());
+        mView.updateTextContent(mModel.getPickedPictures().size(), mModel.getThreshold());
+        mView.updateTextViewVisibility(mModel.getPickedPictures().size() > 0);
         return true;
     }
 
@@ -142,17 +140,9 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     @Override
     public void performPictureRemoved(String imagePath) {
         mModel.removePickedPicture(imagePath);
-        mView.updateTitleText(fetchTitleText());
+        mView.updateTextContent(mModel.getPickedPictures().size(), mModel.getThreshold());
+        mView.updateTextViewVisibility(mModel.getPickedPictures().size() > 0);
     }
 
-    /**
-     * 获取标题文本字符串
-     *
-     * @return
-     */
-    @Override
-    public String fetchTitleText() {
-        mView.updatePreviewVisible(getPickedPictures().size() > 0);
-        return String.format("已选择 (%d/%d)", getPickedPictures().size(), mThreshold);
-    }
+
 }

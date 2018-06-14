@@ -28,6 +28,24 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
     // 用户已选中的图片地址集合
     private List<String> mPickedPictures = new ArrayList<>();
 
+    // 图片的最大限量
+    private int mThreshold;
+
+    @Override
+    public void setThreshold(int threshold) {
+        // 验证一下阈值是否异常
+        if (getPickedPictures().size() > threshold) {
+            throw new RuntimeException("Your picked picture count is over your set threshold!");
+        }
+        this.mThreshold = threshold;
+    }
+
+    @Override
+    public int getThreshold() {
+        return mThreshold;
+    }
+
+
     @Override
     public void init(Context context, final PicturePickerContract.ModelInitializeCallback listener) {
         new Thread(new CursorSystemPictureRunnable(context, listener)).start();

@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.widget;
+package com.frank.lib_picturepicker.picturewatcher;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -26,7 +26,7 @@ public class DraggableViewPager extends ViewPager {
     private float mDownX = 0f;
     private float mDownY = 0f;
     private float mDragThresholdHeight = 0f;// 拖动到可以返回的阈值
-    private float mVerticalVelocityThreshold = 2000f;// 竖直方向上速度的阈值
+    private float mVerticalVelocityThreshold = 1000f;// 竖直方向上速度的阈值
     private float mCapturedOriginY = 0f;// 被捕获的 View 的 Y 的起始点
     private float mFingerUpBkgAlpha = 1f;// 手指松开时, 当前ViewPager背景的透明度
     private boolean mIsDragging = false;
@@ -48,7 +48,7 @@ public class DraggableViewPager extends ViewPager {
         // 速度捕获器
         mVelocityTracker = VelocityTracker.obtain();
         // 规定拖拽到消失的阈值
-        mDragThresholdHeight = getResources().getDisplayMetrics().heightPixels / 5;
+        mDragThresholdHeight = getResources().getDisplayMetrics().heightPixels / 4;
     }
 
     @Override
@@ -71,7 +71,12 @@ public class DraggableViewPager extends ViewPager {
                     mIsDragging = false;
                 }
         }
-        return super.onInterceptTouchEvent(ev);
+        try {
+            return super.onInterceptTouchEvent(ev);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -100,8 +105,8 @@ public class DraggableViewPager extends ViewPager {
                 } else {
                     recover();
                 }
-                mIsDragging = false;
                 mVelocityTracker.recycle();
+                mIsDragging = false;
                 break;
         }
         return true;

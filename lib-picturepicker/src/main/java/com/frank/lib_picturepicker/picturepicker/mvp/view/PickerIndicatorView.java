@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.widget;
+package com.frank.lib_picturepicker.picturepicker.mvp.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -9,13 +9,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -24,9 +21,9 @@ import android.view.animation.OvershootInterpolator;
  * Created by Frank on 2018/6/14.
  * Email: frankchoochina@gmail.com
  * Version: 1.0
- * Description: 用于展示图片被`选中的索引 View
+ * Description: 用于展示图片被选中的索引 View
  */
-public class PictureIndicatorView extends AppCompatTextView {
+public class PickerIndicatorView extends AppCompatTextView {
 
     // Dimension
     private int mBorderWidth;// 边框的宽度
@@ -35,6 +32,7 @@ public class PictureIndicatorView extends AppCompatTextView {
     private float mAnimPercent = 0f;
 
     // Color
+    private final int INVALIDATE_VALUE = -1;
     private int mUncheckedBorderColor = Color.WHITE;// 未选中时边框的颜色
     private int mCheckedBorderColor = mUncheckedBorderColor;// 选中时的边框颜色
     private int mSolidColor = Color.BLUE;// 选中时内部填充的颜色
@@ -48,15 +46,15 @@ public class PictureIndicatorView extends AppCompatTextView {
     private boolean mChecked = false;
     private boolean mIsAnimatorStarted = false;
 
-    public PictureIndicatorView(Context context) {
+    public PickerIndicatorView(Context context) {
         this(context, null);
     }
 
-    public PictureIndicatorView(Context context, AttributeSet attrs) {
+    public PickerIndicatorView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PictureIndicatorView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PickerIndicatorView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setGravity(Gravity.CENTER);
         init();
@@ -85,6 +83,12 @@ public class PictureIndicatorView extends AppCompatTextView {
         }
     }
 
+    public void setCheckedWithoutAnimator(boolean isChecked) {
+        mChecked = isChecked;
+        mAnimPercent = mChecked ? 1 : 0;
+        invalidate();
+    }
+
     public boolean isChecked() {
         return mChecked;
     }
@@ -93,15 +97,29 @@ public class PictureIndicatorView extends AppCompatTextView {
      * 设置边框的颜色
      */
     public void setBorderColor(@ColorInt int checkedColor, @ColorInt int uncheckedColor) {
-        mCheckedBorderColor = checkedColor;
-        mUncheckedBorderColor = uncheckedColor;
+        if (checkedColor != INVALIDATE_VALUE) mCheckedBorderColor = checkedColor;
+        if (uncheckedColor != INVALIDATE_VALUE) mUncheckedBorderColor = uncheckedColor;
     }
 
     /**
      * 设置填充的颜色
      */
     public void setSolidColor(@ColorInt int solidColor) {
-        mSolidColor = solidColor;
+        if (solidColor != INVALIDATE_VALUE) mSolidColor = solidColor;
+    }
+
+    /**
+     * 动态配置字体的尺寸
+     */
+    public void setTextSize(int dip) {
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, dip);
+    }
+
+    /**
+     * 动态配置字体的颜色
+     */
+    public void setTextColor(int color) {
+        setTextColor(color);
     }
 
     @Override
@@ -112,8 +130,8 @@ public class PictureIndicatorView extends AppCompatTextView {
         mCenterPoint.x = getPaddingLeft() + validateWidth / 2;
         mCenterPoint.y = getPaddingTop() + validateHeight / 2;
         mRadius = Math.min(validateWidth, validateHeight) / 2;
-        mBorderWidth = mRadius / 5;
-        mBorderMargin = mBorderWidth / 2;
+        mBorderWidth = mRadius / 10;
+        mBorderMargin = mBorderWidth;
     }
 
     @Override
@@ -136,7 +154,7 @@ public class PictureIndicatorView extends AppCompatTextView {
      */
     private void handleCheck2Unchecked() {
         if (mIsAnimatorStarted) return;
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1, 0).setDuration(300);
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1, 0).setDuration(200);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -156,7 +174,7 @@ public class PictureIndicatorView extends AppCompatTextView {
                 mIsAnimatorStarted = false;
             }
         });
-        valueAnimator.setInterpolator(new AnticipateInterpolator(4f));
+        valueAnimator.setInterpolator(new AnticipateInterpolator(2f));
         valueAnimator.start();
     }
 
@@ -185,7 +203,7 @@ public class PictureIndicatorView extends AppCompatTextView {
                 mIsAnimatorStarted = false;
             }
         });
-        valueAnimator.setInterpolator(new OvershootInterpolator(4f));
+        valueAnimator.setInterpolator(new OvershootInterpolator(2f));
         valueAnimator.start();
     }
 

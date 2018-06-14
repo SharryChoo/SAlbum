@@ -4,11 +4,11 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.frank.lib_picturepicker.picturepicker.PicturePickerActivity;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity;
 
 import java.util.ArrayList;
 
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES;
 
 /**
  * Created by Frank on 2018/6/13.

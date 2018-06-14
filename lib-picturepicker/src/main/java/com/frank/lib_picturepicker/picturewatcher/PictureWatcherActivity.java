@@ -5,15 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.widget.DraggableViewPager;
-import com.frank.lib_picturepicker.widget.toolbar.AppBarHelper;
-import com.frank.lib_picturepicker.widget.toolbar.GenericToolbar;
-import com.frank.lib_picturepicker.widget.toolbar.Style;
+import com.frank.lib_picturepicker.toolbar.AppBarHelper;
+import com.frank.lib_picturepicker.toolbar.GenericToolbar;
+import com.frank.lib_picturepicker.toolbar.Style;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,7 @@ import cn.bluemobi.dylan.photoview.library.PhotoViewAttacher;
  */
 public class PictureWatcherActivity extends AppCompatActivity implements DraggableViewPager.OnPagerChangedListener {
 
+    private static final String TAG = PictureWatcherActivity.class.getSimpleName();
     public static final String EXTRA_PICTURE_URIS = "extra_picture_uris";
     public static final String EXTRA_CUR_POSITION = "extra_cur_position";
 
@@ -41,7 +42,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
      */
     public static void start(Context context, int position, ArrayList<String> pictureUris) {
         if (pictureUris == null || pictureUris.isEmpty()) {
-            throw new IllegalArgumentException("PictureWatcherActivity.start -> pictureUris must not be null!");
+            Log.e(TAG, "PictureWatcherActivity start failed, parameter pictureUris is null");
+            return;
         }
         Intent intent = new Intent(context, PictureWatcherActivity.class);
         intent.putStringArrayListExtra(EXTRA_PICTURE_URIS, pictureUris);
@@ -69,7 +71,9 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
         List<String> uris = getIntent().getStringArrayListExtra(EXTRA_PICTURE_URIS);
         for (String uri : uris) {
             mUris.add(uri);
-            mPhotoViews.add(createPhotoView());
+            PhotoView photoView = createPhotoView();
+            Glide.with(this).load(uri).into(photoView);
+            mPhotoViews.add(photoView);
         }
         // 获取当前需要展示的 Position
         mCurPosition = getIntent().getIntExtra(EXTRA_CUR_POSITION, 0);
@@ -79,7 +83,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
         AppBarHelper.with(this).setStatusBarStyle(Style.TRANSPARENT).apply();
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.setAdjustToTransparentStatusBar(true);
-        mToolbar.addLeftIcon(0, R.drawable.ic_arrow_back_white, new View.OnClickListener() {
+        mToolbar.addLeftIcon(0, R.drawable.icon_common_arrow_back_white, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
@@ -88,8 +92,6 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
     }
 
     protected void initViews() {
-        //加载图片
-        Glide.with(this).load(mUris.get(mCurPosition)).into(mPhotoViews.get(mCurPosition));
         // 初始化底部的索引指示文本
         mTvBottomIndicator = findViewById(R.id.tv_pager_indicator);
         updateBottomIndicator(mCurPosition);
@@ -98,17 +100,31 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
         viewPager.setAdapter(new PictureWatcherAdapter(mPhotoViews));
         viewPager.setCurrentItem(mCurPosition);
         viewPager.setOnPagerChangedListener(this);
+        // 初始化一张图片
+        onPagerChanged(mCurPosition);
     }
 
     @Override
     public View onPagerChanged(int position) {
         updateBottomIndicator(position);
-        final PhotoView photoView = mPhotoViews.get(position);
+        PhotoView curPhotoView = mPhotoViews.get(position);
+        PhotoView beforePhotoView = position - 1 >= 0 ?
+                mPhotoViews.get(position - 1) : null;
+        PhotoView lastPhotoView = position + 1 < mUris.size() ?
+                mPhotoViews.get(position + 1) : null;
         // 若 PhotoView 中的图片没有内容, 则加载
-        if (photoView.getDrawable() == null) {
-            Glide.with(this).load(mUris.get(position)).into(photoView);
+        if (curPhotoView != null && curPhotoView.getDrawable() == null) {
+            Glide.with(this).load(mUris.get(position)).into(curPhotoView);
         }
-        return photoView;
+        // 加载前一个
+        if (beforePhotoView != null && beforePhotoView.getDrawable() == null) {
+            Glide.with(this).load(mUris.get(position)).into(beforePhotoView);
+        }
+        // 加载后一个
+        if (lastPhotoView != null && lastPhotoView.getDrawable() == null) {
+            Glide.with(this).load(mUris.get(position)).into(lastPhotoView);
+        }
+        return curPhotoView;
     }
 
     /**

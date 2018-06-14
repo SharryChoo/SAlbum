@@ -1,10 +1,11 @@
-package com.frank.lib_picturepicker.picturepicker;
+package com.frank.lib_picturepicker.picturepicker.mvp.view;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.widget.PictureIndicatorView;
+import com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +29,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     private Context mContext;
     private List<String> mUris;
     private AdapterInteraction mInteraction;
+    private int mSpanCount;
     private int mIndicatorSolidColor;
     private int mIndicatorBorderCheckedColor;
     private int mIndicatorBorderUncheckedColor;
@@ -50,13 +53,15 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
     }
 
-    public PicturePickerAdapter(Context context, List<String> uris,
+    public PicturePickerAdapter(Context context,
+                                List<String> uris, int spanCount,
                                 int indicatorSolidColor,
                                 int indicatorBorderCheckedColor,
                                 int indicatorBorderUncheckedColor) {
+        this.mInteraction = (AdapterInteraction) context;
         this.mContext = context;
         this.mUris = uris;
-        this.mInteraction = (AdapterInteraction) context;
+        this.mSpanCount = spanCount;
         this.mIndicatorSolidColor = indicatorSolidColor;
         this.mIndicatorBorderCheckedColor = indicatorBorderCheckedColor;
         this.mIndicatorBorderUncheckedColor = indicatorBorderUncheckedColor;
@@ -65,13 +70,27 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.recycle_item_activity_picture_picker, parent, false);
+        ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.recycle_item_activity_picture_picker, parent, false));
         // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
-        ViewGroup.LayoutParams params = itemView.getLayoutParams();
-        params.height = parent.getMeasuredWidth() / 3;
-        itemView.setLayoutParams(params);
-        return new ViewHolder(itemView);
+        int itemSize = parent.getMeasuredWidth() / mSpanCount;
+        ViewGroup.LayoutParams itemParams = holder.itemView.getLayoutParams();
+        itemParams.height = itemSize;
+        holder.itemView.setLayoutParams(itemParams);
+        // 设置指示器的宽高为 ItemView 的五分之一
+        int indicatorSize = itemSize / 5;
+        ViewGroup.MarginLayoutParams indicatorParams =
+                (ViewGroup.MarginLayoutParams) holder.checkIndicator.getLayoutParams();
+        // 动态调整大小
+        indicatorParams.width = indicatorSize;
+        indicatorParams.height = indicatorSize;
+        // 动态调整 Margin
+        indicatorParams.rightMargin = indicatorSize / 5;
+        indicatorParams.topMargin = indicatorSize / 5;
+        holder.checkIndicator.setLayoutParams(indicatorParams);
+        // 设置指示器的文本尺寸为指示器宽高的二分之一
+        holder.checkIndicator.setTextSize(TypedValue.COMPLEX_UNIT_PX, indicatorSize / 2);
+        return holder;
     }
 
     @Override
@@ -80,7 +99,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         Glide.with(mContext).load(uri).into(holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mInteraction.getPickedPictures().indexOf(uri);
-        holder.checkIndicator.setChecked(index != -1);
+        holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
         holder.checkIndicator.setText(String.valueOf(mInteraction.getPickedPictures().indexOf(uri) + 1));
         // 设置点击监听器
         holder.checkIndicator.setOnClickListener(new View.OnClickListener() {
@@ -100,6 +119,14 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
                 }
             }
         });
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<String> paths = new ArrayList<>();
+                paths.add(uri);
+                PictureWatcherActivity.start(mContext, 0, paths);
+            }
+        });
     }
 
     @Override
@@ -117,7 +144,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     class ViewHolder extends RecyclerView.ViewHolder {
 
         final ImageView ivPicture;
-        final PictureIndicatorView checkIndicator;
+        final PickerIndicatorView checkIndicator;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -125,12 +152,6 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
             checkIndicator = itemView.findViewById(R.id.check_indicator);
             checkIndicator.setSolidColor(mIndicatorSolidColor);
             checkIndicator.setBorderColor(mIndicatorBorderCheckedColor, mIndicatorBorderUncheckedColor);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkIndicator.callOnClick();
-                }
-            });
         }
     }
 

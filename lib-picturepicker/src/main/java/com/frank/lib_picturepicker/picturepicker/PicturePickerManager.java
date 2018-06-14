@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.support;
+package com.frank.lib_picturepicker.picturepicker;
 
 import android.Manifest;
 import android.app.Activity;
@@ -13,17 +13,20 @@ import android.support.v4.content.ContextCompat;
 
 import com.frank.lib_picturepicker.permission.PermissionsCallback;
 import com.frank.lib_picturepicker.permission.PermissionsManager;
-import com.frank.lib_picturepicker.picturepicker.PicturePickerActivity;
+import com.frank.lib_picturepicker.picturepicker.support.PicturePickerCallback;
+import com.frank.lib_picturepicker.picturepicker.support.PicturePickerCallbackFragment;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity;
 
 import java.util.ArrayList;
 
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_PICKED_INDICATOR_BORDER_CHECKED_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_PICKED_INDICATOR_BORDER_UNCHECKED_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_PICKED_INDICATOR_SOLID_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_PICKED_THRESHOLD;
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_TOOLBAR_BACKGROUND_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES;
-import static com.frank.lib_picturepicker.picturepicker.PicturePickerActivity.EXTRA_USER_PICKED_PICTURES;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_INDICATOR_BORDER_CHECKED_COLOR;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_INDICATOR_BORDER_UNCHECKED_COLOR;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_INDICATOR_SOLID_COLOR;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_THRESHOLD;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_SPAN_COUNT;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_TOOLBAR_BACKGROUND_COLOR;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES;
+import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_USER_PICKED_PICTURES;
 
 /**
  * Created by Frank on 2018/6/13.
@@ -44,19 +47,19 @@ public class PicturePickerManager {
         }
     }
 
-    private final int DEFAULT_VALUE = 0;
     private Activity mActivity;
     private PicturePickerCallbackFragment mCallbackFragment;
     private ArrayList<String> mPickedPictures = new ArrayList<>();
     private int mThreshold = 9;
+    private int mSpanCount = 3;
 
     // Toolbar 背景色
-    private int mToolbarBkgColor = DEFAULT_VALUE;
-    private int mToolbarBkgDrawableResId = DEFAULT_VALUE;
-
-    private int mIndicatorSolidColor = DEFAULT_VALUE;
-    private int mIndicatorBorderCheckedColor = DEFAULT_VALUE;
-    private int mIndicatorBorderUncheckedColor = DEFAULT_VALUE;
+    private final int INVALIDATE_VALUE = -1;
+    private int mToolbarBkgColor = INVALIDATE_VALUE;
+    private int mToolbarBkgDrawableResId = INVALIDATE_VALUE;
+    private int mIndicatorSolidColor = INVALIDATE_VALUE;
+    private int mIndicatorBorderCheckedColor = INVALIDATE_VALUE;
+    private int mIndicatorBorderUncheckedColor = INVALIDATE_VALUE;
 
     private PicturePickerManager(Activity activity) {
         this.mActivity = activity;
@@ -138,8 +141,8 @@ public class PicturePickerManager {
      * @param uncheckedColorId 未选中的边框颜色
      */
     public PicturePickerManager setIndicatorBorderColorRes(@ColorRes int checkedColorId, @ColorRes int uncheckedColorId) {
-        return setIndicatorBorderColor(ContextCompat.getColor(mActivity, checkedColorId)
-                , ContextCompat.getColor(mActivity, uncheckedColorId));
+        return setIndicatorBorderColor(ContextCompat.getColor(mActivity, checkedColorId),
+                ContextCompat.getColor(mActivity, uncheckedColorId));
     }
 
     /**
@@ -154,6 +157,11 @@ public class PicturePickerManager {
         return this;
     }
 
+
+    public PicturePickerManager setSpanCount(int count) {
+        mSpanCount = count;
+        return this;
+    }
 
     /**
      * 发起请求
@@ -182,6 +190,7 @@ public class PicturePickerManager {
         // 用户已经选中的图片数量
         intent.putExtra(EXTRA_USER_PICKED_PICTURES, mPickedPictures);
         intent.putExtra(EXTRA_PICKED_THRESHOLD, mThreshold);
+        intent.putExtra(EXTRA_SPAN_COUNT, mSpanCount);
         // Toolbar
         intent.putExtra(EXTRA_TOOLBAR_BACKGROUND_COLOR, mToolbarBkgColor);
         intent.putExtra(EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES, mToolbarBkgDrawableResId);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.frank.lib_picturepicker.widget.toolbar.GenericToolbar
+        <com.frank.lib_picturepicker.toolbar.GenericToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,34 +28,45 @@
     <!--底部的照片文件夹选择器-->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_gravity="bottom"
-        android:background="#a9000000"
-        android:paddingLeft="20dp">
+        android:background="#a9000000">
 
         <LinearLayout
             android:id="@+id/ll_bottom_menu"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:gravity="bottom"
             android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/iv_selector"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/selector_picture_picker_bottom_menu" />
 
             <TextView
                 android:id="@+id/tv_folder_name"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
+                android:paddingLeft="20dp"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|right"
                 android:text="全部图片"
-                android:textColor="#FFF"
+                android:textColor="#ffffffff"
                 android:textSize="15dp" />
 
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="3dp"
+                android:src="@drawable/activity_picture_picker_bottom_arrow" />
+
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_preview"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|right"
+            android:gravity="center"
+            android:text="预览"
+            android:textColor="#ffffffff"
+            android:textSize="14dp" />
 
     </FrameLayout>
 
