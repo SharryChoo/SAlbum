@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:layout_margin="2dp">
+
+    <ImageView
+        android:id="@+id/iv_preview"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"/>
+
+    <TextView
+        android:id="@+id/tv_folder_name"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="全部图片"
+        android:layout_marginLeft="10dp" />
+
+</LinearLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="1dp">
+
+    <ImageView
+        android:id="@+id/iv_picture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <com.frank.lib_picturepicker.widget.PictureIndicatorView
+        android:id="@+id/check_indicator"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_gravity="end|top"
+        android:layout_margin="5dp"
+        android:text="3"
+        android:textColor="@android:color/white" />
+
+</FrameLayout>
