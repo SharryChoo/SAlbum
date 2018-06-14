@@ -3,6 +3,7 @@ package com.frank.lib_picturepicker.picturepicker.mvp.view;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -75,6 +76,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private TextView mTvSelectedFolderName;
     private TextView mTvPreview;
     private TextView mTvToolbarEnsure;
+    private FloatingActionButton mFab;
 
     // 选择图片文件夹的弹窗
     private PicturePickerDialog mDialog;
@@ -145,6 +147,10 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         mTvSelectedFolderName = findViewById(R.id.tv_folder_name);
         mTvPreview = findViewById(R.id.tv_preview);
         mTvPreview.setOnClickListener(this);
+        // 悬浮菜单
+        mFab = findViewById(R.id.fab);
+        mFab.setBackgroundColor(mToolbarBkgColor);
+        mFab.setOnClickListener(this);
     }
 
     protected void initData() {
@@ -199,7 +205,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     public void onClick(View v) {
         if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
             onBackPressed();
-        } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE)) {// 确认按钮
+        } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
             Intent intent = new Intent();
             intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, (ArrayList<String>) mPresenter.getPickedPictures());
             setResult(REQUEST_CODE, intent);

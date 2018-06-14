@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -55,11 +56,11 @@ public class PicturePickerManager {
 
     // Toolbar 背景色
     private final int INVALIDATE_VALUE = -1;
-    private int mToolbarBkgColor = INVALIDATE_VALUE;
+    private int mToolbarBkgColor = Color.parseColor("#ff64b6f6");
     private int mToolbarBkgDrawableResId = INVALIDATE_VALUE;
-    private int mIndicatorSolidColor = INVALIDATE_VALUE;
-    private int mIndicatorBorderCheckedColor = INVALIDATE_VALUE;
-    private int mIndicatorBorderUncheckedColor = INVALIDATE_VALUE;
+    private int mIndicatorSolidColor = Color.parseColor("#ff64b6f6");
+    private int mIndicatorBorderCheckedColor = mIndicatorSolidColor;
+    private int mIndicatorBorderUncheckedColor = Color.WHITE;
 
     private PicturePickerManager(Activity activity) {
         this.mActivity = activity;

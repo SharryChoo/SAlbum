@@ -28,8 +28,9 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="activity_picture_picker_bottom_arrow" />
-                            <entry key="sourceFile" value="C:\Users\Frank\Desktop\未选中.svg" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="icon_activity_picture_picker_ensure" />
+                            <entry key="sourceFile" value="C:\Users\Frank\Desktop\发送.svg" />
                           </map>
                         </option>
                       </PersistentState>
