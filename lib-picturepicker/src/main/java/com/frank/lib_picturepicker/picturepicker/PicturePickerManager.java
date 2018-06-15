@@ -56,8 +56,8 @@ public class PicturePickerManager {
 
     // Toolbar 背景色
     private final int INVALIDATE_VALUE = -1;
-    private int mToolbarBkgColor = Color.parseColor("#ff64b6f6");
     private int mToolbarBkgDrawableResId = INVALIDATE_VALUE;
+    private int mToolbarBkgColor = Color.parseColor("#ff64b6f6");
     private int mIndicatorSolidColor = Color.parseColor("#ff64b6f6");
     private int mIndicatorBorderCheckedColor = mIndicatorSolidColor;
     private int mIndicatorBorderUncheckedColor = Color.WHITE;
@@ -157,7 +157,6 @@ public class PicturePickerManager {
         mIndicatorBorderUncheckedColor = uncheckedColor;
         return this;
     }
-
 
     public PicturePickerManager setSpanCount(int count) {
         mSpanCount = count;

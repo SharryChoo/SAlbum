@@ -8,12 +8,20 @@
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#ff000000" />
+        android:background="#ff000000"
+        android:gravity="center" />
 
     <com.frank.lib_picturepicker.toolbar.GenericToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <!--共享元素站位图-->
+    <ImageView
+        android:id="@+id/iv_share_element_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"/>
 
     <TextView
         android:id="@+id/tv_pager_indicator"
@@ -23,6 +31,5 @@
         android:paddingBottom="20dp"
         android:textColor="#ffffffff"
         android:textSize="15dp" />
-
 
 </FrameLayout>

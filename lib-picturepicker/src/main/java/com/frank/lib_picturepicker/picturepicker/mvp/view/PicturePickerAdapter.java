@@ -4,7 +4,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +15,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,10 +47,11 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
         List<String> getPickedPictures();
 
-        boolean onPicturePicked(String imagePath);
+        boolean onIndicatorSelected(String imagePath);
 
-        void onPictureRemoved(String imagePath);
+        void onIndicatorDeselect(String imagePath);
 
+        void onPictureClick(ImageView imageView, String uri, int position);
     }
 
     public PicturePickerAdapter(Context context,
@@ -94,11 +95,21 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final String uri = mUris.get(position);
         Glide.with(mContext).load(uri).into(holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mInteraction.getPickedPictures().indexOf(uri);
+        // 设置图片的共享元素属性
+        ViewCompat.setTransitionName(holder.ivPicture, uri);
+        // 设置点击监听
+        holder.ivPicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("TAG", mUris.indexOf(uri) + uri);
+                mInteraction.onPictureClick((ImageView) v, uri, mUris.indexOf(uri));
+            }
+        });
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
         holder.checkIndicator.setText(String.valueOf(mInteraction.getPickedPictures().indexOf(uri) + 1));
         // 设置点击监听器
@@ -107,24 +118,16 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
             public void onClick(View v) {
                 if (holder.checkIndicator.isChecked()) {// Checked-> Unchecked
                     // 移除选中数据与状态
-                    mInteraction.onPictureRemoved(uri);
+                    mInteraction.onIndicatorDeselect(uri);
                     holder.checkIndicator.setChecked(false);
                     // 需要延时的更新索引角标
                     notifyCheckedIndicatorChanged();
                 } else {// Unchecked -> Checked
                     // 判断是否达到选择上限
-                    holder.checkIndicator.setChecked(mInteraction.onPicturePicked(uri));
+                    holder.checkIndicator.setChecked(mInteraction.onIndicatorSelected(uri));
                     // 设置文本
                     holder.checkIndicator.setText(String.valueOf(mInteraction.getPickedPictures().size()));
                 }
-            }
-        });
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ArrayList<String> paths = new ArrayList<>();
-                paths.add(uri);
-                PictureWatcherActivity.start(mContext, 0, paths);
             }
         });
     }

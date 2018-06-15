@@ -33,6 +33,7 @@ public class DraggableViewPager extends ViewPager {
     private boolean mIsAnimRunning = false;
     private View mCapturedView;
     private VelocityTracker mVelocityTracker;
+    private int mSharedElementPosition = -1;
 
     public DraggableViewPager(Context context) {
         this(context, null);
@@ -49,6 +50,37 @@ public class DraggableViewPager extends ViewPager {
         mVelocityTracker = VelocityTracker.obtain();
         // 规定拖拽到消失的阈值
         mDragThresholdHeight = getResources().getDisplayMetrics().heightPixels / 4;
+    }
+
+    public interface OnPagerChangedListener {
+        View onPagerChanged(int position);
+    }
+
+    public void setOnPagerChangedListener(final OnPagerChangedListener listener) {
+        addOnPageChangeListener(new OnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+            }
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                if (listener != null) {
+                    mCapturedView = listener.onPagerChanged(position);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
+
+    /**
+     * 设置了共享的位置
+     */
+    public void setSharedElementPosition(int position) {
+        this.mSharedElementPosition = position;
     }
 
     @Override
@@ -145,6 +177,10 @@ public class DraggableViewPager extends ViewPager {
      * 滑动超过阈值时消失
      */
     private void dismiss() {
+        if (getCurrentItem() == mSharedElementPosition) {
+            ((Activity) getContext()).onBackPressed();
+            return;
+        }
         float destY = (mCapturedView.getY() - mCapturedOriginY > 0 ? 1 : -1) *
                 getResources().getDisplayMetrics().heightPixels;
         ValueAnimator dismissAnim = ValueAnimator.ofFloat(mCapturedView.getY(), destY).setDuration(400);
@@ -184,27 +220,4 @@ public class DraggableViewPager extends ViewPager {
         return alpha << 24 | (baseColor & 0xffffff);
     }
 
-    public interface OnPagerChangedListener {
-        View onPagerChanged(int position);
-    }
-
-    public void setOnPagerChangedListener(final OnPagerChangedListener listener) {
-        addOnPageChangeListener(new OnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-            }
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (listener != null) {
-                    mCapturedView = listener.onPagerChanged(position);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-    }
 }

@@ -16,10 +16,10 @@ import cn.bluemobi.dylan.photoview.library.PhotoView;
  */
 public class PictureWatcherAdapter extends PagerAdapter {
 
-    private List<PhotoView> mPhotoViews;
+    private List<? extends View> mViews;
 
-    PictureWatcherAdapter(List<PhotoView> children) {
-        this.mPhotoViews = children;
+    PictureWatcherAdapter(List<? extends View> children) {
+        this.mViews = children;
     }
 
     /**
@@ -27,7 +27,7 @@ public class PictureWatcherAdapter extends PagerAdapter {
      */
     @Override
     public int getCount() {
-        return mPhotoViews.size();
+        return mViews.size();
     }
 
     /**
@@ -43,7 +43,7 @@ public class PictureWatcherAdapter extends PagerAdapter {
      */
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View view = mPhotoViews.get(position);
+        View view = mViews.get(position);
         container.addView(view);
         return view;
     }
@@ -53,7 +53,7 @@ public class PictureWatcherAdapter extends PagerAdapter {
      */
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        View view = mPhotoViews.get(position);
+        View view = mViews.get(position);
         container.removeView(view);
     }
 

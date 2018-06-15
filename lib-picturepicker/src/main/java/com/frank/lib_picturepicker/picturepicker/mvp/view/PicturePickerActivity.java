@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +74,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     // View 视图
     private GenericToolbar mToolbar;
     private RecyclerView mRecyclerView;
+    private TextView mTvToolbarFolderName;
     private TextView mTvSelectedFolderName;
     private TextView mTvPreview;
     private TextView mTvToolbarEnsure;
@@ -83,7 +85,6 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     // 用于保存数据的相关集合
     private List<String> mCurDisplayPaths = new ArrayList<>();// 用户选中的文件夹下所有图片的集合
-    private TextView mTvToolbarFolderName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +133,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         mToolbar.addLeftText(TAG_TOOLBAR_CHECKED_DETAIL, "所有图片", 20, null);
         mTvToolbarFolderName = mToolbar.getViewByTag(TAG_TOOLBAR_CHECKED_DETAIL);
         // 添加图片预览按钮
-        mToolbar.addRightText(TAG_TOOLBAR_ENSURE, "发送", 15, this);
+        mToolbar.addRightText(TAG_TOOLBAR_ENSURE, "确认", 15, this);
         mTvToolbarEnsure = mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE);
     }
 
@@ -171,13 +172,13 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     @Override
     public void updateTextContent(int curPicked, int total) {
         mTvPreview.setText("预览 (" + curPicked + ")");
-        mTvToolbarEnsure.setText("发送 (" + curPicked + "/" + total + ")");
+        mTvToolbarEnsure.setText("确认 (" + curPicked + "/" + total + ")");
     }
 
     @Override
     public void updateTextViewVisibility(boolean isVisible) {
         int visible = isVisible ? View.VISIBLE : View.INVISIBLE;
-        mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE).setVisibility(visible);
+        mTvToolbarEnsure.setVisibility(visible);
         mTvPreview.setVisibility(visible);
     }
 
@@ -192,13 +193,22 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
-    public boolean onPicturePicked(String imagePath) {
+    public boolean onIndicatorSelected(String imagePath) {
         return mPresenter.performPicturePicked(imagePath);
     }
 
     @Override
-    public void onPictureRemoved(String imagePath) {
+    public void onIndicatorDeselect(String imagePath) {
         mPresenter.performPictureRemoved(imagePath);
+    }
+
+    @Override
+    public void onPictureClick(ImageView imageView, String uri, int position) {
+        PictureWatcherActivity.start(this,
+                (ArrayList<String>) mCurDisplayPaths,
+                mCurDisplayPaths.indexOf(uri),
+                imageView
+        );
     }
 
     @Override
@@ -211,8 +221,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
             setResult(REQUEST_CODE, intent);
             finish();
         } else if (v.getId() == R.id.tv_preview) {// 预览按钮
-            PictureWatcherActivity.start(this, 0,
-                    (ArrayList<String>) mPresenter.getPickedPictures());
+            PictureWatcherActivity.start(this, (ArrayList<String>) mPresenter.getPickedPictures(), 0);
         } else if (v.getId() == R.id.ll_bottom_menu) {
             if (mDialog == null) {
                 mDialog = new PicturePickerDialog(this, mPresenter.fetchAllPictureFolders())
@@ -226,4 +235,5 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
             mDialog.show();
         }
     }
+
 }
