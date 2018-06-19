@@ -46,23 +46,6 @@ public class PicturePickerConfig implements Parcelable {
         indicatorBorderUncheckedColor = in.readInt();
     }
 
-    public static final Creator<PicturePickerConfig> CREATOR = new Creator<PicturePickerConfig>() {
-        @Override
-        public PicturePickerConfig createFromParcel(Parcel in) {
-            return new PicturePickerConfig(in);
-        }
-
-        @Override
-        public PicturePickerConfig[] newArray(int size) {
-            return new PicturePickerConfig[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringList(userPickedSet);
@@ -75,4 +58,21 @@ public class PicturePickerConfig implements Parcelable {
         dest.writeInt(indicatorBorderCheckedColor);
         dest.writeInt(indicatorBorderUncheckedColor);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<PicturePickerConfig> CREATOR = new Creator<PicturePickerConfig>() {
+        @Override
+        public PicturePickerConfig createFromParcel(Parcel in) {
+            return new PicturePickerConfig(in);
+        }
+
+        @Override
+        public PicturePickerConfig[] newArray(int size) {
+            return new PicturePickerConfig[size];
+        }
+    };
 }

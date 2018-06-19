@@ -10,9 +10,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 
-import com.frank.lib_picturepicker.callback.PickerCallback;
-import com.frank.lib_picturepicker.callback.PickerFragment;
-import com.frank.lib_picturepicker.picturepicker.ui.PicturePickerActivity;
+import com.frank.lib_picturepicker.picturepicker.PicturePickerActivity;
 
 import java.util.ArrayList;
 
@@ -36,7 +34,7 @@ public class PicturePickerManager {
     }
 
     private Activity mActivity;
-    private PickerFragment mPickerFragment;
+    private PicturePickerFragment mPickerFragment;
     private PicturePickerConfig mConfig;
 
     private PicturePickerManager(@NonNull Activity activity) {
@@ -165,8 +163,8 @@ public class PicturePickerManager {
      *
      * @param pickerCallback 图片选中的回调
      */
-    public void start(@NonNull final PickerCallback pickerCallback) {
-        mPickerFragment.verifyPermission(new PickerFragment.PermissionsCallback() {
+    public void start(@NonNull final PicturePickerCallback pickerCallback) {
+        mPickerFragment.verifyPermission(new PicturePickerFragment.PermissionsCallback() {
             @Override
             public void onResult(boolean granted) {
                 if (granted) startActual(pickerCallback);
@@ -176,24 +174,22 @@ public class PicturePickerManager {
 
     /**
      * 处理 PicturePickerActivity 的启动
-     *
-     * @param pickerCallback
      */
-    private void startActual(PickerCallback pickerCallback) {
+    private void startActual(PicturePickerCallback pickerCallback) {
         final Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
         intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, mConfig);
         mPickerFragment.setPickerCallback(pickerCallback);
-        mPickerFragment.startActivityForResult(intent, PickerFragment.REQUEST_CODE_PICKED);
+        mPickerFragment.startActivityForResult(intent, PicturePickerFragment.REQUEST_CODE_PICKED);
     }
 
     /**
      * 获取用于回调的 Fragment
      */
-    private PickerFragment getCallbackFragment(Activity activity) {
-        PickerFragment pickerFragment = findCallbackFragment(activity);
+    private PicturePickerFragment getCallbackFragment(Activity activity) {
+        PicturePickerFragment pickerFragment = findCallbackFragment(activity);
         if (pickerFragment == null) {
-            pickerFragment = PickerFragment.newInstance();
+            pickerFragment = PicturePickerFragment.newInstance();
             FragmentManager fragmentManager = activity.getFragmentManager();
             fragmentManager.beginTransaction().add(pickerFragment, TAG).commitAllowingStateLoss();
             fragmentManager.executePendingTransactions();
@@ -204,8 +200,8 @@ public class PicturePickerManager {
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private PickerFragment findCallbackFragment(Activity activity) {
-        return (PickerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private PicturePickerFragment findCallbackFragment(Activity activity) {
+        return (PicturePickerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
 }

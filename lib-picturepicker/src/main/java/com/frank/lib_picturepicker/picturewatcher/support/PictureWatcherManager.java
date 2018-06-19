@@ -12,14 +12,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 
-import com.frank.lib_picturepicker.callback.PickerCallback;
-import com.frank.lib_picturepicker.callback.PickerFragment;
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerManager;
-import com.frank.lib_picturepicker.picturewatcher.ui.PictureWatcherActivity;
+import com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity;
 
 import java.util.ArrayList;
 
-import static com.frank.lib_picturepicker.picturewatcher.ui.PictureWatcherActivity.EXTRA_SHARED_ELEMENT;
+import static com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity.EXTRA_SHARED_ELEMENT;
 
 /**
  * Created by Frank on 2018/6/19.
@@ -42,13 +40,13 @@ public class PictureWatcherManager {
 
     private Activity mActivity;
     private PictureWatcherConfig mConfig;
-    private PickerFragment mPickerFragment;
+    private PictureWatcherFragment mPictureWatcherFragment;
     private View mTransitionView;
 
     private PictureWatcherManager(Activity activity) {
         this.mActivity = activity;
         this.mConfig = new PictureWatcherConfig();
-        this.mPickerFragment = getCallbackFragment(mActivity);
+        this.mPictureWatcherFragment = getCallbackFragment(mActivity);
     }
 
     /**
@@ -163,11 +161,11 @@ public class PictureWatcherManager {
     /**
      * 调用图片查看器的方法(共享元素)
      */
-    public void start(@NonNull final PickerCallback pickerCallback) {
-        mPickerFragment.verifyPermission(new PickerFragment.PermissionsCallback() {
+    public void start(@NonNull final PictureWatcherCallback callback) {
+        mPictureWatcherFragment.verifyPermission(new PictureWatcherFragment.PermissionsCallback() {
             @Override
             public void onResult(boolean granted) {
-                if (granted) startActual(pickerCallback);
+                if (granted) startActual(callback);
             }
         });
     }
@@ -175,8 +173,8 @@ public class PictureWatcherManager {
     /**
      * 真正的执行 Activity 的启动
      */
-    private void startActual(final PickerCallback pickerCallback) {
-        mPickerFragment.setPickerCallback(pickerCallback);
+    private void startActual(final PictureWatcherCallback callback) {
+        mPictureWatcherFragment.setPickerCallback(callback);
         Intent intent = new Intent(mActivity, PictureWatcherActivity.class);
         intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, mConfig);
         // 5.0 以上的系统使用 Transition 跳转
@@ -184,41 +182,41 @@ public class PictureWatcherManager {
             if (mTransitionView != null) {
                 // 共享元素
                 intent.putExtra(EXTRA_SHARED_ELEMENT, true);
-                mPickerFragment.startActivityForResult(
-                        intent, PickerFragment.REQUEST_CODE_PICKED,
+                mPictureWatcherFragment.startActivityForResult(
+                        intent, PictureWatcherFragment.REQUEST_CODE_PICKED,
                         ActivityOptions.makeSceneTransitionAnimation(mActivity, mTransitionView,
                                 mConfig.pictureUris.get(mConfig.position)).toBundle()
                 );
             } else {
-                mPickerFragment.startActivityForResult(
-                        intent, PickerFragment.REQUEST_CODE_PICKED,
+                mPictureWatcherFragment.startActivityForResult(
+                        intent, PictureWatcherFragment.REQUEST_CODE_PICKED,
                         ActivityOptions.makeSceneTransitionAnimation(mActivity).toBundle()
                 );
             }
         } else {
-            mPickerFragment.startActivityForResult(intent, PickerFragment.REQUEST_CODE_PICKED);
+            mPictureWatcherFragment.startActivityForResult(intent, PictureWatcherFragment.REQUEST_CODE_PICKED);
         }
     }
 
     /**
      * 获取用于回调的 Fragment
      */
-    private PickerFragment getCallbackFragment(Activity activity) {
-        PickerFragment pickerFragment = findCallbackFragment(activity);
-        if (pickerFragment == null) {
-            pickerFragment = PickerFragment.newInstance();
+    private PictureWatcherFragment getCallbackFragment(Activity activity) {
+        PictureWatcherFragment pictureWatcherFragment = findCallbackFragment(activity);
+        if (pictureWatcherFragment == null) {
+            pictureWatcherFragment = PictureWatcherFragment.newInstance();
             FragmentManager fragmentManager = activity.getFragmentManager();
-            fragmentManager.beginTransaction().add(pickerFragment, TAG).commitAllowingStateLoss();
+            fragmentManager.beginTransaction().add(pictureWatcherFragment, TAG).commitAllowingStateLoss();
             fragmentManager.executePendingTransactions();
         }
-        return pickerFragment;
+        return pictureWatcherFragment;
     }
 
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private PickerFragment findCallbackFragment(Activity activity) {
-        return (PickerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private PictureWatcherFragment findCallbackFragment(Activity activity) {
+        return (PictureWatcherFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
 }
