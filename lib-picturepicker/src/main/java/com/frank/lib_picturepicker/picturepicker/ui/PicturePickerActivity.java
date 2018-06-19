@@ -1,7 +1,6 @@
 package com.frank.lib_picturepicker.picturepicker.ui;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.callback.Callback;
-import com.frank.lib_picturepicker.callback.CallbackFragment;
+import com.frank.lib_picturepicker.callback.PickerCallback;
+import com.frank.lib_picturepicker.callback.PickerFragment;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import com.frank.lib_picturepicker.picturepicker.mvp.presenter.PicturePickerPresenter;
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
@@ -184,7 +183,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
                 .setPictureUris(mCurDisplayPaths, position)
                 .setUserPickedSet(mPresenter.fetchUserPickedSet())
                 .setSharedElement(imageView)
-                .start(new Callback() {
+                .start(new PickerCallback() {
                     @Override
                     public void onResult(ArrayList<String> userPickedSet) {
                         mPresenter.setupUserPickedSet(userPickedSet);
@@ -199,8 +198,8 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
             Intent intent = new Intent();
-            intent.putExtra(CallbackFragment.RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPickedSet());
-            setResult(CallbackFragment.REQUEST_CODE, intent);
+            intent.putExtra(PickerFragment.RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPickedSet());
+            setResult(PickerFragment.REQUEST_CODE_PICKED, intent);
             finish();
         } else if (v.getId() == R.id.ll_bottom_menu) {
             if (mDialog == null) {
@@ -221,7 +220,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
                     .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
                     .setPictureUris(mPresenter.fetchUserPickedSet(), 0)
                     .setUserPickedSet(mPresenter.fetchUserPickedSet())
-                    .start(new Callback() {
+                    .start(new PickerCallback() {
                         @Override
                         public void onResult(ArrayList<String> userPickedSet) {
                             mPresenter.setupUserPickedSet(userPickedSet);

@@ -12,8 +12,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 
-import com.frank.lib_picturepicker.callback.Callback;
-import com.frank.lib_picturepicker.callback.CallbackFragment;
+import com.frank.lib_picturepicker.callback.PickerCallback;
+import com.frank.lib_picturepicker.callback.PickerFragment;
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerManager;
 import com.frank.lib_picturepicker.picturewatcher.ui.PictureWatcherActivity;
 
@@ -42,13 +42,13 @@ public class PictureWatcherManager {
 
     private Activity mActivity;
     private PictureWatcherConfig mConfig;
-    private CallbackFragment mCallbackFragment;
+    private PickerFragment mPickerFragment;
     private View mTransitionView;
 
     private PictureWatcherManager(Activity activity) {
         this.mActivity = activity;
         this.mConfig = new PictureWatcherConfig();
-        this.mCallbackFragment = getCallbackFragment(mActivity);
+        this.mPickerFragment = getCallbackFragment(mActivity);
     }
 
     /**
@@ -160,12 +160,23 @@ public class PictureWatcherManager {
         return this;
     }
 
-
     /**
      * 调用图片查看器的方法(共享元素)
      */
-    public void start(@NonNull Callback callback) {
-        mCallbackFragment.setCallback(callback);
+    public void start(@NonNull final PickerCallback pickerCallback) {
+        mPickerFragment.verifyPermission(new PickerFragment.PermissionsCallback() {
+            @Override
+            public void onResult(boolean granted) {
+                if (granted) startActual(pickerCallback);
+            }
+        });
+    }
+
+    /**
+     * 真正的执行 Activity 的启动
+     */
+    private void startActual(final PickerCallback pickerCallback) {
+        mPickerFragment.setPickerCallback(pickerCallback);
         Intent intent = new Intent(mActivity, PictureWatcherActivity.class);
         intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, mConfig);
         // 5.0 以上的系统使用 Transition 跳转
@@ -173,44 +184,41 @@ public class PictureWatcherManager {
             if (mTransitionView != null) {
                 // 共享元素
                 intent.putExtra(EXTRA_SHARED_ELEMENT, true);
-                mCallbackFragment.startActivityForResult(
-                        intent,
-                        CallbackFragment.REQUEST_CODE,
+                mPickerFragment.startActivityForResult(
+                        intent, PickerFragment.REQUEST_CODE_PICKED,
                         ActivityOptions.makeSceneTransitionAnimation(mActivity, mTransitionView,
                                 mConfig.pictureUris.get(mConfig.position)).toBundle()
                 );
             } else {
-                mCallbackFragment.startActivityForResult(
-                        intent,
-                        CallbackFragment.REQUEST_CODE,
+                mPickerFragment.startActivityForResult(
+                        intent, PickerFragment.REQUEST_CODE_PICKED,
                         ActivityOptions.makeSceneTransitionAnimation(mActivity).toBundle()
                 );
             }
         } else {
-            mCallbackFragment.startActivityForResult(intent, CallbackFragment.REQUEST_CODE);
+            mPickerFragment.startActivityForResult(intent, PickerFragment.REQUEST_CODE_PICKED);
         }
     }
-
 
     /**
      * 获取用于回调的 Fragment
      */
-    private CallbackFragment getCallbackFragment(Activity activity) {
-        CallbackFragment callbackFragment = findCallbackFragment(activity);
-        if (callbackFragment == null) {
-            callbackFragment = CallbackFragment.newInstance();
+    private PickerFragment getCallbackFragment(Activity activity) {
+        PickerFragment pickerFragment = findCallbackFragment(activity);
+        if (pickerFragment == null) {
+            pickerFragment = PickerFragment.newInstance();
             FragmentManager fragmentManager = activity.getFragmentManager();
-            fragmentManager.beginTransaction().add(callbackFragment, TAG).commitAllowingStateLoss();
+            fragmentManager.beginTransaction().add(pickerFragment, TAG).commitAllowingStateLoss();
             fragmentManager.executePendingTransactions();
         }
-        return callbackFragment;
+        return pickerFragment;
     }
 
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private CallbackFragment findCallbackFragment(Activity activity) {
-        return (CallbackFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private PickerFragment findCallbackFragment(Activity activity) {
+        return (PickerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
 }

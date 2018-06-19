@@ -6,8 +6,6 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import cn.bluemobi.dylan.photoview.library.PhotoView;
-
 /**
  * Created by Frank on 2018/5/28.
  * Email: frankchoochina@gmail.com

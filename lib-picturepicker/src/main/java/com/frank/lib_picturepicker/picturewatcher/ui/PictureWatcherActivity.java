@@ -19,18 +19,17 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.callback.CallbackFragment;
+import com.frank.lib_picturepicker.callback.PickerFragment;
 import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherConfig;
 import com.frank.lib_picturepicker.widget.DraggableViewPager;
 import com.frank.lib_picturepicker.widget.PickerIndicatorView;
+import com.frank.lib_picturepicker.widget.photoview.OnPhotoTapListener;
+import com.frank.lib_picturepicker.widget.photoview.PhotoView;
 import com.frank.lib_picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.lib_picturepicker.widget.toolbar.GenericToolbar;
 import com.frank.lib_picturepicker.widget.toolbar.Style;
 
 import java.util.ArrayList;
-
-import cn.bluemobi.dylan.photoview.library.PhotoView;
-import cn.bluemobi.dylan.photoview.library.PhotoViewAttacher;
 
 /**
  * Created by FrankChoo on 2017/12/28.
@@ -170,7 +169,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
                         mPhotoViews.get(mSharedPosition).setVisibility(View.VISIBLE);
                         ivSharedElementHolder.setVisibility(View.GONE);
                     }
-                }, 500);
+                }, 600);
                 return true;
             }
         });
@@ -215,8 +214,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
     public void finish() {
         if (mUserPickedSet != null) {
             Intent intent = new Intent();
-            intent.putExtra(CallbackFragment.RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
-            setResult(CallbackFragment.REQUEST_CODE, intent);
+            intent.putExtra(PickerFragment.RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
+            setResult(PickerFragment.REQUEST_CODE_PICKED, intent);
         }
         super.finish();
         // 当前 Activity 关闭时, 使用淡入淡出的动画
@@ -262,16 +261,10 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
         PhotoView photoView = new PhotoView(this);
         photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        photoView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+        photoView.setOnPhotoTapListener(new OnPhotoTapListener() {
             @Override
-            public void onPhotoTap(View view, float x, float y) {
+            public void onPhotoTap(ImageView view, float x, float y) {
                 onBackPressed();
-            }
-        });
-        photoView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                return false;
             }
         });
         return photoView;

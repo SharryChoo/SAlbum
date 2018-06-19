@@ -8,6 +8,6 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description: 图片选择器的回调
  */
-public interface Callback {
+public interface PickerCallback {
     void onResult(ArrayList<String> userPickedSet);
 }

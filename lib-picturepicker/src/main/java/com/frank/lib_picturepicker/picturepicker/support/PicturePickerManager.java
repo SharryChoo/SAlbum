@@ -1,6 +1,5 @@
 package com.frank.lib_picturepicker.picturepicker.support;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -11,10 +10,8 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 
-import com.frank.lib_picturepicker.callback.Callback;
-import com.frank.lib_picturepicker.callback.CallbackFragment;
-import com.frank.lib_picturepicker.permission.PermissionsCallback;
-import com.frank.lib_picturepicker.permission.PermissionsManager;
+import com.frank.lib_picturepicker.callback.PickerCallback;
+import com.frank.lib_picturepicker.callback.PickerFragment;
 import com.frank.lib_picturepicker.picturepicker.ui.PicturePickerActivity;
 
 import java.util.ArrayList;
@@ -39,12 +36,12 @@ public class PicturePickerManager {
     }
 
     private Activity mActivity;
-    private CallbackFragment mCallbackFragment;
+    private PickerFragment mPickerFragment;
     private PicturePickerConfig mConfig;
 
     private PicturePickerManager(@NonNull Activity activity) {
         this.mActivity = activity;
-        this.mCallbackFragment = getCallbackFragment(mActivity);
+        this.mPickerFragment = getCallbackFragment(mActivity);
         this.mConfig = new PicturePickerConfig();
     }
 
@@ -166,52 +163,49 @@ public class PicturePickerManager {
     /**
      * 发起请求
      *
-     * @param callback 图片选中的回调
+     * @param pickerCallback 图片选中的回调
      */
-    public void start(@NonNull final Callback callback) {
-        // 权限检测
-        PermissionsManager.getManager(mActivity)
-                .request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .execute(new PermissionsCallback() {
-                    @Override
-                    public void onResult(boolean granted) {
-                        if (granted) performActivityStart(callback);
-                    }
-                });
+    public void start(@NonNull final PickerCallback pickerCallback) {
+        mPickerFragment.verifyPermission(new PickerFragment.PermissionsCallback() {
+            @Override
+            public void onResult(boolean granted) {
+                if (granted) startActual(pickerCallback);
+            }
+        });
     }
 
     /**
      * 处理 PicturePickerActivity 的启动
      *
-     * @param callback
+     * @param pickerCallback
      */
-    private void performActivityStart(Callback callback) {
+    private void startActual(PickerCallback pickerCallback) {
         final Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
         intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, mConfig);
-        mCallbackFragment.setCallback(callback);
-        mCallbackFragment.startActivityForResult(intent, CallbackFragment.REQUEST_CODE);
+        mPickerFragment.setPickerCallback(pickerCallback);
+        mPickerFragment.startActivityForResult(intent, PickerFragment.REQUEST_CODE_PICKED);
     }
 
     /**
      * 获取用于回调的 Fragment
      */
-    private CallbackFragment getCallbackFragment(Activity activity) {
-        CallbackFragment callbackFragment = findCallbackFragment(activity);
-        if (callbackFragment == null) {
-            callbackFragment = CallbackFragment.newInstance();
+    private PickerFragment getCallbackFragment(Activity activity) {
+        PickerFragment pickerFragment = findCallbackFragment(activity);
+        if (pickerFragment == null) {
+            pickerFragment = PickerFragment.newInstance();
             FragmentManager fragmentManager = activity.getFragmentManager();
-            fragmentManager.beginTransaction().add(callbackFragment, TAG).commitAllowingStateLoss();
+            fragmentManager.beginTransaction().add(pickerFragment, TAG).commitAllowingStateLoss();
             fragmentManager.executePendingTransactions();
         }
-        return callbackFragment;
+        return pickerFragment;
     }
 
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private CallbackFragment findCallbackFragment(Activity activity) {
-        return (CallbackFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private PickerFragment findCallbackFragment(Activity activity) {
+        return (PickerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
 }

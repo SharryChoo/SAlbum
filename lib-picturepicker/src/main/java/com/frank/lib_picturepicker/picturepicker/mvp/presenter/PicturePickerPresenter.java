@@ -36,6 +36,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     @Override
     public void setupUserPickedSet(ArrayList<String> userPicked) {
         mModel.setUserPickedSet(userPicked == null ? new ArrayList<String>() : userPicked);
+        if (mView == null) return;
         mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
         mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
     }
@@ -131,8 +132,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
      * 处理图片被移除了
      */
     @Override
-    public void performPictureRemoved(String uri) {
-        mModel.removePickedPicture(uri);
+    public void performPictureRemoved(String imagePath) {
+        mModel.removePickedPicture(imagePath);
         mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
         mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
     }

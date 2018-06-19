@@ -45,10 +45,12 @@ public class GenericToolbar extends Toolbar {
     private LinearLayout mLeftItemContainer;
     private LinearLayout mCenterItemContainer;
     private LinearLayout mRightItemContainer;
+
     // 提供的标题(文本/图片/自定义)
     private TextView mTitleText;
     private ImageView mTitleImage;
     private int mTextColor = DEFAULT_COLOR;
+
     // 添加的所有View的缓存, 方便用户通过getViewByTag()找到自己添加的View
     private SparseArray<View> mItemViews = new SparseArray<>();
 
@@ -76,6 +78,7 @@ public class GenericToolbar extends Toolbar {
         mLeftItemContainer.setGravity(Gravity.CENTER_VERTICAL);
         mLeftItemContainer.setPadding((int) dp2px(5), 0, (int) dp2px(5), 0);
         addView(mLeftItemContainer);
+
         // 添加右部容器
         mRightItemContainer = new LinearLayout(getContext());
         LayoutParams rightParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -85,6 +88,7 @@ public class GenericToolbar extends Toolbar {
         mRightItemContainer.setGravity(Gravity.CENTER_VERTICAL);
         mRightItemContainer.setPadding((int) dp2px(5), 0, (int) dp2px(5), 0);
         addView(mRightItemContainer);
+
         // 添加中间容器(最后添加, 它的Gravity不会影响其他位置Child的改变)
         mCenterItemContainer = new LinearLayout(getContext());
         LayoutParams centerParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -140,22 +144,6 @@ public class GenericToolbar extends Toolbar {
         return mTitleText;
     }
 
-    private void initTitleText(float textSize, int textColor) {
-        mTitleText = new TextView(getContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.leftMargin = (int) dp2px(5);
-        params.rightMargin = (int) dp2px(5);
-        mTitleText.setLayoutParams(params);
-        mTitleText.setTextColor(mTextColor);
-        mTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-        mTitleText.setMaxEms(8);
-        mTitleText.setLines(1);
-        mTitleText.setEllipsize(TextUtils.TruncateAt.END);
-        mTitleText.setTextColor(textColor);
-        mCenterItemContainer.addView(mTitleText);
-    }
-
     /**
      * 设置标题图片
      */
@@ -170,11 +158,11 @@ public class GenericToolbar extends Toolbar {
         mTitleImage.setImageResource(imageResId);
     }
 
-    public void setTitleImage(TitleImageLoader imageLoader) {
+    public void setTitleImage(@NonNull TitleImageLoader imageLoader) {
         this.setTitleImage(imageLoader, INVALIDATE_VALUE, INVALIDATE_VALUE);
     }
 
-    public void setTitleImage(TitleImageLoader imageLoader, int width, int height) {
+    public void setTitleImage(@NonNull TitleImageLoader imageLoader, int width, int height) {
         if (mTitleImage == null) {
             initTitleImage(width, height);
         }
@@ -186,17 +174,6 @@ public class GenericToolbar extends Toolbar {
             initTitleImage(INVALIDATE_VALUE, INVALIDATE_VALUE);
         }
         return mTitleImage;
-    }
-
-    private void initTitleImage(int width, int height) {
-        mTitleImage = new ImageView(getContext());
-        int imageWidth = width == INVALIDATE_VALUE ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(width);
-        int imageHeight = height == INVALIDATE_VALUE ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(height);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(imageWidth, imageHeight);
-        params.leftMargin = (int) dp2px(5);
-        params.rightMargin = (int) dp2px(5);
-        mTitleImage.setLayoutParams(params);
-        mCenterItemContainer.addView(mTitleImage);
     }
 
     /**
@@ -414,12 +391,38 @@ public class GenericToolbar extends Toolbar {
         setBackgroundResource(drawableRes);
     }
 
-
     /**
      * 图片加载接口, 用户自己实现加载策略
      */
     public interface TitleImageLoader {
         void displayImage(Context context, ImageView titleImage);
+    }
+
+    private void initTitleText(float textSize, int textColor) {
+        mTitleText = new TextView(getContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = (int) dp2px(5);
+        params.rightMargin = (int) dp2px(5);
+        mTitleText.setLayoutParams(params);
+        mTitleText.setTextColor(mTextColor);
+        mTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        mTitleText.setMaxEms(8);
+        mTitleText.setLines(1);
+        mTitleText.setEllipsize(TextUtils.TruncateAt.END);
+        mTitleText.setTextColor(textColor);
+        mCenterItemContainer.addView(mTitleText);
+    }
+
+    private void initTitleImage(int width, int height) {
+        mTitleImage = new ImageView(getContext());
+        int imageWidth = width == INVALIDATE_VALUE ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(width);
+        int imageHeight = height == INVALIDATE_VALUE ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(height);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(imageWidth, imageHeight);
+        params.leftMargin = (int) dp2px(5);
+        params.rightMargin = (int) dp2px(5);
+        mTitleImage.setLayoutParams(params);
+        mCenterItemContainer.addView(mTitleImage);
     }
 
     private float dp2px(float dp) {
