@@ -16,7 +16,7 @@ public class PictureWatcherConfig implements Parcelable {
 
     // 图片选择的相关配置
     public ArrayList<String> pictureUris;// 需要展示的集合
-    public ArrayList<String> pickedPictures;// 选中的集合
+    public ArrayList<String> userPickedSet;// 选中的集合
     public int threshold;// 阈值
 
     // 指示器背景色
@@ -33,7 +33,7 @@ public class PictureWatcherConfig implements Parcelable {
 
     protected PictureWatcherConfig(Parcel in) {
         pictureUris = in.createStringArrayList();
-        pickedPictures = in.createStringArrayList();
+        userPickedSet = in.createStringArrayList();
         threshold = in.readInt();
         indicatorTextColor = in.readInt();
         indicatorSolidColor = in.readInt();
@@ -45,7 +45,7 @@ public class PictureWatcherConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringList(pictureUris);
-        dest.writeStringList(pickedPictures);
+        dest.writeStringList(userPickedSet);
         dest.writeInt(threshold);
         dest.writeInt(indicatorTextColor);
         dest.writeInt(indicatorSolidColor);

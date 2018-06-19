@@ -6,6 +6,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -61,7 +62,7 @@ public class DraggableViewPager extends ViewPager {
             @Override
             public void onPageSelected(int position) {
                 if (listener != null) {
-                    mCapturedView = listener.onPagerChanged(position);
+                    bindCaptureView(listener.onPagerChanged(position));
                 }
             }
 
@@ -75,6 +76,13 @@ public class DraggableViewPager extends ViewPager {
 
             }
         });
+    }
+
+    /**
+     * 绑定正在操作的 View
+     */
+    public void bindCaptureView(@NonNull View capturedView) {
+        mCapturedView = capturedView;
     }
 
     /**

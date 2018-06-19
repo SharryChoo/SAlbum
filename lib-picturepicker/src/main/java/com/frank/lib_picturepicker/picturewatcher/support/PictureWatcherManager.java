@@ -85,7 +85,7 @@ public class PictureWatcherManager {
      * @param pickedPictures 已选中的图片
      */
     public PictureWatcherManager setUserPickedSet(@NonNull ArrayList<String> pickedPictures) {
-        mConfig.pickedPictures = pickedPictures;
+        mConfig.userPickedSet = pickedPictures;
         return this;
     }
 
