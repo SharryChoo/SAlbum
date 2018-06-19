@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
@@ -12,7 +13,6 @@ import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by think on 2018/5/26.
@@ -23,10 +23,10 @@ import java.util.List;
 public class PicturePickerModel implements PicturePickerContract.IModel {
 
     // 所有包含图片文件夹Model的集合
-    private List<PictureFolder> mFolderModels;
+    private ArrayList<PictureFolder> mFolderModels;
 
     // 用户已选中的图片地址集合
-    private List<String> mPickedPictures = new ArrayList<>();
+    private ArrayList<String> mPickedPictures;
 
     // 图片的最大限量
     private int mThreshold;
@@ -34,7 +34,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
     @Override
     public void setThreshold(int threshold) {
         // 验证一下阈值是否异常
-        if (getPickedPictures().size() > threshold) {
+        if (getUserPickedSet().size() > threshold) {
             throw new RuntimeException("Your picked picture count is over your set threshold!");
         }
         this.mThreshold = threshold;
@@ -47,8 +47,13 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
 
 
     @Override
-    public void init(Context context, final PicturePickerContract.ModelInitializeCallback listener) {
+    public void getSystemPictures(Context context, final PicturePickerContract.ModelInitializeCallback listener) {
         new Thread(new CursorSystemPictureRunnable(context, listener)).start();
+    }
+
+    @Override
+    public void setUserPickedSet(@NonNull ArrayList<String> userPicked) {
+        mPickedPictures = userPicked;
     }
 
     /**
@@ -63,7 +68,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * 获取所有的图片文件夹
      */
     @Override
-    public List<PictureFolder> getAllPictureFolders() {
+    public ArrayList<PictureFolder> getAllPictureFolders() {
         return mFolderModels;
     }
 
@@ -73,7 +78,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * @return
      */
     @Override
-    public List<String> getPickedPictures() {
+    public ArrayList<String> getUserPickedSet() {
         return mPickedPictures;
     }
 
@@ -115,7 +120,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
 
         @Override
         public void run() {
-            List<PictureFolder> pictureFolders = new ArrayList<>();
+            ArrayList<PictureFolder> pictureFolders = new ArrayList<>();
             PictureFolder allPictureFolder = new PictureFolder("所有图片");
             pictureFolders.add(allPictureFolder);
             //key为存放图片的文件夹路径, values为PictureFolderModel的对象

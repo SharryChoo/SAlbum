@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.mvp.view;
+package com.frank.lib_picturepicker.picturepicker.ui;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -13,12 +13,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frank.lib_picturepicker.R;
+import com.frank.lib_picturepicker.callback.Callback;
+import com.frank.lib_picturepicker.callback.CallbackFragment;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import com.frank.lib_picturepicker.picturepicker.mvp.presenter.PicturePickerPresenter;
-import com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity;
-import com.frank.lib_picturepicker.toolbar.AppBarHelper;
-import com.frank.lib_picturepicker.toolbar.GenericToolbar;
-import com.frank.lib_picturepicker.toolbar.Style;
+import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
+import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherManager;
+import com.frank.lib_picturepicker.widget.toolbar.AppBarHelper;
+import com.frank.lib_picturepicker.widget.toolbar.GenericToolbar;
+import com.frank.lib_picturepicker.widget.toolbar.Style;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,22 +39,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     /**
      * Intent 常量
      */
-    public static final String EXTRA_USER_PICKED_PICTURES = "extra_user_picked_pictures";// 用户传入的已经选中的集合
-    public static final String EXTRA_PICKED_THRESHOLD = "extra_picked_threshold";// 最大选择数量
-    public static final String EXTRA_SPAN_COUNT = "extra_span_count";// 最大选择数量
-    // Toolbar 背景
-    public static final String EXTRA_TOOLBAR_BACKGROUND_COLOR = "extra_toolbar_background_color";// Toolbar 背景色
-    public static final String EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES = "extra_toolbar_background_drawable";// Toolbar 背景图片
-    // Indicator 指示器的样式
-    public static final String EXTRA_PICKED_INDICATOR_SOLID_COLOR = "extra_picked_indicator_solid_color";// 指示器内部填充的颜色
-    public static final String EXTRA_PICKED_INDICATOR_BORDER_CHECKED_COLOR = "extra_picked_indicator_border_checked_color";// 指示器边框选中的颜色
-    public static final String EXTRA_PICKED_INDICATOR_BORDER_UNCHECKED_COLOR = "extra_picked_indicator_border_unchecked_color";// 指示器边框未选中的颜色
-
-    /**
-     * Activity Result 相关
-     */
-    public static final int REQUEST_CODE = 0x00001234;// 请求码
-    public static final String RESULT_EXTRA_PICKED_PICTURES = "extra_picked_pictures";// 返回的图片
+    public static final String EXTRA_CONFIG = "extra_config";// 用户配置的属性
 
     /**
      * Toolbar 上添加的控件的 Tag
@@ -59,17 +47,11 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private final int TAG_TOOLBAR_BACK = 0x00000001;
     private final int TAG_TOOLBAR_CHECKED_DETAIL = 0x00000002;
     private final int TAG_TOOLBAR_ENSURE = 0x00000003;
-    private final int INVALIDATE_VALUE = -1;
 
     private PicturePickerPresenter mPresenter = new PicturePickerPresenter();
 
     // 通过 Intent 传递过来的数据
-    private int mSpanCount = 3;
-    private int mToolbarBkgColor = INVALIDATE_VALUE;
-    private int mToolbarBkgDrawableRes = INVALIDATE_VALUE;
-    private int mIndicatorSolidColor = INVALIDATE_VALUE;
-    private int mIndicatorBorderCheckedColor = INVALIDATE_VALUE;
-    private int mIndicatorBorderUncheckedColor = INVALIDATE_VALUE;
+    private PicturePickerConfig mConfig;
 
     // View 视图
     private GenericToolbar mToolbar;
@@ -84,7 +66,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private PicturePickerDialog mDialog;
 
     // 用于保存数据的相关集合
-    private List<String> mCurDisplayPaths = new ArrayList<>();// 用户选中的文件夹下所有图片的集合
+    private ArrayList<String> mCurDisplayPaths = new ArrayList<>();// 用户选中的文件夹下所有图片的集合
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,21 +80,11 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     protected void parseIntent() {
+        mConfig = getIntent().getParcelableExtra(EXTRA_CONFIG);
         // 获取外界传递过来, 用户已经获取到的图片的 URI 集合
-        mPresenter.setupUserPicked(getIntent().getStringArrayListExtra(EXTRA_USER_PICKED_PICTURES));
+        mPresenter.setupUserPickedSet(mConfig.userPickedSet);
         // 获取传入的阈值
-        mPresenter.setupThreshold(getIntent().getIntExtra(EXTRA_PICKED_THRESHOLD, 9));
-        // 获取用户设置的每行展示多少张图片
-        mSpanCount = getIntent().getIntExtra(EXTRA_SPAN_COUNT, mSpanCount);
-        // Toolbar 背景色
-        mToolbarBkgColor = getIntent().getIntExtra(EXTRA_TOOLBAR_BACKGROUND_COLOR, mToolbarBkgColor);
-        // Toolbar 背景图
-        mToolbarBkgDrawableRes = getIntent().getIntExtra(EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES, mToolbarBkgDrawableRes);
-        // 获取指示器中间填充的颜色
-        mIndicatorSolidColor = getIntent().getIntExtra(EXTRA_PICKED_INDICATOR_SOLID_COLOR, mIndicatorSolidColor);
-        // 获取指示器边框的颜色
-        mIndicatorBorderCheckedColor = getIntent().getIntExtra(EXTRA_PICKED_INDICATOR_BORDER_CHECKED_COLOR, mIndicatorBorderCheckedColor);
-        mIndicatorBorderUncheckedColor = getIntent().getIntExtra(EXTRA_PICKED_INDICATOR_BORDER_UNCHECKED_COLOR, mIndicatorBorderUncheckedColor);
+        mPresenter.setupThreshold(mConfig.threshold);
     }
 
     protected void initTitle() {
@@ -121,12 +93,11 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         // 初始化视图
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.setAdjustToTransparentStatusBar(true);
-        mToolbar.setTextColor(Color.WHITE);
         // 设置背景
-        if (mToolbarBkgColor != INVALIDATE_VALUE)
-            mToolbar.setBackgroundColor(mToolbarBkgColor);
-        if (mToolbarBkgDrawableRes != INVALIDATE_VALUE)
-            mToolbar.setBackgroundDrawableRes(mToolbarBkgDrawableRes);
+        if (mConfig.toolbarBkgColor != PicturePickerConfig.INVALIDATE_VALUE)
+            mToolbar.setBackgroundColor(mConfig.toolbarBkgColor);
+        if (mConfig.toolbarBkgDrawableResId != PicturePickerConfig.INVALIDATE_VALUE)
+            mToolbar.setBackgroundDrawableRes(mConfig.toolbarBkgDrawableResId);
         // 添加返回按钮
         mToolbar.addLeftIcon(TAG_TOOLBAR_BACK, R.drawable.icon_common_arrow_back_white, this);
         // 添加选中详情的文本
@@ -140,9 +111,8 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     protected void initViews() {
         // RecyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, mSpanCount));
-        mRecyclerView.setAdapter(new PicturePickerAdapter(this, mCurDisplayPaths, mSpanCount,
-                mIndicatorSolidColor, mIndicatorBorderCheckedColor, mIndicatorBorderUncheckedColor));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, mConfig.spanCount));
+        mRecyclerView.setAdapter(new PicturePickerAdapter(this, mCurDisplayPaths, mConfig));
         // 底部菜单控制区域
         findViewById(R.id.ll_bottom_menu).setOnClickListener(this);
         mTvSelectedFolderName = findViewById(R.id.tv_folder_name);
@@ -150,7 +120,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         mTvPreview.setOnClickListener(this);
         // 悬浮菜单
         mFab = findViewById(R.id.fab);
-        mFab.setBackgroundColor(mToolbarBkgColor);
+        mFab.setBackgroundColor(mConfig.toolbarBkgColor);
         mFab.setOnClickListener(this);
     }
 
@@ -159,7 +129,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
-    public void displaySelectedFolder(String folderName, List<String> uris) {
+    public void displayPictures(String folderName, List<String> uris) {
         // 更新文件夹名称
         mTvSelectedFolderName.setText(folderName);
         mTvToolbarFolderName.setText(folderName);
@@ -171,12 +141,14 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public void updateTextContent(int curPicked, int total) {
-        mTvPreview.setText("预览 (" + curPicked + ")");
+        if (mTvToolbarEnsure == null || mTvPreview == null) return;
         mTvToolbarEnsure.setText("确认 (" + curPicked + "/" + total + ")");
+        mTvPreview.setText("预览 (" + curPicked + ")");
     }
 
     @Override
     public void updateTextViewVisibility(boolean isVisible) {
+        if (mTvToolbarEnsure == null || mTvPreview == null) return;
         int visible = isVisible ? View.VISIBLE : View.INVISIBLE;
         mTvToolbarEnsure.setVisibility(visible);
         mTvPreview.setVisibility(visible);
@@ -189,26 +161,36 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public List<String> getPickedPictures() {
-        return mPresenter.getPickedPictures();
+        return mPresenter.fetchUserPickedSet();
     }
 
     @Override
-    public boolean onIndicatorSelected(String imagePath) {
-        return mPresenter.performPicturePicked(imagePath);
+    public boolean onIndicatorSelected(String uri) {
+        return mPresenter.performPicturePicked(uri);
     }
 
     @Override
-    public void onIndicatorDeselect(String imagePath) {
-        mPresenter.performPictureRemoved(imagePath);
+    public void onIndicatorDeselect(String uri) {
+        mPresenter.performPictureRemoved(uri);
     }
 
     @Override
     public void onPictureClick(ImageView imageView, String uri, int position) {
-        PictureWatcherActivity.start(this,
-                (ArrayList<String>) mCurDisplayPaths,
-                mCurDisplayPaths.indexOf(uri),
-                imageView
-        );
+        PictureWatcherManager.with(this)
+                .setThreshold(mConfig.threshold)
+                .setIndicatorTextColor(mConfig.indicatorTextColor)
+                .setIndicatorSolidColor(mConfig.indicatorSolidColor)
+                .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
+                .setPictureUris(mCurDisplayPaths, position)
+                .setUserPickedSet(mPresenter.fetchUserPickedSet())
+                .setSharedElement(imageView)
+                .start(new Callback() {
+                    @Override
+                    public void onResult(ArrayList<String> userPickedSet) {
+                        mPresenter.setupUserPickedSet(userPickedSet);
+                        mRecyclerView.getAdapter().notifyDataSetChanged();
+                    }
+                });
     }
 
     @Override
@@ -217,22 +199,35 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
             Intent intent = new Intent();
-            intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, (ArrayList<String>) mPresenter.getPickedPictures());
-            setResult(REQUEST_CODE, intent);
+            intent.putExtra(CallbackFragment.RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPickedSet());
+            setResult(CallbackFragment.REQUEST_CODE, intent);
             finish();
-        } else if (v.getId() == R.id.tv_preview) {// 预览按钮
-            PictureWatcherActivity.start(this, (ArrayList<String>) mPresenter.getPickedPictures(), 0);
         } else if (v.getId() == R.id.ll_bottom_menu) {
             if (mDialog == null) {
                 mDialog = new PicturePickerDialog(this, mPresenter.fetchAllPictureFolders())
                         .setOnItemClickedListener(new PicturePickerDialog.OnItemClickedListener() {
                             @Override
                             public void onDialogItemClicked(int position) {
-                                mPresenter.fetchPicturePathsAt(position);
+                                mPresenter.fetchDisplayPictures(position);
                             }
                         });
             }
             mDialog.show();
+        } else if (v.getId() == R.id.tv_preview) {// 预览按钮
+            PictureWatcherManager.with(this)
+                    .setThreshold(mConfig.threshold)
+                    .setIndicatorTextColor(mConfig.indicatorTextColor)
+                    .setIndicatorSolidColor(mConfig.indicatorSolidColor)
+                    .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
+                    .setPictureUris(mPresenter.fetchUserPickedSet(), 0)
+                    .setUserPickedSet(mPresenter.fetchUserPickedSet())
+                    .start(new Callback() {
+                        @Override
+                        public void onResult(ArrayList<String> userPickedSet) {
+                            mPresenter.setupUserPickedSet(userPickedSet);
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+                        }
+                    });
         }
     }
 

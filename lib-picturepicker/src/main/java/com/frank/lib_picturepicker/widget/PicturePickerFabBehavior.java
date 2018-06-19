@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.mvp.view;
+package com.frank.lib_picturepicker.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

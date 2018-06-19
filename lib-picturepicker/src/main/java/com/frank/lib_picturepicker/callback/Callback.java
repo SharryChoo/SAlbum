@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.support;
+package com.frank.lib_picturepicker.callback;
 
 import java.util.ArrayList;
 
@@ -8,6 +8,6 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description: 图片选择器的回调
  */
-public interface PicturePickerCallback {
-    void onResult(ArrayList<String> paths);
+public interface Callback {
+    void onResult(ArrayList<String> userPickedSet);
 }

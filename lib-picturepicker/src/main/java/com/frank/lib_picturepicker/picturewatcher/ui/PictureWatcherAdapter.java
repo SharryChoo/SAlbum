@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturewatcher;
+package com.frank.lib_picturepicker.picturewatcher.ui;
 
 import android.support.v4.view.PagerAdapter;
 import android.view.View;

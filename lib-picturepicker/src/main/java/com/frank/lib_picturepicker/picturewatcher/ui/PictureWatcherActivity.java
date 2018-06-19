@@ -1,17 +1,12 @@
-package com.frank.lib_picturepicker.picturewatcher;
+package com.frank.lib_picturepicker.picturewatcher.ui;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.view.View;
@@ -20,15 +15,19 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.toolbar.AppBarHelper;
-import com.frank.lib_picturepicker.toolbar.GenericToolbar;
-import com.frank.lib_picturepicker.toolbar.Style;
+import com.frank.lib_picturepicker.callback.CallbackFragment;
+import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherConfig;
+import com.frank.lib_picturepicker.widget.DraggableViewPager;
+import com.frank.lib_picturepicker.widget.PickerIndicatorView;
+import com.frank.lib_picturepicker.widget.toolbar.AppBarHelper;
+import com.frank.lib_picturepicker.widget.toolbar.GenericToolbar;
+import com.frank.lib_picturepicker.widget.toolbar.Style;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import cn.bluemobi.dylan.photoview.library.PhotoView;
 import cn.bluemobi.dylan.photoview.library.PhotoViewAttacher;
@@ -43,99 +42,29 @@ import cn.bluemobi.dylan.photoview.library.PhotoViewAttacher;
 public class PictureWatcherActivity extends AppCompatActivity implements DraggableViewPager.OnPagerChangedListener {
 
     private static final String TAG = PictureWatcherActivity.class.getSimpleName();
-    public static final String EXTRA_PICTURE_URIS = "extra_picture_uris";
-    public static final String EXTRA_CUR_POSITION = "extra_cur_position";
+    public static final String EXTRA_CONFIG = "extra_config";
     public static final String EXTRA_SHARED_ELEMENT = "extra_shared_element";
 
-    /**
-     * 调用图片查看器的方法
-     *
-     * @param context 上下文
-     * @param uri     点击哪张图片进入图片查看器
-     */
-    public static void start(@NonNull Context context, @NonNull String uri) {
-        start(context, uri, null);
-        if (TextUtils.isEmpty(uri)) {
-            throw new IllegalArgumentException("PictureWatcherActivity.start -> Parameter uri must not be null!");
-        }
-        ArrayList<String> uris = new ArrayList<>();
-        uris.add(uri);
-        start(context, uris, 0);
-    }
-
-    /**
-     * 单张图片调用图片查看器的方法(共享元素)
-     *
-     * @param context 上下文
-     * @param uri     点击哪张图片进入图片查看器
-     */
-    public static void start(@NonNull Context context, @NonNull String uri, @NonNull View transitionView) {
-        if (TextUtils.isEmpty(uri)) {
-            throw new IllegalArgumentException("PictureWatcherActivity.start -> Parameter uri must not be null!");
-        }
-        ArrayList<String> uris = new ArrayList<>();
-        uris.add(uri);
-        start(context, uris, 0, transitionView);
-    }
-
-    /**
-     * 调用图片查看器的方法
-     *
-     * @param context     上下文
-     * @param pictureUris 图片的Url集合
-     * @param position    点击哪张图片进入图片查看器
-     */
-    public static void start(@NonNull Context context, @NonNull ArrayList<String> pictureUris, int position) {
-        start(context, pictureUris, position, null);
-    }
-
-    /**
-     * 调用图片查看器的方法(共享元素)
-     *
-     * @param context     上下文
-     * @param pictureUris 图片的Url集合
-     * @param position    点击哪张图片进入图片查看器
-     */
-    public static void start(@NonNull Context context, @NonNull ArrayList<String> pictureUris,
-                             int position, View transitionView) {
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("PictureWatcherActivity.start -> Parameter context cannot cast to be Activity!");
-        }
-        if (pictureUris.isEmpty()) {
-            throw new IllegalArgumentException("PictureWatcherActivity.start -> Parameter pictureUris must not be null or empty!");
-        }
-        Activity activity = (Activity) context;
-        Intent intent = new Intent(activity, PictureWatcherActivity.class);
-        intent.putStringArrayListExtra(EXTRA_PICTURE_URIS, pictureUris);
-        intent.putExtra(EXTRA_CUR_POSITION, position);
-        // 5.0 以上的系统使用 Transition 跳转
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (transitionView != null) {// 共享元素
-                intent.putExtra(EXTRA_SHARED_ELEMENT, true);
-                activity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(
-                        activity, transitionView, pictureUris.get(position)).toBundle());
-            } else {
-                activity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(activity).toBundle());
-            }
-        } else {
-            activity.startActivity(intent);
-        }
-    }
-
     // 数据的集合
-    private List<String> mUris = new ArrayList<>();
-    private List<PhotoView> mPhotoViews = new ArrayList<>();
+    private PictureWatcherConfig mConfig;
+    private ArrayList<String> mPictureUris;
+    private ArrayList<String> mUserPickedSet;
+    private ArrayList<PhotoView> mPhotoViews = new ArrayList<>();
     private PictureWatcherAdapter mAdapter;
 
-    // Flag
+    // SharedElement
     private boolean mIsSharedElement = false;// 开启共享元素
-    private String mSharedKey;
-    private int mSharedPosition;// 共享元素的 key
+    private int mSharedPosition;// 共享元素的位置
+    private String mSharedKey;// 共享元素的 key
 
     // 视图
     private DraggableViewPager mViewPager;
+    private PickerIndicatorView mCheckIndicator;
     private TextView mTvBottomIndicator;
+
+    // 当前战士的 位置 和 URI
     private int mCurPosition;
+    private String mCurUri;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -155,15 +84,19 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
     }
 
     protected void parseIntent() {
+        mConfig = getIntent().getParcelableExtra(EXTRA_CONFIG);
         // 获取需要展示图片的 URI 集合
-        mUris = getIntent().getStringArrayListExtra(EXTRA_PICTURE_URIS);
+        mPictureUris = mConfig.pickedPictures == null ?
+                new ArrayList<String>() : mConfig.pictureUris;
+        // 获取已经选中的图片
+        mUserPickedSet = mConfig.pickedPictures;
         // 获取当前需要展示的 Position
-        mCurPosition = getIntent().getIntExtra(EXTRA_CUR_POSITION, 0);
-        // 判断是否开启共享动画
+        mCurPosition = mConfig.position;
         mIsSharedElement = getIntent().getBooleanExtra(EXTRA_SHARED_ELEMENT, false);
+        // 判断是否开启共享动画
         if (mIsSharedElement) {
             mSharedPosition = mCurPosition;
-            mSharedKey = mUris.get(mSharedPosition);
+            mSharedKey = mPictureUris.get(mSharedPosition);
         }
     }
 
@@ -175,6 +108,33 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
             @Override
             public void onClick(View v) {
                 onBackPressed();
+            }
+        });
+        // 图片是否选中的指示器
+        if (mUserPickedSet == null) return;
+        mCheckIndicator = new PickerIndicatorView(this);
+        mCheckIndicator.setBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor);
+        mCheckIndicator.setSolidColor(mConfig.indicatorSolidColor);
+        mCheckIndicator.setTextColor(mConfig.indicatorTextColor);
+        toolbar.addRightView(1, mCheckIndicator, 25, 25, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCheckIndicator.isChecked()) {// Checked-> Unchecked
+                    // 移除选中数据与状态
+                    mUserPickedSet.remove(mCurUri);
+                    mCheckIndicator.setChecked(false);
+                } else {// Unchecked -> Checked
+                    // 判断是否达到选择上限
+                    if (mUserPickedSet.size() < mConfig.threshold) {
+                        mUserPickedSet.add(mCurUri);
+                        mCheckIndicator.setText(String.valueOf(mUserPickedSet.indexOf(mCurUri) + 1));
+                        mCheckIndicator.setChecked(true);
+                    } else {
+                        Toast.makeText(PictureWatcherActivity.this,
+                                "最多只可选择 " + mConfig.threshold + " 张图片", Toast.LENGTH_SHORT).show();
+                        mCheckIndicator.setChecked(false);
+                    }
+                }
             }
         });
     }
@@ -217,7 +177,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
     }
 
     private void initData() {
-        for (String uri : mUris) {
+        for (String uri : mPictureUris) {
             PhotoView photoView = createPhotoView();
             mPhotoViews.add(photoView);
             if (mIsSharedElement && uri.equals(mSharedKey)) {
@@ -232,9 +192,18 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
 
     @Override
     public View onPagerChanged(int position) {
+        // 更新当前页面的 URI
+        mCurUri = mPictureUris.get(position);
         // 更新当前页面共享元素的 key
         ViewCompat.setTransitionName(mPhotoViews.get(mSharedPosition),
                 position == mSharedPosition ? mSharedKey : "");
+        // 更新 Title 选中标识
+        if (mUserPickedSet.indexOf(mCurUri) != -1) {
+            mCheckIndicator.setChecked(true);
+            mCheckIndicator.setText(String.valueOf(mUserPickedSet.indexOf(mCurUri) + 1));
+        } else {
+            mCheckIndicator.setChecked(false);
+        }
         // 更新底部角标索引
         updateBottomIndicator(position);
         // 加载图片
@@ -244,6 +213,11 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
 
     @Override
     public void finish() {
+        if (mUserPickedSet != null) {
+            Intent intent = new Intent();
+            intent.putExtra(CallbackFragment.RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
+            setResult(CallbackFragment.REQUEST_CODE, intent);
+        }
         super.finish();
         // 当前 Activity 关闭时, 使用淡入淡出的动画
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -254,7 +228,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
      */
     private void updateBottomIndicator(int position) {
         int nowPager = position + 1;
-        int AllPager = mUris.size();
+        int AllPager = mPictureUris.size();
         mTvBottomIndicator.setText(nowPager + "/" + AllPager);
     }
 
@@ -265,19 +239,19 @@ public class PictureWatcherActivity extends AppCompatActivity implements Draggab
         // 加载当前的位置的图片
         PhotoView curView = mPhotoViews.get(position);
         if (curView != null && curView.getDrawable() == null) {
-            Glide.with(this).load(mUris.get(position)).into(curView);
+            Glide.with(this).load(mPictureUris.get(position)).into(curView);
         }
         // 加载前一个
         int beforeIndex = position - 1;
         PhotoView beforeView = beforeIndex >= 0 ? mPhotoViews.get(beforeIndex) : null;
         if (beforeView != null && beforeView.getDrawable() == null) {
-            Glide.with(this).load(mUris.get(beforeIndex)).into(beforeView);
+            Glide.with(this).load(mPictureUris.get(beforeIndex)).into(beforeView);
         }
         // 加载后一个
         int afterIndex = position + 1;
-        PhotoView afterView = afterIndex < mUris.size() ? mPhotoViews.get(afterIndex) : null;
+        PhotoView afterView = afterIndex < mPictureUris.size() ? mPhotoViews.get(afterIndex) : null;
         if (afterView != null && afterView.getDrawable() == null) {
-            Glide.with(this).load(mUris.get(afterIndex)).into(afterView);
+            Glide.with(this).load(mPictureUris.get(afterIndex)).into(afterView);
         }
     }
 

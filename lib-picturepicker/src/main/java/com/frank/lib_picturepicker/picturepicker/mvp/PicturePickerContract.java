@@ -1,9 +1,11 @@
 package com.frank.lib_picturepicker.picturepicker.mvp;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,15 +21,10 @@ public interface PicturePickerContract {
         /**
          * 显示选中的图片文件夹
          *
-         * @param folderName
-         * @param uris
+         * @param folderName 文件夹的名称
+         * @param uris       文件夹中的数据
          */
-        void displaySelectedFolder(String folderName, List<String> uris);
-
-        /**
-         * 更新标题文本
-         */
-        void updateTextContent(int curPicked, int total);
+        void displayPictures(String folderName, List<String> uris);
 
         /**
          * 展示消息通知
@@ -37,68 +34,64 @@ public interface PicturePickerContract {
         void showMsg(String msg);
 
         /**
-         * 跟新预览文本的可见性(选中图片大于 0 时, 即为可见)
-         *
-         * @param isVisible
+         * 更新标题文本
+         */
+        void updateTextContent(int curPicked, int total);
+
+        /**
+         * 更新文本的可见性(选中图片大于 0 时, 即为可见)
          */
         void updateTextViewVisibility(boolean isVisible);
     }
 
     interface IPresenter {
 
+        /**
+         * 绑定 View
+         */
         void attach(IView view);
 
         /**
-         * 添加用户跳转到 View 时携带的图片地址集合
+         * 配置用户已经选中的图片集合
          *
-         * @param userPicked
+         * @param userPicked 用户已经选中的图片集合
          */
-        void setupUserPicked(List<String> userPicked);
+        void setupUserPickedSet(ArrayList<String> userPicked);
 
         /**
          * 配置阈值
-         *
-         * @param threshold
          */
         void setupThreshold(int threshold);
 
         /**
          * 初始化 Model 的数据
-         *
-         * @param context
          */
         void initData(Context context);
 
         /**
-         * 获取 <<指定索引处的>> 图片文件夹
+         * 获取需要展示的图片
          *
          * @param position
          */
-        void fetchPicturePathsAt(int position);
+        void fetchDisplayPictures(int position);
 
         /**
          * 获取所有图片文件夹
          */
-        List<PictureFolder> fetchAllPictureFolders();
+        ArrayList<PictureFolder> fetchAllPictureFolders();
 
         /**
          * 获取用户选中的所有图片
-         *
-         * @return
          */
-        List<String> getPickedPictures();
+        ArrayList<String> fetchUserPickedSet();
 
         /**
          * 处理图片被选中了
-         *
-         * @param imagePath
          */
         boolean performPicturePicked(String imagePath);
 
         /**
          * 处理图片被移除了
-         *
-         * @param imagePath
          */
         void performPictureRemoved(String imagePath);
 
@@ -106,7 +99,15 @@ public interface PicturePickerContract {
 
     interface IModel {
 
-        void init(Context context, final ModelInitializeCallback listener);
+        /**
+         * 设置用户已经选中的图片集合
+         */
+        void setUserPickedSet(@NonNull ArrayList<String> userPicked);
+
+        /**
+         * 获取系统图片
+         */
+        void getSystemPictures(Context context, final ModelInitializeCallback listener);
 
         /**
          * 设置图片选择的阈值
@@ -126,26 +127,22 @@ public interface PicturePickerContract {
         /**
          * 获取所有的图片文件夹
          */
-        List<PictureFolder> getAllPictureFolders();
+        ArrayList<PictureFolder> getAllPictureFolders();
 
         /**
          * 获取用户选中的图片
          *
          * @return
          */
-        List<String> getPickedPictures();
+        ArrayList<String> getUserPickedSet();
 
         /**
          * 添加用户选中的图片
-         *
-         * @param imagePath
          */
         void addPickedPicture(String imagePath);
 
         /**
          * 移除用户选中的图片
-         *
-         * @param imagePath
          */
         void removePickedPicture(String imagePath);
     }

@@ -1,33 +1,23 @@
-package com.frank.lib_picturepicker.picturepicker;
+package com.frank.lib_picturepicker.picturepicker.support;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 
+import com.frank.lib_picturepicker.callback.Callback;
+import com.frank.lib_picturepicker.callback.CallbackFragment;
 import com.frank.lib_picturepicker.permission.PermissionsCallback;
 import com.frank.lib_picturepicker.permission.PermissionsManager;
-import com.frank.lib_picturepicker.picturepicker.support.PicturePickerCallback;
-import com.frank.lib_picturepicker.picturepicker.support.PicturePickerCallbackFragment;
-import com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity;
+import com.frank.lib_picturepicker.picturepicker.ui.PicturePickerActivity;
 
 import java.util.ArrayList;
-
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_INDICATOR_BORDER_CHECKED_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_INDICATOR_BORDER_UNCHECKED_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_INDICATOR_SOLID_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_PICKED_THRESHOLD;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_SPAN_COUNT;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_TOOLBAR_BACKGROUND_COLOR;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES;
-import static com.frank.lib_picturepicker.picturepicker.mvp.view.PicturePickerActivity.EXTRA_USER_PICKED_PICTURES;
 
 /**
  * Created by Frank on 2018/6/13.
@@ -49,22 +39,13 @@ public class PicturePickerManager {
     }
 
     private Activity mActivity;
-    private PicturePickerCallbackFragment mCallbackFragment;
-    private ArrayList<String> mPickedPictures = new ArrayList<>();
-    private int mThreshold = 9;
-    private int mSpanCount = 3;
+    private CallbackFragment mCallbackFragment;
+    private PicturePickerConfig mConfig;
 
-    // Toolbar 背景色
-    private final int INVALIDATE_VALUE = -1;
-    private int mToolbarBkgDrawableResId = INVALIDATE_VALUE;
-    private int mToolbarBkgColor = Color.parseColor("#ff64b6f6");
-    private int mIndicatorSolidColor = Color.parseColor("#ff64b6f6");
-    private int mIndicatorBorderCheckedColor = mIndicatorSolidColor;
-    private int mIndicatorBorderUncheckedColor = Color.WHITE;
-
-    private PicturePickerManager(Activity activity) {
+    private PicturePickerManager(@NonNull Activity activity) {
         this.mActivity = activity;
         this.mCallbackFragment = getCallbackFragment(mActivity);
+        this.mConfig = new PicturePickerConfig();
     }
 
     /**
@@ -73,7 +54,7 @@ public class PicturePickerManager {
      * @param threshold 阈值
      */
     public PicturePickerManager setThreshold(int threshold) {
-        this.mThreshold = threshold;
+        mConfig.threshold = threshold;
         return this;
     }
 
@@ -83,7 +64,12 @@ public class PicturePickerManager {
      * @param pickedPictures 已选中的图片
      */
     public PicturePickerManager setPickedPictures(@NonNull ArrayList<String> pickedPictures) {
-        this.mPickedPictures.addAll(pickedPictures);
+        mConfig.userPickedSet.addAll(pickedPictures);
+        return this;
+    }
+
+    public PicturePickerManager setSpanCount(int count) {
+        mConfig.spanCount = count;
         return this;
     }
 
@@ -102,7 +88,7 @@ public class PicturePickerManager {
      * @param color color 资源 ID
      */
     public PicturePickerManager setToolbarBackgroundColor(@ColorInt int color) {
-        this.mToolbarBkgColor = color;
+        mConfig.toolbarBkgColor = color;
         return this;
     }
 
@@ -112,7 +98,26 @@ public class PicturePickerManager {
      * @param drawableRes drawable 资源 ID
      */
     public PicturePickerManager setToolbarBackgroundDrawableRes(@DrawableRes int drawableRes) {
-        this.mToolbarBkgDrawableResId = drawableRes;
+        mConfig.toolbarBkgDrawableResId = drawableRes;
+        return this;
+    }
+
+    /**
+     * 设置选择索引的边框颜色
+     *
+     * @param textColorId 边框的颜色 ID
+     */
+    public PicturePickerManager setIndicatorTextColorRes(@ColorRes int textColorId) {
+        return setIndicatorTextColor(ContextCompat.getColor(mActivity, textColorId));
+    }
+
+    /**
+     * 设置选择索引的边框颜色
+     *
+     * @param textColor 边框的颜色
+     */
+    public PicturePickerManager setIndicatorTextColor(@ColorInt int textColor) {
+        mConfig.indicatorTextColor = textColor;
         return this;
     }
 
@@ -131,7 +136,7 @@ public class PicturePickerManager {
      * @param solidColor 边框的颜色
      */
     public PicturePickerManager setIndicatorSolidColor(@ColorInt int solidColor) {
-        mIndicatorSolidColor = solidColor;
+        mConfig.indicatorSolidColor = solidColor;
         return this;
     }
 
@@ -153,13 +158,8 @@ public class PicturePickerManager {
      * @param uncheckedColor 未选中的边框颜色的Res Id
      */
     public PicturePickerManager setIndicatorBorderColor(@ColorInt int checkedColor, @ColorInt int uncheckedColor) {
-        mIndicatorBorderCheckedColor = checkedColor;
-        mIndicatorBorderUncheckedColor = uncheckedColor;
-        return this;
-    }
-
-    public PicturePickerManager setSpanCount(int count) {
-        mSpanCount = count;
+        mConfig.indicatorBorderCheckedColor = checkedColor;
+        mConfig.indicatorBorderUncheckedColor = uncheckedColor;
         return this;
     }
 
@@ -168,7 +168,7 @@ public class PicturePickerManager {
      *
      * @param callback 图片选中的回调
      */
-    public void start(@NonNull final PicturePickerCallback callback) {
+    public void start(@NonNull final Callback callback) {
         // 权限检测
         PermissionsManager.getManager(mActivity)
                 .request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -185,30 +185,21 @@ public class PicturePickerManager {
      *
      * @param callback
      */
-    private void performActivityStart(PicturePickerCallback callback) {
+    private void performActivityStart(Callback callback) {
         final Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
-        intent.putExtra(EXTRA_USER_PICKED_PICTURES, mPickedPictures);
-        intent.putExtra(EXTRA_PICKED_THRESHOLD, mThreshold);
-        intent.putExtra(EXTRA_SPAN_COUNT, mSpanCount);
-        // Toolbar
-        intent.putExtra(EXTRA_TOOLBAR_BACKGROUND_COLOR, mToolbarBkgColor);
-        intent.putExtra(EXTRA_TOOLBAR_BACKGROUND_DRAWABLE_RES, mToolbarBkgDrawableResId);
-        // 指示器
-        intent.putExtra(EXTRA_PICKED_INDICATOR_SOLID_COLOR, mIndicatorSolidColor);
-        intent.putExtra(EXTRA_PICKED_INDICATOR_BORDER_CHECKED_COLOR, mIndicatorBorderCheckedColor);
-        intent.putExtra(EXTRA_PICKED_INDICATOR_BORDER_UNCHECKED_COLOR, mIndicatorBorderUncheckedColor);
+        intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, mConfig);
         mCallbackFragment.setCallback(callback);
-        mCallbackFragment.startActivityForResult(intent, PicturePickerActivity.REQUEST_CODE);
+        mCallbackFragment.startActivityForResult(intent, CallbackFragment.REQUEST_CODE);
     }
 
     /**
      * 获取用于回调的 Fragment
      */
-    private PicturePickerCallbackFragment getCallbackFragment(Activity activity) {
-        PicturePickerCallbackFragment callbackFragment = findCallbackFragment(activity);
+    private CallbackFragment getCallbackFragment(Activity activity) {
+        CallbackFragment callbackFragment = findCallbackFragment(activity);
         if (callbackFragment == null) {
-            callbackFragment = PicturePickerCallbackFragment.newInstance();
+            callbackFragment = CallbackFragment.newInstance();
             FragmentManager fragmentManager = activity.getFragmentManager();
             fragmentManager.beginTransaction().add(callbackFragment, TAG).commitAllowingStateLoss();
             fragmentManager.executePendingTransactions();
@@ -219,8 +210,8 @@ public class PicturePickerManager {
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private PicturePickerCallbackFragment findCallbackFragment(Activity activity) {
-        return (PicturePickerCallbackFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private CallbackFragment findCallbackFragment(Activity activity) {
+        return (CallbackFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
 }

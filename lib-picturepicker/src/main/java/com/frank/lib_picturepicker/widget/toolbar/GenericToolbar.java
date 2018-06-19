@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.toolbar;
+package com.frank.lib_picturepicker.widget.toolbar;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
@@ -31,11 +32,14 @@ import java.lang.ref.WeakReference;
  * Version: 2.8
  * Description:
  * Generic 的最小高度为系统 ActionBar 的高度
- *
+ * <p>
  * 1. 可以直接在Xml文件中直接使用
  * 2. 可以使用Builder动态的植入
  */
 public class GenericToolbar extends Toolbar {
+
+    private final static int INVALIDATE_VALUE = -1;
+    private final static int DEFAULT_COLOR = Color.WHITE;
 
     // Toolbar中的三个容器
     private LinearLayout mLeftItemContainer;
@@ -44,7 +48,7 @@ public class GenericToolbar extends Toolbar {
     // 提供的标题(文本/图片/自定义)
     private TextView mTitleText;
     private ImageView mTitleImage;
-    private int mTextColor = Color.WHITE;
+    private int mTextColor = DEFAULT_COLOR;
     // 添加的所有View的缓存, 方便用户通过getViewByTag()找到自己添加的View
     private SparseArray<View> mItemViews = new SparseArray<>();
 
@@ -103,27 +107,11 @@ public class GenericToolbar extends Toolbar {
     }
 
     /**
-     * 设置Toolbar中所有文本的颜色
-     */
-    public void setTextColor(int textColor) {
-        mTextColor = textColor;
-        if (mTitleText != null) {
-            mTitleText.setTextColor(mTextColor);
-        }
-        for (int i = 0; i < mItemViews.size(); i++) {
-            View itemView = mItemViews.valueAt(i);
-            if (itemView instanceof TextView) {
-                ((TextView) itemView).setTextColor(textColor);
-            }
-        }
-    }
-
-    /**
      * 设置文本标题
      */
     @Override
-    public void setTitle(@StringRes int stringRes) {
-        this.setTitle(getResources().getText(stringRes), 18f);
+    public void setTitle(@StringRes int stringResId) {
+        this.setTitle(getResources().getText(stringResId), 18f);
     }
 
     @Override
@@ -133,19 +121,26 @@ public class GenericToolbar extends Toolbar {
 
     public void setTitle(CharSequence text, float textSize) {
         if (mTitleText == null) {
-            initTitleText(textSize);
+            initTitleText(textSize, DEFAULT_COLOR);
+        }
+        mTitleText.setText(text);
+    }
+
+    public void setTitle(CharSequence text, float textSize, @ColorInt int textColor) {
+        if (mTitleText == null) {
+            initTitleText(textSize, textColor);
         }
         mTitleText.setText(text);
     }
 
     public TextView getTitleText() {
         if (mTitleText == null) {
-            initTitleText(18f);
+            initTitleText(18f, DEFAULT_COLOR);
         }
         return mTitleText;
     }
 
-    private void initTitleText(float textSize) {
+    private void initTitleText(float textSize, int textColor) {
         mTitleText = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -157,25 +152,26 @@ public class GenericToolbar extends Toolbar {
         mTitleText.setMaxEms(8);
         mTitleText.setLines(1);
         mTitleText.setEllipsize(TextUtils.TruncateAt.END);
+        mTitleText.setTextColor(textColor);
         mCenterItemContainer.addView(mTitleText);
     }
 
     /**
      * 设置标题图片
      */
-    public void setTitleImage(@DrawableRes int iconRes) {
-        this.setTitleImage(iconRes, -1, -1);
+    public void setTitleImage(@DrawableRes int imageResId) {
+        this.setTitleImage(imageResId, INVALIDATE_VALUE, INVALIDATE_VALUE);
     }
 
-    public void setTitleImage(@DrawableRes int iconRes, int width, int height) {
+    public void setTitleImage(@DrawableRes int imageResId, int width, int height) {
         if (mTitleImage == null) {
             initTitleImage(width, height);
         }
-        mTitleImage.setImageResource(iconRes);
+        mTitleImage.setImageResource(imageResId);
     }
 
     public void setTitleImage(TitleImageLoader imageLoader) {
-        this.setTitleImage(imageLoader, -1, -1);
+        this.setTitleImage(imageLoader, INVALIDATE_VALUE, INVALIDATE_VALUE);
     }
 
     public void setTitleImage(TitleImageLoader imageLoader, int width, int height) {
@@ -187,15 +183,15 @@ public class GenericToolbar extends Toolbar {
 
     public ImageView getTitleImage() {
         if (mTitleImage == null) {
-            initTitleImage(-1, -1);
+            initTitleImage(INVALIDATE_VALUE, INVALIDATE_VALUE);
         }
         return mTitleImage;
     }
 
     private void initTitleImage(int width, int height) {
         mTitleImage = new ImageView(getContext());
-        int imageWidth = width == -1 ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(width);
-        int imageHeight = height == -1 ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(height);
+        int imageWidth = width == INVALIDATE_VALUE ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(width);
+        int imageHeight = height == INVALIDATE_VALUE ? (int) (getActionBarHeight() * 0.6) : (int) dp2px(height);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(imageWidth, imageHeight);
         params.leftMargin = (int) dp2px(5);
         params.rightMargin = (int) dp2px(5);
@@ -206,8 +202,7 @@ public class GenericToolbar extends Toolbar {
     /**
      * 添加用户自定义的标题
      */
-    public void addCustomTitle(View titleView) {
-        if (titleView == null) throw new NullPointerException();
+    public void addCustomTitle(@NonNull View titleView) {
         mCenterItemContainer.addView(titleView);
     }
 
@@ -219,6 +214,10 @@ public class GenericToolbar extends Toolbar {
     }
 
     public void addLeftText(int tag, CharSequence text, /*sp*/float textSize, OnClickListener listener) {
+        this.addLeftText(tag, text, textSize, DEFAULT_COLOR, listener);
+    }
+
+    public void addLeftText(int tag, CharSequence text, /*sp*/float textSize, @ColorInt int textColor, OnClickListener listener) {
         ensure(tag);
         TextView textView = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -228,6 +227,7 @@ public class GenericToolbar extends Toolbar {
         textView.setGravity(Gravity.CENTER);
         textView.setTextColor(mTextColor);
         textView.setText(text);
+        textView.setTextColor(textColor);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         textView.setOnClickListener(listener);
         mItemViews.put(tag, textView);
@@ -238,19 +238,19 @@ public class GenericToolbar extends Toolbar {
      * 添加左部图标
      */
     public void addLeftIcon(int tag, @DrawableRes int drawableRes, OnClickListener listener) {
-        this.addLeftIcon(tag, drawableRes, -1, -1, listener);
+        this.addLeftIcon(tag, drawableRes, INVALIDATE_VALUE, INVALIDATE_VALUE, listener);
     }
 
     public void addLeftIcon(int tag, @DrawableRes int drawableRes, /*dp*/int width, /*dp*/int height, OnClickListener listener) {
         ensure(tag);
-        int imageWidth = (width == -1) ? (int) (getActionBarHeight() * 0.4) : (int) dp2px(width);
+        int destWidth = (width == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.4) : (int) dp2px(width);
         // 增大触控面积
-        int imageVerticalPadding = (height == -1) ? (int) (getActionBarHeight() * 0.3)
+        int verticalPadding = (height == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.3)
                 : (getActionBarHeight() - (int) dp2px(height)) / 2;
         ImageView imageView = new ImageView(getContext());
-        imageView.setPadding((int) dp2px(5), imageVerticalPadding, (int) dp2px(5), imageVerticalPadding);
+        imageView.setPadding((int) dp2px(5), verticalPadding, (int) dp2px(5), verticalPadding);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                imageWidth + imageView.getPaddingRight() + imageView.getPaddingLeft(),
+                destWidth + imageView.getPaddingRight() + imageView.getPaddingLeft(),
                 LinearLayout.LayoutParams.MATCH_PARENT
         );
         imageView.setLayoutParams(params);
@@ -262,6 +262,26 @@ public class GenericToolbar extends Toolbar {
     }
 
     /**
+     * 添加左部的 View
+     */
+    public void addLeftView(int tag, View view, /*dp*/int width, /*dp*/int height, OnClickListener listener) {
+        ensure(tag);
+        int destWidth = (width == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.4) : (int) dp2px(width);
+        // 这样处理是为了增大触控面积
+        int verticalPadding = (height == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.3)
+                : (getActionBarHeight() - (int) dp2px(height)) / 2;
+        view.setPadding((int) dp2px(5), verticalPadding, (int) dp2px(5), verticalPadding);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                destWidth + view.getPaddingRight() + view.getPaddingLeft(),
+                LinearLayout.LayoutParams.MATCH_PARENT
+        );
+        view.setLayoutParams(params);
+        view.setOnClickListener(listener);
+        mItemViews.put(tag, view);
+        mLeftItemContainer.addView(view);
+    }
+
+    /**
      * 添加右部文本
      */
     public void addRightText(int tag, CharSequence text, OnClickListener listener) {
@@ -269,6 +289,10 @@ public class GenericToolbar extends Toolbar {
     }
 
     public void addRightText(int tag, CharSequence text, /*sp*/float textSize, OnClickListener listener) {
+        this.addRightText(tag, text, textSize, DEFAULT_COLOR, listener);
+    }
+
+    public void addRightText(int tag, CharSequence text, /*sp*/float textSize, @ColorInt int textColor, OnClickListener listener) {
         ensure(tag);
         TextView textView = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -278,6 +302,7 @@ public class GenericToolbar extends Toolbar {
         textView.setGravity(Gravity.CENTER);
         textView.setTextColor(mTextColor);
         textView.setText(text);
+        textView.setTextColor(textColor);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         textView.setOnClickListener(listener);
         mItemViews.put(tag, textView);
@@ -288,19 +313,19 @@ public class GenericToolbar extends Toolbar {
      * 添加右部图标
      */
     public void addRightIcon(int tag, @DrawableRes int drawableRes, OnClickListener listener) {
-        this.addRightIcon(tag, drawableRes, -1, -1, listener);
+        this.addRightIcon(tag, drawableRes, INVALIDATE_VALUE, INVALIDATE_VALUE, listener);
     }
 
     public void addRightIcon(int tag, @DrawableRes int drawableRes, /*dp*/int width, /*dp*/int height, OnClickListener listener) {
         ensure(tag);
-        int imageWidth = (width == -1) ? (int) (getActionBarHeight() * 0.4) : (int) dp2px(width);
+        int destWidth = (width == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.4) : (int) dp2px(width);
         // 这样处理是为了增大触控面积
-        int imageVerticalPadding = (height == -1) ? (int) (getActionBarHeight() * 0.3)
+        int imageVerticalPadding = (height == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.3)
                 : (getActionBarHeight() - (int) dp2px(height)) / 2;
         ImageView imageView = new ImageView(getContext());
         imageView.setPadding((int) dp2px(5), imageVerticalPadding, (int) dp2px(5), imageVerticalPadding);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                imageWidth + imageView.getPaddingRight() + imageView.getPaddingLeft(),
+                destWidth + imageView.getPaddingRight() + imageView.getPaddingLeft(),
                 LinearLayout.LayoutParams.MATCH_PARENT
         );
         imageView.setLayoutParams(params);
@@ -309,6 +334,26 @@ public class GenericToolbar extends Toolbar {
         imageView.setOnClickListener(listener);
         mItemViews.put(tag, imageView);
         mRightItemContainer.addView(imageView);
+    }
+
+    /**
+     * 添加右部的 View
+     */
+    public void addRightView(int tag, View view, /*dp*/int width, /*dp*/int height, OnClickListener listener) {
+        ensure(tag);
+        int destWidth = (width == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.4) : (int) dp2px(width);
+        // 这样处理是为了增大触控面积
+        int verticalPadding = (height == INVALIDATE_VALUE) ? (int) (getActionBarHeight() * 0.3)
+                : (getActionBarHeight() - (int) dp2px(height)) / 2;
+        view.setPadding((int) dp2px(5), verticalPadding, (int) dp2px(5), verticalPadding);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                destWidth + view.getPaddingRight() + view.getPaddingLeft(),
+                LinearLayout.LayoutParams.MATCH_PARENT
+        );
+        view.setLayoutParams(params);
+        view.setOnClickListener(listener);
+        mItemViews.put(tag, view);
+        mRightItemContainer.addView(view);
     }
 
     /**
@@ -474,19 +519,6 @@ public class GenericToolbar extends Toolbar {
         }
 
         /**
-         * 设置文本颜色, 应用于全局
-         */
-        public Builder setTextColor(@ColorInt int color) {
-            mToolbar.setTextColor(color);
-            return this;
-        }
-
-        public Builder setTextColorRes(@ColorRes int colorRes) {
-            mToolbar.setTextColor(ContextCompat.getColor(mContext, colorRes));
-            return this;
-        }
-
-        /**
          * 文本标题
          */
         public Builder addTitleText(CharSequence text) {
@@ -496,6 +528,11 @@ public class GenericToolbar extends Toolbar {
 
         public Builder addTitleText(CharSequence text, float textSize) {
             mToolbar.setTitle(text, textSize);
+            return this;
+        }
+
+        public Builder addTitleText(CharSequence text, float textSize, @ColorInt int textColor) {
+            mToolbar.setTitle(text, textSize, textColor);
             return this;
         }
 
@@ -566,6 +603,11 @@ public class GenericToolbar extends Toolbar {
             return this;
         }
 
+        public Builder addLeftText(int tag, CharSequence text,/*sp*/float textSize, @ColorInt int textColor, OnClickListener listener) {
+            mToolbar.addLeftText(tag, text, textSize, textColor, listener);
+            return this;
+        }
+
         /**
          * 右部图标
          */
@@ -589,6 +631,11 @@ public class GenericToolbar extends Toolbar {
 
         public Builder addRightText(int tag, CharSequence text, /*sp*/float textSize, OnClickListener listener) {
             mToolbar.addRightText(tag, text, textSize, listener);
+            return this;
+        }
+
+        public Builder addRightText(int tag, CharSequence text,/*sp*/float textSize, @ColorInt int textColor, OnClickListener listener) {
+            mToolbar.addRightText(tag, text, textSize, textColor, listener);
             return this;
         }
 

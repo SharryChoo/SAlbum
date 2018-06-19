@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.mvp.view;
+package com.frank.lib_picturepicker.picturepicker.ui;
 
 import android.app.Dialog;
 import android.content.Context;

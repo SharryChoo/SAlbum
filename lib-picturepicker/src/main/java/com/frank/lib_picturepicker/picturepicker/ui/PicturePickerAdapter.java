@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.mvp.view;
+package com.frank.lib_picturepicker.picturepicker.ui;
 
 import android.content.Context;
 import android.os.Handler;
@@ -6,7 +6,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +14,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
+import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
+import com.frank.lib_picturepicker.widget.PickerIndicatorView;
 
 import java.util.List;
 
@@ -29,10 +30,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     private Context mContext;
     private List<String> mUris;
     private AdapterInteraction mInteraction;
-    private int mSpanCount;
-    private int mIndicatorSolidColor;
-    private int mIndicatorBorderCheckedColor;
-    private int mIndicatorBorderUncheckedColor;
+    private PicturePickerConfig mConfig;
 
     // 用于延时更新角标
     private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
@@ -52,20 +50,14 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         void onIndicatorDeselect(String imagePath);
 
         void onPictureClick(ImageView imageView, String uri, int position);
+
     }
 
-    public PicturePickerAdapter(Context context,
-                                List<String> uris, int spanCount,
-                                int indicatorSolidColor,
-                                int indicatorBorderCheckedColor,
-                                int indicatorBorderUncheckedColor) {
+    public PicturePickerAdapter(Context context, List<String> uris, PicturePickerConfig mConfig) {
         this.mInteraction = (AdapterInteraction) context;
         this.mContext = context;
         this.mUris = uris;
-        this.mSpanCount = spanCount;
-        this.mIndicatorSolidColor = indicatorSolidColor;
-        this.mIndicatorBorderCheckedColor = indicatorBorderCheckedColor;
-        this.mIndicatorBorderUncheckedColor = indicatorBorderUncheckedColor;
+        this.mConfig = mConfig;
     }
 
     @NonNull
@@ -74,7 +66,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
                 R.layout.recycle_item_activity_picture_picker, parent, false));
         // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
-        int itemSize = parent.getMeasuredWidth() / mSpanCount;
+        int itemSize = parent.getMeasuredWidth() / mConfig.spanCount;
         ViewGroup.LayoutParams itemParams = holder.itemView.getLayoutParams();
         itemParams.height = itemSize;
         holder.itemView.setLayoutParams(itemParams);
@@ -106,7 +98,6 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         holder.ivPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("TAG", mUris.indexOf(uri) + uri);
                 mInteraction.onPictureClick((ImageView) v, uri, mUris.indexOf(uri));
             }
         });
@@ -153,8 +144,9 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
             super(itemView);
             ivPicture = itemView.findViewById(R.id.iv_picture);
             checkIndicator = itemView.findViewById(R.id.check_indicator);
-            checkIndicator.setSolidColor(mIndicatorSolidColor);
-            checkIndicator.setBorderColor(mIndicatorBorderCheckedColor, mIndicatorBorderUncheckedColor);
+            checkIndicator.setTextColor(mConfig.indicatorTextColor);
+            checkIndicator.setSolidColor(mConfig.indicatorSolidColor);
+            checkIndicator.setBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor);
         }
     }
 

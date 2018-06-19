@@ -8,6 +8,7 @@ import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import com.frank.lib_picturepicker.picturepicker.mvp.model.PicturePickerModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,21 +29,19 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     }
 
     /**
-     * 添加用户跳转到 View 时携带的图片地址集合
+     * 配置用户选中的图片 URI
      *
-     * @param userPicked
+     * @param userPicked 用户已经选中的图片
      */
     @Override
-    public void setupUserPicked(List<String> userPicked) {
-        if (userPicked != null && !userPicked.isEmpty()) {
-            for (String path : userPicked) mModel.addPickedPicture(path);
-        }
+    public void setupUserPickedSet(ArrayList<String> userPicked) {
+        mModel.setUserPickedSet(userPicked == null ? new ArrayList<String>() : userPicked);
+        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
     }
 
     /**
      * 配置阈值
-     *
-     * @param threshold
      */
     @Override
     public void setupThreshold(int threshold) {
@@ -51,12 +50,10 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
 
     /**
      * 初始化 Model 的数据
-     *
-     * @param context
      */
     @Override
     public void initData(Context context) {
-        mModel.init(context, new PicturePickerContract.ModelInitializeCallback() {
+        mModel.getSystemPictures(context, new PicturePickerContract.ModelInitializeCallback() {
             @Override
             public void onComplete(List<PictureFolder> pictureFolders) {
                 mMainLooperHandler.post(new Runnable() {
@@ -65,9 +62,9 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                         // 展示第一个图片文件夹
                         PictureFolder allPictureFolder = mModel.getPictureFolderAt(0);
                         if (mView == null) return;
-                        mView.displaySelectedFolder(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
-                        mView.updateTextContent(mModel.getPickedPictures().size(), mModel.getThreshold());
-                        mView.updateTextViewVisibility(mModel.getPickedPictures().size() > 0);
+                        mView.displayPictures(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
+                        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+                        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
                     }
                 });
             }
@@ -91,17 +88,17 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
      * @param position
      */
     @Override
-    public void fetchPicturePathsAt(int position) {
+    public void fetchDisplayPictures(int position) {
         PictureFolder target = mModel.getPictureFolderAt(position);
         if (mView == null) return;
-        mView.displaySelectedFolder(target.getFolderName(), target.getImagePaths());
+        mView.displayPictures(target.getFolderName(), target.getImagePaths());
     }
 
     /**
      * 获取所有图片文件夹
      */
     @Override
-    public List<PictureFolder> fetchAllPictureFolders() {
+    public ArrayList<PictureFolder> fetchAllPictureFolders() {
         return mModel.getAllPictureFolders();
     }
 
@@ -111,37 +108,33 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
      * @return
      */
     @Override
-    public List<String> getPickedPictures() {
-        return mModel.getPickedPictures();
+    public ArrayList<String> fetchUserPickedSet() {
+        return mModel.getUserPickedSet();
     }
 
     /**
      * 处理图片被选中了
-     *
-     * @param imagePath
      */
     @Override
-    public boolean performPicturePicked(String imagePath) {
-        if (getPickedPictures().size() == mModel.getThreshold()) {
+    public boolean performPicturePicked(String uri) {
+        if (fetchUserPickedSet().size() == mModel.getThreshold()) {
             mView.showMsg("最多只可选择 " + mModel.getThreshold() + " 张图片");
             return false;
         }
-        mModel.addPickedPicture(imagePath);
-        mView.updateTextContent(mModel.getPickedPictures().size(), mModel.getThreshold());
-        mView.updateTextViewVisibility(mModel.getPickedPictures().size() > 0);
+        mModel.addPickedPicture(uri);
+        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
         return true;
     }
 
     /**
      * 处理图片被移除了
-     *
-     * @param imagePath
      */
     @Override
-    public void performPictureRemoved(String imagePath) {
-        mModel.removePickedPicture(imagePath);
-        mView.updateTextContent(mModel.getPickedPictures().size(), mModel.getThreshold());
-        mView.updateTextViewVisibility(mModel.getPickedPictures().size() > 0);
+    public void performPictureRemoved(String uri) {
+        mModel.removePickedPicture(uri);
+        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
     }
 
 

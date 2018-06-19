@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.mvp.view;
+package com.frank.lib_picturepicker.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -113,13 +113,6 @@ public class PickerIndicatorView extends AppCompatTextView {
      */
     public void setTextSize(int dip) {
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, dip);
-    }
-
-    /**
-     * 动态配置字体的颜色
-     */
-    public void setTextColor(int color) {
-        setTextColor(color);
     }
 
     @Override

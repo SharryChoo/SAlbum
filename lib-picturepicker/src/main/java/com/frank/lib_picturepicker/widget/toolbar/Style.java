@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.toolbar;
+package com.frank.lib_picturepicker.widget.toolbar;
 
 /**
  * Created by FrankChoo on 2017/10/10.
