@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initTitle() {
         GenericToolbar.Builder(this)
-                .setBackgroundColorRes(R.color.colorAccent)
+                .setBackgroundColorRes(R.color.colorPrimary)
                 .addTitleText("相册")
                 .apply()
     }
@@ -30,9 +30,10 @@ class MainActivity : AppCompatActivity() {
             PicturePickerManager.with(this)
                     .setThreshold(etAlbumThreshold.text.toString().toInt())
                     .setSpanCount(etSpanCount.text.toString().toInt())
-                    .isShowScrollBehavior(true)
-                    .setIndicatorSolidColorRes(R.color.colorAccent)
-                    .setIndicatorBorderColorRes(R.color.colorAccent, android.R.color.white)
+                    .isShowScrollBehavior(checkbox.isChecked)
+                    .setToolbarBackgroundColorRes(R.color.colorPrimary)
+                    .setIndicatorSolidColorRes(R.color.colorPrimary)
+                    .setIndicatorBorderColorRes(R.color.colorPrimary, android.R.color.white)
                     .start {
                         it.forEach {
                             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
