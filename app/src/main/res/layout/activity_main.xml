@@ -1,16 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/tvText"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="相册"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/etAlbumThreshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="Threshold"
+            android:inputType="number"
+            android:padding="10dp"
+            android:text="6"
+            android:textColor="@color/colorAccent"
+            android:textSize="15dp" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/etSpanCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="SpanCount"
+            android:inputType="number"
+            android:padding="10dp"
+            android:text="3"
+            android:textColor="@color/colorAccent"
+            android:textSize="15dp" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/btnLauncher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/activity_main_btn"
+        android:gravity="center"
+        android:text="Launcher"
+        android:textAllCaps="false"
+        android:textColor="#fff"
         android:textSize="20dp" />
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

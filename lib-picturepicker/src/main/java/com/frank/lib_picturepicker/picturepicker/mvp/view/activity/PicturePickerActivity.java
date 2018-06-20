@@ -3,6 +3,7 @@ package com.frank.lib_picturepicker.picturepicker.mvp.view.activity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -89,6 +90,14 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         AppBarHelper.with(this).setStatusBarStyle(Style.TRANSPARENT).apply();
         // 初始化视图
         mToolbar = findViewById(R.id.toolbar);
+        // 是否开启滚动动画
+        if (mConfig.isShowScrollBehavior) {
+            AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
+            params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                    | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP);
+            mToolbar.setLayoutParams(params);
+        }
         mToolbar.setAdjustToTransparentStatusBar(true);
         // 设置背景
         if (mConfig.toolbarBkgColor != PicturePickerConfig.INVALIDATE_VALUE)
@@ -117,6 +126,10 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         mTvPreview.setOnClickListener(this);
         // 悬浮按钮
         FloatingActionButton fab = findViewById(R.id.fab);
+        if (!mConfig.isShowScrollBehavior) {
+            fab.setVisibility(View.GONE);
+            return;
+        }
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
         params.setBehavior(new PicturePickerFabBehavior());
         fab.setLayoutParams(params);

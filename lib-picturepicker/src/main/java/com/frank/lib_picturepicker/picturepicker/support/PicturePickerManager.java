@@ -158,6 +158,12 @@ public class PicturePickerManager {
         return this;
     }
 
+    public PicturePickerManager isShowScrollBehavior(boolean isShowScrollBehavior) {
+        mConfig.isShowScrollBehavior = isShowScrollBehavior;
+        return this;
+    }
+
+
     /**
      * 发起请求
      *

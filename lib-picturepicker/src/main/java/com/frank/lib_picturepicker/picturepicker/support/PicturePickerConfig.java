@@ -31,6 +31,9 @@ public class PicturePickerConfig implements Parcelable {
     public int indicatorBorderCheckedColor = indicatorSolidColor;// 指示器边框选中的颜色
     public int indicatorBorderUncheckedColor = Color.WHITE;// 指示器边框未被选中的颜色
 
+    // 是否展示滚动动画
+    public boolean isShowScrollBehavior = false;
+
     public PicturePickerConfig() {
     }
 
@@ -44,6 +47,7 @@ public class PicturePickerConfig implements Parcelable {
         indicatorSolidColor = in.readInt();
         indicatorBorderCheckedColor = in.readInt();
         indicatorBorderUncheckedColor = in.readInt();
+        isShowScrollBehavior = in.readByte() != 0;
     }
 
     @Override
@@ -57,6 +61,7 @@ public class PicturePickerConfig implements Parcelable {
         dest.writeInt(indicatorSolidColor);
         dest.writeInt(indicatorBorderCheckedColor);
         dest.writeInt(indicatorBorderUncheckedColor);
+        dest.writeByte((byte) (isShowScrollBehavior ? 1 : 0));
     }
 
     @Override

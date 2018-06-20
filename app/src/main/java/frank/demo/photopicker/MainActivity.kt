@@ -2,8 +2,10 @@ package frank.demo.photopicker
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.text.TextUtils
 import android.widget.Toast
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerManager
+import com.frank.lib_picturepicker.toolbar.GenericToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -11,10 +13,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        tvText.setOnClickListener {
+        initTitle()
+        initViews()
+    }
+
+    private fun initTitle() {
+        GenericToolbar.Builder(this)
+                .setBackgroundColorRes(R.color.colorAccent)
+                .addTitleText("相册")
+                .apply()
+    }
+
+    private fun initViews() {
+        btnLauncher.setOnClickListener {
+            if (TextUtils.isEmpty(etAlbumThreshold.text) || TextUtils.isEmpty(etSpanCount.text)) return@setOnClickListener
             PicturePickerManager.with(this)
-                    .setThreshold(1)
-                    .setSpanCount(3)
+                    .setThreshold(etAlbumThreshold.text.toString().toInt())
+                    .setSpanCount(etSpanCount.text.toString().toInt())
+                    .isShowScrollBehavior(true)
                     .setIndicatorSolidColorRes(R.color.colorAccent)
                     .setIndicatorBorderColorRes(R.color.colorAccent, android.R.color.white)
                     .start {
