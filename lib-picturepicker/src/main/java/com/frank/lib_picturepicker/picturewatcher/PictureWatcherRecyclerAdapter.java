@@ -33,9 +33,12 @@ public class PictureWatcherRecyclerAdapter extends RecyclerView.Adapter<PictureW
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.recycle_item_activity_picture_watcher, parent, false);
-        return new ViewHolder(view);
+        ImageView iv = new ImageView(parent.getContext());
+        int size = parent.getHeight();
+        iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        iv.setLayoutParams(new ViewGroup.LayoutParams(size, size));
+        iv.setPadding(size/20, size/20, size/20, size/20);
+        return new ViewHolder(iv);
     }
 
     @Override
@@ -57,13 +60,11 @@ public class PictureWatcherRecyclerAdapter extends RecyclerView.Adapter<PictureW
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        final FrameLayout flContainer;
         final ImageView ivPicture;
 
         ViewHolder(View itemView) {
             super(itemView);
-            this.flContainer = itemView.findViewById(R.id.container);
-            this.ivPicture = itemView.findViewById(R.id.iv_picture);
+            this.ivPicture = (ImageView) itemView;
         }
     }
 

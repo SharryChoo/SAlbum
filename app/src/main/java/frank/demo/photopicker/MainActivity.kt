@@ -1,11 +1,8 @@
 package frank.demo.photopicker
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.widget.ImageView
 import android.widget.Toast
-import com.bumptech.glide.Glide
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerManager
 import kotlinx.android.synthetic.main.activity_main.*
 

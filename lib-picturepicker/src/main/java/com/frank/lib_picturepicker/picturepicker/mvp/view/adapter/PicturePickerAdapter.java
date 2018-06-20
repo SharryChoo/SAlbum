@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker;
+package com.frank.lib_picturepicker.picturepicker.mvp.view.adapter;
 
 import android.content.Context;
 import android.os.Handler;
@@ -14,8 +14,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.widget.CheckedIndicatorView;
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
-import com.frank.lib_picturepicker.picturepicker.widget.PickerIndicatorView;
 
 import java.util.List;
 
@@ -43,21 +43,21 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
     public interface AdapterInteraction {
 
-        List<String> getPickedPictures();
+        List<String> onUserPickedSet();
 
-        boolean onIndicatorSelected(String imagePath);
+        boolean onPictureChecked(String uri);
 
-        void onIndicatorDeselect(String imagePath);
+        void onPictureUnchecked(String uri);
 
-        void onPictureClick(ImageView imageView, String uri, int position);
+        void onPictureClicked(ImageView imageView, String uri, int position);
 
     }
 
-    public PicturePickerAdapter(Context context, List<String> uris, PicturePickerConfig mConfig) {
+    public PicturePickerAdapter(Context context, List<String> uris, PicturePickerConfig config) {
         this.mInteraction = (AdapterInteraction) context;
         this.mContext = context;
         this.mUris = uris;
-        this.mConfig = mConfig;
+        this.mConfig = config;
     }
 
     @NonNull
@@ -91,33 +91,33 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         final String uri = mUris.get(position);
         Glide.with(mContext).load(uri).into(holder.ivPicture);
         // 判断当前 uri 是否被选中了
-        final int index = mInteraction.getPickedPictures().indexOf(uri);
+        final int index = mInteraction.onUserPickedSet().indexOf(uri);
         // 设置图片的共享元素属性
         ViewCompat.setTransitionName(holder.ivPicture, uri);
         // 设置点击监听
         holder.ivPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mInteraction.onPictureClick((ImageView) v, uri, mUris.indexOf(uri));
+                mInteraction.onPictureClicked((ImageView) v, uri, mUris.indexOf(uri));
             }
         });
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
-        holder.checkIndicator.setText(String.valueOf(mInteraction.getPickedPictures().indexOf(uri) + 1));
+        holder.checkIndicator.setText(String.valueOf(mInteraction.onUserPickedSet().indexOf(uri) + 1));
         // 设置点击监听器
         holder.checkIndicator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (holder.checkIndicator.isChecked()) {// Checked-> Unchecked
                     // 移除选中数据与状态
-                    mInteraction.onIndicatorDeselect(uri);
+                    mInteraction.onPictureUnchecked(uri);
                     holder.checkIndicator.setChecked(false);
                     // 需要延时的更新索引角标
                     notifyCheckedIndicatorChanged();
                 } else {// Unchecked -> Checked
                     // 判断是否达到选择上限
-                    holder.checkIndicator.setChecked(mInteraction.onIndicatorSelected(uri));
+                    holder.checkIndicator.setChecked(mInteraction.onPictureChecked(uri));
                     // 设置文本
-                    holder.checkIndicator.setText(String.valueOf(mInteraction.getPickedPictures().size()));
+                    holder.checkIndicator.setText(String.valueOf(mInteraction.onUserPickedSet().size()));
                 }
             }
         });
@@ -138,7 +138,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     class ViewHolder extends RecyclerView.ViewHolder {
 
         final ImageView ivPicture;
-        final PickerIndicatorView checkIndicator;
+        final CheckedIndicatorView checkIndicator;
 
         ViewHolder(View itemView) {
             super(itemView);

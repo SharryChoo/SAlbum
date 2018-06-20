@@ -1,15 +1,13 @@
-package com.frank.lib_picturepicker.picturepicker.widget;
+package com.frank.lib_picturepicker.picturepicker.mvp.view.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.AttributeSet;
 import android.view.View;
 
 /**
@@ -22,10 +20,6 @@ public class PicturePickerFabBehavior extends CoordinatorLayout.Behavior<Floatin
 
     private AnimatorSet mAppearAnimatorSet;
     private AnimatorSet mDismissAnimatorSet;
-
-    public PicturePickerFabBehavior(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
 
     /**
      * 设置依赖的控件

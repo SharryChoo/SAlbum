@@ -22,9 +22,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.frank.lib_picturepicker.R;
-import com.frank.lib_picturepicker.picturepicker.widget.PickerIndicatorView;
 import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherConfig;
 import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherFragment;
+import com.frank.lib_picturepicker.picturewatcher.widget.CheckedIndicatorView;
 import com.frank.lib_picturepicker.picturewatcher.widget.DraggableViewPager;
 import com.frank.lib_picturepicker.picturewatcher.widget.photoview.OnPhotoTapListener;
 import com.frank.lib_picturepicker.picturewatcher.widget.photoview.PhotoView;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 /**
  * Created by FrankChoo on 2017/12/28.
  * Email: frankchoochina@gmail.com
- * Version:  1.0
+ * Version:  1.2
  * Description: 图片查看器的 Activity, 主题设置为背景透明效果更佳
  */
 @SuppressLint("NewApi")
@@ -52,10 +52,10 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     // 数据的集合
     private PictureWatcherConfig mConfig;
-    private ArrayList<String> mPictureUris;
-    private ArrayList<String> mUserPickedSet;
-    private ArrayList<PhotoView> mPhotoViews = new ArrayList<>();
-    private PictureWatcherAdapter mAdapter;
+    private ArrayList<String> mPictureUris;// 展示的图片集合
+    private ArrayList<String> mUserPickedSet;// 用户选中的图片集合, 配合相册使用
+    private ArrayList<PhotoView> mPhotoViews = new ArrayList<>();// 图片对象
+    private PictureWatcherAdapter mAdapter;// ViewPager 的 Adapter
 
     // SharedElement
     private boolean mIsSharedElement = false;// 开启共享元素
@@ -64,11 +64,11 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     // 视图
     private DraggableViewPager mViewPager;
-    private PickerIndicatorView mCheckIndicator;
+    private CheckedIndicatorView mCheckIndicator;
     private TextView mTvTitle;
     private RecyclerView mRecyclerView;
 
-    // 当前战士的 位置 和 URI
+    // 当前展示的 位置 和 URI
     private int mCurPosition;
     private String mCurUri;
     private PhotoView mCurView;
@@ -93,7 +93,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     protected void parseIntent() {
         mConfig = getIntent().getParcelableExtra(EXTRA_CONFIG);
         // 获取需要展示图片的 URI 集合
-        mPictureUris = mConfig.userPickedSet == null ?
+        mPictureUris = mConfig.pictureUris == null ?
                 new ArrayList<String>() : mConfig.pictureUris;
         // 获取已经选中的图片
         mUserPickedSet = mConfig.userPickedSet;
@@ -122,10 +122,9 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         toolbar.setTitleGravity(Gravity.LEFT);
         mTvTitle = toolbar.getTitleText();
         mTvTitle.setTextSize(20);
-        updateTitleIndicator(mCurPosition);
         // 图片是否选中的指示器
         if (mUserPickedSet == null) return;
-        mCheckIndicator = new PickerIndicatorView(this);
+        mCheckIndicator = new CheckedIndicatorView(this);
         mCheckIndicator.setChecked(false);
         mCheckIndicator.setBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor);
         mCheckIndicator.setSolidColor(mConfig.indicatorSolidColor);
@@ -176,6 +175,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     private void initData() {
+        // 填充数据
         for (String uri : mPictureUris) {
             PhotoView photoView = createPhotoView();
             mPhotoViews.add(photoView);
@@ -186,32 +186,24 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             }
         }
         mAdapter.notifyDataSetChanged();
-        // 加载第一张图片
-        if (mCurPosition == 0) {
-            mCurView = mPhotoViews.get(mCurPosition);
-            Glide.with(this).load(mCurUri).into(mCurView);
-            mViewPager.bindCaptureView(mCurView);
-            mCheckIndicator.setText(String.valueOf(mUserPickedSet.indexOf(mCurUri) + 1));
-            updateTitleCheckIndicator();
-        } else {
-            mViewPager.setCurrentItem(mCurPosition, false);
-        }
+        // 手动加载第一张需要展示的图片
+        onPagerChanged(mCurPosition);
+        mViewPager.bindCaptureView(mCurView);
+        mViewPager.setCurrentItem(mCurPosition, false);
     }
 
     @Override
     public View onPagerChanged(int position) {
         // 更新当前页面的 URI
+        mCurPosition = position;
         mCurUri = mPictureUris.get(position);
         mCurView = mPhotoViews.get(position);
         // 更新当前页面共享元素的 key
         ViewCompat.setTransitionName(mPhotoViews.get(mSharedPosition),
                 position == mSharedPosition ? mSharedKey : "");
-        // 更新 Title 选中标识
-        updateTitleCheckIndicator();
-        // 更新标题角标索引
-        updateTitleIndicator(position);
-        // 加载图片
-        displayCurrentPhotoView(position);
+        updateToolbarIndicatorCheckedStatus();// 更新 Title 选中标识
+        updateToolbarIndicatorTextContent(); // 更新标题角标索引
+        displayCurrentPhotoView();// 加载图片
         return mCurView;
     }
 
@@ -265,44 +257,48 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     /**
-     * 获取底部索引指示的文本
+     * 更新 Toolbar 上标题文本的索引
      */
-    private void updateTitleIndicator(int position) {
-        int nowPager = position + 1;
+    private void updateToolbarIndicatorTextContent() {
+        int nowPager = mCurPosition + 1;
         int AllPager = mPictureUris.size();
         mTvTitle.setText(nowPager + "/" + AllPager);
     }
 
     /**
-     * 显示图片当前位置的图片
+     * 更新 Toolbar 上的选中指示器的状态
      */
-    private void displayCurrentPhotoView(int position) {
-        // 加载当前的位置的图片
-        PhotoView curView = mPhotoViews.get(position);
-        if (curView != null && curView.getDrawable() == null) {
-            Glide.with(this).load(mPictureUris.get(position)).into(curView);
-        }
-        // 加载前一个
-        int beforeIndex = position - 1;
-        PhotoView beforeView = beforeIndex >= 0 ? mPhotoViews.get(beforeIndex) : null;
-        if (beforeView != null && beforeView.getDrawable() == null) {
-            Glide.with(this).load(mPictureUris.get(beforeIndex)).into(beforeView);
-        }
-        // 加载后一个
-        int afterIndex = position + 1;
-        PhotoView afterView = afterIndex < mPictureUris.size() ? mPhotoViews.get(afterIndex) : null;
-        if (afterView != null && afterView.getDrawable() == null) {
-            Glide.with(this).load(mPictureUris.get(afterIndex)).into(afterView);
-        }
-    }
-
-    private void updateTitleCheckIndicator() {
+    private void updateToolbarIndicatorCheckedStatus() {
+        if (mUserPickedSet == null) return;
         // 更新 Title 选中标识
         if (mUserPickedSet.indexOf(mCurUri) != -1) {
             mCheckIndicator.setChecked(true);
             mCheckIndicator.setText(String.valueOf(mUserPickedSet.indexOf(mCurUri) + 1));
         } else {
             mCheckIndicator.setChecked(false);
+        }
+    }
+
+    /**
+     * 显示图片当前位置的图片
+     */
+    private void displayCurrentPhotoView() {
+        // 加载当前的位置的图片
+        PhotoView curView = mPhotoViews.get(mCurPosition);
+        if (curView != null && curView.getDrawable() == null) {
+            Glide.with(this).load(mPictureUris.get(mCurPosition)).into(curView);
+        }
+        // 加载前一个
+        int beforeIndex = mCurPosition - 1;
+        PhotoView beforeView = beforeIndex >= 0 ? mPhotoViews.get(beforeIndex) : null;
+        if (beforeView != null && beforeView.getDrawable() == null) {
+            Glide.with(this).load(mPictureUris.get(beforeIndex)).into(beforeView);
+        }
+        // 加载后一个
+        int afterIndex = mCurPosition + 1;
+        PhotoView afterView = afterIndex < mPictureUris.size() ? mPhotoViews.get(afterIndex) : null;
+        if (afterView != null && afterView.getDrawable() == null) {
+            Glide.with(this).load(mPictureUris.get(afterIndex)).into(afterView);
         }
     }
 
@@ -322,4 +318,3 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         return photoView;
     }
 }
-

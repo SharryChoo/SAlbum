@@ -1,7 +1,8 @@
-package com.frank.lib_picturepicker.picturepicker;
+package com.frank.lib_picturepicker.picturepicker.mvp.view.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -14,10 +15,10 @@ import android.widget.Toast;
 import com.frank.lib_picturepicker.R;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import com.frank.lib_picturepicker.picturepicker.mvp.presenter.PicturePickerPresenter;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.adapter.PicturePickerAdapter;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.widget.PicturePickerFabBehavior;
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
 import com.frank.lib_picturepicker.picturepicker.support.PicturePickerFragment;
-import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherCallback;
-import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherManager;
 import com.frank.lib_picturepicker.toolbar.AppBarHelper;
 import com.frank.lib_picturepicker.toolbar.GenericToolbar;
 import com.frank.lib_picturepicker.toolbar.Style;
@@ -59,10 +60,6 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private TextView mTvSelectedFolderName;
     private TextView mTvPreview;
     private TextView mTvToolbarEnsure;
-    private FloatingActionButton mFab;
-
-    // 选择图片文件夹的弹窗
-    private PicturePickerDialog mDialog;
 
     // 用于保存数据的相关集合
     private ArrayList<String> mCurDisplayPaths = new ArrayList<>();// 用户选中的文件夹下所有图片的集合
@@ -117,10 +114,13 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         mTvSelectedFolderName = findViewById(R.id.tv_folder_name);
         mTvPreview = findViewById(R.id.tv_preview);
         mTvPreview.setOnClickListener(this);
-        // 悬浮菜单
-        mFab = findViewById(R.id.fab);
-        mFab.setBackgroundColor(mConfig.toolbarBkgColor);
-        mFab.setOnClickListener(this);
+        // 悬浮按钮
+        FloatingActionButton fab = findViewById(R.id.fab);
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+        params.setBehavior(new PicturePickerFabBehavior());
+        fab.setLayoutParams(params);
+        fab.setBackgroundColor(mConfig.toolbarBkgColor);
+        fab.setOnClickListener(this);
     }
 
     protected void initData() {
@@ -154,79 +154,48 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
+    public void notifyUserPickedSetChanged() {
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    @Override
     public void showMsg(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public List<String> getPickedPictures() {
+    public List<String> onUserPickedSet() {
         return mPresenter.fetchUserPickedSet();
     }
 
     @Override
-    public boolean onIndicatorSelected(String uri) {
-        return mPresenter.performPicturePicked(uri);
+    public boolean onPictureChecked(String uri) {
+        return mPresenter.performPictureChecked(uri);
     }
 
     @Override
-    public void onIndicatorDeselect(String uri) {
-        mPresenter.performPictureRemoved(uri);
+    public void onPictureUnchecked(String uri) {
+        mPresenter.performPictureUnchecked(uri);
     }
 
     @Override
-    public void onPictureClick(ImageView imageView, String uri, int position) {
-        PictureWatcherManager.with(this)
-                .setThreshold(mConfig.threshold)
-                .setIndicatorTextColor(mConfig.indicatorTextColor)
-                .setIndicatorSolidColor(mConfig.indicatorSolidColor)
-                .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
-                .setPictureUris(mCurDisplayPaths, position)
-                .setUserPickedSet(mPresenter.fetchUserPickedSet())
-                .setSharedElement(imageView)
-                .start(new PictureWatcherCallback() {
-                    @Override
-                    public void onResult(ArrayList<String> userPickedSet) {
-                        mPresenter.setupUserPickedSet(userPickedSet);
-                        mRecyclerView.getAdapter().notifyDataSetChanged();
-                    }
-                });
+    public void onPictureClicked(ImageView imageView, String uri, int position) {
+        mPresenter.performPictureClicked(imageView, uri, position, mConfig, mCurDisplayPaths);
     }
 
     @Override
     public void onClick(View v) {
-        if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
+        if (v.getId() == R.id.ll_bottom_menu) {// 底部菜单按钮
+            mPresenter.performBottomMenuClicked(this);
+        } else if (v.getId() == R.id.tv_preview) {// 预览按钮
+            mPresenter.performPreviewClicked(this, mConfig);
+        } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
             Intent intent = new Intent();
             intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPickedSet());
             setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
             finish();
-        } else if (v.getId() == R.id.ll_bottom_menu) {
-            if (mDialog == null) {
-                mDialog = new PicturePickerDialog(this, mPresenter.fetchAllPictureFolders())
-                        .setOnItemClickedListener(new PicturePickerDialog.OnItemClickedListener() {
-                            @Override
-                            public void onDialogItemClicked(int position) {
-                                mPresenter.fetchDisplayPictures(position);
-                            }
-                        });
-            }
-            mDialog.show();
-        } else if (v.getId() == R.id.tv_preview) {// 预览按钮
-            PictureWatcherManager.with(this)
-                    .setThreshold(mConfig.threshold)
-                    .setIndicatorTextColor(mConfig.indicatorTextColor)
-                    .setIndicatorSolidColor(mConfig.indicatorSolidColor)
-                    .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
-                    .setPictureUris(mPresenter.fetchUserPickedSet(), 0)
-                    .setUserPickedSet(mPresenter.fetchUserPickedSet())
-                    .start(new PictureWatcherCallback() {
-                        @Override
-                        public void onResult(ArrayList<String> userPickedSet) {
-                            mPresenter.setupUserPickedSet(userPickedSet);
-                            mRecyclerView.getAdapter().notifyDataSetChanged();
-                        }
-                    });
         }
     }
 

@@ -46,7 +46,7 @@ public class PictureWatcherFragment extends Fragment {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
-    private PictureWatcherCallback mCallback;
+    private PictureWatcherCallback mWatcherCallback;
     private PermissionsCallback mPermissionsCallback;
 
     /**
@@ -66,13 +66,13 @@ public class PictureWatcherFragment extends Fragment {
      * 设置图片选择回调
      */
     public void setPickerCallback(PictureWatcherCallback callback) {
-        this.mCallback = callback;
+        this.mWatcherCallback = callback;
     }
 
     /**
      * 设置权限请求接口的回调
      */
-    public void verifyPermission(PermissionsCallback callback) {
+    public void verifyPermission(@NonNull PermissionsCallback callback) {
         mPermissionsCallback = callback;
         if (isMarshmallow() && !isAllGranted()) {
             requestPermissions(mPermissions, REQUEST_CODE_PERMISSIONS);
@@ -97,10 +97,10 @@ public class PictureWatcherFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_PICKED && data != null && mCallback != null) {
+        if (requestCode == REQUEST_CODE_PICKED && data != null && mWatcherCallback != null) {
             ArrayList<String> paths = data.getStringArrayListExtra(RESULT_EXTRA_PICKED_PICTURES);
             if (paths != null) {
-                mCallback.onResult(paths);
+                mWatcherCallback.onResult(paths);
             }
         } else if (requestCode == REQUEST_CODE_SETTING) {
             mPermissionsCallback.onResult(isAllGranted());

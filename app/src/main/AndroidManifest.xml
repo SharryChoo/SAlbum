@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.frank.lib_picturepicker.picturepicker.PicturePickerActivity" />
+        <activity android:name="com.frank.lib_picturepicker.picturepicker.mvp.view.activity.PicturePickerActivity" />
         <activity
             android:name="com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity"
             android:theme="@style/TransparentTheme" />

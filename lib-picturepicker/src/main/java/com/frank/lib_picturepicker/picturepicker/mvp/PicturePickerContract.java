@@ -2,8 +2,10 @@ package com.frank.lib_picturepicker.picturepicker.mvp;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.view.View;
 
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
+import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +30,6 @@ public interface PicturePickerContract {
 
         /**
          * 展示消息通知
-         *
-         * @param msg
          */
         void showMsg(String msg);
 
@@ -42,6 +42,11 @@ public interface PicturePickerContract {
          * 更新文本的可见性(选中图片大于 0 时, 即为可见)
          */
         void updateTextViewVisibility(boolean isVisible);
+
+        /**
+         * 通知选中的图片集合变更了
+         */
+        void notifyUserPickedSetChanged();
     }
 
     interface IPresenter {
@@ -88,13 +93,27 @@ public interface PicturePickerContract {
         /**
          * 处理图片被选中了
          */
-        boolean performPicturePicked(String imagePath);
+        boolean performPictureChecked(String imagePath);
 
         /**
          * 处理图片被移除了
          */
-        void performPictureRemoved(String imagePath);
+        void performPictureUnchecked(String imagePath);
 
+        /**
+         * 处理图片被点击了
+         */
+        void performPictureClicked(View sharedElement, String uri, int position, PicturePickerConfig config, ArrayList<String> mCurDisplayPaths);
+
+        /**
+         * 处理预览按钮被点击了
+         */
+        void performPreviewClicked(Context context, PicturePickerConfig mConfig);
+
+        /**
+         * 处理底部菜单被点击了
+         */
+        void performBottomMenuClicked(Context context);
     }
 
     interface IModel {
@@ -131,8 +150,6 @@ public interface PicturePickerContract {
 
         /**
          * 获取用户选中的图片
-         *
-         * @return
          */
         ArrayList<String> getUserPickedSet();
 

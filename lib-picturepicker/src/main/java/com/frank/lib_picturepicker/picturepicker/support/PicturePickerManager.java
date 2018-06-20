@@ -10,7 +10,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 
-import com.frank.lib_picturepicker.picturepicker.PicturePickerActivity;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.activity.PicturePickerActivity;
 
 import java.util.ArrayList;
 

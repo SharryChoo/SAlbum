@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 
-import com.frank.lib_picturepicker.picturepicker.support.PicturePickerManager;
 import com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ import static com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity.
  */
 public class PictureWatcherManager {
 
-    public static final String TAG = PicturePickerManager.class.getSimpleName();
+    public static final String TAG = PictureWatcherManager.class.getSimpleName();
 
     public static PictureWatcherManager with(@NonNull Context context) {
         if (context instanceof Activity) {
@@ -159,21 +158,37 @@ public class PictureWatcherManager {
     }
 
     /**
-     * 调用图片查看器的方法(共享元素)
+     * 调用图片查看器的方法
      */
-    public void start(@NonNull final PictureWatcherCallback callback) {
+    public void start() {
+        start(null);
+    }
+
+    /**
+     * 调用图片查看器, 一般用于相册
+     */
+    public void start(final PictureWatcherCallback callback) {
         mPictureWatcherFragment.verifyPermission(new PictureWatcherFragment.PermissionsCallback() {
             @Override
             public void onResult(boolean granted) {
-                if (granted) startActual(callback);
+                if (!granted) return;
+                if (callback != null) startForResultActual(callback);
+                else startActual();
             }
         });
     }
 
     /**
-     * 真正的执行 Activity 的启动
+     * 真正的执行 Activity 的启动(无回调)
      */
-    private void startActual(final PictureWatcherCallback callback) {
+    private void startActual() {
+        startForResultActual(null);
+    }
+
+    /**
+     * 真正的执行 Activity 的启动(有回调)
+     */
+    private void startForResultActual(final PictureWatcherCallback callback) {
         mPictureWatcherFragment.setPickerCallback(callback);
         Intent intent = new Intent(mActivity, PictureWatcherActivity.class);
         intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, mConfig);

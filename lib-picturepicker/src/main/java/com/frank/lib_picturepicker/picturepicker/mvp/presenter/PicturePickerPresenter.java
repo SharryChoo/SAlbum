@@ -3,10 +3,15 @@ package com.frank.lib_picturepicker.picturepicker.mvp.presenter;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import com.frank.lib_picturepicker.picturepicker.mvp.model.PicturePickerModel;
+import com.frank.lib_picturepicker.picturepicker.mvp.view.dialog.PicturePickerDialog;
+import com.frank.lib_picturepicker.picturepicker.support.PicturePickerConfig;
+import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherCallback;
+import com.frank.lib_picturepicker.picturewatcher.support.PictureWatcherManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +33,6 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
         this.mView = view;
     }
 
-    /**
-     * 配置用户选中的图片 URI
-     *
-     * @param userPicked 用户已经选中的图片
-     */
     @Override
     public void setupUserPickedSet(ArrayList<String> userPicked) {
         mModel.setUserPickedSet(userPicked == null ? new ArrayList<String>() : userPicked);
@@ -41,17 +41,11 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
         mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
     }
 
-    /**
-     * 配置阈值
-     */
     @Override
     public void setupThreshold(int threshold) {
         mModel.setThreshold(threshold);
     }
 
-    /**
-     * 初始化 Model 的数据
-     */
     @Override
     public void initData(Context context) {
         mModel.getSystemPictures(context, new PicturePickerContract.ModelInitializeCallback() {
@@ -83,11 +77,6 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
         });
     }
 
-    /**
-     * 获取 <<指定索引处的>> 图片文件夹
-     *
-     * @param position
-     */
     @Override
     public void fetchDisplayPictures(int position) {
         PictureFolder target = mModel.getPictureFolderAt(position);
@@ -95,29 +84,18 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
         mView.displayPictures(target.getFolderName(), target.getImagePaths());
     }
 
-    /**
-     * 获取所有图片文件夹
-     */
     @Override
     public ArrayList<PictureFolder> fetchAllPictureFolders() {
         return mModel.getAllPictureFolders();
     }
 
-    /**
-     * 获取用户选中的所有图片
-     *
-     * @return
-     */
     @Override
     public ArrayList<String> fetchUserPickedSet() {
         return mModel.getUserPickedSet();
     }
 
-    /**
-     * 处理图片被选中了
-     */
     @Override
-    public boolean performPicturePicked(String uri) {
+    public boolean performPictureChecked(String uri) {
         if (fetchUserPickedSet().size() == mModel.getThreshold()) {
             mView.showMsg("最多只可选择 " + mModel.getThreshold() + " 张图片");
             return false;
@@ -128,15 +106,62 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
         return true;
     }
 
-    /**
-     * 处理图片被移除了
-     */
     @Override
-    public void performPictureRemoved(String imagePath) {
+    public void performPictureUnchecked(String imagePath) {
         mModel.removePickedPicture(imagePath);
         mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
         mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
     }
 
+    @Override
+    public void performPictureClicked(View sharedElement, String uri, int position, PicturePickerConfig config, ArrayList<String> pictureUris) {
+        PictureWatcherManager.with(sharedElement.getContext())
+                .setThreshold(mModel.getThreshold())
+                .setIndicatorTextColor(config.indicatorTextColor)
+                .setIndicatorSolidColor(config.indicatorSolidColor)
+                .setIndicatorBorderColor(config.indicatorBorderCheckedColor, config.indicatorBorderUncheckedColor)
+                .setPictureUris(pictureUris, position)
+                .setUserPickedSet(fetchUserPickedSet())
+                .setSharedElement(sharedElement)
+                .start(new PictureWatcherCallback() {
+                    @Override
+                    public void onResult(ArrayList<String> userPickedSet) {
+                        if (mView == null) return;
+                        setupUserPickedSet(userPickedSet);
+                        mView.notifyUserPickedSetChanged();
+                    }
+                });
+    }
+
+    @Override
+    public void performPreviewClicked(Context context, PicturePickerConfig config) {
+        PictureWatcherManager.with(context)
+                .setThreshold(mModel.getThreshold())
+                .setIndicatorTextColor(config.indicatorTextColor)
+                .setIndicatorSolidColor(config.indicatorSolidColor)
+                .setIndicatorBorderColor(config.indicatorBorderCheckedColor, config.indicatorBorderUncheckedColor)
+                .setPictureUris(fetchUserPickedSet(), 0)
+                .setUserPickedSet(fetchUserPickedSet())
+                .start(new PictureWatcherCallback() {
+                    @Override
+                    public void onResult(ArrayList<String> userPickedSet) {
+                        if (mView == null) return;
+                        setupUserPickedSet(userPickedSet);
+                        mView.notifyUserPickedSetChanged();
+                    }
+                });
+    }
+
+    @Override
+    public void performBottomMenuClicked(Context context) {
+        new PicturePickerDialog(context, fetchAllPictureFolders())
+                .setOnItemClickedListener(new PicturePickerDialog.OnItemClickedListener() {
+                    @Override
+                    public void onDialogItemClicked(int position) {
+                        fetchDisplayPictures(position);
+                    }
+                })
+                .show();
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.frank.lib_picturepicker.picturepicker.widget;
+package com.frank.lib_picturepicker.picturepicker.mvp.view.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -23,7 +23,7 @@ import android.view.animation.OvershootInterpolator;
  * Version: 1.0
  * Description: 用于展示图片被选中的索引 View
  */
-public class PickerIndicatorView extends AppCompatTextView {
+public class CheckedIndicatorView extends AppCompatTextView {
 
     // Dimension
     private int mBorderWidth;// 边框的宽度
@@ -46,15 +46,15 @@ public class PickerIndicatorView extends AppCompatTextView {
     private boolean mChecked = false;
     private boolean mIsAnimatorStarted = false;
 
-    public PickerIndicatorView(Context context) {
+    public CheckedIndicatorView(Context context) {
         this(context, null);
     }
 
-    public PickerIndicatorView(Context context, AttributeSet attrs) {
+    public CheckedIndicatorView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PickerIndicatorView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CheckedIndicatorView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setGravity(Gravity.CENTER);
         init();
