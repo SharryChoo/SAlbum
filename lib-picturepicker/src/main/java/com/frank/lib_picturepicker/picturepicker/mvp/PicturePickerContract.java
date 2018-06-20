@@ -2,6 +2,7 @@ package com.frank.lib_picturepicker.picturepicker.mvp;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.view.View;
 
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
@@ -47,6 +48,11 @@ public interface PicturePickerContract {
          * 通知选中的图片集合变更了
          */
         void notifyUserPickedSetChanged();
+
+        /**
+         * 从资源文件获取 String
+         */
+        String getString(@StringRes int resId);
     }
 
     interface IPresenter {

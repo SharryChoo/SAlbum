@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--PicturePickerActivity 需要用到的字符串-->
+    <string name="activity_picture_picker_btn_toolbar_ensure">确认</string>
+    <string name="activity_picture_picker_btn_preview">预览</string>
+    <string name="activity_picture_picker_all_picture">所有图片</string>
+    <string name="activity_picture_picker_msg_over_threshold_prefix">最多只可选择&#160;</string>
+    <string name="activity_picture_picker_msg_over_threshold_suffix">&#160;张图片</string>
+    <string name="activity_picture_picker_msg_fetch_album_failed">获取相册数据失败</string>
+
+    <!--PictureWatcherActivity 需要用到的字符串-->
+    <string name="activity_picture_watcher_msg_over_threshold_prefix">@string/activity_picture_picker_msg_over_threshold_prefix</string>
+    <string name="activity_picture_watcher_msg_over_threshold_suffix">@string/activity_picture_picker_msg_over_threshold_suffix</string>
+
+</resources>

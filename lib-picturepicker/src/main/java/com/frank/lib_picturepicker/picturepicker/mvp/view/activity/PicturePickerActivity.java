@@ -1,5 +1,6 @@
 package com.frank.lib_picturepicker.picturepicker.mvp.view.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -97,10 +98,10 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         // 添加返回按钮
         mToolbar.addLeftIcon(TAG_TOOLBAR_BACK, R.drawable.icon_common_arrow_back_white, this);
         // 添加选中详情的文本
-        mToolbar.addLeftText(TAG_TOOLBAR_CHECKED_DETAIL, "所有图片", 20, null);
+        mToolbar.addLeftText(TAG_TOOLBAR_CHECKED_DETAIL, getString(R.string.activity_picture_picker_all_picture), 20, null);
         mTvToolbarFolderName = mToolbar.getViewByTag(TAG_TOOLBAR_CHECKED_DETAIL);
-        // 添加图片预览按钮
-        mToolbar.addRightText(TAG_TOOLBAR_ENSURE, "确认", 15, this);
+        // 添加图片确认按钮
+        mToolbar.addRightText(TAG_TOOLBAR_ENSURE, getString(R.string.activity_picture_picker_btn_toolbar_ensure), 15, this);
         mTvToolbarEnsure = mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE);
     }
 
@@ -139,10 +140,13 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
+    @SuppressLint("SetTextI18n")
     public void updateTextContent(int curPicked, int total) {
         if (mTvToolbarEnsure == null || mTvPreview == null) return;
-        mTvToolbarEnsure.setText("确认 (" + curPicked + "/" + total + ")");
-        mTvPreview.setText("预览 (" + curPicked + ")");
+        mTvToolbarEnsure.setText(getString(R.string.activity_picture_picker_btn_toolbar_ensure)
+                + " (" + curPicked + "/" + total + ")");
+        mTvPreview.setText(getString(R.string.activity_picture_picker_btn_preview)
+                + " (" + curPicked + ")");
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.frank.lib_picturepicker.R;
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 
@@ -121,7 +122,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
         @Override
         public void run() {
             ArrayList<PictureFolder> pictureFolders = new ArrayList<>();
-            PictureFolder allPictureFolder = new PictureFolder("所有图片");
+            PictureFolder allPictureFolder = new PictureFolder(mContext.getString(R.string.activity_picture_picker_all_picture));
             pictureFolders.add(allPictureFolder);
             //key为存放图片的文件夹路径, values为PictureFolderModel的对象
             HashMap<String, PictureFolder> hashMap = new HashMap<>();

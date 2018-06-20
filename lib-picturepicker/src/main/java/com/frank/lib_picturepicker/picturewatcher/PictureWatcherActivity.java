@@ -241,8 +241,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements
                 mRecyclerView.getAdapter().notifyItemInserted(addedIndex);
                 mRecyclerView.smoothScrollToPosition(addedIndex);
             } else {
-                Toast.makeText(PictureWatcherActivity.this,
-                        "最多只可选择 " + mConfig.threshold + " 张图片", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.activity_picture_watcher_msg_over_threshold_prefix)
+                        + mConfig.threshold + getString(R.string.activity_picture_watcher_msg_over_threshold_suffix), Toast.LENGTH_SHORT).show();
                 mCheckIndicator.setChecked(false);
             }
         }

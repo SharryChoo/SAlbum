@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -49,33 +48,37 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:gravity="bottom"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp">
 
             <TextView
                 android:id="@+id/tv_folder_name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|right"
-                android:paddingLeft="20dp"
-                android:text="全部图片"
+                android:text="@string/activity_picture_picker_all_picture"
                 android:textColor="#ffffffff"
                 android:textSize="15dp" />
 
             <ImageView
-                android:layout_width="10dp"
+                android:layout_width="15dp"
                 android:layout_height="match_parent"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
+                android:paddingLeft="5dp"
                 android:src="@drawable/activity_picture_picker_bottom_arrow" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/tv_preview"
-            android:layout_width="80dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical|right"
             android:gravity="center"
-            android:text="预览"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/activity_picture_picker_btn_preview"
             android:textColor="#ffffffff"
             android:textSize="14dp" />
 

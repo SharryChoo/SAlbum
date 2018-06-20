@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         tvText.setOnClickListener {
             PicturePickerManager.with(this)
-                    .setThreshold(6)
+                    .setThreshold(1)
                     .setSpanCount(3)
                     .setIndicatorSolidColorRes(R.color.colorAccent)
                     .setIndicatorBorderColorRes(R.color.colorAccent, android.R.color.white)

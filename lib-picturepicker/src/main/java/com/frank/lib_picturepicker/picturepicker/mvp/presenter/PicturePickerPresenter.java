@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 
+import com.frank.lib_picturepicker.R;
 import com.frank.lib_picturepicker.picturepicker.data.PictureFolder;
 import com.frank.lib_picturepicker.picturepicker.mvp.PicturePickerContract;
 import com.frank.lib_picturepicker.picturepicker.mvp.model.PicturePickerModel;
@@ -70,7 +71,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                     @Override
                     public void run() {
                         if (mView == null) return;
-                        mView.showMsg("获取相册数据失败");
+                        mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_fetch_album_failed));
                     }
                 });
             }
@@ -97,7 +98,10 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     @Override
     public boolean performPictureChecked(String uri) {
         if (fetchUserPickedSet().size() == mModel.getThreshold()) {
-            mView.showMsg("最多只可选择 " + mModel.getThreshold() + " 张图片");
+            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_over_threshold_prefix)
+                    + mModel.getThreshold()
+                    + mView.getString(R.string.activity_picture_picker_msg_over_threshold_suffix)
+            );
             return false;
         }
         mModel.addPickedPicture(uri);
