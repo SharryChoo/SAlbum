@@ -10,6 +10,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.util.Pair;
 import android.view.View;
 
 import com.frank.picturepicker.support.callback.WatcherCallback;
@@ -214,11 +215,12 @@ public class PictureWatcherManager {
             if (mTransitionView != null) {
                 // 共享元素
                 intent.putExtra(EXTRA_SHARED_ELEMENT, true);
-                mPictureWatcherFragment.startActivityForResult(
-                        intent, PictureWatcherFragment.REQUEST_CODE_PICKED,
-                        ActivityOptions.makeSceneTransitionAnimation(mActivity, mTransitionView,
-                                mConfig.pictureUris.get(mConfig.position)).toBundle()
-                );
+                String transitionKey = mConfig.pictureUris.get(mConfig.position);
+                mTransitionView.setTransitionName(transitionKey);
+                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                        mActivity, Pair.create(mTransitionView, transitionKey));
+                mPictureWatcherFragment.startActivityForResult(intent,
+                        PictureWatcherFragment.REQUEST_CODE_PICKED, options.toBundle());
             } else {
                 mPictureWatcherFragment.startActivityForResult(
                         intent, PictureWatcherFragment.REQUEST_CODE_PICKED,
@@ -228,6 +230,7 @@ public class PictureWatcherManager {
         } else {
             mPictureWatcherFragment.startActivityForResult(intent, PictureWatcherFragment.REQUEST_CODE_PICKED);
         }
+        mActivity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     /**

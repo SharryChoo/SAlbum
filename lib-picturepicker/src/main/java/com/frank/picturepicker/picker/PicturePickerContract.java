@@ -6,6 +6,7 @@ import android.support.annotation.StringRes;
 import android.view.View;
 
 import com.frank.picturepicker.picker.data.PictureFolder;
+import com.frank.picturepicker.picker.view.activity.PicturePickerActivity;
 import com.frank.picturepicker.support.config.PickerConfig;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
  * Created by Frank on 2018/6/13.
  * Email: frankchoochina@gmail.com
  * Version: 1.0
- * Description:
+ * Description: PicturePicture MVP 的约束
  */
 public interface PicturePickerContract {
 
@@ -33,11 +34,6 @@ public interface PicturePickerContract {
          * 更新确定和预览文本的内容
          */
         void updateEnsureAndPreviewTextContent(int curPicked, int total);
-
-        /**
-         * 更新确定和预览文本的可点击性
-         */
-        void updateEnsureAndPreviewTextClickable(boolean clickable);
 
         /**
          * 通知选中的图片集合变更了
@@ -120,6 +116,11 @@ public interface PicturePickerContract {
          * 处理底部菜单被点击了
          */
         void performBottomMenuClicked(Context context);
+
+        /**
+         * 确认按钮被点击了
+         */
+        void performEnsureClicked(PicturePickerActivity bind);
     }
 
     interface IModel {

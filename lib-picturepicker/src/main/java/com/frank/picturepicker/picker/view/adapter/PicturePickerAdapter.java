@@ -92,8 +92,6 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         PictureLoader.load(mContext, uri, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mInteraction.onUserPickedSet().indexOf(uri);
-        // 设置图片的共享元素属性
-        ViewCompat.setTransitionName(holder.ivPicture, uri);
         // 设置点击监听
         holder.ivPicture.setOnClickListener(new View.OnClickListener() {
             @Override

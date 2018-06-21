@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,12 +17,18 @@ import android.transition.ChangeTransform;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
+import android.transition.TransitionSet;
+import android.transition.TransitionValues;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,17 +85,13 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private int mCurPosition;
     private String mCurUri;
     private PhotoView mCurView;
+    private ImageView mIvSharedElementHolder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         parseIntent();
-        // 5.0 以上的系统使用 Transition 过渡动画
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-            getWindow().setEnterTransition(new Explode().setDuration(300));
-            getWindow().setReturnTransition(new Fade().setDuration(200));
-        }
+        setupWindowTransitions();
         setContentView(R.layout.activity_picture_watcher);
         // Postpone the shared element enter transition.
         if (mIsSharedElement) postponeEnterTransition();
@@ -112,6 +115,31 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             mSharedPosition = mCurPosition;
             mSharedKey = mPictureUris.get(mSharedPosition);
         }
+    }
+
+    protected void setupWindowTransitions() {
+        // 5.0 以上的系统使用 Transition 过渡动画
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        // 进出动画
+        getWindow().setEnterTransition(mIsSharedElement ?
+                new Explode().setDuration(300) : new Slide().setDuration(300));
+        getWindow().setReturnTransition(new Fade().setDuration(300));
+        // 共享元素动画设置
+        ChangeBounds elementEnterTransition = new ChangeBounds();
+        elementEnterTransition.setDuration(500);
+        elementEnterTransition.setInterpolator(new OvershootInterpolator(1f));
+        getWindow().setSharedElementEnterTransition(elementEnterTransition);
+        // 退出动画
+        TransitionSet elementReturnTransition = new TransitionSet();
+        Transition transition1 = new ChangeBounds();
+        Transition transition2 = new ChangeImageTransform();
+        transition1.setInterpolator(new OvershootInterpolator(0.5f));
+        transition2.setInterpolator(new OvershootInterpolator(0.5f));
+        elementReturnTransition.addTransition(transition1);
+        elementReturnTransition.addTransition(transition2);
+        elementReturnTransition.setDuration(400);
+        getWindow().setSharedElementReturnTransition(elementReturnTransition);
     }
 
     protected void initTitle() {
@@ -158,21 +186,21 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             return;
         }
         // 初始化共享元素展位图
-        final ImageView ivSharedElementHolder = findViewById(R.id.iv_share_element_holder);
-        PictureLoader.load(this, mSharedKey, ivSharedElementHolder);
-        ViewCompat.setTransitionName(ivSharedElementHolder, mSharedKey);
-        ivSharedElementHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        mIvSharedElementHolder = findViewById(R.id.iv_share_element_holder);
+        PictureLoader.load(this, mSharedKey, mIvSharedElementHolder);
+        ViewCompat.setTransitionName(mIvSharedElementHolder, mSharedKey);
+        mIvSharedElementHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                ivSharedElementHolder.getViewTreeObserver().removeOnPreDrawListener(this);
+                mIvSharedElementHolder.getViewTreeObserver().removeOnPreDrawListener(this);
                 startPostponedEnterTransition();
                 initData();
                 // 等待真正的 ViewPager 图片加载完成后再将共享元素占位图隐藏
-                ivSharedElementHolder.postDelayed(new Runnable() {
+                mIvSharedElementHolder.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         mPhotoViews.get(mSharedPosition).setVisibility(View.VISIBLE);
-                        ivSharedElementHolder.setVisibility(View.GONE);
+                        mIvSharedElementHolder.setVisibility(View.GONE);
                     }
                 }, 600);
                 return true;
@@ -214,18 +242,6 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void finish() {
-        if (mUserPickedSet != null) {
-            Intent intent = new Intent();
-            intent.putExtra(PictureWatcherFragment.RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
-            setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
-        }
-        super.finish();
-        // 当前 Activity 关闭时, 使用淡入淡出的动画
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    }
-
-    @Override
     public void onClick(View v) {
         if (mCheckIndicator.isChecked()) {// Checked-> Unchecked
             // 移除选中数据与状态
@@ -260,6 +276,18 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         if (indexOfPictureUris != -1) {
             mViewPager.setCurrentItem(indexOfPictureUris);
         }
+    }
+
+    @Override
+    public void finish() {
+        if (mUserPickedSet != null) {
+            Intent intent = new Intent();
+            intent.putExtra(PictureWatcherFragment.RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
+            setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
+        }
+        super.finish();
+        // 当前 Activity 关闭时, 使用淡入淡出的动画
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     /**

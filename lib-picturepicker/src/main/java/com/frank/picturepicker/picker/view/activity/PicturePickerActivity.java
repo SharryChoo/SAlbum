@@ -1,8 +1,7 @@
 package com.frank.picturepicker.picker.view.activity;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.graphics.Color;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -24,7 +23,6 @@ import com.frank.picturepicker.picker.view.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.picker.view.widget.toolbar.GenericToolbar;
 import com.frank.picturepicker.picker.view.widget.toolbar.Style;
 import com.frank.picturepicker.support.config.PickerConfig;
-import com.frank.picturepicker.support.manager.picker.PicturePickerFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +49,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private final int TAG_TOOLBAR_CHECKED_DETAIL = 0x00000002;
     private final int TAG_TOOLBAR_ENSURE = 0x00000003;
 
-    private PicturePickerPresenter mPresenter = new PicturePickerPresenter();
+    private PicturePickerContract.IPresenter mPresenter = new PicturePickerPresenter();
 
     // 通过 Intent 传递过来的数据
     private PickerConfig mConfig;
@@ -134,7 +132,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
         params.setBehavior(new PicturePickerFabBehavior());
         fab.setLayoutParams(params);
-        fab.setBackgroundColor(mConfig.toolbarBkgColor);
+        fab.setBackgroundTintList(ColorStateList.valueOf(mConfig.toolbarBkgColor));
         fab.setOnClickListener(this);
     }
 
@@ -161,15 +159,6 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
                 + " (" + curPicked + "/" + total + ")");
         mTvPreview.setText(getString(R.string.activity_picture_picker_btn_preview)
                 + " (" + curPicked + ")");
-    }
-
-    @Override
-    public void updateEnsureAndPreviewTextClickable(boolean clickable) {
-        if (mTvToolbarEnsure == null || mTvPreview == null) return;
-        mTvToolbarEnsure.setTextColor(clickable ? Color.WHITE : Color.LTGRAY);
-        mTvPreview.setTextColor(clickable ? Color.WHITE : Color.LTGRAY);
-        mTvToolbarEnsure.setClickable(clickable);
-        mTvPreview.setClickable(clickable);
     }
 
     @Override
@@ -211,10 +200,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
-            Intent intent = new Intent();
-            intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPickedSet());
-            setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
-            finish();
+            mPresenter.performEnsureClicked(this);
         }
     }
 
