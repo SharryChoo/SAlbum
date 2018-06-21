@@ -30,24 +30,24 @@ public interface PicturePickerContract {
         void displayPictures(String folderName, List<String> uris);
 
         /**
-         * 展示消息通知
+         * 更新确定和预览文本的内容
          */
-        void showMsg(String msg);
+        void updateEnsureAndPreviewTextContent(int curPicked, int total);
 
         /**
-         * 更新标题文本
+         * 更新确定和预览文本的可点击性
          */
-        void updateTextContent(int curPicked, int total);
-
-        /**
-         * 更新文本的可见性(选中图片大于 0 时, 即为可见)
-         */
-        void updateTextViewVisibility(boolean isVisible);
+        void updateEnsureAndPreviewTextClickable(boolean clickable);
 
         /**
          * 通知选中的图片集合变更了
          */
         void notifyUserPickedSetChanged();
+
+        /**
+         * 展示消息通知
+         */
+        void showMsg(String msg);
 
         /**
          * 从资源文件获取 String

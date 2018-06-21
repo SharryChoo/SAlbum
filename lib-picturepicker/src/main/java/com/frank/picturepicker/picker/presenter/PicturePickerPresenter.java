@@ -39,8 +39,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     public void setupUserPickedSet(ArrayList<String> userPicked) {
         mModel.setUserPickedSet(userPicked == null ? new ArrayList<String>() : userPicked);
         if (mView == null) return;
-        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
-        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
+        mView.updateEnsureAndPreviewTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+        mView.updateEnsureAndPreviewTextClickable(mModel.getUserPickedSet().size() != 0);
     }
 
     @Override
@@ -60,8 +60,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                         PictureFolder allPictureFolder = mModel.getPictureFolderAt(0);
                         if (mView == null) return;
                         mView.displayPictures(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
-                        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
-                        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
+                        mView.updateEnsureAndPreviewTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+                        mView.updateEnsureAndPreviewTextClickable(mModel.getUserPickedSet().size() != 0);
                     }
                 });
             }
@@ -106,16 +106,16 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
             return false;
         }
         mModel.addPickedPicture(uri);
-        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
-        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
+        mView.updateEnsureAndPreviewTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+        mView.updateEnsureAndPreviewTextClickable(mModel.getUserPickedSet().size() != 0);
         return true;
     }
 
     @Override
     public void performPictureUnchecked(String imagePath) {
         mModel.removePickedPicture(imagePath);
-        mView.updateTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
-        mView.updateTextViewVisibility(mModel.getUserPickedSet().size() > 0);
+        mView.updateEnsureAndPreviewTextContent(mModel.getUserPickedSet().size(), mModel.getThreshold());
+        mView.updateEnsureAndPreviewTextClickable(mModel.getUserPickedSet().size() != 0);
     }
 
     @Override
@@ -141,6 +141,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
 
     @Override
     public void performPreviewClicked(Context context, PickerConfig config) {
+        if (mModel.getUserPickedSet().size() == 0) return;
         PictureWatcherManager.with(context)
                 .setThreshold(mModel.getThreshold())
                 .setIndicatorTextColor(config.indicatorTextColor)

@@ -2,6 +2,7 @@ package com.frank.picturepicker.picker.view.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -154,7 +155,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     @SuppressLint("SetTextI18n")
-    public void updateTextContent(int curPicked, int total) {
+    public void updateEnsureAndPreviewTextContent(int curPicked, int total) {
         if (mTvToolbarEnsure == null || mTvPreview == null) return;
         mTvToolbarEnsure.setText(getString(R.string.activity_picture_picker_btn_toolbar_ensure)
                 + " (" + curPicked + "/" + total + ")");
@@ -163,11 +164,12 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
-    public void updateTextViewVisibility(boolean isVisible) {
+    public void updateEnsureAndPreviewTextClickable(boolean clickable) {
         if (mTvToolbarEnsure == null || mTvPreview == null) return;
-        int visible = isVisible ? View.VISIBLE : View.INVISIBLE;
-        mTvToolbarEnsure.setVisibility(visible);
-        mTvPreview.setVisibility(visible);
+        mTvToolbarEnsure.setTextColor(clickable ? Color.WHITE : Color.LTGRAY);
+        mTvPreview.setTextColor(clickable ? Color.WHITE : Color.LTGRAY);
+        mTvToolbarEnsure.setClickable(clickable);
+        mTvPreview.setClickable(clickable);
     }
 
     @Override
