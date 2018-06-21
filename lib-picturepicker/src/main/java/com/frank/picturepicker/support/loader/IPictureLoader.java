@@ -10,5 +10,5 @@ import android.widget.ImageView;
  * Description:
  */
 public interface IPictureLoader {
-    void loadImage(Context context, String uri, ImageView imageView);
+    void load(Context context, String uri, ImageView imageView);
 }

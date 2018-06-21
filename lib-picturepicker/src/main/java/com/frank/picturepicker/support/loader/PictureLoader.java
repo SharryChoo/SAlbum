@@ -26,7 +26,7 @@ public class PictureLoader {
         if (mPictureLoader == null) {
             throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
         }
-        mPictureLoader.loadImage(context, uri, imageView);
+        mPictureLoader.load(context, uri, imageView);
     }
 
 }
