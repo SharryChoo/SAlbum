@@ -42,7 +42,7 @@ public class CameraTakeManager {
     /**
      * 设置目的文件
      */
-    public CameraTakeManager setDestFile(@NonNull String filePath) {
+    public CameraTakeManager setDestFilePath(@NonNull String filePath) {
         this.mConfig.destFilePath = filePath;
         return this;
     }

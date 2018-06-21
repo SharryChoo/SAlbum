@@ -64,7 +64,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnLauncher"
+        android:id="@+id/btnLaunchAlbum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"
@@ -72,9 +72,28 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/activity_main_btn"
         android:gravity="center"
-        android:text="Launcher"
+        android:text="Launch Album"
         android:textAllCaps="false"
         android:textColor="#fff"
         android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btnLaunchCamera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/activity_main_btn"
+        android:gravity="center"
+        android:text="Launch Camera"
+        android:textAllCaps="false"
+        android:textColor="#fff"
+        android:textSize="20dp" />
+
+    <ImageView
+        android:id="@+id/ivPicture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </LinearLayout>

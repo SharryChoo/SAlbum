@@ -28,7 +28,7 @@ class Util {
     /**
      * 图片压缩
      */
-    public static void doCompress(String originPath, String destPath, int quality) throws IOException {
+    static void doCompress(String originPath, String destPath, int quality) throws IOException {
         if (TextUtils.isEmpty(originPath)) {
             throw new IllegalArgumentException("BitmapUtil.doCompress -> parameter originPath must not be null!");
         }
@@ -47,14 +47,14 @@ class Util {
     /**
      * 刷新文件管理器
      */
-    public static void freshMediaStore(Context context, File file) {
+    static void freshMediaStore(Context context, File file) {
         MediaScanner.refresh(context, file);
     }
 
     /**
      * 获取 URI
      */
-    public static Uri getUriFromFile(Context context, String authority, File file) {
+    static Uri getUriFromFile(Context context, String authority, File file) {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
                 FileProvider.getUriForFile(context, authority, file) : Uri.fromFile(file);
     }
