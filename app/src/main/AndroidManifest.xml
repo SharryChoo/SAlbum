@@ -30,9 +30,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.frank.lib_picturepicker.picturepicker.mvp.view.activity.PicturePickerActivity" />
+        <activity android:name="com.frank.picturepicker.picker.view.activity.PicturePickerActivity" />
         <activity
-            android:name="com.frank.lib_picturepicker.picturewatcher.PictureWatcherActivity"
+            android:name="com.frank.picturepicker.watcher.PictureWatcherActivity"
             android:theme="@style/TransparentTheme" />
     </application>
 

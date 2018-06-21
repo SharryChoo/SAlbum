@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
-    <com.frank.lib_picturepicker.picturepicker.mvp.view.widget.CheckedIndicatorView
+    <com.frank.picturepicker.picker.view.widget.CheckedIndicatorView
         android:id="@+id/check_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

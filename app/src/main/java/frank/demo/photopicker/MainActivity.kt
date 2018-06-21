@@ -5,9 +5,9 @@ import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.frank.lib_picturepicker.picturepicker.support.PicturePickerManager
-import com.frank.lib_picturepicker.picturepicker.support.camare.CameraTakeManager
-import com.frank.lib_picturepicker.toolbar.GenericToolbar
+import com.frank.picturepicker.support.manager.picker.PicturePickerManager
+import com.frank.picturepicker.support.manager.take.PictureTakeManager
+import com.frank.picturepicker.watcher.widget.toolbar.GenericToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
@@ -37,6 +37,9 @@ class MainActivity : AppCompatActivity() {
                     .setToolbarBackgroundColorRes(R.color.colorPrimary)
                     .setIndicatorSolidColorRes(R.color.colorPrimary)
                     .setIndicatorBorderColorRes(R.color.colorPrimary, android.R.color.white)
+                    .setPictureLoader { context, uri, imageView ->
+                        Glide.with(context).load(uri).into(imageView)
+                    }
                     .start {
                         it.forEach {
                             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
@@ -45,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnLaunchCamera.setOnClickListener {
-            CameraTakeManager.with(this)
+            PictureTakeManager.with(this)
                     .setDestFilePath(cacheDir.absolutePath + File.separator + "test.jpg")
                     .setDestQuality(75)
                     .take {
