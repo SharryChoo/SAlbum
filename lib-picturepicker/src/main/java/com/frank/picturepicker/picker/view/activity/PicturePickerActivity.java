@@ -18,10 +18,10 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.picker.PicturePickerContract;
 import com.frank.picturepicker.picker.presenter.PicturePickerPresenter;
 import com.frank.picturepicker.picker.view.adapter.PicturePickerAdapter;
-import com.frank.picturepicker.picker.view.widget.PicturePickerFabBehavior;
-import com.frank.picturepicker.picker.view.widget.toolbar.AppBarHelper;
-import com.frank.picturepicker.picker.view.widget.toolbar.GenericToolbar;
-import com.frank.picturepicker.picker.view.widget.toolbar.Style;
+import com.frank.picturepicker.widget.PicturePickerFabBehavior;
+import com.frank.picturepicker.widget.toolbar.AppBarHelper;
+import com.frank.picturepicker.widget.toolbar.GenericToolbar;
+import com.frank.picturepicker.widget.toolbar.Style;
 import com.frank.picturepicker.support.config.PickerConfig;
 
 import java.util.ArrayList;

@@ -7,7 +7,7 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.frank.picturepicker.support.manager.picker.PicturePickerManager
 import com.frank.picturepicker.support.manager.take.PictureTakeManager
-import com.frank.picturepicker.watcher.widget.toolbar.GenericToolbar
+import com.frank.picturepicker.widget.toolbar.GenericToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 

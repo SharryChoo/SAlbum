@@ -1,4 +1,4 @@
-package com.frank.picturepicker.watcher.widget.photoview;
+package com.frank.picturepicker.widget.photoview;
 
 import android.view.MotionEvent;
 

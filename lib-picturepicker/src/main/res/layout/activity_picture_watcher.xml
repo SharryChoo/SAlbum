@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.frank.picturepicker.watcher.widget.DraggableViewPager
+    <com.frank.picturepicker.widget.DraggableViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center" />
 
-    <com.frank.picturepicker.watcher.widget.toolbar.GenericToolbar
+    <com.frank.picturepicker.widget.toolbar.GenericToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

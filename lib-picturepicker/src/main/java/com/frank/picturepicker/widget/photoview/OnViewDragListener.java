@@ -1,4 +1,4 @@
-package com.frank.picturepicker.watcher.widget.photoview;
+package com.frank.picturepicker.widget.photoview;
 
 /**
  * Interface definition for a callback to be invoked when the photo is experiencing a drag event

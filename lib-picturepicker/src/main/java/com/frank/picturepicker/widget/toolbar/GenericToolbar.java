@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picker.view.widget.toolbar;
+package com.frank.picturepicker.widget.toolbar;
 
 import android.app.Activity;
 import android.content.Context;

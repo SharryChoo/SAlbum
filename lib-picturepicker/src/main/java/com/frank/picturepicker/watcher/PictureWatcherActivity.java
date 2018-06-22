@@ -37,20 +37,20 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.support.config.WatcherConfig;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.manager.watcher.PictureWatcherFragment;
-import com.frank.picturepicker.watcher.widget.CheckedIndicatorView;
-import com.frank.picturepicker.watcher.widget.DraggableViewPager;
-import com.frank.picturepicker.watcher.widget.photoview.OnPhotoTapListener;
-import com.frank.picturepicker.watcher.widget.photoview.PhotoView;
-import com.frank.picturepicker.watcher.widget.toolbar.AppBarHelper;
-import com.frank.picturepicker.watcher.widget.toolbar.GenericToolbar;
-import com.frank.picturepicker.watcher.widget.toolbar.Style;
+import com.frank.picturepicker.widget.CheckedIndicatorView;
+import com.frank.picturepicker.widget.DraggableViewPager;
+import com.frank.picturepicker.widget.photoview.OnPhotoTapListener;
+import com.frank.picturepicker.widget.photoview.PhotoView;
+import com.frank.picturepicker.widget.toolbar.AppBarHelper;
+import com.frank.picturepicker.widget.toolbar.GenericToolbar;
+import com.frank.picturepicker.widget.toolbar.Style;
 
 import java.util.ArrayList;
 
 /**
  * Created by FrankChoo on 2017/12/28.
  * Email: frankchoochina@gmail.com
- * Version:  1.2
+ * Version:  1.3
  * Description: 图片查看器的 Activity, 主题设置为背景透明效果更佳
  */
 @SuppressLint("NewApi")

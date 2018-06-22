@@ -13,27 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.frank.picturepicker.watcher.widget.photoview;
+package com.frank.picturepicker.widget.photoview;
 
-import android.annotation.TargetApi;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-import android.view.View;
+interface OnGestureListener {
 
-class Compat {
+    void onDrag(float dx, float dy);
 
-    private static final int SIXTY_FPS_INTERVAL = 1000 / 60;
+    void onFling(float startX, float startY, float velocityX,
+                 float velocityY);
 
-    public static void postOnAnimation(View view, Runnable runnable) {
-        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
-            postOnAnimationJellyBean(view, runnable);
-        } else {
-            view.postDelayed(runnable, SIXTY_FPS_INTERVAL);
-        }
-    }
+    void onScale(float scaleFactor, float focusX, float focusY);
 
-    @TargetApi(16)
-    private static void postOnAnimationJellyBean(View view, Runnable runnable) {
-        view.postOnAnimation(runnable);
-    }
 }

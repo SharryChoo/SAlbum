@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -13,9 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picker.view.widget.CheckedIndicatorView;
 import com.frank.picturepicker.support.config.PickerConfig;
 import com.frank.picturepicker.support.loader.PictureLoader;
+import com.frank.picturepicker.widget.CheckedIndicatorView;
 
 import java.util.List;
 
