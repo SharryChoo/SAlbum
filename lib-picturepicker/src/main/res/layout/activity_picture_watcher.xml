@@ -10,13 +10,6 @@
         android:layout_height="match_parent"
         android:gravity="center" />
 
-    <!--共享元素站位图-->
-    <ImageView
-        android:id="@+id/iv_share_element_holder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center" />
-
     <com.frank.picturepicker.widget.toolbar.GenericToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"

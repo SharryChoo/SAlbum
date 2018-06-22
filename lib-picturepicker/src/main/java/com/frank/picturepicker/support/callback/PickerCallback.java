@@ -9,5 +9,5 @@ import java.util.ArrayList;
  * Description: 图片选择器的回调
  */
 public interface PickerCallback {
-    void onResult(ArrayList<String> userPickedSet);
+    void onPickedComplete(ArrayList<String> userPickedSet);
 }

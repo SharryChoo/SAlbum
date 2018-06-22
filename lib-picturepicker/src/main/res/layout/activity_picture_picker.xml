@@ -65,7 +65,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="4dp"
                 android:paddingLeft="5dp"
-                android:src="@drawable/activity_picture_picker_bottom_arrow" />
+                android:src="@drawable/icon_activity_picture_picker_bottom_arrow" />
 
         </LinearLayout>
 

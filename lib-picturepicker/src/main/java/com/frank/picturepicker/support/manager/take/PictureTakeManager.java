@@ -1,14 +1,18 @@
 package com.frank.picturepicker.support.manager.take;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.frank.picturepicker.support.callback.TakeCallback;
 import com.frank.picturepicker.support.config.TakeConfig;
+import com.frank.picturepicker.support.callback.PermissionsCallback;
+import com.frank.picturepicker.support.manager.permission.PermissionsManager;
 
 import java.io.File;
 import java.util.Date;
@@ -32,6 +36,12 @@ public class PictureTakeManager {
         }
     }
 
+    // 所需要的权限
+    private String[] mPermissions = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
     private Activity mActivity;
     private PictureTakeFragment mTakePhotoFragment;
     private TakeConfig mConfig;
@@ -45,8 +55,8 @@ public class PictureTakeManager {
     /**
      * 设置目的文件
      */
-    public PictureTakeManager setDestFilePath(@NonNull String filePath) {
-        this.mConfig.destFilePath = filePath;
+    public PictureTakeManager setCameraDestFilePath(@NonNull String filePath) {
+        this.mConfig.cameraDestFilePath = filePath;
         return this;
     }
 
@@ -67,28 +77,46 @@ public class PictureTakeManager {
     }
 
     /**
+     * 设置 FileProvider 的路径, 7.0 以后用于查找 URI
+     */
+    public PictureTakeManager setCropSupport(boolean isCropSupport) {
+        mConfig.isCropSupport = isCropSupport;
+        return this;
+    }
+
+    /**
+     * 设置裁剪后的路径
+     */
+    public PictureTakeManager setCropDestFilePath(@NonNull String filePath) {
+        mConfig.cropDestFilePath = filePath;
+        return this;
+    }
+
+    /**
      * 获取拍摄照片
      */
     public void take(@NonNull final TakeCallback callback) {
-        mTakePhotoFragment.verifyPermission(new PictureTakeFragment.PermissionsCallback() {
-            @Override
-            public void onResult(boolean granted) {
-                if (granted) takeActual(callback);
-            }
-        });
+        PermissionsManager.getManager(mActivity)
+                .request(mPermissions)
+                .execute(new PermissionsCallback() {
+                    @Override
+                    public void onResult(boolean granted) {
+                        if (granted) takeActual(callback);
+                    }
+                });
     }
 
     private void takeActual(TakeCallback callback) {
-        // 若未指定目的路径, 则在系统相册的路径下创建图片文件
-        if (mConfig.destFilePath == null) {
-            mConfig.destFilePath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+        // 指定默认的拍照路径
+        if (TextUtils.isEmpty(mConfig.cameraDestFilePath)) {
+            mConfig.cameraDestFilePath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
                     new Date().getTime() + ".jpg").getAbsolutePath();
         }
         // 若未指定 FileProvider 的 authority, 则给予默认值
         if (TextUtils.isEmpty(mConfig.authority)) {
             mConfig.authority = mActivity.getPackageName() + ".FileProvider";
         }
-        mTakePhotoFragment.takePhoto(mConfig, callback);
+        mTakePhotoFragment.takePicture(mConfig, callback);
     }
 
     /**
@@ -111,5 +139,4 @@ public class PictureTakeManager {
     private PictureTakeFragment findCallbackFragment(Activity activity) {
         return (PictureTakeFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
-
 }

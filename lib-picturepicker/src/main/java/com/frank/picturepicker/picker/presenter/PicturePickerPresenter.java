@@ -12,13 +12,19 @@ import com.frank.picturepicker.picker.data.PictureFolder;
 import com.frank.picturepicker.picker.model.PicturePickerModel;
 import com.frank.picturepicker.picker.view.activity.PicturePickerActivity;
 import com.frank.picturepicker.picker.view.dialog.PicturePickerDialog;
+import com.frank.picturepicker.support.callback.CropCallback;
+import com.frank.picturepicker.support.callback.TakeCallback;
 import com.frank.picturepicker.support.callback.WatcherCallback;
 import com.frank.picturepicker.support.config.PickerConfig;
 import com.frank.picturepicker.support.loader.PictureLoader;
+import com.frank.picturepicker.support.manager.crop.PictureCropManager;
 import com.frank.picturepicker.support.manager.picker.PicturePickerFragment;
+import com.frank.picturepicker.support.manager.take.PictureTakeManager;
 import com.frank.picturepicker.support.manager.watcher.PictureWatcherManager;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -130,10 +136,34 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .start(new WatcherCallback() {
                     @Override
-                    public void onResult(ArrayList<String> userPickedSet) {
+                    public void onWatcherPickedComplete(ArrayList<String> userPickedSet) {
                         if (mView == null) return;
                         setupUserPickedSet(userPickedSet);
                         mView.notifyUserPickedSetChanged();
+                    }
+                });
+    }
+
+    @Override
+    public void performCameraClicked(final Context context, final PickerConfig config) {
+        if (fetchUserPickedSet().size() == mModel.getThreshold()) {
+            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_over_threshold_prefix)
+                    + mModel.getThreshold()
+                    + mView.getString(R.string.activity_picture_picker_msg_over_threshold_suffix)
+            );
+            return;
+        }
+        PictureTakeManager.with(context)
+                .setFileProviderAuthority(config.authority)
+                .setCameraDestFilePath(new File(config.cameraDirectoryPath,
+                        new Date().getTime() + ".jpg").getAbsolutePath())
+                .setDestQuality(config.cameraDestQuality)
+                .take(new TakeCallback() {
+                    @Override
+                    public void onTakeComplete(String path) {
+                        mModel.getCurDisplayFolder().getImagePaths().add(0, path);// 添加数据到 Model 中
+                        mModel.addPickedPicture(path);// 添加到选中集合
+                        mView.notifyCameraTakeOnePicture(path);// 通知拍摄了一张照片
                     }
                 });
     }
@@ -154,7 +184,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .start(new WatcherCallback() {
                     @Override
-                    public void onResult(ArrayList<String> userPickedSet) {
+                    public void onWatcherPickedComplete(ArrayList<String> userPickedSet) {
                         if (mView == null) return;
                         setupUserPickedSet(userPickedSet);
                         mView.notifyUserPickedSetChanged();
@@ -163,15 +193,29 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
     }
 
     @Override
-    public void performEnsureClicked(PicturePickerActivity bind) {
+    public void performEnsureClicked(final PicturePickerActivity bind, PickerConfig config) {
         if (fetchUserPickedSet().size() == 0) {
             mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_ensure_failed));
             return;
         }
-        Intent intent = new Intent();
-        intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, fetchUserPickedSet());
-        bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
-        bind.finish();
+        // 处理裁剪
+        if (config.isCropSupport) {
+            PictureCropManager.with(bind)
+                    .setFileProviderAuthority(config.authority)
+                    .setOriginFilePath(fetchUserPickedSet().get(0))
+                    .setDestFilePath(config.cropDestFilePath)
+                    .setQuality(config.cropDestQuality)
+                    .crop(new CropCallback() {
+                        @Override
+                        public void onCropComplete(String path) {
+                            fetchUserPickedSet().clear();
+                            fetchUserPickedSet().add(path);
+                            setResult(bind);
+                        }
+                    });
+        } else {
+            setResult(bind);
+        }
     }
 
     @Override
@@ -184,5 +228,15 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                     }
                 })
                 .show();
+    }
+
+    /**
+     * 所有操作完成了
+     */
+    private void setResult(PicturePickerActivity bind) {
+        Intent intent = new Intent();
+        intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, fetchUserPickedSet());
+        bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
+        bind.finish();
     }
 }

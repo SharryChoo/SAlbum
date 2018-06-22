@@ -85,7 +85,6 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private int mCurPosition;
     private String mCurUri;
     private PhotoView mCurView;
-    private ImageView mIvSharedElementHolder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -181,31 +180,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                     LinearLayoutManager.HORIZONTAL, false));
         }
-        if (!mIsSharedElement) {
-            initData();
-            return;
-        }
-        // 初始化共享元素展位图
-        mIvSharedElementHolder = findViewById(R.id.iv_share_element_holder);
-        PictureLoader.load(this, mSharedKey, mIvSharedElementHolder);
-        ViewCompat.setTransitionName(mIvSharedElementHolder, mSharedKey);
-        mIvSharedElementHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                mIvSharedElementHolder.getViewTreeObserver().removeOnPreDrawListener(this);
-                startPostponedEnterTransition();
-                initData();
-                // 等待真正的 ViewPager 图片加载完成后再将共享元素占位图隐藏
-                mIvSharedElementHolder.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPhotoViews.get(mSharedPosition).setVisibility(View.VISIBLE);
-                        mIvSharedElementHolder.setVisibility(View.GONE);
-                    }
-                }, 600);
-                return true;
-            }
-        });
+        initData();
     }
 
     private void initData() {
@@ -215,8 +190,14 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             mPhotoViews.add(photoView);
             if (mIsSharedElement && uri.equals(mSharedKey)) {
                 ViewCompat.setTransitionName(photoView, mSharedKey);
-                // 防止在共享元素动画完成之前展示出来, 造成重影
-                photoView.setVisibility(View.INVISIBLE);
+                photoView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mPhotoViews.get(mSharedPosition).getViewTreeObserver().removeOnPreDrawListener(this);
+                        startPostponedEnterTransition();
+                        return true;
+                    }
+                });
             }
         }
         mAdapter.notifyDataSetChanged();

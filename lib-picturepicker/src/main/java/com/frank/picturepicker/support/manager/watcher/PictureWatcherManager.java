@@ -1,5 +1,6 @@
 package com.frank.picturepicker.support.manager.watcher;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.FragmentManager;
@@ -17,6 +18,8 @@ import com.frank.picturepicker.support.callback.WatcherCallback;
 import com.frank.picturepicker.support.config.WatcherConfig;
 import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
+import com.frank.picturepicker.support.callback.PermissionsCallback;
+import com.frank.picturepicker.support.manager.permission.PermissionsManager;
 import com.frank.picturepicker.watcher.PictureWatcherActivity;
 
 import java.util.ArrayList;
@@ -41,7 +44,10 @@ public class PictureWatcherManager {
             throw new IllegalArgumentException("PictureWatcherManager.with -> Context can not cast to Activity");
         }
     }
-
+    private String[] mPermissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
     private Activity mActivity;
     private WatcherConfig mConfig;
     private PictureWatcherFragment mPictureWatcherFragment;
@@ -186,14 +192,16 @@ public class PictureWatcherManager {
             throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
         }
         // 2. 请求权限
-        mPictureWatcherFragment.verifyPermission(new PictureWatcherFragment.PermissionsCallback() {
-            @Override
-            public void onResult(boolean granted) {
-                if (!granted) return;
-                if (callback != null) startForResultActual(callback);
-                else startActual();
-            }
-        });
+        PermissionsManager.getManager(mActivity)
+                .request(mPermissions)
+                .execute(new PermissionsCallback() {
+                    @Override
+                    public void onResult(boolean granted) {
+                        if (!granted) return;
+                        if (callback != null) startForResultActual(callback);
+                        else startActual();
+                    }
+                });
     }
 
     /**

@@ -25,6 +25,12 @@ public class PickerConfig implements Parcelable {
     public int toolbarBkgColor = Color.parseColor("#ff64b6f6");// 背景色
     public int toolbarBkgDrawableResId = INVALIDATE_VALUE;// 背景的Drawable
 
+    // 整体背景色
+    public int pickerBackgroundColor = INVALIDATE_VALUE;
+
+    // Item 背景色
+    public int pickerItemBackgroundColor = Color.WHITE;
+
     // 指示器背景色
     public int indicatorTextColor = Color.WHITE;
     public int indicatorSolidColor = Color.parseColor("#ff64b6f6");// 指示器选中的填充色
@@ -33,6 +39,18 @@ public class PickerConfig implements Parcelable {
 
     // 是否展示滚动动画
     public boolean isShowScrollBehavior = false;
+
+    // 是否展示拍照支持
+    public String authority;// FileProvider 的 authority 属性
+    public boolean isCameraSupport = false;// 是否展示拍照功能
+    public int cameraIconDrawableResId = INVALIDATE_VALUE;// 相机的资源文件
+    public String cameraDirectoryPath;// 拍照后的路径
+    public int cameraDestQuality;// 拍照照片的质量
+
+    // 是否裁剪支持
+    public boolean isCropSupport = false;// 照片裁剪的支持
+    public String cropDestFilePath;// 拍照后的路径
+    public int cropDestQuality;// 拍照照片的质量
 
     public PickerConfig() {
     }
@@ -43,11 +61,21 @@ public class PickerConfig implements Parcelable {
         spanCount = in.readInt();
         toolbarBkgColor = in.readInt();
         toolbarBkgDrawableResId = in.readInt();
+        pickerBackgroundColor = in.readInt();
+        pickerItemBackgroundColor = in.readInt();
         indicatorTextColor = in.readInt();
         indicatorSolidColor = in.readInt();
         indicatorBorderCheckedColor = in.readInt();
         indicatorBorderUncheckedColor = in.readInt();
         isShowScrollBehavior = in.readByte() != 0;
+        authority = in.readString();
+        isCameraSupport = in.readByte() != 0;
+        cameraIconDrawableResId = in.readInt();
+        cameraDirectoryPath = in.readString();
+        cameraDestQuality = in.readInt();
+        isCropSupport = in.readByte() != 0;
+        cropDestFilePath = in.readString();
+        cropDestQuality = in.readInt();
     }
 
     @Override
@@ -57,11 +85,21 @@ public class PickerConfig implements Parcelable {
         dest.writeInt(spanCount);
         dest.writeInt(toolbarBkgColor);
         dest.writeInt(toolbarBkgDrawableResId);
+        dest.writeInt(pickerBackgroundColor);
+        dest.writeInt(pickerItemBackgroundColor);
         dest.writeInt(indicatorTextColor);
         dest.writeInt(indicatorSolidColor);
         dest.writeInt(indicatorBorderCheckedColor);
         dest.writeInt(indicatorBorderUncheckedColor);
         dest.writeByte((byte) (isShowScrollBehavior ? 1 : 0));
+        dest.writeString(authority);
+        dest.writeByte((byte) (isCameraSupport ? 1 : 0));
+        dest.writeInt(cameraIconDrawableResId);
+        dest.writeString(cameraDirectoryPath);
+        dest.writeInt(cameraDestQuality);
+        dest.writeByte((byte) (isCropSupport ? 1 : 0));
+        dest.writeString(cropDestFilePath);
+        dest.writeInt(cropDestQuality);
     }
 
     @Override

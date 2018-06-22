@@ -1,5 +1,6 @@
 package com.frank.picturepicker.support.manager.picker;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -15,7 +16,10 @@ import com.frank.picturepicker.support.callback.PickerCallback;
 import com.frank.picturepicker.support.config.PickerConfig;
 import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
+import com.frank.picturepicker.support.callback.PermissionsCallback;
+import com.frank.picturepicker.support.manager.permission.PermissionsManager;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -37,6 +41,10 @@ public class PicturePickerManager {
         }
     }
 
+    private String[] mPermissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
     private Activity mActivity;
     private PicturePickerFragment mPickerFragment;
     private PickerConfig mConfig;
@@ -83,8 +91,6 @@ public class PicturePickerManager {
 
     /**
      * 设置 Toolbar 的背景色
-     *
-     * @param color color 资源 ID
      */
     public PicturePickerManager setToolbarBackgroundColor(@ColorInt int color) {
         mConfig.toolbarBkgColor = color;
@@ -98,6 +104,40 @@ public class PicturePickerManager {
      */
     public PicturePickerManager setToolbarBackgroundDrawableRes(@DrawableRes int drawableRes) {
         mConfig.toolbarBkgDrawableResId = drawableRes;
+        return this;
+    }
+
+    /**
+     * 设置图片选择器的背景色
+     *
+     * @param colorId color 资源 ID
+     */
+    public PicturePickerManager setPickerBackgroundColorRes(@ColorRes int colorId) {
+        return setPickerBackgroundColor(ContextCompat.getColor(mActivity, colorId));
+    }
+
+    /**
+     * 设置图片选择器的背景色
+     */
+    public PicturePickerManager setPickerBackgroundColor(@ColorInt int color) {
+        mConfig.pickerBackgroundColor = color;
+        return this;
+    }
+
+    /**
+     * 设置图片选择器的Item背景色
+     *
+     * @param colorId color 资源 ID
+     */
+    public PicturePickerManager setPickerItemBackgroundColorRes(@ColorRes int colorId) {
+        return setPickerItemBackgroundColor(ContextCompat.getColor(mActivity, colorId));
+    }
+
+    /**
+     * 设置图片选择器的背景色
+     */
+    public PicturePickerManager setPickerItemBackgroundColor(@ColorInt int color) {
+        mConfig.pickerItemBackgroundColor = color;
         return this;
     }
 
@@ -179,6 +219,76 @@ public class PicturePickerManager {
     }
 
     /**
+     * FileProvider 的 authority
+     */
+    public PicturePickerManager setFileProviderAuthority(String authority) {
+        this.mConfig.authority = authority;
+        return this;
+    }
+
+    /**
+     * 开启相机支持
+     */
+    public PicturePickerManager setCameraSupport(boolean isCameraSupport) {
+        mConfig.isCameraSupport = isCameraSupport;
+        return this;
+    }
+
+    /**
+     * 相机的图标 ID
+     */
+    public PicturePickerManager setCameraIconDrawableRes(int cameraIconDrawableResId) {
+        mConfig.cameraIconDrawableResId = cameraIconDrawableResId;
+        return this;
+    }
+
+    /**
+     * 设置目的文件
+     */
+    public PicturePickerManager setCropDestFilePath(@NonNull String filePath) {
+        this.mConfig.cropDestFilePath = filePath;
+        return this;
+    }
+
+    /**
+     * 设置拍照后的压缩质量
+     */
+    public PicturePickerManager setCropDestQuality(int quality) {
+        mConfig.cropDestQuality = quality;
+        return this;
+    }
+
+    /**
+     * 开启裁剪支持
+     */
+    public PicturePickerManager setCropSupport(boolean isCropSupport) {
+        mConfig.isCropSupport = isCropSupport;
+        return this;
+    }
+
+    /**
+     * 设置相机拍摄存储的路径文件夹
+     */
+    public PicturePickerManager setCameraDestDirectory(@NonNull String directoryPath) {
+        File file = new File(directoryPath);
+        if (!file.isDirectory()) {
+            throw new IllegalArgumentException(TAG + ".setCameraDestDirectory -> " +
+                    "Ensure parameter directory is file directory");
+        }
+        if (!file.exists()) file.mkdirs();
+        this.mConfig.cameraDirectoryPath = directoryPath;
+        return this;
+    }
+
+    /**
+     * 设置拍照后的压缩质量
+     */
+    public PicturePickerManager setCameraDestQuality(int quality) {
+        mConfig.cameraDestQuality = quality;
+        return this;
+    }
+
+    /**
      * 发起请求
      *
      * @param pickerCallback 图片选中的回调
@@ -189,18 +299,25 @@ public class PicturePickerManager {
             throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
         }
         // 2. 验证权限
-        mPickerFragment.verifyPermission(new PicturePickerFragment.PermissionsCallback() {
-            @Override
-            public void onResult(boolean granted) {
-                if (granted) startActual(pickerCallback);
-            }
-        });
+        PermissionsManager.getManager(mActivity)
+                .request(mPermissions)
+                .execute(new PermissionsCallback() {
+                    @Override
+                    public void onResult(boolean granted) {
+                        if (granted) startActual(pickerCallback);
+                    }
+                });
     }
 
     /**
      * 处理 PicturePickerActivity 的启动
      */
     private void startActual(PickerCallback pickerCallback) {
+        // 若开启了裁剪, 则只能选中一张图片
+        if (mConfig.isCropSupport) {
+            mConfig.threshold = 1;
+            mConfig.userPickedSet = null;
+        }
         final Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
         intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, mConfig);
@@ -228,5 +345,4 @@ public class PicturePickerManager {
     private PicturePickerFragment findCallbackFragment(Activity activity) {
         return (PicturePickerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
-
 }

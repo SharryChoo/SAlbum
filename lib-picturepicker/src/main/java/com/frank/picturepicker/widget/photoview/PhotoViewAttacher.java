@@ -109,9 +109,9 @@ public class PhotoViewAttacher implements View.OnTouchListener,
          * over the touch event.
          *
          * First we check whether this function is enabled. We never want the
-         * parent to take over if we're scaling. We then check the edge we're
+         * parent to crop over if we're scaling. We then check the edge we're
          * on, and the direction of the scroll (i.e. if we're pulling against
-         * the edge, aka 'overscrolling', let the parent take over).
+         * the edge, aka 'overscrolling', let the parent crop over).
          */
             ViewParent parent = mImageView.getParent();
             if (mAllowParentInterceptOnEdge && !mScaleDragDetector.isScaling() && !mBlockParentIntercept) {

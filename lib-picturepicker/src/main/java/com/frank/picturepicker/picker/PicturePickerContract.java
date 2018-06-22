@@ -41,6 +41,12 @@ public interface PicturePickerContract {
         void notifyUserPickedSetChanged();
 
         /**
+         * 通过相机拍摄了一张照片
+         * @param path
+         */
+        void notifyCameraTakeOnePicture(String path);
+
+        /**
          * 展示消息通知
          */
         void showMsg(String msg);
@@ -120,7 +126,12 @@ public interface PicturePickerContract {
         /**
          * 确认按钮被点击了
          */
-        void performEnsureClicked(PicturePickerActivity bind);
+        void performEnsureClicked(PicturePickerActivity bind, PickerConfig config);
+
+        /**
+         * 相机按钮被点击了
+         */
+        void performCameraClicked(Context context, PickerConfig config);
     }
 
     interface IModel {
@@ -154,6 +165,11 @@ public interface PicturePickerContract {
          * 获取所有的图片文件夹
          */
         ArrayList<PictureFolder> getAllPictureFolders();
+
+        /**
+         * 获取当前正在展示的图片集合
+         */
+        PictureFolder getCurDisplayFolder();
 
         /**
          * 获取用户选中的图片

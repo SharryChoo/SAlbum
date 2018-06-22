@@ -1,24 +1,18 @@
 package com.frank.picturepicker.support.manager.take;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.frank.picturepicker.support.callback.CropCallback;
 import com.frank.picturepicker.support.callback.TakeCallback;
 import com.frank.picturepicker.support.config.TakeConfig;
+import com.frank.picturepicker.support.manager.crop.PictureCropManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,19 +44,12 @@ public class PictureTakeFragment extends Fragment {
         return fragment;
     }
 
-    // 所需要的权限
-    private String[] mPermissions = {
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
     // 回调
-    private PermissionsCallback mPermissionsCallback;
     private TakeCallback mTakeCallback;
 
     private Context mContext;
     // 存储系统相机拍摄的图片临时路径
-    private File mTempFile;
+    private File mTempCameraFile;
     // 相关配置
     private TakeConfig mConfig;
 
@@ -94,129 +81,76 @@ public class PictureTakeFragment extends Fragment {
     /**
      * 开始拍照
      */
-    public void takePhoto(TakeConfig config, TakeCallback callback) {
+    public void takePicture(TakeConfig config, TakeCallback callback) {
         this.mConfig = config;
         this.mTakeCallback = callback;
+        mTempCameraFile = createTempFile();
         // 启动相机
         Intent intent = new Intent(INTENT_ACTION_START_CAMERA);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Util.getUriFromFile(mContext, mConfig.authority, getTempFile()));
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, TakeUtil.getUriFromFile(mContext, mConfig.authority, mTempCameraFile));
         startActivityForResult(intent, REQUEST_CODE_TAKE);
-    }
-
-    /**
-     * 设置权限请求接口的回调
-     */
-    public void verifyPermission(@NonNull PermissionsCallback callback) {
-        mPermissionsCallback = callback;
-        if (isMarshmallow() && !isAllGranted()) {
-            requestPermissions(mPermissions, REQUEST_CODE_PERMISSIONS);
-        } else {
-            mPermissionsCallback.onResult(true);
-        }
-    }
-
-    @Override
-    @TargetApi(Build.VERSION_CODES.M)
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != REQUEST_CODE_PERMISSIONS) return;
-        boolean isAllGranted = isAllGranted();
-        if (isAllGranted) {
-            mPermissionsCallback.onResult(true);
-        } else {
-            showPermissionDeniedDialog();
-        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case REQUEST_CODE_SETTING:
-                mPermissionsCallback.onResult(isAllGranted());
-                break;
-            case REQUEST_CODE_TAKE:
-                if (resultCode == Activity.RESULT_OK) {
-                    try {
-                        // 压缩选中的图片
-                        Util.doCompress(mTempFile.getAbsolutePath(), mConfig.destFilePath, mConfig.destQuality);
-                        // 回调
-                        mTakeCallback.onResult(mConfig.destFilePath);
-                        // 通知文件变更
-                        Util.freshMediaStore(mContext, new File(mConfig.destFilePath));
-                    } catch (IOException e) {
-                        Log.e(TAG, "Camera take photo failed.", e);
-                    } finally {
-                        mTempFile.delete();
-                    }
-                }
-                break;
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private boolean isAllGranted() {
-        boolean isAllGranted = true;
-        for (String permission : mPermissions) {
-            if (isGranted(permission)) {
-                log("onRequestPermissionsResult: " + permission + " is Granted");
-            } else {
-                log("onRequestPermissionsResult: " + permission + " is Denied");
-                isAllGranted = false;
-            }
-        }
-        return isAllGranted;
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    boolean isGranted(String permission) {
-        return getActivity().checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private void showPermissionDeniedDialog() {
-        //启动当前App的系统设置界面
-        AlertDialog dialog = new AlertDialog.Builder(mContext)
-                .setTitle("帮助")
-                .setMessage("当前应用缺少必要权限")
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mPermissionsCallback.onResult(false);
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("设置", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 启动当前App的系统设置界面
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        intent.setData(Uri.parse("package:" + mContext.getPackageName()));
-                        startActivityForResult(intent, REQUEST_CODE_SETTING);
-                    }
-                }).create();
-        dialog.show();
-    }
-
-    private boolean isMarshmallow() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
-    }
-
-    private File getTempFile() {
-        if (mTempFile != null) return mTempFile;
-        // 创建临时文件
+        if (requestCode != REQUEST_CODE_TAKE || resultCode != Activity.RESULT_OK) return;
         try {
-            mTempFile = new File(mContext.getCacheDir(), "temp_camera.jpg");
-            if (mTempFile.exists()) mTempFile.delete();
-            mTempFile.createNewFile();
+            // 1. 将拍摄后的图片, 压缩到 cameraDestFile 中
+            TakeUtil.doCompress(mTempCameraFile.getAbsolutePath(), mConfig.cameraDestFilePath, mConfig.destQuality);
+            // 2. 处理图片裁剪
+            if (mConfig.isCropSupport) {
+                performCropPicture();
+            } else {
+                // 3. 回调
+                callCameraCallback(mConfig.cameraDestFilePath);
+                // 刷新文件管理器
+                TakeUtil.freshMediaStore(mContext, new File(mConfig.cameraDestFilePath));
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Camera photo compress failed.", e);
+        }
+    }
+
+    /**
+     * 处理裁剪
+     */
+    private void performCropPicture() {
+        PictureCropManager.with(mContext)
+                .setFileProviderAuthority(mConfig.authority)
+                .setOriginFilePath(mConfig.cameraDestFilePath)// 需要裁剪的文件路径
+                .setDestFilePath(mConfig.cropDestFilePath)// 裁剪后输出的文件路径
+                .setQuality(100)// 拍摄后已经压缩一次了, 裁剪时不压缩
+                .crop(new CropCallback() {
+                    @Override
+                    public void onCropComplete(String path) {
+                        callCameraCallback(path);
+                    }
+                });
+    }
+
+    /**
+     * 回调相机的 Callback
+     */
+    private void callCameraCallback(String path) {
+        mTakeCallback.onTakeComplete(path);
+        mTempCameraFile.delete();
+    }
+
+    /**
+     * 创建临时文件
+     */
+    private File createTempFile() {
+        // 创建临时文件
+        String tempFileName = "temp_" + SystemClock.currentThreadTimeMillis() + ".jpg";
+        File tempFile = new File(mContext.getCacheDir(), tempFileName);
+        try {
+            if (tempFile.exists()) tempFile.delete();
+            tempFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return mTempFile;
-    }
-
-    private void log(String message) {
-        Log.i(TAG, message);
+        return tempFile;
     }
 
 }

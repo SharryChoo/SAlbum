@@ -18,11 +18,11 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.picker.PicturePickerContract;
 import com.frank.picturepicker.picker.presenter.PicturePickerPresenter;
 import com.frank.picturepicker.picker.view.adapter.PicturePickerAdapter;
+import com.frank.picturepicker.support.config.PickerConfig;
 import com.frank.picturepicker.widget.PicturePickerFabBehavior;
 import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
 import com.frank.picturepicker.widget.toolbar.Style;
-import com.frank.picturepicker.support.config.PickerConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,6 +118,9 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, mConfig.spanCount));
         mRecyclerView.setAdapter(new PicturePickerAdapter(this, mCurDisplayPaths, mConfig));
+        if (mConfig.pickerBackgroundColor != PickerConfig.INVALIDATE_VALUE) {
+            mRecyclerView.setBackgroundColor(mConfig.pickerBackgroundColor);
+        }
         // 底部菜单控制区域
         findViewById(R.id.ll_bottom_menu).setOnClickListener(this);
         mTvSelectedFolderName = findViewById(R.id.tv_folder_name);
@@ -167,6 +170,12 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
+    public void notifyCameraTakeOnePicture(String path) {
+        mCurDisplayPaths.add(0, path);
+        mRecyclerView.getAdapter().notifyItemInserted(1);
+    }
+
+    @Override
     public void showMsg(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
@@ -192,6 +201,11 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
+    public void onCameraClicked() {
+        mPresenter.performCameraClicked(this, mConfig);
+    }
+
+    @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ll_bottom_menu) {// 底部菜单按钮
             mPresenter.performBottomMenuClicked(this);
@@ -200,7 +214,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
-            mPresenter.performEnsureClicked(this);
+            mPresenter.performEnsureClicked(this, mConfig);
         }
     }
 

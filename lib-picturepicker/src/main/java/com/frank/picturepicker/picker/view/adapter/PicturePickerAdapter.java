@@ -50,6 +50,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
         void onPictureClicked(ImageView imageView, String uri, int position);
 
+        void onCameraClicked();
     }
 
     public PicturePickerAdapter(Context context, List<String> uris, PickerConfig config) {
@@ -86,20 +87,51 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        final String uri = mUris.get(position);
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+        holder.ivPicture.setBackgroundColor(mConfig.pickerItemBackgroundColor);
+        if (mConfig.isCameraSupport && position == 0) {
+            bindCameraHeader(holder);
+        } else {
+            int relativePosition = position - (mConfig.isCameraSupport ? 1 : 0);
+            final String uri = mUris.get(relativePosition);
+            bindItemView(holder, uri);
+        }
+    }
+
+    /**
+     * 绑定相机 Header 的数据
+     */
+    private void bindCameraHeader(ViewHolder holder) {
+        holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER);
+        holder.ivPicture.setImageResource(mConfig.cameraIconDrawableResId == PickerConfig.INVALIDATE_VALUE
+                ? R.drawable.activity_picture_picker_default_camera : mConfig.cameraIconDrawableResId);
+        holder.ivPicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mInteraction.onCameraClicked();
+            }
+        });
+        holder.checkIndicator.setVisibility(View.INVISIBLE);
+    }
+
+    /**
+     * 绑定普通视图的数据
+     */
+    private void bindItemView(final ViewHolder holder, final String uri) {
+        holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         PictureLoader.load(mContext, uri, holder.ivPicture);
-        // 判断当前 uri 是否被选中了
-        final int index = mInteraction.onUserPickedSet().indexOf(uri);
-        // 设置点击监听
         holder.ivPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mInteraction.onPictureClicked((ImageView) v, uri, mUris.indexOf(uri));
             }
         });
+        // 判断当前 uri 是否被选中了
+        final int index = mInteraction.onUserPickedSet().indexOf(uri);
+        // 设置点击监听
+        holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
-        holder.checkIndicator.setText(String.valueOf(mInteraction.onUserPickedSet().indexOf(uri) + 1));
+        holder.checkIndicator.setText(String.valueOf(index + 1));
         // 设置点击监听器
         holder.checkIndicator.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,7 +154,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
     @Override
     public int getItemCount() {
-        return mUris.size();
+        return mUris.size() + (mConfig.isCameraSupport ? 1 : 0);
     }
 
     /**

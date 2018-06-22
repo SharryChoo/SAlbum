@@ -29,8 +29,12 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
     // 用户已选中的图片地址集合
     private ArrayList<String> mPickedPictures;
 
+    // 当前正在展示的图片集合
+    private PictureFolder mCurrentDisplayFolder;
+
     // 图片的最大限量
     private int mThreshold;
+
 
     @Override
     public void setThreshold(int threshold) {
@@ -62,7 +66,8 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      */
     @Override
     public PictureFolder getPictureFolderAt(int index) {
-        return mFolderModels.get(index);
+        mCurrentDisplayFolder = mFolderModels.get(index);
+        return mCurrentDisplayFolder;
     }
 
     /**
@@ -74,9 +79,15 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
     }
 
     /**
+     * 设置当前选中的图片
+     */
+    @Override
+    public PictureFolder getCurDisplayFolder() {
+        return mCurrentDisplayFolder;
+    }
+
+    /**
      * 获取用户选中的图片
-     *
-     * @return
      */
     @Override
     public ArrayList<String> getUserPickedSet() {
@@ -97,8 +108,6 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
 
     /**
      * 移除用户选中的图片
-     *
-     * @param imagePath
      */
     @Override
     public void removePickedPicture(String imagePath) {

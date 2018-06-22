@@ -52,15 +52,36 @@
         android:padding="10dp">
 
         <CheckBox
-            android:id="@+id/checkbox"
+            android:id="@+id/checkboxCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="滑动动画" />
+            android:text="Camera" />
 
+        <CheckBox
+            android:id="@+id/checkboxCrop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crop" />
+
+        <CheckBox
+            android:id="@+id/checkboxBehavior"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Animation" />
     </LinearLayout>
 
     <Button
@@ -73,20 +94,6 @@
         android:background="@drawable/activity_main_btn"
         android:gravity="center"
         android:text="Launch Album"
-        android:textAllCaps="false"
-        android:textColor="#fff"
-        android:textSize="20dp" />
-
-    <Button
-        android:id="@+id/btnLaunchCamera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/activity_main_btn"
-        android:gravity="center"
-        android:text="Launch Camera"
         android:textAllCaps="false"
         android:textColor="#fff"
         android:textSize="20dp" />

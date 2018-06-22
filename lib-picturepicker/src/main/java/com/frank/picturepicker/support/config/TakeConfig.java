@@ -11,9 +11,12 @@ import android.os.Parcelable;
  */
 public class TakeConfig implements Parcelable {
 
-    public int destQuality = 80;// 拍照后压缩的质量
-    public String destFilePath;// 最终的文件路径
     public String authority;// fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
+    public int destQuality = 80;// 拍照后压缩的质量
+    public String cameraDestFilePath;// 最终的文件路径
+    // 裁剪后的参数
+    public boolean isCropSupport = false;// 拍摄后是否开启裁剪
+    public String cropDestFilePath;// 拍照后裁剪的路径
 
     public TakeConfig() {
 
@@ -21,7 +24,7 @@ public class TakeConfig implements Parcelable {
 
     protected TakeConfig(Parcel in) {
         destQuality = in.readInt();
-        destFilePath = in.readString();
+        cameraDestFilePath = in.readString();
         authority = in.readString();
     }
 
@@ -45,7 +48,7 @@ public class TakeConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(destQuality);
-        dest.writeString(destFilePath);
+        dest.writeString(cameraDestFilePath);
         dest.writeString(authority);
     }
 }

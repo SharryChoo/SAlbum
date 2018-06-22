@@ -21,16 +21,16 @@ import java.io.IOException;
  * Created by Frank on 2018/6/21.
  * Email: frankchoochina@gmail.com
  * Version: 1.0
- * Description:
+ * Description: 图片采集的工具类
  */
-class Util {
+class TakeUtil {
 
     /**
      * 图片压缩
      */
     static void doCompress(String originPath, String destPath, int quality) throws IOException {
         if (TextUtils.isEmpty(originPath)) {
-            throw new IllegalArgumentException("BitmapUtil.doCompress -> parameter originPath must not be null!");
+            throw new IllegalArgumentException("BitmapUtil.doCompress -> parameter originFilePath must not be null!");
         }
         if (TextUtils.isEmpty(destPath)) {
             throw new IllegalArgumentException("BitmapUtil.doCompress -> parameter destPath must not be null!");

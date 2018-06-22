@@ -32,8 +32,6 @@ public class PictureWatcherFragment extends Fragment {
      * Activity Result 相关
      */
     public static final int REQUEST_CODE_PICKED = 0x00001111;// 图片选择请求码
-    public static final int REQUEST_CODE_SETTING = 0x00002222;// 设置页面请求码
-    public static final int REQUEST_CODE_PERMISSIONS = 0x00003333;// 权限申请请求码
 
     public static final String RESULT_EXTRA_PICKED_PICTURES = "extra_picked_pictures";// 返回的图片
 
@@ -44,12 +42,7 @@ public class PictureWatcherFragment extends Fragment {
         return fragment;
     }
 
-    private String[] mPermissions = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
     private WatcherCallback mWatcherCallback;
-    private PermissionsCallback mPermissionsCallback;
 
     /**
      * 权限请求的接口
@@ -71,93 +64,15 @@ public class PictureWatcherFragment extends Fragment {
         this.mWatcherCallback = callback;
     }
 
-    /**
-     * 设置权限请求接口的回调
-     */
-    public void verifyPermission(@NonNull PermissionsCallback callback) {
-        mPermissionsCallback = callback;
-        if (isMarshmallow() && !isAllGranted()) {
-            requestPermissions(mPermissions, REQUEST_CODE_PERMISSIONS);
-        } else {
-            mPermissionsCallback.onResult(true);
-        }
-    }
-
-    @Override
-    @TargetApi(Build.VERSION_CODES.M)
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != REQUEST_CODE_PERMISSIONS) return;
-        boolean isAllGranted = isAllGranted();
-        if (isAllGranted) {
-            mPermissionsCallback.onResult(true);
-        } else {
-            showPermissionDeniedDialog();
-        }
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_PICKED && data != null && mWatcherCallback != null) {
             ArrayList<String> paths = data.getStringArrayListExtra(RESULT_EXTRA_PICKED_PICTURES);
             if (paths != null) {
-                mWatcherCallback.onResult(paths);
-            }
-        } else if (requestCode == REQUEST_CODE_SETTING) {
-            mPermissionsCallback.onResult(isAllGranted());
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private boolean isAllGranted() {
-        boolean isAllGranted = true;
-        for (String permission : mPermissions) {
-            if (isGranted(permission)) {
-                log("onRequestPermissionsResult: " + permission + " is Granted");
-            } else {
-                log("onRequestPermissionsResult: " + permission + " is Denied");
-                isAllGranted = false;
+                mWatcherCallback.onWatcherPickedComplete(paths);
             }
         }
-        return isAllGranted;
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    boolean isGranted(String permission) {
-        return getActivity().checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private void showPermissionDeniedDialog() {
-        //启动当前App的系统设置界面
-        AlertDialog dialog = new AlertDialog.Builder(getContext())
-                .setTitle("帮助")
-                .setMessage("当前应用缺少必要权限")
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mPermissionsCallback.onResult(false);
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("设置", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 启动当前App的系统设置界面
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        intent.setData(Uri.parse("package:" + getContext().getPackageName()));
-                        startActivityForResult(intent, REQUEST_CODE_SETTING);
-                    }
-                }).create();
-        dialog.show();
-    }
-
-    private boolean isMarshmallow() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
-    }
-
-    private void log(String message) {
-        Log.i(TAG, message);
-    }
 }
