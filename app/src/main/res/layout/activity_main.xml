@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
-            android:hint="Threshold"
+            android:hint="@string/activity_et_threshold_hint"
             android:inputType="number"
             android:padding="10dp"
             android:text="6"
@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
-            android:hint="SpanCount"
+            android:hint="@string/activity_et_span_count_hint"
             android:inputType="number"
             android:padding="10dp"
             android:text="3"
@@ -59,7 +59,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Camera" />
+            android:text="@string/activity_tv_camera" />
 
         <CheckBox
             android:id="@+id/checkboxCrop"
@@ -70,10 +70,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Crop" />
+            android:text="@string/activity_tv_crop" />
 
         <CheckBox
-            android:id="@+id/checkboxBehavior"
+            android:id="@+id/checkboxAnimation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp" />
@@ -81,7 +81,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Animation" />
+            android:text="@string/activity_tv_anim" />
     </LinearLayout>
 
     <Button
@@ -93,14 +93,9 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/activity_main_btn"
         android:gravity="center"
-        android:text="Launch Album"
+        android:text="@string/activity_btn_launch"
         android:textAllCaps="false"
         android:textColor="#fff"
         android:textSize="20dp" />
-
-    <ImageView
-        android:id="@+id/ivPicture"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </LinearLayout>

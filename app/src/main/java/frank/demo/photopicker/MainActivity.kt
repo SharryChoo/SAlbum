@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.frank.picturepicker.support.manager.picker.PicturePickerManager
+import com.frank.picturepicker.picturepicker.manager.PicturePickerManager
 import com.frank.picturepicker.widget.toolbar.GenericToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     private fun initTitle() {
         GenericToolbar.Builder(this)
                 .setBackgroundColorRes(R.color.colorPrimary)
-                .addTitleText("Album")
+                .addTitleText(getString(R.string.app_name))
                 .apply()
     }
 
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             PicturePickerManager.with(this)
                     .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
                     .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
-                    .isShowScrollBehavior(checkboxBehavior.isChecked)// Behavior 动画
+                    .isShowScrollBehavior(checkboxAnimation.isChecked)// Behavior 动画
                     .setToolbarBackgroundColorRes(R.color.colorPrimary) // Toolbar 背景设置
                     .setIndicatorSolidColorRes(R.color.colorPrimary)// 选中指示器的颜色
                     .setIndicatorBorderColorRes(R.color.colorPrimary, android.R.color.white)// 指示器边界的颜色
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                     // 开启相机支持
                     .setCameraSupport(checkboxCamera.isChecked)
                     .setFileProviderAuthority("$packageName.FileProvider")
-                    .setCameraDestQuality(70)
+                    .setCameraDestQuality(80)
                     .setCameraDestDirectory(APP_DIRECTORY)// 相机文件存储路径
                     // 开启图片裁剪支持
                     .setCropSupport(checkboxCrop.isChecked)
