@@ -16,6 +16,9 @@ public class TakeConfig implements Parcelable {
     public String cameraDestFilePath;// 最终的文件路径
     // 裁剪后的参数
     public boolean isCropSupport = false;// 拍摄后是否开启裁剪
+    public boolean isCropCircle = false;// 是否圆形裁剪
+    public int cropWidth = 500;// 裁剪的宽
+    public int cropHeight = 500;// 裁剪的高
     public String cropDestFilePath;// 拍照后裁剪的路径
 
     public TakeConfig() {

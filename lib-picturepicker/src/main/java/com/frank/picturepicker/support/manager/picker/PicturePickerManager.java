@@ -10,6 +10,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 
 import com.frank.picturepicker.picker.view.activity.PicturePickerActivity;
 import com.frank.picturepicker.support.callback.PickerCallback;
@@ -243,18 +244,18 @@ public class PicturePickerManager {
     }
 
     /**
-     * 设置目的文件
+     * 设置相机拍摄存储的路径文件夹
      */
-    public PicturePickerManager setCropDestFilePath(@NonNull String filePath) {
-        this.mConfig.cropDestFilePath = filePath;
+    public PicturePickerManager setCameraDestDirectory(@NonNull String directoryPath) {
+        this.mConfig.cameraDirectoryPath = directoryPath;
         return this;
     }
 
     /**
      * 设置拍照后的压缩质量
      */
-    public PicturePickerManager setCropDestQuality(int quality) {
-        mConfig.cropDestQuality = quality;
+    public PicturePickerManager setCameraDestQuality(int quality) {
+        mConfig.cameraDestQuality = quality;
         return this;
     }
 
@@ -267,24 +268,35 @@ public class PicturePickerManager {
     }
 
     /**
-     * 设置相机拍摄存储的路径文件夹
+     * 设置目的文件
      */
-    public PicturePickerManager setCameraDestDirectory(@NonNull String directoryPath) {
-        File file = new File(directoryPath);
-        if (!file.isDirectory()) {
-            throw new IllegalArgumentException(TAG + ".setCameraDestDirectory -> " +
-                    "Ensure parameter directory is file directory");
-        }
-        if (!file.exists()) file.mkdirs();
-        this.mConfig.cameraDirectoryPath = directoryPath;
+    public PicturePickerManager setCropDestFilePath(@NonNull String filePath) {
+        this.mConfig.cropDestFilePath = filePath;
         return this;
     }
 
     /**
-     * 设置拍照后的压缩质量
+     * 裁剪的宽高的设置
      */
-    public PicturePickerManager setCameraDestQuality(int quality) {
-        mConfig.cameraDestQuality = quality;
+    public PicturePickerManager setCropSize(int width, int height) {
+        mConfig.cropWidth = width;
+        mConfig.cropHeight = height;
+        return this;
+    }
+
+    /**
+     * 设置是否为圆形裁剪区域
+     */
+    public PicturePickerManager setCropCircle(boolean isCropCircle) {
+        mConfig.isCropCircle = isCropCircle;
+        return this;
+    }
+
+    /**
+     * 设置裁剪后的压缩质量
+     */
+    public PicturePickerManager setCropDestQuality(int quality) {
+        mConfig.cropDestQuality = quality;
         return this;
     }
 
@@ -313,12 +325,17 @@ public class PicturePickerManager {
      * 处理 PicturePickerActivity 的启动
      */
     private void startActual(PickerCallback pickerCallback) {
+        // 若用户设置了相机拍摄存储的目录, 则尝试创建目录
+        if (!TextUtils.isEmpty(mConfig.cameraDirectoryPath)) {
+            File file = new File(mConfig.cameraDirectoryPath);
+            if (!file.exists()) file.mkdirs();
+        }
         // 若开启了裁剪, 则只能选中一张图片
         if (mConfig.isCropSupport) {
             mConfig.threshold = 1;
             mConfig.userPickedSet = null;
         }
-        final Intent intent = new Intent(mActivity, PicturePickerActivity.class);
+        Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
         intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, mConfig);
         mPickerFragment.setPickerCallback(pickerCallback);

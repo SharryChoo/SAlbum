@@ -13,6 +13,7 @@ public class CropConfig implements Parcelable {
 
     public String originFilePath;
     public String destFilePath;
+    public boolean isCropCircle;
     public String authority;// fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
     public int aspectX = 1;// 方形 X 的比率
     public int aspectY = 1;// 方形 X 的比率

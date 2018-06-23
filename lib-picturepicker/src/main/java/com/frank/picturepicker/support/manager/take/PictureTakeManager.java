@@ -5,13 +5,12 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.frank.picturepicker.support.callback.PermissionsCallback;
 import com.frank.picturepicker.support.callback.TakeCallback;
 import com.frank.picturepicker.support.config.TakeConfig;
-import com.frank.picturepicker.support.callback.PermissionsCallback;
 import com.frank.picturepicker.support.manager.permission.PermissionsManager;
 
 import java.io.File;
@@ -81,6 +80,23 @@ public class PictureTakeManager {
      */
     public PictureTakeManager setCropSupport(boolean isCropSupport) {
         mConfig.isCropSupport = isCropSupport;
+        return this;
+    }
+
+    /**
+     * 裁剪的宽高的设置
+     */
+    public PictureTakeManager setCropSize(int width, int height) {
+        mConfig.cropWidth = width;
+        mConfig.cropHeight = height;
+        return this;
+    }
+
+    /**
+     * 设置是否为圆形裁剪区域
+     */
+    public PictureTakeManager setCropCircle(boolean isCropCircle) {
+        mConfig.isCropCircle = isCropCircle;
         return this;
     }
 

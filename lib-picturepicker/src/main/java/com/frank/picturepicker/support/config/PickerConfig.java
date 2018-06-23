@@ -49,8 +49,11 @@ public class PickerConfig implements Parcelable {
 
     // 是否裁剪支持
     public boolean isCropSupport = false;// 照片裁剪的支持
-    public String cropDestFilePath;// 拍照后的路径
-    public int cropDestQuality;// 拍照照片的质量
+    public boolean isCropCircle = false;// 是否圆形裁剪
+    public int cropWidth = 500;// 裁剪的宽
+    public int cropHeight = 500;// 裁剪的高
+    public String cropDestFilePath;// 裁剪后的路径
+    public int cropDestQuality = 80;// 裁剪照片的质量
 
     public PickerConfig() {
     }

@@ -66,8 +66,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      */
     @Override
     public PictureFolder getPictureFolderAt(int index) {
-        mCurrentDisplayFolder = mFolderModels.get(index);
-        return mCurrentDisplayFolder;
+        return mFolderModels.get(index);
     }
 
     /**
@@ -84,6 +83,10 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
     @Override
     public PictureFolder getCurDisplayFolder() {
         return mCurrentDisplayFolder;
+    }
+
+    public void setCurDisplayFolder(PictureFolder curDisplayFolder) {
+        this.mCurrentDisplayFolder = curDisplayFolder;
     }
 
     /**

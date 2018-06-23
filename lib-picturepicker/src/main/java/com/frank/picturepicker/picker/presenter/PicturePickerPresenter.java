@@ -1,5 +1,6 @@
 package com.frank.picturepicker.picker.presenter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -27,13 +28,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 /**
  * Created by think on 2018/5/26.
  * Email: frankchoochina@gmail.com
  * Version: 1.0
  * Description: 图片选择器的 Presenter
  */
-public class PicturePickerPresenter implements PicturePickerContract.IPresenter {
+public class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCallback, WatcherCallback, CropCallback {
 
     private PicturePickerContract.IView mView;
     private PicturePickerModel mModel = new PicturePickerModel();
@@ -66,6 +68,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                     public void run() {
                         // 展示第一个图片文件夹
                         PictureFolder allPictureFolder = mModel.getPictureFolderAt(0);
+                        mModel.setCurDisplayFolder(allPictureFolder);
                         if (mView == null) return;
                         mView.displayPictures(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
                         mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
@@ -88,9 +91,10 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
 
     @Override
     public void fetchDisplayPictures(int position) {
-        PictureFolder target = mModel.getPictureFolderAt(position);
+        PictureFolder curDisplayFolder = mModel.getPictureFolderAt(position);
+        mModel.setCurDisplayFolder(curDisplayFolder);
         if (mView == null) return;
-        mView.displayPictures(target.getFolderName(), target.getImagePaths());
+        mView.displayPictures(curDisplayFolder.getFolderName(), curDisplayFolder.getImagePaths());
     }
 
     @Override
@@ -105,22 +109,28 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
 
     @Override
     public boolean performPictureChecked(String uri) {
-        if (fetchUserPickedSet().size() == mModel.getThreshold()) {
-            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_over_threshold_prefix)
-                    + mModel.getThreshold()
-                    + mView.getString(R.string.activity_picture_picker_msg_over_threshold_suffix)
-            );
-            return false;
+        boolean result = isCanPickedPicture(true);
+        if (result) {
+            mModel.addPickedPicture(uri);
+            mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
         }
-        mModel.addPickedPicture(uri);
-        mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
-        return true;
+        return result;
     }
 
     @Override
     public void performPictureUnchecked(String imagePath) {
         mModel.removePickedPicture(imagePath);
         mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
+    }
+
+    @Override
+    public void performCameraClicked(final Context context, final PickerConfig config) {
+        PictureTakeManager.with(context)
+                .setFileProviderAuthority(config.authority)
+                .setCameraDestFilePath(new File(config.cameraDirectoryPath,
+                        new Date().getTime() + ".jpg").getAbsolutePath())
+                .setDestQuality(config.cameraDestQuality)
+                .take(this);
     }
 
     @Override
@@ -134,46 +144,12 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                 .setUserPickedSet(fetchUserPickedSet())
                 .setSharedElement(sharedElement)
                 .setPictureLoader(PictureLoader.getPictureLoader())
-                .start(new WatcherCallback() {
-                    @Override
-                    public void onWatcherPickedComplete(ArrayList<String> userPickedSet) {
-                        if (mView == null) return;
-                        setupUserPickedSet(userPickedSet);
-                        mView.notifyUserPickedSetChanged();
-                    }
-                });
-    }
-
-    @Override
-    public void performCameraClicked(final Context context, final PickerConfig config) {
-        if (fetchUserPickedSet().size() == mModel.getThreshold()) {
-            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_over_threshold_prefix)
-                    + mModel.getThreshold()
-                    + mView.getString(R.string.activity_picture_picker_msg_over_threshold_suffix)
-            );
-            return;
-        }
-        PictureTakeManager.with(context)
-                .setFileProviderAuthority(config.authority)
-                .setCameraDestFilePath(new File(config.cameraDirectoryPath,
-                        new Date().getTime() + ".jpg").getAbsolutePath())
-                .setDestQuality(config.cameraDestQuality)
-                .take(new TakeCallback() {
-                    @Override
-                    public void onTakeComplete(String path) {
-                        mModel.getCurDisplayFolder().getImagePaths().add(0, path);// 添加数据到 Model 中
-                        mModel.addPickedPicture(path);// 添加到选中集合
-                        mView.notifyCameraTakeOnePicture(path);// 通知拍摄了一张照片
-                    }
-                });
+                .start(this);
     }
 
     @Override
     public void performPreviewClicked(Context context, PickerConfig config) {
-        if (fetchUserPickedSet().size() == 0) {
-            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_preview_failed));
-            return;
-        }
+        if (!isCanLaunchPreview()) return;
         PictureWatcherManager.with(context)
                 .setThreshold(mModel.getThreshold())
                 .setIndicatorTextColor(config.indicatorTextColor)
@@ -182,40 +158,26 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                 .setPictureUris(fetchUserPickedSet(), 0)
                 .setUserPickedSet(fetchUserPickedSet())
                 .setPictureLoader(PictureLoader.getPictureLoader())
-                .start(new WatcherCallback() {
-                    @Override
-                    public void onWatcherPickedComplete(ArrayList<String> userPickedSet) {
-                        if (mView == null) return;
-                        setupUserPickedSet(userPickedSet);
-                        mView.notifyUserPickedSetChanged();
-                    }
-                });
+                .start(this);
     }
 
     @Override
     public void performEnsureClicked(final PicturePickerActivity bind, PickerConfig config) {
-        if (fetchUserPickedSet().size() == 0) {
-            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_ensure_failed));
-            return;
-        }
-        // 处理裁剪
-        if (config.isCropSupport) {
-            PictureCropManager.with(bind)
-                    .setFileProviderAuthority(config.authority)
-                    .setOriginFilePath(fetchUserPickedSet().get(0))
-                    .setDestFilePath(config.cropDestFilePath)
-                    .setQuality(config.cropDestQuality)
-                    .crop(new CropCallback() {
-                        @Override
-                        public void onCropComplete(String path) {
-                            fetchUserPickedSet().clear();
-                            fetchUserPickedSet().add(path);
-                            setResult(bind);
-                        }
-                    });
-        } else {
-            setResult(bind);
-        }
+        if (!isCanEnsure()) return;
+        // 不需要裁剪, 直接返回
+        if (!config.isCropSupport) performUserPickedSetResult();
+        // 需要裁剪, 则启动裁剪
+        PictureCropManager.with(bind)
+                .setFileProviderAuthority(config.authority)
+                .setDesireSize(config.cropWidth, config.cropHeight)
+                .setCropCircle(config.isCropCircle)
+                // 启动裁剪了只能选择一张图片
+                .setOriginFilePath(fetchUserPickedSet().get(0))
+                // 裁剪后存储的文件路径
+                .setDestFilePath(config.cropDestFilePath)
+                // 裁剪后压缩的质量
+                .setQuality(config.cropDestQuality)
+                .crop(this);
     }
 
     @Override
@@ -230,13 +192,93 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter 
                 .show();
     }
 
+    @Override
+    public void onTakeComplete(String path) {
+        // 添加到当前拍照的文件夹下
+        PictureFolder curFolder = mModel.getCurDisplayFolder();
+        curFolder.getImagePaths().add(0, path);
+        // 添加到所有文件的文件夹下
+        PictureFolder allPictureFolder = mModel.getPictureFolderAt(0);
+        if (allPictureFolder != curFolder) {
+            allPictureFolder.getImagePaths().add(0, path);
+        }
+        // 判断是否可以继续选择
+        if (isCanPickedPicture(false)) {
+            mModel.addPickedPicture(path);// 添加到选中的集合中
+            mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());// 更新文本
+        }
+        mView.notifyCameraTakeOnePicture(path);// 通知拍摄了一张照片
+    }
+
+    @Override
+    public void onWatcherPickedComplete(ArrayList<String> userPickedSet) {
+        if (mView == null) return;
+        setupUserPickedSet(userPickedSet);
+        mView.notifyUserPickedSetChanged();
+    }
+
+    @Override
+    public void onCropComplete(String path) {
+        fetchUserPickedSet().clear();
+        fetchUserPickedSet().add(path);
+        performUserPickedSetResult();
+    }
+
     /**
-     * 所有操作完成了
+     * 是否可以继续选择图片
+     *
+     * @param isShowFailedMsg 是否提示失败原因
+     * @return true is can picked, false is cannot picked.
      */
-    private void setResult(PicturePickerActivity bind) {
-        Intent intent = new Intent();
-        intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, fetchUserPickedSet());
-        bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
-        bind.finish();
+    private boolean isCanPickedPicture(boolean isShowFailedMsg) {
+        if (fetchUserPickedSet().size() == mModel.getThreshold()) {
+            if (isShowFailedMsg) {
+                mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_over_threshold_prefix)
+                        + mModel.getThreshold()
+                        + mView.getString(R.string.activity_picture_picker_msg_over_threshold_suffix)
+                );
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 是否可以启动图片预览
+     *
+     * @return true is can launch, false is cannot launch.
+     */
+    private boolean isCanLaunchPreview() {
+        if (fetchUserPickedSet().size() == 0) {
+            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_preview_failed));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 是否可以发起确认请求
+     *
+     * @return true is can ensure, false is cannot ensure.
+     */
+    private boolean isCanEnsure() {
+        if (fetchUserPickedSet().size() == 0) {
+            mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_ensure_failed));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 处理图片选择完成了
+     */
+    private void performUserPickedSetResult() {
+        if (mView != null && mView instanceof Activity) {
+            Activity bind = (Activity) mView;
+            Intent intent = new Intent();
+            intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, fetchUserPickedSet());
+            bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
+            bind.finish();
+        }
     }
 }

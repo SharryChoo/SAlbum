@@ -75,41 +75,31 @@ public class PictureCropFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
-        Uri uri = CropUtil.getUriFromFile(mContext, config.authority, new File(config.originFilePath));
-        intent.setDataAndType(uri, "image/*");//可以选择图片类型, 如果是*表明所有类型的图片
+        Uri originUri = CropUtil.getUriFromFile(mContext, config.authority, new File(config.originFilePath));
+        intent.setDataAndType(originUri, "image/*");//可以选择图片类型, 如果是*表明所有类型的图片
         intent.putExtra("crop", true);//设置可裁剪状态
         intent.putExtra("scale", config.aspectX == config.aspectY);//裁剪时是否保留图片的比例, 这里的比例是1:1
-        intent.putExtra("aspectX", config.aspectX);// aspectX, aspectY是宽高的比例，这里设置的是正方形
-        intent.putExtra("aspectY", config.aspectY);// aspectX, aspectY是宽高的比例，这里设置的是正方形
-        intent.putExtra("outputX", config.outputX);//outputX是裁剪图片宽
-        intent.putExtra("outputY", config.outputY);//outputY是裁剪图片高
+        intent.putExtra("aspectX", config.aspectX);// X方向上的比例
+        intent.putExtra("aspectY", config.aspectY);// Y方向上的比例
+        intent.putExtra("outputX", config.outputX);// 裁剪区域的宽
+        intent.putExtra("outputY", config.outputY);// 裁剪区域的宽
+        intent.putExtra("return-data", false);// 是否将数据保留在Bitmap中返回, 返回的缩略图效果模糊
         intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());//设置输出的格式
-        intent.putExtra("return-data", true);//是否将数据保留在Bitmap中返回
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(config.destFilePath)));// 裁剪后的保存路径, 这里的 URI 不需要区分
+        intent.putExtra("noFaceDetection", true);// 不启用人脸识别
         startActivityForResult(intent, REQUEST_CODE_CROP);
-        /*intent.putExtra(MediaStore.EXTRA_OUTPUT, cropImageUri);//该方法已经不可用
-         * Android4.4不能使用扩展卡，所以判断以后 使用了应用自己的目录，而不是扩展卡目录。
-         * 这样就是让第三方的裁剪应用把图片保存到自己的APP目录下，这显然是不可能的，可以通
-         * 过一些文件管理应用查看权限，这个目录只有应用本身才可以读写的，其它应用没有读写权
-         * 限。所以保存失败了。这样一来，扩展卡不能保存，第三方又不能跨APP保存，所以失败了。*/
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != REQUEST_CODE_CROP || resultCode != Activity.RESULT_OK
-                || mCropCallback == null || data == null) return;
-        // 压缩选中的 Bitmap
-        Bitmap bitmap = data.getParcelableExtra("data");
-        if (bitmap == null) return;
-        try {
-            // 回调
-            CropUtil.qualityCompress(bitmap, mConfig.destQuality, mConfig.destFilePath);
-            mCropCallback.onCropComplete(mConfig.destFilePath);
-            // 通知文件变更
-            CropUtil.freshMediaStore(mContext, new File(mConfig.destFilePath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                || mCropCallback == null) return;
+
+        // 回调
+        mCropCallback.onCropComplete(mConfig.destFilePath);
+        // 通知文件变更
+        CropUtil.freshMediaStore(mContext, new File(mConfig.destFilePath));
     }
 
 }

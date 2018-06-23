@@ -26,25 +26,6 @@ import java.io.IOException;
 class CropUtil {
 
     /**
-     * Bitmap 质量压缩
-     *
-     * @param srcBitmap    原始 Bitmap
-     * @param quality      压缩质量
-     * @param destFilePath 压缩后的文件
-     */
-    public static void qualityCompress(Bitmap srcBitmap, int quality, String destFilePath) throws IOException {
-        File file = new File(destFilePath);
-        if (file.exists()) file.delete();
-        file.createNewFile();
-        // 进行质量压缩
-        FileOutputStream out = new FileOutputStream(file);
-        // 采用有损的 jpeg 图片压缩
-        srcBitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
-        out.flush();
-        out.close();
-    }
-
-    /**
      * 刷新文件管理器
      */
     static void freshMediaStore(Context context, File file) {
@@ -55,6 +36,13 @@ class CropUtil {
      * 获取 URI
      */
     static Uri getUriFromFile(Context context, String authority, File file) {
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
                 FileProvider.getUriForFile(context, authority, file) : Uri.fromFile(file);
     }

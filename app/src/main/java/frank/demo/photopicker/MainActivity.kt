@@ -14,6 +14,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolutePath}${File.separator}PicturePicker"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViews() {
         btnLaunchAlbum.setOnClickListener {
+            if (TextUtils.isEmpty(etAlbumThreshold.text) || TextUtils.isEmpty(etSpanCount.text)) return@setOnClickListener
             PicturePickerManager.with(this)
                     .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
                     .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
@@ -42,12 +45,14 @@ class MainActivity : AppCompatActivity() {
                     .setCameraSupport(checkboxCamera.isChecked)
                     .setFileProviderAuthority("$packageName.FileProvider")
                     .setCameraDestQuality(70)
-                    .setCameraDestDirectory(Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_DCIM).absolutePath)// 相机文件存储路径
+                    .setCameraDestDirectory(APP_DIRECTORY)// 相机文件存储路径
                     // 开启图片裁剪支持
                     .setCropSupport(checkboxCrop.isChecked)
-                    .setCropDestFilePath(createFile().absolutePath)// 不指定, 使用默认的路径
-                    .setCropDestQuality(100)
+                    .setCropCircle(true)
+                    .setCropSize(1000, 1000)
+                    .setCropDestFilePath(File(APP_DIRECTORY,
+                            Date().time.toString() + ".jpg").absolutePath)// 不指定, 使用默认的路径
+                    .setCropDestQuality(80)
                     // 图片加载框架注入
                     .setPictureLoader { context, uri, imageView ->
                         Glide.with(context).load(uri).into(imageView)
@@ -57,14 +62,7 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
                         }
                     }
-            if (TextUtils.isEmpty(etAlbumThreshold.text) || TextUtils.isEmpty(etSpanCount.text)) return@setOnClickListener
         }
     }
-
-    private fun createFile(): File {
-        return File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                Date().time.toString() + ".jpg")
-    }
-
 
 }

@@ -5,14 +5,12 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.frank.picturepicker.support.callback.CropCallback;
 import com.frank.picturepicker.support.callback.PermissionsCallback;
 import com.frank.picturepicker.support.config.CropConfig;
-import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.manager.permission.PermissionsManager;
 
 import java.io.File;
@@ -49,6 +47,14 @@ public class PictureCropManager {
         this.mActivity = activity;
         this.mCropFragment = getCallbackFragment(activity);
         this.mConfig = new CropConfig();
+    }
+
+    /**
+     * 设置是否为圆形裁剪区域
+     */
+    public PictureCropManager setCropCircle(boolean isCropCircle) {
+        this.mConfig.isCropCircle = isCropCircle;
+        return this;
     }
 
     /**
