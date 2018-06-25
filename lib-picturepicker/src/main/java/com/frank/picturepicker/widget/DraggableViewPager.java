@@ -6,7 +6,10 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -35,6 +38,7 @@ public class DraggableViewPager extends ViewPager {
     private View mCapturedView;
     private VelocityTracker mVelocityTracker;
     private int mSharedElementPosition = -1;
+    private int mBackgroundColor = Color.BLACK;
 
     public DraggableViewPager(Context context) {
         this(context, null);
@@ -46,7 +50,6 @@ public class DraggableViewPager extends ViewPager {
     }
 
     private void init() {
-        setBackgroundColor(Color.BLACK);
         // 速度捕获器
         mVelocityTracker = VelocityTracker.obtain();
         // 规定拖拽到消失的阈值
@@ -76,6 +79,15 @@ public class DraggableViewPager extends ViewPager {
 
             }
         });
+    }
+
+    public void setBackgroundColorRes(@ColorRes int colorResId) {
+        setBackgroundColor(ContextCompat.getColor(getContext(), colorResId));
+    }
+
+    public void setBackgroundColor(@ColorInt int color) {
+        mBackgroundColor = color;
+        super.setBackgroundColor(mBackgroundColor);
     }
 
     /**
@@ -134,7 +146,7 @@ public class DraggableViewPager extends ViewPager {
                 float deltaY = (ev.getRawY() - mDownY) / 5;// 添加阻尼感
                 mCapturedView.setY(mCapturedOriginY + deltaY);
                 mFingerUpBkgAlpha = 1 - (Math.abs(deltaY) / mDragThresholdHeight);
-                setBackgroundColor(alphaColor(Color.BLACK, mFingerUpBkgAlpha));
+                setBackgroundColor(alphaColor(mBackgroundColor, mFingerUpBkgAlpha));
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
