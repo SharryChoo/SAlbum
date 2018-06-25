@@ -176,7 +176,7 @@ public class DraggableViewPager extends ViewPager {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float curY = (float) animation.getAnimatedValue();
                 mCapturedView.setY(curY);
-                setBackgroundColor(alphaColor(Color.BLACK, mFingerUpBkgAlpha
+                setBackgroundColor(alphaColor(mBackgroundColor, mFingerUpBkgAlpha
                         + (1 - mFingerUpBkgAlpha) * animation.getAnimatedFraction()));
             }
         });
@@ -211,7 +211,7 @@ public class DraggableViewPager extends ViewPager {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float curY = (float) animation.getAnimatedValue();
                 mCapturedView.setY(curY);
-                setBackgroundColor(alphaColor(Color.BLACK, mFingerUpBkgAlpha * (1 - animation.getAnimatedFraction())));
+                setBackgroundColor(alphaColor(mBackgroundColor, mFingerUpBkgAlpha * (1 - animation.getAnimatedFraction())));
             }
         });
         dismissAnim.addListener(new AnimatorListenerAdapter() {
