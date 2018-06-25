@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FrankPhotoPicker</string>
+    <string name="app_name">FrankPicturePicker</string>
 
     <string name="activity_et_threshold_hint">Threshold</string>
     <string name="activity_et_span_count_hint">Span Count</string>

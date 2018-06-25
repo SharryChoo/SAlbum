@@ -89,6 +89,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         if (mIsSharedElement) postponeEnterTransition();
         initTitle();
         initViews();
+        initData();
     }
 
     protected void parseIntent() {
@@ -173,14 +174,14 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                     LinearLayoutManager.HORIZONTAL, false));
         }
-        initData();
     }
 
-    private void initData() {
+    protected void initData() {
         // 填充数据
         for (String uri : mPictureUris) {
             PhotoView photoView = createPhotoView();
             mPhotoViews.add(photoView);
+            // 配置共享元素
             if (mIsSharedElement && uri.equals(mSharedKey)) {
                 ViewCompat.setTransitionName(photoView, mSharedKey);
                 photoView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -207,8 +208,10 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         mCurUri = mPictureUris.get(position);
         mCurView = mPhotoViews.get(position);
         // 更新当前页面共享元素的 key
-        ViewCompat.setTransitionName(mPhotoViews.get(mSharedPosition),
-                position == mSharedPosition ? mSharedKey : "");
+        if (mIsSharedElement) {
+            ViewCompat.setTransitionName(mPhotoViews.get(mSharedPosition),
+                    position == mSharedPosition ? mSharedKey : "");
+        }
         updateToolbarIndicatorCheckedStatus();// 更新 Title 选中标识
         updateToolbarIndicatorTextContent(); // 更新标题角标索引
         displayCurrentPhotoView();// 加载图片

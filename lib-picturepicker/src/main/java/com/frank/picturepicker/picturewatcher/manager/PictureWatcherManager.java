@@ -235,8 +235,8 @@ public class PictureWatcherManager {
             }
         } else {
             mPictureWatcherFragment.startActivityForResult(intent, PictureWatcherFragment.REQUEST_CODE_PICKED);
+            mActivity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         }
-        mActivity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     /**
