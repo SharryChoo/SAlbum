@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
+import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
@@ -132,8 +132,9 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void performPictureClicked(View sharedElement, String uri, int position, PickerConfig config, ArrayList<String> pictureUris) {
-        PictureWatcherManager.with(sharedElement.getContext())
+    public void performPictureClicked(Context context, ArrayList<String> pictureUris, int position,
+                                      PickerConfig config, ImageView sharedElement) {
+        PictureWatcherManager.with(context)
                 .setThreshold(mModel.getThreshold())
                 .setIndicatorTextColor(config.indicatorTextColor)
                 .setIndicatorSolidColor(config.indicatorSolidColor)

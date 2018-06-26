@@ -196,7 +196,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public void onPictureClicked(ImageView imageView, String uri, int position) {
-        mPresenter.performPictureClicked(imageView, uri, position, mConfig, mCurDisplayPaths);
+        mPresenter.performPictureClicked(this, mCurDisplayPaths, position, mConfig, imageView);
     }
 
     @Override

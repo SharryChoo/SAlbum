@@ -122,7 +122,7 @@ public class PictureCropFragment extends Fragment {
             mCropCallback.onCropComplete(mConfig.destFilePath);
             // 通知文件变更
             Utils.freshMediaStore(mContext, new File(mConfig.destFilePath));
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Picture compress failed after crop.", e);
         } finally {
             mTempFile.delete(); // 删除临时文件

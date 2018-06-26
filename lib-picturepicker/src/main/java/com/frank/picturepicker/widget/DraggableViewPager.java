@@ -6,12 +6,12 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -27,6 +27,7 @@ import android.view.animation.OvershootInterpolator;
  */
 public class DraggableViewPager extends ViewPager {
 
+    private static final int INVALIDATE_VALUE = -1;
     private float mDownX = 0f;
     private float mDownY = 0f;
     private float mDragThresholdHeight = 0f;// 拖动到可以返回的阈值
@@ -37,8 +38,8 @@ public class DraggableViewPager extends ViewPager {
     private boolean mIsAnimRunning = false;
     private View mCapturedView;
     private VelocityTracker mVelocityTracker;
-    private int mSharedElementPosition = -1;
-    private int mBackgroundColor = Color.BLACK;
+    private int mSharedElementPosition = INVALIDATE_VALUE;
+    private int mBackgroundColor = INVALIDATE_VALUE;
 
     public DraggableViewPager(Context context) {
         this(context, null);
@@ -81,13 +82,21 @@ public class DraggableViewPager extends ViewPager {
         });
     }
 
+    /**
+     * 设置背景色
+     *
+     * @param colorResId 颜色 ID
+     */
     public void setBackgroundColorRes(@ColorRes int colorResId) {
         setBackgroundColor(ContextCompat.getColor(getContext(), colorResId));
     }
 
-    public void setBackgroundColor(@ColorInt int color) {
-        mBackgroundColor = color;
-        super.setBackgroundColor(mBackgroundColor);
+    @Override
+    public void setBackgroundColor(int color) {
+        if (mBackgroundColor == INVALIDATE_VALUE) {
+            mBackgroundColor = color;
+        }
+        super.setBackgroundColor(color);
     }
 
     /**
@@ -146,7 +155,7 @@ public class DraggableViewPager extends ViewPager {
                 float deltaY = (ev.getRawY() - mDownY) / 5;// 添加阻尼感
                 mCapturedView.setY(mCapturedOriginY + deltaY);
                 mFingerUpBkgAlpha = 1 - (Math.abs(deltaY) / mDragThresholdHeight);
-                setBackgroundColor(alphaColor(mBackgroundColor, mFingerUpBkgAlpha));
+                setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBkgAlpha));
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
@@ -176,7 +185,7 @@ public class DraggableViewPager extends ViewPager {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float curY = (float) animation.getAnimatedValue();
                 mCapturedView.setY(curY);
-                setBackgroundColor(alphaColor(mBackgroundColor, mFingerUpBkgAlpha
+                setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBkgAlpha
                         + (1 - mFingerUpBkgAlpha) * animation.getAnimatedFraction()));
             }
         });
@@ -211,7 +220,7 @@ public class DraggableViewPager extends ViewPager {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float curY = (float) animation.getAnimatedValue();
                 mCapturedView.setY(curY);
-                setBackgroundColor(alphaColor(mBackgroundColor, mFingerUpBkgAlpha * (1 - animation.getAnimatedFraction())));
+                setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBkgAlpha * (1 - animation.getAnimatedFraction())));
             }
         });
         dismissAnim.addListener(new AnimatorListenerAdapter() {
@@ -227,6 +236,13 @@ public class DraggableViewPager extends ViewPager {
             }
         });
         dismissAnim.start();
+    }
+
+    /**
+     * 获取用于背景色渐变的基础颜色
+     */
+    private int getBaseColor() {
+        return mBackgroundColor == INVALIDATE_VALUE ? Color.BLACK : mBackgroundColor;
     }
 
     /**

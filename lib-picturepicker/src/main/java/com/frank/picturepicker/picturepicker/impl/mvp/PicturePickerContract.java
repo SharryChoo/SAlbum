@@ -3,7 +3,7 @@ package com.frank.picturepicker.picturepicker.impl.mvp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
-import android.view.View;
+import android.widget.ImageView;
 
 import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
@@ -111,7 +111,7 @@ public interface PicturePickerContract {
         /**
          * 处理图片被点击了
          */
-        void performPictureClicked(View sharedElement, String uri, int position, PickerConfig config, ArrayList<String> mCurDisplayPaths);
+        void performPictureClicked(Context context, ArrayList<String> curPaths, int position, PickerConfig config, ImageView sharedElement);
 
         /**
          * 处理预览按钮被点击了

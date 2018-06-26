@@ -39,6 +39,7 @@ public class Utils {
         // 1. 邻近采样压缩尺寸(Nearest Neighbour Resampling Compress)
         BitmapFactory.Options options = getBitmapOptions(originPath);
         Bitmap bitmap = BitmapFactory.decodeFile(originPath, options);
+        if(bitmap == null) return;
         // 2. 旋转一下 Bitmap
         bitmap = rotateBitmap(bitmap, readPictureAngle(originPath));
         // 3. 质量压缩(Quality Compress)
