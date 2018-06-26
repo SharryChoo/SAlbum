@@ -33,11 +33,12 @@ import java.util.List;
  * Version: 1.0
  * Description: 图片选择器的 Presenter
  */
-public class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCallback, WatcherCallback, CropCallback {
+public class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCallback, CropCallback, WatcherCallback {
 
     private PicturePickerContract.IView mView;
     private PicturePickerModel mModel = new PicturePickerModel();
     private Handler mMainLooperHandler = new Handler(Looper.getMainLooper());
+    private PickerConfig mConfig;
 
     @Override
     public void attach(PicturePickerContract.IView view) {
@@ -57,7 +58,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void initData(Context context) {
+    public void initData(Context context, PickerConfig config) {
+        this.mConfig = config;
         mModel.getSystemPictures(context, new PicturePickerContract.ModelInitializeCallback() {
             @Override
             public void onComplete(List<PictureFolder> pictureFolders) {
@@ -122,23 +124,23 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void performCameraClicked(final Context context, final PickerConfig config) {
-        PictureTakeManager.with(context)
-                .setFileProviderAuthority(config.authority)
-                .setCameraDestFilePath(new File(config.cameraDirectoryPath,
+    public void performCameraClicked() {
+        PictureTakeManager.with((Context) mView)
+                .setFileProviderAuthority(mConfig.authority)
+                .setCameraDestFilePath(new File(mConfig.cameraDirectoryPath,
                         new Date().getTime() + ".jpg").getAbsolutePath())
-                .setCameraDestQuality(config.cameraDestQuality)
+                .setCameraDestQuality(mConfig.cameraDestQuality)
                 .take(this);
     }
 
     @Override
-    public void performPictureClicked(Context context, ArrayList<String> pictureUris, int position,
-                                      PickerConfig config, ImageView sharedElement) {
-        PictureWatcherManager.with(context)
+    public void performPictureClicked(ArrayList<String> pictureUris, int position,
+                                      ImageView sharedElement) {
+        PictureWatcherManager.with((Context) mView)
                 .setThreshold(mModel.getThreshold())
-                .setIndicatorTextColor(config.indicatorTextColor)
-                .setIndicatorSolidColor(config.indicatorSolidColor)
-                .setIndicatorBorderColor(config.indicatorBorderCheckedColor, config.indicatorBorderUncheckedColor)
+                .setIndicatorTextColor(mConfig.indicatorTextColor)
+                .setIndicatorSolidColor(mConfig.indicatorSolidColor)
+                .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
                 .setPictureUris(pictureUris, position)
                 .setUserPickedSet(fetchUserPickedSet())
                 .setSharedElement(sharedElement)
@@ -147,13 +149,13 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void performPreviewClicked(Context context, PickerConfig config) {
+    public void performPreviewClicked() {
         if (!isCanLaunchPreview()) return;
-        PictureWatcherManager.with(context)
+        PictureWatcherManager.with((Context) mView)
                 .setThreshold(mModel.getThreshold())
-                .setIndicatorTextColor(config.indicatorTextColor)
-                .setIndicatorSolidColor(config.indicatorSolidColor)
-                .setIndicatorBorderColor(config.indicatorBorderCheckedColor, config.indicatorBorderUncheckedColor)
+                .setIndicatorTextColor(mConfig.indicatorTextColor)
+                .setIndicatorSolidColor(mConfig.indicatorSolidColor)
+                .setIndicatorBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor)
                 .setPictureUris(fetchUserPickedSet(), 0)
                 .setUserPickedSet(fetchUserPickedSet())
                 .setPictureLoader(PictureLoader.getPictureLoader())
@@ -161,30 +163,30 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void performEnsureClicked(final PicturePickerActivity bind, PickerConfig config) {
+    public void performEnsureClicked() {
         if (!isCanEnsure()) return;
         // 不需要裁剪, 直接返回
-        if (!config.isCropSupport) {
+        if (!mConfig.isCropSupport) {
             performUserPickedSetResult();
             return;
         }
         // 需要裁剪, 则启动裁剪
-        PictureCropManager.with(bind)
-                .setFileProviderAuthority(config.authority)
-                .setDesireSize(config.cropWidth, config.cropHeight)
-                .setCropCircle(config.isCropCircle)
+        PictureCropManager.with((Context) mView)
+                .setFileProviderAuthority(mConfig.authority)
+                .setDesireSize(mConfig.cropWidth, mConfig.cropHeight)
+                .setCropCircle(mConfig.isCropCircle)
                 // 启动裁剪了只能选择一张图片
                 .setOriginFilePath(fetchUserPickedSet().get(0))
                 // 裁剪后存储的文件路径
-                .setDestFilePath(config.cropDestFilePath)
+                .setDestFilePath(mConfig.cropDestFilePath)
                 // 裁剪后压缩的质量
-                .setQuality(config.cropDestQuality)
+                .setQuality(mConfig.cropDestQuality)
                 .crop(this);
     }
 
     @Override
-    public void performBottomMenuClicked(Context context) {
-        new PicturePickerDialog(context, fetchAllPictureFolders())
+    public void performBottomMenuClicked() {
+        new PicturePickerDialog((Context) mView, fetchAllPictureFolders())
                 .setOnItemClickedListener(new PicturePickerDialog.OnItemClickedListener() {
                     @Override
                     public void onDialogItemClicked(int position) {
@@ -192,6 +194,14 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
                     }
                 })
                 .show();
+    }
+
+    @Override
+    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> userPickedSet) {
+        if (mView == null) return;
+        setupUserPickedSet(userPickedSet);
+        if (isEnsure) performEnsureClicked();
+        else mView.notifyUserPickedSetChanged();
     }
 
     @Override
@@ -213,14 +223,6 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> userPickedSet) {
-        if (mView == null) return;
-        setupUserPickedSet(userPickedSet);
-        if (isEnsure) performUserPickedSetResult();// 若为确认返回则直接执行销毁当前页
-        else mView.notifyUserPickedSetChanged();
-    }
-
-    @Override
     public void onCropComplete(String path) {
         fetchUserPickedSet().clear();
         fetchUserPickedSet().add(path);
@@ -234,7 +236,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
      * @return true is can picked, false is cannot picked.
      */
     private boolean isCanPickedPicture(boolean isShowFailedMsg) {
-        if (fetchUserPickedSet().size() == mModel.getThreshold()) {
+        if (fetchUserPickedSet().size() == mModel.getThreshold() && mView != null) {
             if (isShowFailedMsg) {
                 mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_over_threshold_prefix)
                         + mModel.getThreshold()
@@ -252,7 +254,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
      * @return true is can launch, false is cannot launch.
      */
     private boolean isCanLaunchPreview() {
-        if (fetchUserPickedSet().size() == 0) {
+        if (fetchUserPickedSet().size() == 0 && mView != null) {
             mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_preview_failed));
             return false;
         }
@@ -265,7 +267,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
      * @return true is can ensure, false is cannot ensure.
      */
     private boolean isCanEnsure() {
-        if (fetchUserPickedSet().size() == 0) {
+        if (fetchUserPickedSet().size() == 0 && mView != null) {
             mView.showMsg(mView.getString(R.string.activity_picture_picker_msg_ensure_failed));
             return false;
         }

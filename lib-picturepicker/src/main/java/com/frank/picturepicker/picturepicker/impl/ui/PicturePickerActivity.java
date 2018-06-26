@@ -140,7 +140,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     protected void initData() {
-        mPresenter.initData(this);
+        mPresenter.initData(this, mConfig);
     }
 
     @Override
@@ -197,24 +197,24 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public void onPictureClicked(ImageView imageView, String uri, int position) {
-        mPresenter.performPictureClicked(this, mCurDisplayPaths, position, mConfig, imageView);
+        mPresenter.performPictureClicked( mCurDisplayPaths, position, imageView);
     }
 
     @Override
     public void onCameraClicked() {
-        mPresenter.performCameraClicked(this, mConfig);
+        mPresenter.performCameraClicked();
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ll_bottom_menu) {// 底部菜单按钮
-            mPresenter.performBottomMenuClicked(this);
+            mPresenter.performBottomMenuClicked();
         } else if (v.getId() == R.id.tv_preview) {// 预览按钮
-            mPresenter.performPreviewClicked(this, mConfig);
+            mPresenter.performPreviewClicked();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
-            mPresenter.performEnsureClicked(this, mConfig);
+            mPresenter.performEnsureClicked();
         }
     }
 

@@ -7,7 +7,6 @@ import android.widget.ImageView;
 
 import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
-import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +78,7 @@ public interface PicturePickerContract {
         /**
          * 初始化 Model 的数据
          */
-        void initData(Context context);
+        void initData(Context context, PickerConfig config);
 
         /**
          * 获取需要展示的图片
@@ -111,27 +110,27 @@ public interface PicturePickerContract {
         /**
          * 处理图片被点击了
          */
-        void performPictureClicked(Context context, ArrayList<String> curPaths, int position, PickerConfig config, ImageView sharedElement);
+        void performPictureClicked(ArrayList<String> curPaths, int position, ImageView sharedElement);
 
         /**
          * 处理预览按钮被点击了
          */
-        void performPreviewClicked(Context context, PickerConfig mConfig);
+        void performPreviewClicked();
 
         /**
          * 处理底部菜单被点击了
          */
-        void performBottomMenuClicked(Context context);
+        void performBottomMenuClicked();
 
         /**
          * 确认按钮被点击了
          */
-        void performEnsureClicked(PicturePickerActivity bind, PickerConfig config);
+        void performEnsureClicked();
 
         /**
          * 相机按钮被点击了
          */
-        void performCameraClicked(Context context, PickerConfig config);
+        void performCameraClicked();
     }
 
     interface IModel {
