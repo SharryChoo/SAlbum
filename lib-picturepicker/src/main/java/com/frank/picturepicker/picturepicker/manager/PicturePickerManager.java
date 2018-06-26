@@ -339,7 +339,7 @@ public class PicturePickerManager {
         }
         Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
-        intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, mConfig);
+        intent.putExtra(PicturePickerActivity.START_INTENT_EXTRA_CONFIG, mConfig);
         mPickerFragment.setPickerCallback(pickerCallback);
         mPickerFragment.startActivityForResult(intent, PicturePickerFragment.REQUEST_CODE_PICKED);
     }

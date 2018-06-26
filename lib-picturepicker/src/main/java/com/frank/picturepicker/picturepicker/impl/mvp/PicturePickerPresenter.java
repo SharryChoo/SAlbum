@@ -11,15 +11,15 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
 import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity;
 import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerDialog;
-import com.frank.picturepicker.pricturecrop.manager.CropCallback;
-import com.frank.picturepicker.picturetake.manager.TakeCallback;
-import com.frank.picturepicker.picturewatcher.manager.WatcherCallback;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
-import com.frank.picturepicker.support.loader.PictureLoader;
-import com.frank.picturepicker.pricturecrop.manager.PictureCropManager;
 import com.frank.picturepicker.picturepicker.manager.PicturePickerFragment;
 import com.frank.picturepicker.picturetake.manager.PictureTakeManager;
+import com.frank.picturepicker.picturetake.manager.TakeCallback;
 import com.frank.picturepicker.picturewatcher.manager.PictureWatcherManager;
+import com.frank.picturepicker.picturewatcher.manager.WatcherCallback;
+import com.frank.picturepicker.pricturecrop.manager.CropCallback;
+import com.frank.picturepicker.pricturecrop.manager.PictureCropManager;
+import com.frank.picturepicker.support.loader.PictureLoader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -213,10 +213,11 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void onWatcherPickedComplete(ArrayList<String> userPickedSet) {
+    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> userPickedSet) {
         if (mView == null) return;
         setupUserPickedSet(userPickedSet);
-        mView.notifyUserPickedSetChanged();
+        if (isEnsure) performUserPickedSetResult();// 若为确认返回则直接执行销毁当前页
+        else mView.notifyUserPickedSetChanged();
     }
 
     @Override
@@ -278,7 +279,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         if (mView != null && mView instanceof Activity) {
             Activity bind = (Activity) mView;
             Intent intent = new Intent();
-            intent.putExtra(PicturePickerFragment.RESULT_EXTRA_PICKED_PICTURES, fetchUserPickedSet());
+            intent.putExtra(PicturePickerActivity.RESULT_INTENT_EXTRA_PICKED_PICTURES, fetchUserPickedSet());
             bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
             bind.finish();
         }

@@ -22,7 +22,7 @@ import com.frank.picturepicker.support.permission.PermissionsManager;
 
 import java.util.ArrayList;
 
-import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity.EXTRA_SHARED_ELEMENT;
+import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity.START_INTENT_EXTRA_SHARED_ELEMENT;
 
 /**
  * Created by Frank on 2018/6/19.
@@ -215,12 +215,12 @@ public class PictureWatcherManager {
     private void startForResultActual(final WatcherCallback callback) {
         mPictureWatcherFragment.setPickerCallback(callback);
         Intent intent = new Intent(mActivity, PictureWatcherActivity.class);
-        intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, mConfig);
+        intent.putExtra(PictureWatcherActivity.START_INTENT_EXTRA_CONFIG, mConfig);
         // 5.0 以上的系统使用 Transition 跳转
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (mTransitionView != null) {
                 // 共享元素
-                intent.putExtra(EXTRA_SHARED_ELEMENT, true);
+                intent.putExtra(START_INTENT_EXTRA_SHARED_ELEMENT, true);
                 String transitionKey = mConfig.pictureUris.get(mConfig.position);
                 mTransitionView.setTransitionName(transitionKey);
                 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(

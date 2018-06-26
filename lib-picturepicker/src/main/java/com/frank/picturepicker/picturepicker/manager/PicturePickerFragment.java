@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity;
+
 import java.util.ArrayList;
 
 /**
@@ -20,7 +22,6 @@ public class PicturePickerFragment extends Fragment {
      * Activity Result 相关
      */
     public static final int REQUEST_CODE_PICKED = 0x00000011;// 图片选择请求码
-    public static final String RESULT_EXTRA_PICKED_PICTURES = "extra_picked_pictures";// 返回的图片
 
     public static PicturePickerFragment newInstance() {
         PicturePickerFragment fragment = new PicturePickerFragment();
@@ -48,7 +49,7 @@ public class PicturePickerFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_PICKED && data != null && mPickerCallback != null) {
-            ArrayList<String> paths = data.getStringArrayListExtra(RESULT_EXTRA_PICKED_PICTURES);
+            ArrayList<String> paths = data.getStringArrayListExtra(PicturePickerActivity.RESULT_INTENT_EXTRA_PICKED_PICTURES);
             if (paths != null) {
                 mPickerCallback.onPickedComplete(paths);
             }

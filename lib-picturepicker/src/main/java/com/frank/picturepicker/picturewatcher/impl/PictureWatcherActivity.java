@@ -23,6 +23,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,8 +54,13 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         PictureWatcherRecyclerAdapter.AdapterInteraction {
 
     private static final String TAG = PictureWatcherActivity.class.getSimpleName();
-    public static final String EXTRA_CONFIG = "extra_config";
-    public static final String EXTRA_SHARED_ELEMENT = "extra_shared_element";
+
+    // 启动时的 Extra
+    public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";
+    public static final String START_INTENT_EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
+    // 返回时的 Extra
+    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";// 返回的图片
+    public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";// 是否是确认选择
 
     // 数据的集合
     private WatcherConfig mConfig;
@@ -73,11 +79,14 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private CheckedIndicatorView mCheckIndicator;
     private TextView mTvTitle;
     private RecyclerView mRecyclerView;
+    private LinearLayout mllBottomContainer;
+    private TextView mTvEnsure;
 
     // 当前展示的 位置 和 URI
     private int mCurPosition;
     private String mCurUri;
     private PhotoView mCurView;
+    private boolean mIsEnsure = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,7 +102,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     protected void parseIntent() {
-        mConfig = getIntent().getParcelableExtra(EXTRA_CONFIG);
+        mConfig = getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG);
         // 获取需要展示图片的 URI 集合
         mPictureUris = mConfig.pictureUris == null ?
                 new ArrayList<String>() : mConfig.pictureUris;
@@ -103,7 +112,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         mCurPosition = mConfig.position;
         mCurUri = mPictureUris.get(mCurPosition);
         // 判断是否开启共享动画
-        mIsSharedElement = getIntent().getBooleanExtra(EXTRA_SHARED_ELEMENT, false);
+        mIsSharedElement = getIntent().getBooleanExtra(START_INTENT_EXTRA_SHARED_ELEMENT, false);
         if (mIsSharedElement) {
             mSharedPosition = mCurPosition;
             mSharedKey = mPictureUris.get(mSharedPosition);
@@ -112,7 +121,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     protected void setupWindowTransitions() {
         // 5.0 以上的系统使用 Transition 过渡动画
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+        if (!isLollipop()) return;
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         // 进出动画
         getWindow().setEnterTransition(mIsSharedElement ?
@@ -168,11 +177,26 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         mViewPager.setOnPagerChangedListener(this);
         // 初始化 RecyclerView
         if (mUserPickedSet != null) {
+            mllBottomContainer = findViewById(R.id.ll_bottom_container);
             mRecyclerView = findViewById(R.id.recycler_view);
-            mRecyclerView.setVisibility(mUserPickedSet.isEmpty() ? View.INVISIBLE : View.VISIBLE);
             mRecyclerView.setAdapter(new PictureWatcherRecyclerAdapter(mUserPickedSet, this));
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                     LinearLayoutManager.HORIZONTAL, false));
+            mTvEnsure = findViewById(R.id.tv_ensure);
+            mTvEnsure.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isLollipop()) getWindow().setReturnTransition(null);
+                    if (mIsSharedElement) getWindow().setSharedElementReturnTransition(null);
+                    // 更新标记位为确认按钮的返回
+                    mIsEnsure = true;
+                    onBackPressed();
+                }
+            });
+            // 初始化状态
+            mllBottomContainer.setVisibility(mUserPickedSet.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+            mTvEnsure.setText(getString(R.string.activity_picture_watcher_btn_ensure) +
+                    "(" + mUserPickedSet.size() + "/" + mConfig.threshold + ")");
         }
     }
 
@@ -227,7 +251,6 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             mCheckIndicator.setChecked(false);
             // 通知 RecyclerView 数据变更
             mRecyclerView.getAdapter().notifyItemRemoved(removedIndex);
-            if (mUserPickedSet.size() == 0) mRecyclerView.setVisibility(View.INVISIBLE);
         } else {// Unchecked -> Checked
             // 判断是否达到选择上限
             if (mUserPickedSet.size() < mConfig.threshold) {
@@ -236,7 +259,6 @@ public class PictureWatcherActivity extends AppCompatActivity implements
                 mCheckIndicator.setText(String.valueOf(addedIndex + 1));
                 mCheckIndicator.setChecked(true);
                 // 通知 RecyclerView 数据变更
-                mRecyclerView.setVisibility(View.VISIBLE);
                 mRecyclerView.getAdapter().notifyItemInserted(addedIndex);
                 mRecyclerView.smoothScrollToPosition(addedIndex);
             } else {
@@ -245,6 +267,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
                 mCheckIndicator.setChecked(false);
             }
         }
+        updateBottomMenuStatus();
     }
 
     @Override
@@ -259,7 +282,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     public void finish() {
         if (mUserPickedSet != null) {
             Intent intent = new Intent();
-            intent.putExtra(PictureWatcherFragment.RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
+            intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
+            intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, mIsEnsure);
             setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
         }
         super.finish();
@@ -288,6 +312,15 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         } else {
             mCheckIndicator.setChecked(false);
         }
+    }
+
+    /**
+     * 更新底部菜单的状态
+     */
+    private void updateBottomMenuStatus() {
+        mllBottomContainer.setVisibility(mUserPickedSet.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+        mTvEnsure.setText(getString(R.string.activity_picture_watcher_btn_ensure) +
+                "(" + mUserPickedSet.size() + "/" + mConfig.threshold + ")");
     }
 
     /**
@@ -327,5 +360,9 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             }
         });
         return photoView;
+    }
+
+    private boolean isLollipop() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 }

@@ -39,7 +39,8 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     /**
      * Intent 常量
      */
-    public static final String EXTRA_CONFIG = "extra_config";// 用户配置的属性
+    public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
+    public static final String RESULT_INTENT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
 
     /**
      * Toolbar 上添加的控件的 Tag
@@ -76,7 +77,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     protected void parseIntent() {
-        mConfig = getIntent().getParcelableExtra(EXTRA_CONFIG);
+        mConfig = getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG);
         // 获取外界传递过来, 用户已经获取到的图片的 URI 集合
         mPresenter.setupUserPickedSet(mConfig.userPickedSet);
         // 获取传入的阈值

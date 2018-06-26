@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity;
+
 import java.util.ArrayList;
 
 /**
@@ -21,8 +23,6 @@ public class PictureWatcherFragment extends Fragment {
      */
     public static final int REQUEST_CODE_PICKED = 0x00001111;// 图片选择请求码
 
-    public static final String RESULT_EXTRA_PICKED_PICTURES = "extra_picked_pictures";// 返回的图片
-
     public static PictureWatcherFragment newInstance() {
         PictureWatcherFragment fragment = new PictureWatcherFragment();
         Bundle args = new Bundle();
@@ -31,13 +31,6 @@ public class PictureWatcherFragment extends Fragment {
     }
 
     private WatcherCallback mWatcherCallback;
-
-    /**
-     * 权限请求的接口
-     */
-    public interface PermissionsCallback {
-        void onResult(boolean granted);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,9 +49,10 @@ public class PictureWatcherFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_PICKED && data != null && mWatcherCallback != null) {
-            ArrayList<String> paths = data.getStringArrayListExtra(RESULT_EXTRA_PICKED_PICTURES);
+            ArrayList<String> paths = data.getStringArrayListExtra(PictureWatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
+            boolean isEnsure = data.getBooleanExtra(PictureWatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
             if (paths != null) {
-                mWatcherCallback.onWatcherPickedComplete(paths);
+                mWatcherCallback.onWatcherPickedComplete(isEnsure, paths);
             }
         }
     }
