@@ -1,5 +1,6 @@
 package com.frank.picturepicker.pricturecrop.manager;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -69,13 +70,13 @@ public class PictureCropFragment extends Fragment {
     }
 
     /**
-     * 开始拍照
+     * 开始裁剪
      */
     public void cropPicture(CropConfig config, CropCallback callback) {
         this.mConfig = config;
         this.mCropCallback = callback;
         // 创建 TempFile
-        mTempFile = createTempFile();
+        mTempFile = Utils.createTempFile();
         // 获取 URI
         Uri originUri = Utils.getUriFromFile(mContext, config.authority, new File(config.originFilePath));
         Uri tempUri = Utils.getUriFromFile(mContext, config.authority, mTempFile);
@@ -113,8 +114,9 @@ public class PictureCropFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQUEST_CODE_CROP || resultCode != Activity.RESULT_OK
-                || mCropCallback == null) return;
+        if (requestCode != REQUEST_CODE_CROP ||
+                resultCode != Activity.RESULT_OK || mCropCallback == null)
+            return;
         try {
             // 将图片压缩到指定文夹(destFilePath)
             Utils.doCompress(mTempFile.getAbsolutePath(), mConfig.destFilePath, mConfig.destQuality);
@@ -129,19 +131,4 @@ public class PictureCropFragment extends Fragment {
         }
     }
 
-    /**
-     * 创建裁剪临时文件
-     */
-    private File createTempFile() {
-        // 创建临时文件
-        String tempFileName = "temp_crop_" + new Date().getTime() + ".jpg";
-        File tempFile = new File(mContext.getCacheDir(), tempFileName);
-        try {
-            if (tempFile.exists()) tempFile.delete();
-            tempFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return tempFile;
-    }
 }

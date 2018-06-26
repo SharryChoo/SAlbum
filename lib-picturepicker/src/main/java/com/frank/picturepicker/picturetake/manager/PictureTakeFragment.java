@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -15,6 +19,7 @@ import com.frank.picturepicker.support.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Frank on 2018/6/13.
@@ -72,10 +77,11 @@ public class PictureTakeFragment extends Fragment {
     public void takePicture(TakeConfig config, TakeCallback callback) {
         this.mConfig = config;
         this.mTakeCallback = callback;
-        mTempFile = Utils.createTempFile(mContext);
+        mTempFile = Utils.createTempFile();
+        Uri tempUri = Utils.getUriFromFile(mContext, mConfig.authority, mTempFile);
         // 启动相机
         Intent intent = new Intent(INTENT_ACTION_START_CAMERA);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Utils.getUriFromFile(mContext, mConfig.authority, mTempFile));
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
         startActivityForResult(intent, REQUEST_CODE_TAKE);
     }
 

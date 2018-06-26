@@ -9,6 +9,7 @@ import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class Utils {
         // 1. 邻近采样压缩尺寸(Nearest Neighbour Resampling Compress)
         BitmapFactory.Options options = getBitmapOptions(originPath);
         Bitmap bitmap = BitmapFactory.decodeFile(originPath, options);
-        if(bitmap == null) return;
+        if (bitmap == null) return;
         // 2. 旋转一下 Bitmap
         bitmap = rotateBitmap(bitmap, readPictureAngle(originPath));
         // 3. 质量压缩(Quality Compress)
@@ -66,10 +67,13 @@ public class Utils {
      *
      * @return 创建的文件
      */
-    public static File createTempFile(Context context) {
+    public static File createTempFile() {
+        // 创建临时文件目录
+        File tempDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        if (!tempDirectory.exists()) tempDirectory.mkdirs();
         // 创建临时文件
         String tempFileName = "temp_file_" + new Date().getTime() + ".jpg";
-        File tempFile = new File(context.getCacheDir(), tempFileName);
+        File tempFile = new File(tempDirectory, tempFileName);
         try {
             if (tempFile.exists()) tempFile.delete();
             tempFile.createNewFile();

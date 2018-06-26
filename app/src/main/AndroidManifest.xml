@@ -22,6 +22,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,9 +31,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity" />
+        <activity
+            android:name="com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity"
+            android:launchMode="singleTop" />
         <activity
             android:name="com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity"
+            android:launchMode="singleTop"
             android:theme="@style/TransparentTheme" />
     </application>
 
