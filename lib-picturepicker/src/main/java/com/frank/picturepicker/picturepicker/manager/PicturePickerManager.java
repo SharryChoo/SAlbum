@@ -324,12 +324,15 @@ public class PicturePickerManager {
      * 处理 PicturePickerActivity 的启动
      */
     private void startActual(PickerCallback pickerCallback) {
-        // 若用户设置了相机拍摄存储的目录, 则尝试创建目录
-        if (!TextUtils.isEmpty(mConfig.cameraDirectoryPath)) {
-            File file = new File(mConfig.cameraDirectoryPath);
-            if (!file.exists()) file.mkdirs();
-        } else {
-            mConfig.cameraDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
+        // 若开启了相机支持, 则创建目录
+        if (mConfig.isCameraSupport) {
+            // 若用户设置了相机拍摄存储的目录, 则尝试创建目录
+            if (!TextUtils.isEmpty(mConfig.cameraDirectoryPath)) {
+                File file = new File(mConfig.cameraDirectoryPath);
+                if (!file.exists()) file.mkdirs();
+            } else {
+                mConfig.cameraDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
+            }
         }
         // 若开启了裁剪, 则只能选中一张图片
         if (mConfig.isCropSupport) {

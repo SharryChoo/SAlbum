@@ -87,13 +87,13 @@ public class Utils {
     }
 
     /**
-     * 创建默认文件目录
+     * 创建默认文件目录(包名的最后一个字段/系统相册的目录)
      */
     public static File createDefaultDirectory(Context context) {
         // 获取默认路径
-        File defaultDir = TextUtils.isEmpty(getAppName(context)) ?
+        File defaultDir = TextUtils.isEmpty(getDefaultName(context)) ?
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
-                new File(Environment.getExternalStorageDirectory(), getAppName(context));
+                new File(Environment.getExternalStorageDirectory(), getDefaultName(context));
         if (!defaultDir.exists()) defaultDir.mkdirs();
         return defaultDir;
     }
@@ -147,19 +147,17 @@ public class Utils {
     }
 
     /**
-     * 获取 App 名字
+     * 获取默认文件名(包名的最后一个字段)
      */
-    private static String getAppName(Context context) {
-        try {
-            PackageManager packageManager = context.getPackageManager();
-            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
-            int labelRes = packageInfo.applicationInfo.labelRes;
-            return context.getResources().getString(labelRes);
-        } catch (Exception e) {
-            Log.e("Utils", "get app name failed.", e);
-        } finally {
-            return null;
+    private static String getDefaultName(Context context) {
+        String packageName = context.getPackageName();
+        if (!TextUtils.isEmpty(packageName)) {
+            int indexLastDot = packageName.lastIndexOf(".");
+            if (indexLastDot != -1) {
+                return packageName.substring(indexLastDot + 1);
+            }
         }
+        return null;
     }
 
     /**
