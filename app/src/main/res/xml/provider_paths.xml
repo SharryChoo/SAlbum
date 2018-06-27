@@ -3,7 +3,7 @@
     <!-- path 中的 . 代表去当前属性文件下所有的文件 -->
     <external-path
         name="external_files"
-        path="PicturePicker" />
+        path="." />
     <cache-path
         name="cache_files"
         path="." />

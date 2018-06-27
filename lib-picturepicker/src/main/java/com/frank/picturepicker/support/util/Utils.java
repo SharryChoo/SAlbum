@@ -106,7 +106,7 @@ public class Utils {
     public static File createDefaultCameraDestFile(Context context) {
         // 获取默认路径
         File defaultDir = createDefaultDirectory(context);
-        // 创建临时文件
+        // 创建拍照目标文件
         String defaultFileName = "camera_" + new Date().getTime() + ".jpg";
         File tempFile = new File(defaultDir, defaultFileName);
         try {
@@ -127,8 +127,7 @@ public class Utils {
     public static File createDefaultCropDestFile(Context context) {
         // 获取默认路径
         File defaultDir = createDefaultDirectory(context);
-        if (!defaultDir.exists()) defaultDir.mkdirs();
-        // 创建临时文件
+        // 创建裁剪目标文件
         String defaultFileName = "crop_" + new Date().getTime() + ".jpg";
         File tempFile = new File(defaultDir, defaultFileName);
         try {
@@ -153,14 +152,14 @@ public class Utils {
     private static String getAppName(Context context) {
         try {
             PackageManager packageManager = context.getPackageManager();
-            PackageInfo packageInfo = packageManager.getPackageInfo(
-                    context.getPackageName(), 0);
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
             int labelRes = packageInfo.applicationInfo.labelRes;
             return context.getResources().getString(labelRes);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e("Utils", "get app name failed.", e);
+        } finally {
+            return null;
         }
-        return null;
     }
 
     /**
