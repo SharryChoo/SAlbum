@@ -4,16 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
 import com.frank.picturepicker.support.util.Utils;
-
-import java.io.File;
-import java.util.Date;
 
 /**
  * Created by think on 2018/6/20.
