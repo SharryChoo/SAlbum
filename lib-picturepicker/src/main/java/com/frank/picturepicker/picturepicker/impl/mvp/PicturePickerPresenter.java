@@ -128,7 +128,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         PictureTakeManager.with((Context) mView)
                 .setFileProviderAuthority(mConfig.authority)
                 .setCameraDestFilePath(new File(mConfig.cameraDirectoryPath,
-                        new Date().getTime() + ".jpg").getAbsolutePath())
+                        "camera_" + new Date().getTime() + ".jpg").getAbsolutePath())
                 .setCameraDestQuality(mConfig.cameraDestQuality)
                 .take(this);
     }

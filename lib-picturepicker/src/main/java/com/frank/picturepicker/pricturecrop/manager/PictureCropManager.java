@@ -4,15 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
-
-import java.io.File;
-import java.util.Date;
+import com.frank.picturepicker.support.util.Utils;
 
 /**
  * Created by think on 2018/6/20.
@@ -130,12 +127,11 @@ public class PictureCropManager {
         }
         // 指定默认的裁剪路径
         if (TextUtils.isEmpty(mConfig.destFilePath)) {
-            mConfig.destFilePath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                    new Date().getTime() + ".jpg").getAbsolutePath();
+            mConfig.destFilePath = Utils.createDefaultCropDestFile(mActivity).getAbsolutePath();
         }
         // 指定默认, FileProvider 的 authority
         if (TextUtils.isEmpty(mConfig.authority)) {
-            mConfig.authority = mActivity.getPackageName() + ".FileProvider";
+            mConfig.authority = Utils.getDefaultFileProviderAuthority(mActivity);
         }
         mCropFragment.cropPicture(mConfig, callback);
     }

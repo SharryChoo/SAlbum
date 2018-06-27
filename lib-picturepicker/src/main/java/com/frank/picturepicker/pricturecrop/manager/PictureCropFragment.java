@@ -1,6 +1,5 @@
 package com.frank.picturepicker.pricturecrop.manager;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -17,8 +16,6 @@ import android.util.Log;
 import com.frank.picturepicker.support.util.Utils;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -76,7 +73,7 @@ public class PictureCropFragment extends Fragment {
         this.mConfig = config;
         this.mCropCallback = callback;
         // 创建 TempFile
-        mTempFile = Utils.createTempFile();
+        mTempFile = Utils.createTempFileByDestFile(config.destFilePath);
         // 获取 URI
         Uri originUri = Utils.getUriFromFile(mContext, config.authority, new File(config.originFilePath));
         Uri tempUri = Utils.getUriFromFile(mContext, config.authority, mTempFile);

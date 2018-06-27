@@ -18,6 +18,7 @@ import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
+import com.frank.picturepicker.support.util.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -329,8 +330,7 @@ public class PicturePickerManager {
             File file = new File(mConfig.cameraDirectoryPath);
             if (!file.exists()) file.mkdirs();
         } else {
-            mConfig.cameraDirectoryPath = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DCIM).getAbsolutePath();
+            mConfig.cameraDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
         }
         // 若开启了裁剪, 则只能选中一张图片
         if (mConfig.isCropSupport) {

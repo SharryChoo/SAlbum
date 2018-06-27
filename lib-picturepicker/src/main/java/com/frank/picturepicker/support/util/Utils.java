@@ -2,6 +2,8 @@ package com.frank.picturepicker.support.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -63,13 +65,14 @@ public class Utils {
     }
 
     /**
-     * 在 App 的 Cache 目录下创建临时文件
+     * 根据目的文件路径, 创建临时文件
      *
+     * @param destFilePath 目标文件路径
      * @return 创建的文件
      */
-    public static File createTempFile() {
-        // 创建临时文件目录
-        File tempDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+    public static File createTempFileByDestFile(String destFilePath) {
+        // 获取临时文件目录
+        File tempDirectory = new File(destFilePath).getParentFile();
         if (!tempDirectory.exists()) tempDirectory.mkdirs();
         // 创建临时文件
         String tempFileName = "temp_file_" + new Date().getTime() + ".jpg";
@@ -81,6 +84,83 @@ public class Utils {
             e.printStackTrace();
         }
         return tempFile;
+    }
+
+    /**
+     * 创建默认文件目录
+     */
+    public static File createDefaultDirectory(Context context) {
+        // 获取默认路径
+        File defaultDir = TextUtils.isEmpty(getAppName(context)) ?
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
+                new File(Environment.getExternalStorageDirectory(), getAppName(context));
+        if (!defaultDir.exists()) defaultDir.mkdirs();
+        return defaultDir;
+    }
+
+    /**
+     * 创建默认的拍照文件
+     *
+     * @return 创建的文件
+     */
+    public static File createDefaultCameraDestFile(Context context) {
+        // 获取默认路径
+        File defaultDir = createDefaultDirectory(context);
+        // 创建临时文件
+        String defaultFileName = "camera_" + new Date().getTime() + ".jpg";
+        File tempFile = new File(defaultDir, defaultFileName);
+        try {
+            if (tempFile.exists()) tempFile.delete();
+            tempFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
+
+    }
+
+    /**
+     * 创建默认的裁剪文件
+     *
+     * @return 创建的文件
+     */
+    public static File createDefaultCropDestFile(Context context) {
+        // 获取默认路径
+        File defaultDir = createDefaultDirectory(context);
+        if (!defaultDir.exists()) defaultDir.mkdirs();
+        // 创建临时文件
+        String defaultFileName = "crop_" + new Date().getTime() + ".jpg";
+        File tempFile = new File(defaultDir, defaultFileName);
+        try {
+            if (tempFile.exists()) tempFile.delete();
+            tempFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
+    }
+
+    /**
+     * 创建默认的 FileProvider 的 Authority
+     */
+    public static String getDefaultFileProviderAuthority(Context context) {
+        return context.getPackageName() + ".FileProvider";
+    }
+
+    /**
+     * 获取 App 名字
+     */
+    private static String getAppName(Context context) {
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(
+                    context.getPackageName(), 0);
+            int labelRes = packageInfo.applicationInfo.labelRes;
+            return context.getResources().getString(labelRes);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

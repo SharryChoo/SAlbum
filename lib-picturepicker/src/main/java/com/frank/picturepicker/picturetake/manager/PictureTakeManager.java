@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
+import com.frank.picturepicker.support.util.Utils;
 
 import java.io.File;
 import java.util.Date;
@@ -131,12 +132,11 @@ public class PictureTakeManager {
     private void takeActual(TakeCallback callback) {
         // 指定默认的拍照路径
         if (TextUtils.isEmpty(mConfig.cameraDestFilePath)) {
-            mConfig.cameraDestFilePath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                    new Date().getTime() + ".jpg").getAbsolutePath();
+            mConfig.cameraDestFilePath = Utils.createDefaultCameraDestFile(mActivity).getAbsolutePath();
         }
         // 若未指定 FileProvider 的 authority, 则给予默认值
         if (TextUtils.isEmpty(mConfig.authority)) {
-            mConfig.authority = mActivity.getPackageName() + ".FileProvider";
+            mConfig.authority = Utils.getDefaultFileProviderAuthority(mActivity);
         }
         mTakePhotoFragment.takePicture(mConfig, callback);
     }
