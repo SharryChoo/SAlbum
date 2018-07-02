@@ -54,14 +54,8 @@ class MainActivity : AppCompatActivity() {
                             Date().time.toString() + ".jpg").absolutePath)// 不指定, 使用默认的路径
                     .setCropDestQuality(80)
                     // 图片加载框架注入
-                    .setPictureLoader { context, uri, imageView ->
-                        Glide.with(context).load(uri).into(imageView)
-                    }
-                    .start {
-                        it.forEach {
-                            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                    .setPictureLoader { context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
+                    .start { it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() } }
         }
     }
 
