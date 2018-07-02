@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.format.DateFormat;
 import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
@@ -23,8 +24,10 @@ import com.frank.picturepicker.support.loader.PictureLoader;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -127,8 +130,11 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     public void performCameraClicked() {
         PictureTakeManager.with((Context) mView)
                 .setFileProviderAuthority(mConfig.authority)
-                .setCameraDestFilePath(new File(mConfig.cameraDirectoryPath,
-                        "camera_" + new Date().getTime() + ".jpg").getAbsolutePath())
+                .setCameraDestFilePath(
+                        new File(mConfig.cameraDirectoryPath,
+                                "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
+                                        Calendar.getInstance(Locale.CHINA)) + ".jpg").getAbsolutePath()
+                )
                 .setCameraDestQuality(mConfig.cameraDestQuality)
                 .take(this);
     }

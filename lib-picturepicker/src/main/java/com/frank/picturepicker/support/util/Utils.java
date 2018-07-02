@@ -14,12 +14,15 @@ import android.os.Build;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Frank on 2018/6/21.
@@ -75,7 +78,7 @@ public class Utils {
         File tempDirectory = new File(destFilePath).getParentFile();
         if (!tempDirectory.exists()) tempDirectory.mkdirs();
         // 创建临时文件
-        String tempFileName = "temp_file_" + new Date().getTime() + ".jpg";
+        String tempFileName = "temp_file_" + DateFormat.format("yyyyMMdd_HHmmss", Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File tempFile = new File(tempDirectory, tempFileName);
         try {
             if (tempFile.exists()) tempFile.delete();
@@ -107,7 +110,8 @@ public class Utils {
         // 获取默认路径
         File defaultDir = createDefaultDirectory(context);
         // 创建拍照目标文件
-        String defaultFileName = "camera_" + new Date().getTime() + ".jpg";
+        String defaultFileName = "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
+                Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File tempFile = new File(defaultDir, defaultFileName);
         try {
             if (tempFile.exists()) tempFile.delete();
@@ -128,7 +132,8 @@ public class Utils {
         // 获取默认路径
         File defaultDir = createDefaultDirectory(context);
         // 创建裁剪目标文件
-        String defaultFileName = "crop_" + new Date().getTime() + ".jpg";
+        String defaultFileName = "crop_" + DateFormat.format("yyyyMMdd_HHmmss",
+                Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File tempFile = new File(defaultDir, defaultFileName);
         try {
             if (tempFile.exists()) tempFile.delete();
