@@ -125,7 +125,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         // 进出动画
         getWindow().setEnterTransition(mIsSharedElement ?
-                new Explode().setDuration(300) : new Slide().setDuration(300));
+                new Fade().setDuration(300) : new Slide().setDuration(300));
         getWindow().setReturnTransition(new Fade().setDuration(300));
         // 共享元素动画设置
         ChangeBounds elementEnterTransition = new ChangeBounds();

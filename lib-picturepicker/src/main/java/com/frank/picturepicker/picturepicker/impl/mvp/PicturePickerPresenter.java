@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.format.DateFormat;
 import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
@@ -22,12 +21,8 @@ import com.frank.picturepicker.pricturecrop.manager.CropCallback;
 import com.frank.picturepicker.pricturecrop.manager.PictureCropManager;
 import com.frank.picturepicker.support.loader.PictureLoader;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 
 /**
@@ -130,12 +125,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     public void performCameraClicked() {
         PictureTakeManager.with((Context) mView)
                 .setFileProviderAuthority(mConfig.authority)
-                .setCameraDestFilePath(
-                        new File(mConfig.cameraDirectoryPath,
-                                "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
-                                        Calendar.getInstance(Locale.CHINA)) + ".jpg").getAbsolutePath()
-                )
-                .setCameraDestQuality(mConfig.cameraDestQuality)
+                .setCameraDirectoryPath(mConfig.cameraDirectoryPath)
+                .setCameraQuality(mConfig.cameraQuality)
                 .take(this);
     }
 
@@ -184,9 +175,9 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
                 // 启动裁剪了只能选择一张图片
                 .setOriginFilePath(fetchUserPickedSet().get(0))
                 // 裁剪后存储的文件路径
-                .setDestFilePath(mConfig.cropDestFilePath)
+                .setCropDirectoryPath(mConfig.cropDirectoryPath)
                 // 裁剪后压缩的质量
-                .setQuality(mConfig.cropDestQuality)
+                .setCropQuality(mConfig.cropQuality)
                 .crop(this);
     }
 

@@ -19,7 +19,6 @@ import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
 import com.frank.picturepicker.support.util.Utils;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -245,7 +244,7 @@ public class PicturePickerManager {
     /**
      * 设置相机拍摄存储的路径文件夹
      */
-    public PicturePickerManager setCameraDestDirectory(@NonNull String directoryPath) {
+    public PicturePickerManager setCameraDirectory(@NonNull String directoryPath) {
         this.mConfig.cameraDirectoryPath = directoryPath;
         return this;
     }
@@ -253,8 +252,8 @@ public class PicturePickerManager {
     /**
      * 设置拍照后的压缩质量
      */
-    public PicturePickerManager setCameraDestQuality(int quality) {
-        mConfig.cameraDestQuality = quality;
+    public PicturePickerManager setCameraQuality(int quality) {
+        mConfig.cameraQuality = quality;
         return this;
     }
 
@@ -286,16 +285,16 @@ public class PicturePickerManager {
     /**
      * 设置目的文件
      */
-    public PicturePickerManager setCropDestFilePath(@NonNull String filePath) {
-        this.mConfig.cropDestFilePath = filePath;
+    public PicturePickerManager setCropDirectory(@NonNull String fileDirectory) {
+        this.mConfig.cropDirectoryPath = fileDirectory;
         return this;
     }
 
     /**
      * 设置裁剪后的压缩质量
      */
-    public PicturePickerManager setCropDestQuality(int quality) {
-        mConfig.cropDestQuality = quality;
+    public PicturePickerManager setCropQuality(int quality) {
+        mConfig.cropQuality = quality;
         return this;
     }
 
@@ -326,11 +325,8 @@ public class PicturePickerManager {
     private void startActual(PickerCallback pickerCallback) {
         // 若开启了相机支持, 则创建目录
         if (mConfig.isCameraSupport) {
-            // 若用户设置了相机拍摄存储的目录, 则尝试创建目录
-            if (!TextUtils.isEmpty(mConfig.cameraDirectoryPath)) {
-                File file = new File(mConfig.cameraDirectoryPath);
-                if (!file.exists()) file.mkdirs();
-            } else {
+            // 若用户没有设置拍照路径, 则给予默认路径
+            if (TextUtils.isEmpty(mConfig.cameraDirectoryPath)) {
                 mConfig.cameraDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
             }
         }
@@ -338,6 +334,10 @@ public class PicturePickerManager {
         if (mConfig.isCropSupport) {
             mConfig.threshold = 1;
             mConfig.userPickedSet = null;
+            // 若用户没有设置裁剪路径, 则给予默认路径
+            if (TextUtils.isEmpty(mConfig.cropDirectoryPath)) {
+                mConfig.cropDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
+            }
         }
         Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量

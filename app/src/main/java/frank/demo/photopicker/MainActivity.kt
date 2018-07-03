@@ -10,7 +10,6 @@ import com.frank.picturepicker.picturepicker.manager.PicturePickerManager
 import com.frank.picturepicker.widget.toolbar.GenericToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,16 +42,15 @@ class MainActivity : AppCompatActivity() {
                     .setPickerItemBackgroundColorRes(android.R.color.white)// 条目背景色
                     // 开启相机支持
                     .setCameraSupport(checkboxCamera.isChecked)
-                    .setFileProviderAuthority("$packageName.FileProvider")
-                    .setCameraDestQuality(80)
-                    .setCameraDestDirectory(APP_DIRECTORY)// 相机文件存储路径
+                    .setFileProviderAuthority("$packageName.FileProvider")// 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
+                    .setCameraQuality(80)
+                    .setCameraDirectory(APP_DIRECTORY)// 相机文件存储路径
                     // 开启图片裁剪支持
                     .setCropSupport(checkboxCrop.isChecked)
-                    .setCropCircle(true)
+                    // .setCropCircle(true)// 功能暂未实现
                     .setCropSize(1000, 1000)
-                    .setCropDestFilePath(File(APP_DIRECTORY,
-                            Date().time.toString() + ".jpg").absolutePath)// 不指定, 使用默认的路径
-                    .setCropDestQuality(80)
+                    .setCropDirectory(APP_DIRECTORY)// 裁剪文件存储路径
+                    .setCropQuality(80)
                     // 图片加载框架注入
                     .setPictureLoader { context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
                     .start { it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() } }

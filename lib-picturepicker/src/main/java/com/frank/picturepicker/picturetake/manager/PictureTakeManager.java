@@ -49,15 +49,15 @@ public class PictureTakeManager {
     /**
      * 设置目的文件
      */
-    public PictureTakeManager setCameraDestFilePath(@NonNull String filePath) {
-        this.mConfig.cameraDestFilePath = filePath;
+    public PictureTakeManager setCameraDirectoryPath(@NonNull String filePath) {
+        this.mConfig.cameraDirectoryPath = filePath;
         return this;
     }
 
     /**
      * 设置拍照后的压缩质量
      */
-    public PictureTakeManager setCameraDestQuality(int quality) {
+    public PictureTakeManager setCameraQuality(int quality) {
         mConfig.cameraDestQuality = quality;
         return this;
     }
@@ -99,7 +99,7 @@ public class PictureTakeManager {
      * 设置裁剪后的路径
      */
     public PictureTakeManager setCropDestFilePath(@NonNull String filePath) {
-        mConfig.cropDestFilePath = filePath;
+        mConfig.cropDirectoryPath = filePath;
         return this;
     }
 
@@ -107,7 +107,7 @@ public class PictureTakeManager {
      * 设置拍照后的压缩质量
      */
     public PictureTakeManager setCropDestQuality(int quality) {
-        mConfig.cropDestQuality = quality;
+        mConfig.cropQuality = quality;
         return this;
     }
 
@@ -127,8 +127,13 @@ public class PictureTakeManager {
 
     private void takeActual(TakeCallback callback) {
         // 指定默认的拍照路径
-        if (TextUtils.isEmpty(mConfig.cameraDestFilePath)) {
-            mConfig.cameraDestFilePath = Utils.createDefaultCameraDestFile(mActivity).getAbsolutePath();
+        if (TextUtils.isEmpty(mConfig.cameraDirectoryPath)) {
+            mConfig.cameraDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
+        }
+        if (mConfig.isCropSupport) {
+            if (TextUtils.isEmpty(mConfig.cropDirectoryPath)) {
+                mConfig.cropDirectoryPath = mConfig.cameraDirectoryPath;
+            }
         }
         // 若未指定 FileProvider 的 authority, 则给予默认值
         if (TextUtils.isEmpty(mConfig.authority)) {

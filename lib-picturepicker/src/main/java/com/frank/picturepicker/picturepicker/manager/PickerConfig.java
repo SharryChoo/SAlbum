@@ -45,15 +45,15 @@ public class PickerConfig implements Parcelable {
     public boolean isCameraSupport = false;// 是否展示拍照功能
     public int cameraIconDrawableResId = INVALIDATE_VALUE;// 相机的资源文件
     public String cameraDirectoryPath;// 拍照后的路径
-    public int cameraDestQuality;// 拍照照片的质量
+    public int cameraQuality;// 拍照照片的质量
 
     // 是否裁剪支持
     public boolean isCropSupport = false;// 照片裁剪的支持
     public boolean isCropCircle = false;// 是否圆形裁剪
     public int cropWidth = 500;// 裁剪的宽
     public int cropHeight = 500;// 裁剪的高
-    public String cropDestFilePath;// 裁剪后的路径
-    public int cropDestQuality = 80;// 裁剪照片的质量
+    public String cropDirectoryPath;// 裁剪生成的目录
+    public int cropQuality = 80;// 裁剪照片的质量
 
     public PickerConfig() {
     }
@@ -75,10 +75,10 @@ public class PickerConfig implements Parcelable {
         isCameraSupport = in.readByte() != 0;
         cameraIconDrawableResId = in.readInt();
         cameraDirectoryPath = in.readString();
-        cameraDestQuality = in.readInt();
+        cameraQuality = in.readInt();
         isCropSupport = in.readByte() != 0;
-        cropDestFilePath = in.readString();
-        cropDestQuality = in.readInt();
+        cropDirectoryPath = in.readString();
+        cropQuality = in.readInt();
     }
 
     @Override
@@ -99,10 +99,10 @@ public class PickerConfig implements Parcelable {
         dest.writeByte((byte) (isCameraSupport ? 1 : 0));
         dest.writeInt(cameraIconDrawableResId);
         dest.writeString(cameraDirectoryPath);
-        dest.writeInt(cameraDestQuality);
+        dest.writeInt(cameraQuality);
         dest.writeByte((byte) (isCropSupport ? 1 : 0));
-        dest.writeString(cropDestFilePath);
-        dest.writeInt(cropDestQuality);
+        dest.writeString(cropDirectoryPath);
+        dest.writeInt(cropQuality);
     }
 
     @Override

@@ -72,7 +72,7 @@ public class PictureTakeFragment extends Fragment {
     public void takePicture(TakeConfig config, TakeCallback callback) {
         this.mConfig = config;
         this.mTakeCallback = callback;
-        mTempFile = Utils.createTempFileByDestFile(config.cameraDestFilePath);
+        mTempFile = Utils.createTempFileByDestDirectory(config.cameraDirectoryPath);
         Uri tempUri = Utils.getUriFromFile(mContext, mConfig.authority, mTempFile);
         // 启动相机
         Intent intent = new Intent(INTENT_ACTION_START_CAMERA);
@@ -86,46 +86,41 @@ public class PictureTakeFragment extends Fragment {
         if (requestCode != REQUEST_CODE_TAKE || resultCode != Activity.RESULT_OK) return;
         try {
             // 1. 将拍摄后的图片, 压缩到 cameraDestFile 中
-            Utils.doCompress(mTempFile.getAbsolutePath(), mConfig.cameraDestFilePath, mConfig.cameraDestQuality);
+            File cameraDestFile = Utils.createCameraDestFile(mConfig.cameraDirectoryPath);
+            Utils.doCompress(mTempFile.getAbsolutePath(), cameraDestFile.getAbsolutePath(), mConfig.cameraDestQuality);
             // 2. 处理图片裁剪
             if (mConfig.isCropSupport) {
-                performCropPicture();
+                performCropPicture(cameraDestFile.getAbsolutePath());
             } else {
                 // 3. 回调
-                callCameraCallback(mConfig.cameraDestFilePath);
+                mTakeCallback.onTakeComplete(cameraDestFile.getAbsolutePath());
                 // 刷新文件管理器
-                Utils.freshMediaStore(mContext, new File(mConfig.cameraDestFilePath));
+                Utils.freshMediaStore(mContext, cameraDestFile);
             }
         } catch (IOException e) {
             Log.e(TAG, "Picture compress failed after camera take.", e);
+        } finally {
+            mTempFile.delete();
         }
     }
 
     /**
      * 处理裁剪
      */
-    private void performCropPicture() {
+    private void performCropPicture(String cameraFilePath) {
         PictureCropManager.with(mContext)
                 .setFileProviderAuthority(mConfig.authority)
                 .setCropCircle(mConfig.isCropCircle)
                 .setDesireSize(mConfig.cropWidth, mConfig.cropHeight)// 期望的尺寸
-                .setOriginFilePath(mConfig.cameraDestFilePath)// 需要裁剪的文件路径
-                .setDestFilePath(mConfig.cropDestFilePath)// 裁剪后输出的文件路径
-                .setQuality(mConfig.cropDestQuality)// 拍摄后已经压缩一次了, 裁剪时不压缩
+                .setOriginFilePath(cameraFilePath)// 需要裁剪的文件路径
+                .setCropDirectoryPath(mConfig.cropDirectoryPath)// 裁剪后输出的文件路径
+                .setCropQuality(mConfig.cropQuality)// 拍摄后已经压缩一次了, 裁剪时不压缩
                 .crop(new CropCallback() {
                     @Override
                     public void onCropComplete(String path) {
-                        callCameraCallback(path);
+                        mTakeCallback.onTakeComplete(path);
                     }
                 });
-    }
-
-    /**
-     * 回调相机的 Callback
-     */
-    private void callCameraCallback(String path) {
-        mTakeCallback.onTakeComplete(path);
-        mTempFile.delete();
     }
 
 }

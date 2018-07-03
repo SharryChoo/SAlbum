@@ -89,15 +89,15 @@ public class PictureCropManager {
     /**
      * 设置需要裁剪的文件地址
      */
-    public PictureCropManager setDestFilePath(@NonNull String filePath) {
-        this.mConfig.destFilePath = filePath;
+    public PictureCropManager setCropDirectoryPath(@NonNull String filePath) {
+        this.mConfig.cropDirectoryPath = filePath;
         return this;
     }
 
     /**
      * 设置裁剪后压缩的质量
      */
-    public PictureCropManager setQuality(int quality) {
+    public PictureCropManager setCropQuality(int quality) {
         mConfig.destQuality = quality;
         return this;
     }
@@ -126,8 +126,8 @@ public class PictureCropManager {
                     "target path is valuable.");
         }
         // 指定默认的裁剪路径
-        if (TextUtils.isEmpty(mConfig.destFilePath)) {
-            mConfig.destFilePath = Utils.createDefaultCropDestFile(mActivity).getAbsolutePath();
+        if (TextUtils.isEmpty(mConfig.cropDirectoryPath)) {
+            mConfig.cropDirectoryPath = Utils.createDefaultDirectory(mActivity).getAbsolutePath();
         }
         // 指定默认, FileProvider 的 authority
         if (TextUtils.isEmpty(mConfig.authority)) {

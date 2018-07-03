@@ -68,14 +68,26 @@ public class Utils {
     }
 
     /**
+     * 创建默认文件目录(包名的最后一个字段/系统相册的目录)
+     */
+    public static File createDefaultDirectory(Context context) {
+        // 获取默认路径
+        File defaultDir = TextUtils.isEmpty(getDefaultName(context)) ?
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
+                new File(Environment.getExternalStorageDirectory(), getDefaultName(context));
+        if (!defaultDir.exists()) defaultDir.mkdirs();
+        return defaultDir;
+    }
+
+    /**
      * 根据目的文件路径, 创建临时文件
      *
-     * @param destFilePath 目标文件路径
+     * @param directoryPath 目标文件路径
      * @return 创建的文件
      */
-    public static File createTempFileByDestFile(String destFilePath) {
+    public static File createTempFileByDestDirectory(String directoryPath) {
         // 获取临时文件目录
-        File tempDirectory = new File(destFilePath).getParentFile();
+        File tempDirectory = new File(directoryPath);
         if (!tempDirectory.exists()) tempDirectory.mkdirs();
         // 创建临时文件
         String tempFileName = "temp_file_" + DateFormat.format("yyyyMMdd_HHmmss", Calendar.getInstance(Locale.CHINA)) + ".jpg";
@@ -90,58 +102,47 @@ public class Utils {
     }
 
     /**
-     * 创建默认文件目录(包名的最后一个字段/系统相册的目录)
-     */
-    public static File createDefaultDirectory(Context context) {
-        // 获取默认路径
-        File defaultDir = TextUtils.isEmpty(getDefaultName(context)) ?
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
-                new File(Environment.getExternalStorageDirectory(), getDefaultName(context));
-        if (!defaultDir.exists()) defaultDir.mkdirs();
-        return defaultDir;
-    }
-
-    /**
-     * 创建默认的拍照文件
+     * 创建拍照文件
      *
-     * @return 创建的文件
+     * @param directoryPath 文件目录路径
      */
-    public static File createDefaultCameraDestFile(Context context) {
+    public static File createCameraDestFile(String directoryPath) {
         // 获取默认路径
-        File defaultDir = createDefaultDirectory(context);
+        File dir = new File(directoryPath);
+        if (!dir.exists()) dir.mkdirs();
         // 创建拍照目标文件
-        String defaultFileName = "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
+        String fileName = "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
-        File tempFile = new File(defaultDir, defaultFileName);
+        File cameraFile = new File(dir, fileName);
         try {
-            if (tempFile.exists()) tempFile.delete();
-            tempFile.createNewFile();
+            if (cameraFile.exists()) cameraFile.delete();
+            cameraFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return tempFile;
-
+        return cameraFile;
     }
 
     /**
-     * 创建默认的裁剪文件
+     * 创建拍照文件
      *
-     * @return 创建的文件
+     * @param directoryPath 文件目录路径
      */
-    public static File createDefaultCropDestFile(Context context) {
+    public static File createCropDestFile(String directoryPath) {
         // 获取默认路径
-        File defaultDir = createDefaultDirectory(context);
-        // 创建裁剪目标文件
-        String defaultFileName = "crop_" + DateFormat.format("yyyyMMdd_HHmmss",
+        File dir = new File(directoryPath);
+        if (!dir.exists()) dir.mkdirs();
+        // 创建拍照目标文件
+        String fileName = "crop_" + DateFormat.format("yyyyMMdd_HHmmss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
-        File tempFile = new File(defaultDir, defaultFileName);
+        File cropFile = new File(dir, fileName);
         try {
-            if (tempFile.exists()) tempFile.delete();
-            tempFile.createNewFile();
+            if (cropFile.exists()) cropFile.delete();
+            cropFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return tempFile;
+        return cropFile;
     }
 
     /**

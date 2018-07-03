@@ -13,14 +13,14 @@ public class TakeConfig implements Parcelable {
 
     public String authority;// fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
     public int cameraDestQuality = 80;// 拍照后压缩的质量
-    public String cameraDestFilePath;// 最终的文件路径
+    public String cameraDirectoryPath;// 存储文件的目录路径
     // 裁剪后的参数
     public boolean isCropSupport = false;// 拍摄后是否开启裁剪
     public boolean isCropCircle = false;// 是否圆形裁剪
     public int cropWidth = 500;// 裁剪的宽
     public int cropHeight = 500;// 裁剪的高
-    public int cropDestQuality = 80;
-    public String cropDestFilePath;// 拍照后裁剪的路径
+    public int cropQuality = 80;
+    public String cropDirectoryPath;// 裁剪文件的目录路径
 
     public TakeConfig() {
 
@@ -28,7 +28,7 @@ public class TakeConfig implements Parcelable {
 
     protected TakeConfig(Parcel in) {
         cameraDestQuality = in.readInt();
-        cameraDestFilePath = in.readString();
+        cameraDirectoryPath = in.readString();
         authority = in.readString();
     }
 
@@ -52,7 +52,7 @@ public class TakeConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(cameraDestQuality);
-        dest.writeString(cameraDestFilePath);
+        dest.writeString(cameraDirectoryPath);
         dest.writeString(authority);
     }
 }

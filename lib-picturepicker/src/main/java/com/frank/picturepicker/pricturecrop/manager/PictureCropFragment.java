@@ -73,7 +73,7 @@ public class PictureCropFragment extends Fragment {
         this.mConfig = config;
         this.mCropCallback = callback;
         // 创建 TempFile
-        mTempFile = Utils.createTempFileByDestFile(config.destFilePath);
+        mTempFile = Utils.createTempFileByDestDirectory(config.cropDirectoryPath);
         // 获取 URI
         Uri originUri = Utils.getUriFromFile(mContext, config.authority, new File(config.originFilePath));
         Uri tempUri = Utils.getUriFromFile(mContext, config.authority, mTempFile);
@@ -115,12 +115,13 @@ public class PictureCropFragment extends Fragment {
                 resultCode != Activity.RESULT_OK || mCropCallback == null)
             return;
         try {
-            // 将图片压缩到指定文夹(destFilePath)
-            Utils.doCompress(mTempFile.getAbsolutePath(), mConfig.destFilePath, mConfig.destQuality);
+            // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
+            File destFile = Utils.createCropDestFile(mConfig.cropDirectoryPath);
+            Utils.doCompress(mTempFile.getAbsolutePath(), destFile.getAbsolutePath(), mConfig.destQuality);
             // 回调
-            mCropCallback.onCropComplete(mConfig.destFilePath);
+            mCropCallback.onCropComplete(destFile.getAbsolutePath());
             // 通知文件变更
-            Utils.freshMediaStore(mContext, new File(mConfig.destFilePath));
+            Utils.freshMediaStore(mContext, destFile);
         } catch (Exception e) {
             Log.e(TAG, "Picture compress failed after crop.", e);
         } finally {
