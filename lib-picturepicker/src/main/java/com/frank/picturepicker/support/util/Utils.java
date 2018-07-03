@@ -32,6 +32,8 @@ import java.util.Locale;
  */
 public class Utils {
 
+    private static final String TAG = Utils.class.getSimpleName();
+
     /**
      * 图片压缩
      */
@@ -95,8 +97,9 @@ public class Utils {
         try {
             if (tempFile.exists()) tempFile.delete();
             tempFile.createNewFile();
+            Log.i(TAG, "create temp file directory success -> " + tempFile.getAbsolutePath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "create temp file directory failed ->" + tempFile.getAbsolutePath(), e);
         }
         return tempFile;
     }
@@ -117,8 +120,9 @@ public class Utils {
         try {
             if (cameraFile.exists()) cameraFile.delete();
             cameraFile.createNewFile();
+            Log.i(TAG, "create camera file success -> " + cameraFile.getAbsolutePath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "create camera file failed -> " + cameraFile.getAbsolutePath(), e);
         }
         return cameraFile;
     }
@@ -139,8 +143,9 @@ public class Utils {
         try {
             if (cropFile.exists()) cropFile.delete();
             cropFile.createNewFile();
+            Log.i(TAG, "create crop file success -> " + cropFile.getAbsolutePath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "create crop file failed -> " + cropFile.getAbsolutePath(), e);
         }
         return cropFile;
     }
