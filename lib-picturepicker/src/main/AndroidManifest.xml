@@ -7,4 +7,17 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
+    <application
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name="com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity"
+            android:launchMode="singleTop" />
+        <activity
+            android:name="com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/TransparentTheme" />
+    </application>
+
 </manifest>

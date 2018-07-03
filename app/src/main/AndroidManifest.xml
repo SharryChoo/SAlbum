@@ -31,14 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity"
-            android:launchMode="singleTop" />
-        <activity
-            android:name="com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/TransparentTheme" />
     </application>
 
 </manifest>

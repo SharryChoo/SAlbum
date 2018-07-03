@@ -1,5 +1,12 @@
 <resources>
 
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#FF00b0ff</item>
+        <item name="colorPrimaryDark">#FF00b0ff</item>
+        <item name="colorAccent">#FF64b6f6</item>
+    </style>
+
     <!--透明主题-->
     <style name="TransparentTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
