@@ -19,7 +19,7 @@
     <LinearLayout
         android:id="@+id/ll_bottom_container"
         android:layout_width="match_parent"
-        android:layout_height="140dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="#a9000000"
         android:gravity="right"
@@ -34,12 +34,13 @@
         <TextView
             android:id="@+id/tv_ensure"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:layout_height="60dp"
             android:gravity="center"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
             android:text="@string/activity_picture_watcher_btn_ensure"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textSize="14dp" />
 
     </LinearLayout>
 

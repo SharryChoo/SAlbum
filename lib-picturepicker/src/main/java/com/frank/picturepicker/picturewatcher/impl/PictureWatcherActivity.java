@@ -1,9 +1,14 @@
 package com.frank.picturepicker.picturewatcher.impl;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +44,7 @@ import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
 import com.frank.picturepicker.widget.toolbar.Style;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
 /**
@@ -154,11 +160,11 @@ public class PictureWatcherActivity extends AppCompatActivity implements
                 onBackPressed();
             }
         });
-        // 设置标题文本
+        // 1. 设置标题文本
         toolbar.setTitleGravity(Gravity.LEFT);
         mTvTitle = toolbar.getTitleText();
         mTvTitle.setTextSize(20);
-        // 图片是否选中的指示器
+        // 2. 配置图片选中指示器
         if (mUserPickedSet == null) return;
         mCheckIndicator = new CheckedIndicatorView(this);
         mCheckIndicator.setChecked(false);
@@ -169,39 +175,25 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     protected void initViews() {
-        // 初始化 ViewPager
+        // 1. 初始化 ViewPager
         mViewPager = findViewById(R.id.view_pager);
         if (mIsSharedElement) mViewPager.setSharedElementPosition(mSharedPosition);
         mAdapter = new PictureWatcherAdapter(mPhotoViews);
         mViewPager.setAdapter(mAdapter);
         mViewPager.setOnPagerChangedListener(this);
-        // 初始化 RecyclerView
-        if (mUserPickedSet != null) {
-            mllBottomContainer = findViewById(R.id.ll_bottom_container);
-            mRecyclerView = findViewById(R.id.recycler_view);
-            mRecyclerView.setAdapter(new PictureWatcherRecyclerAdapter(mUserPickedSet, this));
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
-                    LinearLayoutManager.HORIZONTAL, false));
-            mTvEnsure = findViewById(R.id.tv_ensure);
-            mTvEnsure.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isLollipop()) getWindow().setReturnTransition(null);
-                    if (mIsSharedElement) getWindow().setSharedElementReturnTransition(null);
-                    // 更新标记位为确认按钮的返回
-                    mIsEnsure = true;
-                    onBackPressed();
-                }
-            });
-            // 初始化状态
-            mllBottomContainer.setVisibility(mUserPickedSet.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-            mTvEnsure.setText(getString(R.string.activity_picture_watcher_btn_ensure) +
-                    "(" + mUserPickedSet.size() + "/" + mConfig.threshold + ")");
-        }
+        // 2. 初始化底部菜单
+        if (mUserPickedSet == null) return;
+        mllBottomContainer = findViewById(R.id.ll_bottom_container);
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setAdapter(new PictureWatcherRecyclerAdapter(mUserPickedSet, this));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false));
+        mTvEnsure = findViewById(R.id.tv_ensure);
+        mTvEnsure.setOnClickListener(this);
     }
 
     protected void initData() {
-        // 填充数据
+        // 1. 填充 ViewPager 数据
         for (String uri : mPictureUris) {
             PhotoView photoView = createPhotoView();
             mPhotoViews.add(photoView);
@@ -219,10 +211,17 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             }
         }
         mAdapter.notifyDataSetChanged();
-        // 手动加载第一张需要展示的图片
-        onPagerChanged(mCurPosition);
-        mViewPager.bindCaptureView(mCurView);
-        mViewPager.setCurrentItem(mCurPosition, false);
+        onPagerChanged(mCurPosition); // 手动加载第一张需要展示的图片
+        mViewPager.bindCaptureView(mCurView);// 绑定第一张捕获的照片
+        mViewPager.setCurrentItem(mCurPosition, false);// 设置当前选中的图片
+        // 2. 更新底部菜单状态
+        if (mUserPickedSet == null) return;
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateBottomMenuStatus();
+            }
+        }, mIsSharedElement ? 500 : 0);
     }
 
     @Override
@@ -244,30 +243,39 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View v) {
-        if (mCheckIndicator.isChecked()) {// Checked-> Unchecked
-            // 移除选中数据与状态
-            int removedIndex = mUserPickedSet.indexOf(mCurUri);
-            mUserPickedSet.remove(removedIndex);
-            mCheckIndicator.setChecked(false);
-            // 通知 RecyclerView 数据变更
-            mRecyclerView.getAdapter().notifyItemRemoved(removedIndex);
-        } else {// Unchecked -> Checked
-            // 判断是否达到选择上限
-            if (mUserPickedSet.size() < mConfig.threshold) {
-                mUserPickedSet.add(mCurUri);
-                int addedIndex = mUserPickedSet.indexOf(mCurUri);
-                mCheckIndicator.setText(String.valueOf(addedIndex + 1));
-                mCheckIndicator.setChecked(true);
-                // 通知 RecyclerView 数据变更
-                mRecyclerView.getAdapter().notifyItemInserted(addedIndex);
-                mRecyclerView.smoothScrollToPosition(addedIndex);
-            } else {
-                Toast.makeText(this, getString(R.string.activity_picture_watcher_msg_over_threshold_prefix)
-                        + mConfig.threshold + getString(R.string.activity_picture_watcher_msg_over_threshold_suffix), Toast.LENGTH_SHORT).show();
+        if (v.getId() == R.id.tv_ensure) {// 确认按钮
+            if (isLollipop()) getWindow().setReturnTransition(null);
+            if (mIsSharedElement) getWindow().setSharedElementReturnTransition(null);
+            // 更新标记位为确认按钮的返回
+            mIsEnsure = true;
+            onBackPressed();
+        } else {
+            if (mCheckIndicator.isChecked()) {// Checked-> Unchecked
+                // 移除选中数据与状态
+                int removedIndex = mUserPickedSet.indexOf(mCurUri);
+                mUserPickedSet.remove(removedIndex);
                 mCheckIndicator.setChecked(false);
+                // 通知 RecyclerView 数据变更
+                mRecyclerView.getAdapter().notifyItemRemoved(removedIndex);
+            } else {// Unchecked -> Checked
+                // 判断是否达到选择上限
+                if (mUserPickedSet.size() < mConfig.threshold) {
+                    mUserPickedSet.add(mCurUri);
+                    int addedIndex = mUserPickedSet.indexOf(mCurUri);
+                    mCheckIndicator.setText(String.valueOf(addedIndex + 1));
+                    mCheckIndicator.setChecked(true);
+                    // 通知 RecyclerView 数据变更
+                    mRecyclerView.getAdapter().notifyItemInserted(addedIndex);
+                    mRecyclerView.smoothScrollToPosition(addedIndex);
+                } else {
+                    Toast.makeText(this, getString(R.string.activity_picture_watcher_msg_over_threshold_prefix)
+                                    + mConfig.threshold + getString(R.string.activity_picture_watcher_msg_over_threshold_suffix),
+                            Toast.LENGTH_SHORT).show();
+                    mCheckIndicator.setChecked(false);
+                }
             }
+            updateBottomMenuStatus();
         }
-        updateBottomMenuStatus();
     }
 
     @Override
@@ -279,7 +287,17 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onBackPressed() {
+        // 若为共享元素则在开始动画之前将底部选中菜单移除
+        if (mIsSharedElement) {
+            mllBottomContainer.setVisibility(View.INVISIBLE);
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     public void finish() {
+        // 回调数据
         if (mUserPickedSet != null) {
             Intent intent = new Intent();
             intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
@@ -297,7 +315,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private void updateToolbarIndicatorTextContent() {
         int nowPager = mCurPosition + 1;
         int AllPager = mPictureUris.size();
-        mTvTitle.setText(nowPager + "/" + AllPager);
+        mTvTitle.setText(MessageFormat.format("{0}/{1}", nowPager, AllPager));
     }
 
     /**
@@ -318,9 +336,31 @@ public class PictureWatcherActivity extends AppCompatActivity implements
      * 更新底部菜单的状态
      */
     private void updateBottomMenuStatus() {
-        mllBottomContainer.setVisibility(mUserPickedSet.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-        mTvEnsure.setText(getString(R.string.activity_picture_watcher_btn_ensure) +
-                "(" + mUserPickedSet.size() + "/" + mConfig.threshold + ")");
+        // 更新底部文本
+        mTvEnsure.setText(MessageFormat.format("{0}({1}/{2})",
+                getString(R.string.activity_picture_watcher_btn_ensure), mUserPickedSet.size(), mConfig.threshold));
+        // 更新底部视图
+        boolean beforeVisible = mllBottomContainer.getVisibility() == View.VISIBLE;
+        final boolean nowVisible = !mUserPickedSet.isEmpty();
+        if (beforeVisible != nowVisible) {
+            int startY = beforeVisible ? 0 : mllBottomContainer.getHeight();
+            int endY = beforeVisible ? mllBottomContainer.getHeight() : 0;
+            ObjectAnimator animator = ObjectAnimator.ofFloat(mllBottomContainer,
+                    "translationY", startY, endY);
+            animator.setDuration(200);
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mllBottomContainer.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mllBottomContainer.setVisibility(nowVisible ? View.VISIBLE : View.INVISIBLE);
+                }
+            });
+            animator.start();
+        }
     }
 
     /**

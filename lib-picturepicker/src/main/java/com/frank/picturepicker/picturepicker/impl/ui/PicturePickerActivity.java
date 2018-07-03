@@ -1,6 +1,5 @@
 package com.frank.picturepicker.picturepicker.impl.ui;
 
-import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -23,6 +22,7 @@ import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
 import com.frank.picturepicker.widget.toolbar.Style;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -155,13 +155,12 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
-    @SuppressLint("SetTextI18n")
     public void updateEnsureAndPreviewTextContent(int curPicked, int total) {
         if (mTvToolbarEnsure == null || mTvPreview == null) return;
-        mTvToolbarEnsure.setText(getString(R.string.activity_picture_picker_btn_toolbar_ensure)
-                + " (" + curPicked + "/" + total + ")");
-        mTvPreview.setText(getString(R.string.activity_picture_picker_btn_preview)
-                + " (" + curPicked + ")");
+        mTvToolbarEnsure.setText(MessageFormat.format("{0} ({1}/{2})",
+                getString(R.string.activity_picture_picker_btn_toolbar_ensure), curPicked, total));
+        mTvPreview.setText(MessageFormat.format("{0} ({1})",
+                getString(R.string.activity_picture_picker_btn_preview), curPicked));
     }
 
     @Override
