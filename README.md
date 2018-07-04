@@ -89,3 +89,14 @@ PictureCropManager.with(this)
     .setCropDirectory(APP_DIRECTORY)// 裁剪后图片存储目录
     .crop {Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
 ```
+### 图片查看器
+```
+PictureWatcherManager.with(this)
+    .setIndicatorBorderColorRes(R.color.colorPrimary, android.R.color.white)// 指示器边界的颜色
+    .setIndicatorSolidColorRes(R.color.colorPrimary)// 选中指示器的颜色
+    .setIndicatorTextColorRes(android.R.color.white)// 指示器文本颜色
+    .setPictureUris(uris, 0)// 需要展示图片集合
+    .setSharedElement(imageView)// 共享元素
+    .setPictureLoader{ context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
+    .start()
+```
