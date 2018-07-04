@@ -11,7 +11,7 @@ Add it in your root **build.gradle** at the end of repositories
 ```
 
 ### Step 2
-Add the dependency
+Add the dependency [![](https://jitpack.io/v/FrankChoo/PicturePicker.svg)](https://jitpack.io/#FrankChoo/PicturePicker)
 ```
 dependencies {
     implementation 'com.github.FrankChoo:PicturePicker:1.1.4'
