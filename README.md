@@ -1,4 +1,21 @@
+# Preview
+### 相机
+调用系统相机<br>
+![相机.gif](https://upload-images.jianshu.io/upload_images/4147272-ebb8f6e885be0bda.gif?imageMogr2/auto-orient/strip)
 
+### 裁剪
+调用系统裁剪<br>
+![裁剪.gif](https://upload-images.jianshu.io/upload_images/4147272-1eee096619c36bf3.gif?imageMogr2/auto-orient/strip)
+
+### 动画
+自定义了 Behavior 动画<br>
+![动画.gif](https://upload-images.jianshu.io/upload_images/4147272-26a38495218e541b.gif?imageMogr2/auto-orient/strip)
+
+### 运行时权限申请
+内部封装了运行时权限申请, 外界无需进行权限请求<br>
+![运行时权限.gif](https://upload-images.jianshu.io/upload_images/4147272-ce313ce1bf11ee0a.gif?imageMogr2/auto-orient/strip)
+
+# How to use
 ### Step 1
 Add it in your root **build.gradle** at the end of repositories
 ```
