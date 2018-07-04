@@ -25,20 +25,6 @@ dependencies {
 }
 ```
 
-# Preview([图片无法显示](http://note.youdao.com/noteshare?id=ee9a0d7909afc4e66b6dda57df10eda6&sub=125F838B572242DBA6B85FE66D89F77C))
-### 相机
-![相机.gif](https://upload-images.jianshu.io/upload_images/4147272-ebb8f6e885be0bda.gif?imageMogr2/auto-orient/strip)
-
-### 裁剪
-![裁剪.gif](https://upload-images.jianshu.io/upload_images/4147272-1eee096619c36bf3.gif?imageMogr2/auto-orient/strip)
-
-### 动画
-![动画.gif](https://upload-images.jianshu.io/upload_images/4147272-26a38495218e541b.gif?imageMogr2/auto-orient/strip)
-
-### 运行时权限申请
-![运行时权限.gif](https://upload-images.jianshu.io/upload_images/4147272-ce313ce1bf11ee0a.gif?imageMogr2/auto-orient/strip)
-
-
 # How to use
 ### 图片选择器(集成了拍照和裁剪)
 ```
