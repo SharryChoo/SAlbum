@@ -15,21 +15,21 @@
  *******************************************************************************/
 package com.frank.picturepicker.widget.photoview;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.widget.ImageView;
 
 /**
- * A zoomable {@link ImageView}. See {@link PhotoViewAttacher} for most of the details on how the zooming
+ * A zoomable {@link AppCompatImageView}. See {@link PhotoViewAttacher} for most of the details on how the zooming
  * is accomplished
  */
-public class PhotoView extends ImageView {
+public class PhotoView extends AppCompatImageView {
 
     private PhotoViewAttacher attacher;
     private ScaleType pendingScaleType;
@@ -44,12 +44,6 @@ public class PhotoView extends ImageView {
 
     public PhotoView(Context context, AttributeSet attr, int defStyle) {
         super(context, attr, defStyle);
-        init();
-    }
-
-    @TargetApi(21)
-    public PhotoView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
