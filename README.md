@@ -35,7 +35,7 @@ dependencies {
 ![运行时权限.gif](https://upload-images.jianshu.io/upload_images/4147272-ce313ce1bf11ee0a.gif?imageMogr2/auto-orient/strip)
 
 
-### How to use
+# How to use
 ```
 // 1. 图片选择器使用方式
 PicturePickerManager.with(this)
