@@ -86,3 +86,6 @@ PictureWatcherManager.with(this)
     .setPictureLoader{ context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
     .start()
 ```
+
+### 更多详情
+https://www.jianshu.com/p/84aef19097a6
