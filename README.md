@@ -2,19 +2,21 @@
 ### Step 1
 Add it in your root **build.gradle** at the end of repositories
 ```
-    allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
+allprojects {
+    repositories {
+	...
+	maven { url 'https://jitpack.io' }
+    }
+}
 ```
 
 ### Step 2
-Add the dependency [![](https://jitpack.io/v/FrankChoo/PicturePicker.svg)](https://jitpack.io/#FrankChoo/PicturePicker)
+Add it in your module **build.gradle** at the end of repositories<br>
+[![](https://jitpack.io/v/FrankChoo/PicturePicker.svg)](https://jitpack.io/#FrankChoo/PicturePicker)
 ```
 dependencies {
-    implementation 'com.github.FrankChoo:PicturePicker:1.1.4'
+    ...
+    implementation 'com.github.FrankChoo:PicturePicker:1.1.+'
     implementation 'com.android.support:appcompat-v7:27.+'
     implementation 'com.android.support:design:27.+'
     implementation 'com.android.support:recyclerview-v7:27.+'
