@@ -1,6 +1,7 @@
 package com.frank.picturepicker.picturepicker.impl.ui;
 
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -8,7 +9,16 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.ChangeBounds;
+import android.transition.ChangeImageTransform;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionSet;
 import android.view.View;
+import android.view.Window;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +27,7 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.impl.mvp.PicturePickerContract;
 import com.frank.picturepicker.picturepicker.impl.mvp.PicturePickerPresenter;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
+import com.frank.picturepicker.support.util.Utils;
 import com.frank.picturepicker.widget.PicturePickerFabBehavior;
 import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
@@ -68,9 +79,9 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        parseIntent();
         setContentView(R.layout.activity_picture_picker);
         mPresenter.attach(this);
-        parseIntent();
         initTitle();
         initViews();
         initData();

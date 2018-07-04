@@ -6,7 +6,6 @@ import android.app.ActivityOptions;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
@@ -19,6 +18,7 @@ import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
+import com.frank.picturepicker.support.util.Utils;
 
 import java.util.ArrayList;
 
@@ -42,19 +42,20 @@ public class PictureWatcherManager {
             throw new IllegalArgumentException("PictureWatcherManager.with -> Context can not cast to Activity");
         }
     }
+
     private String[] mPermissions = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
     private Activity mActivity;
     private WatcherConfig mConfig;
-    private PictureWatcherFragment mPictureWatcherFragment;
+    private PictureWatcherFragment mWatcherFragment;
     private View mTransitionView;
 
     private PictureWatcherManager(Activity activity) {
         this.mActivity = activity;
         this.mConfig = new WatcherConfig();
-        this.mPictureWatcherFragment = getCallbackFragment(mActivity);
+        this.mWatcherFragment = getCallbackFragment(mActivity);
     }
 
     /**
@@ -213,28 +214,25 @@ public class PictureWatcherManager {
      * 真正的执行 Activity 的启动(有回调)
      */
     private void startForResultActual(final WatcherCallback callback) {
-        mPictureWatcherFragment.setPickerCallback(callback);
+        mWatcherFragment.setPickerCallback(callback);
         Intent intent = new Intent(mActivity, PictureWatcherActivity.class);
         intent.putExtra(PictureWatcherActivity.START_INTENT_EXTRA_CONFIG, mConfig);
         // 5.0 以上的系统使用 Transition 跳转
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Utils.isLollipop()) {
+            ActivityOptions options = null;
             if (mTransitionView != null) {
                 // 共享元素
                 intent.putExtra(START_INTENT_EXTRA_SHARED_ELEMENT, true);
                 String transitionKey = mConfig.pictureUris.get(mConfig.position);
                 mTransitionView.setTransitionName(transitionKey);
-                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                options = ActivityOptions.makeSceneTransitionAnimation(
                         mActivity, Pair.create(mTransitionView, transitionKey));
-                mPictureWatcherFragment.startActivityForResult(intent,
-                        PictureWatcherFragment.REQUEST_CODE_PICKED, options.toBundle());
             } else {
-                mPictureWatcherFragment.startActivityForResult(
-                        intent, PictureWatcherFragment.REQUEST_CODE_PICKED,
-                        ActivityOptions.makeSceneTransitionAnimation(mActivity).toBundle()
-                );
+                options = ActivityOptions.makeSceneTransitionAnimation(mActivity);
             }
+            mWatcherFragment.startActivityForResult(intent, PictureWatcherFragment.REQUEST_CODE_PICKED, options.toBundle());
         } else {
-            mPictureWatcherFragment.startActivityForResult(intent, PictureWatcherFragment.REQUEST_CODE_PICKED);
+            mWatcherFragment.startActivityForResult(intent, PictureWatcherFragment.REQUEST_CODE_PICKED);
             mActivity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         }
     }

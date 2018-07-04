@@ -32,6 +32,10 @@ public class Utils {
 
     private static final String TAG = Utils.class.getSimpleName();
 
+    public static boolean isLollipop() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
     /**
      * 图片压缩
      */

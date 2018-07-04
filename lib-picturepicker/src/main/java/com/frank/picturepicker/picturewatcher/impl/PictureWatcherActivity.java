@@ -36,6 +36,7 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
 import com.frank.picturepicker.support.loader.PictureLoader;
+import com.frank.picturepicker.support.util.Utils;
 import com.frank.picturepicker.widget.CheckedIndicatorView;
 import com.frank.picturepicker.widget.DraggableViewPager;
 import com.frank.picturepicker.widget.photoview.OnPhotoTapListener;
@@ -127,7 +128,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     protected void setupWindowTransitions() {
         // 5.0 以上的系统使用 Transition 过渡动画
-        if (!isLollipop()) return;
+        if (!Utils.isLollipop()) return;
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         // 进出动画
         getWindow().setEnterTransition(mIsSharedElement ?
@@ -244,7 +245,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.tv_ensure) {// 确认按钮
-            if (isLollipop()) getWindow().setReturnTransition(null);
+            if (Utils.isLollipop()) getWindow().setReturnTransition(null);
             if (mIsSharedElement) getWindow().setSharedElementReturnTransition(null);
             // 更新标记位为确认按钮的返回
             mIsEnsure = true;
@@ -402,7 +403,4 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         return photoView;
     }
 
-    private boolean isLollipop() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
 }
