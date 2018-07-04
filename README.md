@@ -36,8 +36,8 @@ dependencies {
 
 
 # How to use
+### 图片选择器(集成了拍照和裁剪)
 ```
-// 1. 图片选择器使用方式
 PicturePickerManager.with(this)
     .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
     .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
@@ -60,8 +60,9 @@ PicturePickerManager.with(this)
     .setPictureLoader { context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
     // 获取图片选择的回调
     .start { it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() } }
-    
-// 2. 单独拍照模块使用方式
+```
+### 相机(集成了裁剪)
+```
 PictureTakeManager.with(this)
     .setFileProviderAuthority("$packageName.FileProvider")// 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
     .setCameraDirectory(APP_DIRECTORY)
@@ -73,8 +74,9 @@ PictureTakeManager.with(this)
     .setCropQuality(80)
     // 获取拍照后的图片回调
     .take { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
-    
-// 3. 裁剪模块单独使用的方式
+```  
+### 裁剪
+```
 PictureCropManager.with(this)
     .setFileProviderAuthority("$packageName.FileProvider")
     .setCropSize(1000, 1000)// 裁剪框的尺寸
