@@ -1,17 +1,4 @@
-# Preview
-### 相机
-![相机.gif](https://upload-images.jianshu.io/upload_images/4147272-ebb8f6e885be0bda.gif?imageMogr2/auto-orient/strip)
-
-### 裁剪
-![裁剪.gif](https://upload-images.jianshu.io/upload_images/4147272-1eee096619c36bf3.gif?imageMogr2/auto-orient/strip)
-
-### 动画
-![动画.gif](https://upload-images.jianshu.io/upload_images/4147272-26a38495218e541b.gif?imageMogr2/auto-orient/strip)
-
-### 运行时权限申请
-![运行时权限.gif](https://upload-images.jianshu.io/upload_images/4147272-ce313ce1bf11ee0a.gif?imageMogr2/auto-orient/strip)
-
-# How to use
+# How to integration
 ### Step 1
 Add it in your root **build.gradle** at the end of repositories
 ```
@@ -27,14 +14,28 @@ Add it in your root **build.gradle** at the end of repositories
 Add the dependency
 ```
 dependencies {
-    implementation 'com.github.FrankChoo:PicturePicker:1.1.3'
+    implementation 'com.github.FrankChoo:PicturePicker:1.1.4'
     implementation 'com.android.support:appcompat-v7:27.+'
     implementation 'com.android.support:design:27.+'
     implementation 'com.android.support:recyclerview-v7:27.+'
 }
 ```
 
-### Step 3
+# Preview
+### 相机
+![相机.gif](https://upload-images.jianshu.io/upload_images/4147272-ebb8f6e885be0bda.gif?imageMogr2/auto-orient/strip)
+
+### 裁剪
+![裁剪.gif](https://upload-images.jianshu.io/upload_images/4147272-1eee096619c36bf3.gif?imageMogr2/auto-orient/strip)
+
+### 动画
+![动画.gif](https://upload-images.jianshu.io/upload_images/4147272-26a38495218e541b.gif?imageMogr2/auto-orient/strip)
+
+### 运行时权限申请
+![运行时权限.gif](https://upload-images.jianshu.io/upload_images/4147272-ce313ce1bf11ee0a.gif?imageMogr2/auto-orient/strip)
+
+
+### How to use
 ```
 // 1. 图片选择器使用方式
 PicturePickerManager.with(this)
