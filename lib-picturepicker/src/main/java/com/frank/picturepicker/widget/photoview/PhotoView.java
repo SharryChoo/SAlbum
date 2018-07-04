@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.frank.picturepicker.widget.photoview;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -26,7 +27,7 @@ import android.view.GestureDetector;
 import android.widget.ImageView;
 
 /**
- * A zoomable {@link AppCompatImageView}. See {@link PhotoViewAttacher} for most of the details on how the zooming
+ * A zoomable {@link ImageView}. See {@link PhotoViewAttacher} for most of the details on how the zooming
  * is accomplished
  */
 public class PhotoView extends AppCompatImageView {
