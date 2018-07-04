@@ -7,6 +7,7 @@ import android.text.TextUtils
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.frank.picturepicker.picturepicker.manager.PicturePickerManager
+import com.frank.picturepicker.pricturecrop.manager.PictureCropManager
 import com.frank.picturepicker.widget.toolbar.GenericToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
@@ -43,13 +44,12 @@ class MainActivity : AppCompatActivity() {
                     // 开启相机支持
                     .setCameraSupport(checkboxCamera.isChecked)
                     .setFileProviderAuthority("$packageName.FileProvider")// 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
-                    .setCameraQuality(80)
                     .setCameraDirectory(APP_DIRECTORY)// 相机文件存储路径
+                    .setCameraQuality(80)
                     // 开启图片裁剪支持
                     .setCropSupport(checkboxCrop.isChecked)
-                    // .setCropCircle(true)// 功能暂未实现
-                    .setCropSize(1000, 1000)
                     .setCropDirectory(APP_DIRECTORY)// 裁剪文件存储路径
+                    .setCropSize(1000, 1000)
                     .setCropQuality(80)
                     // 图片加载框架注入
                     .setPictureLoader { context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }

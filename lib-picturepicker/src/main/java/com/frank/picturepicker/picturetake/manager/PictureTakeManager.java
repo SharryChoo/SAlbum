@@ -49,7 +49,7 @@ public class PictureTakeManager {
     /**
      * 设置目的文件
      */
-    public PictureTakeManager setCameraDirectoryPath(@NonNull String filePath) {
+    public PictureTakeManager setCameraDirectory(@NonNull String filePath) {
         this.mConfig.cameraDirectoryPath = filePath;
         return this;
     }
@@ -98,7 +98,7 @@ public class PictureTakeManager {
     /**
      * 设置裁剪后的路径
      */
-    public PictureTakeManager setCropDestFilePath(@NonNull String filePath) {
+    public PictureTakeManager setCropDirectory(@NonNull String filePath) {
         mConfig.cropDirectoryPath = filePath;
         return this;
     }
@@ -106,7 +106,7 @@ public class PictureTakeManager {
     /**
      * 设置拍照后的压缩质量
      */
-    public PictureTakeManager setCropDestQuality(int quality) {
+    public PictureTakeManager setCropQuality(int quality) {
         mConfig.cropQuality = quality;
         return this;
     }

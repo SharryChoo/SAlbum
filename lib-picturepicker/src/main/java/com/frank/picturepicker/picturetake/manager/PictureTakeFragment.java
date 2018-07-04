@@ -111,9 +111,9 @@ public class PictureTakeFragment extends Fragment {
         PictureCropManager.with(mContext)
                 .setFileProviderAuthority(mConfig.authority)
                 .setCropCircle(mConfig.isCropCircle)
-                .setDesireSize(mConfig.cropWidth, mConfig.cropHeight)// 期望的尺寸
-                .setOriginFilePath(cameraFilePath)// 需要裁剪的文件路径
-                .setCropDirectoryPath(mConfig.cropDirectoryPath)// 裁剪后输出的文件路径
+                .setCropSize(mConfig.cropWidth, mConfig.cropHeight)// 期望的尺寸
+                .setOriginFile(cameraFilePath)// 需要裁剪的文件路径
+                .setCropDirectory(mConfig.cropDirectoryPath)// 裁剪后输出的文件路径
                 .setCropQuality(mConfig.cropQuality)// 拍摄后已经压缩一次了, 裁剪时不压缩
                 .crop(new CropCallback() {
                     @Override

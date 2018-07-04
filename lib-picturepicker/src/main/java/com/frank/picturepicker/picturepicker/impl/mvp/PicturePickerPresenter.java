@@ -125,7 +125,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     public void performCameraClicked() {
         PictureTakeManager.with((Context) mView)
                 .setFileProviderAuthority(mConfig.authority)
-                .setCameraDirectoryPath(mConfig.cameraDirectoryPath)
+                .setCameraDirectory(mConfig.cameraDirectoryPath)
                 .setCameraQuality(mConfig.cameraQuality)
                 .take(this);
     }
@@ -170,12 +170,12 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         // 需要裁剪, 则启动裁剪
         PictureCropManager.with((Context) mView)
                 .setFileProviderAuthority(mConfig.authority)
-                .setDesireSize(mConfig.cropWidth, mConfig.cropHeight)
+                .setCropSize(mConfig.cropWidth, mConfig.cropHeight)
                 .setCropCircle(mConfig.isCropCircle)
                 // 启动裁剪了只能选择一张图片
-                .setOriginFilePath(fetchUserPickedSet().get(0))
+                .setOriginFile(fetchUserPickedSet().get(0))
                 // 裁剪后存储的文件路径
-                .setCropDirectoryPath(mConfig.cropDirectoryPath)
+                .setCropDirectory(mConfig.cropDirectoryPath)
                 // 裁剪后压缩的质量
                 .setCropQuality(mConfig.cropQuality)
                 .crop(this);

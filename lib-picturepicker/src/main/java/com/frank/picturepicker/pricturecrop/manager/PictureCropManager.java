@@ -55,7 +55,7 @@ public class PictureCropManager {
     /**
      * 设置裁剪的尺寸
      */
-    public PictureCropManager setDesireSize(int width, int height) {
+    public PictureCropManager setCropSize(int width, int height) {
         this.mConfig.outputX = width;
         this.mConfig.outputY = height;
         return this;
@@ -81,7 +81,7 @@ public class PictureCropManager {
     /**
      * 设置需要裁剪的文件地址
      */
-    public PictureCropManager setOriginFilePath(@NonNull String filePath) {
+    public PictureCropManager setOriginFile(@NonNull String filePath) {
         this.mConfig.originFilePath = filePath;
         return this;
     }
@@ -89,7 +89,7 @@ public class PictureCropManager {
     /**
      * 设置需要裁剪的文件地址
      */
-    public PictureCropManager setCropDirectoryPath(@NonNull String filePath) {
+    public PictureCropManager setCropDirectory(@NonNull String filePath) {
         this.mConfig.cropDirectoryPath = filePath;
         return this;
     }
