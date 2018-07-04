@@ -25,7 +25,7 @@ dependencies {
 }
 ```
 
-# Preview
+# Preview([图片无法显示](http://note.youdao.com/noteshare?id=ee9a0d7909afc4e66b6dda57df10eda6&sub=125F838B572242DBA6B85FE66D89F77C))
 ### 相机
 ![相机.gif](https://upload-images.jianshu.io/upload_images/4147272-ebb8f6e885be0bda.gif?imageMogr2/auto-orient/strip)
 
