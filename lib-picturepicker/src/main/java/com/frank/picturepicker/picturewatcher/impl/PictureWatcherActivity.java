@@ -290,7 +290,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         // 若为共享元素则在开始动画之前将底部选中菜单移除
-        if (mIsSharedElement) {
+        if (mIsSharedElement && mUserPickedSet != null) {
             mllBottomContainer.setVisibility(View.INVISIBLE);
         }
         super.onBackPressed();
