@@ -1,7 +1,6 @@
 package com.frank.picturepicker.picturepicker.impl.ui;
 
 import android.content.res.ColorStateList;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -9,16 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.ChangeBounds;
-import android.transition.ChangeImageTransform;
-import android.transition.Explode;
-import android.transition.Fade;
-import android.transition.Slide;
-import android.transition.Transition;
-import android.transition.TransitionSet;
 import android.view.View;
-import android.view.Window;
-import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +17,6 @@ import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.impl.mvp.PicturePickerContract;
 import com.frank.picturepicker.picturepicker.impl.mvp.PicturePickerPresenter;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
-import com.frank.picturepicker.support.util.Utils;
 import com.frank.picturepicker.widget.PicturePickerFabBehavior;
 import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
@@ -40,7 +29,7 @@ import java.util.List;
 /**
  * Created by think on 2018/5/26.
  * Email: frankchoochina@gmail.com
- * Version: 1.0
+ * Version: 1.2
  * Description: 图片选择器的 Activity
  */
 public class PicturePickerActivity extends AppCompatActivity implements PicturePickerContract.IView,
@@ -62,9 +51,6 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     private PicturePickerContract.IPresenter mPresenter = new PicturePickerPresenter();
 
-    // 通过 Intent 传递过来的数据
-    private PickerConfig mConfig;
-
     // View 视图
     private GenericToolbar mToolbar;
     private RecyclerView mRecyclerView;
@@ -75,6 +61,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     // 用于保存数据的相关集合
     private ArrayList<String> mCurDisplayPaths = new ArrayList<>();// 用户选中的文件夹下所有图片的集合
+    private FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,11 +75,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     protected void parseIntent() {
-        mConfig = getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG);
-        // 获取外界传递过来, 用户已经获取到的图片的 URI 集合
-        mPresenter.setupUserPickedSet(mConfig.userPickedSet);
-        // 获取传入的阈值
-        mPresenter.setupThreshold(mConfig.threshold);
+        mPresenter.init((PickerConfig) getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG));
     }
 
     protected void initTitle() {
@@ -100,20 +83,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         AppBarHelper.with(this).setStatusBarStyle(Style.TRANSPARENT).apply();
         // 初始化视图
         mToolbar = findViewById(R.id.toolbar);
-        // 是否开启滚动动画
-        if (mConfig.isShowScrollBehavior) {
-            AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
-            params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-                    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
-                    | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP);
-            mToolbar.setLayoutParams(params);
-        }
         mToolbar.setAdjustToTransparentStatusBar(true);
-        // 设置背景
-        if (mConfig.toolbarBkgColor != PickerConfig.INVALIDATE_VALUE)
-            mToolbar.setBackgroundColor(mConfig.toolbarBkgColor);
-        if (mConfig.toolbarBkgDrawableResId != PickerConfig.INVALIDATE_VALUE)
-            mToolbar.setBackgroundDrawableRes(mConfig.toolbarBkgDrawableResId);
         // 添加返回按钮
         mToolbar.addLeftIcon(TAG_TOOLBAR_BACK, R.drawable.icon_common_arrow_back_white, this);
         // 添加选中详情的文本
@@ -127,31 +97,62 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     protected void initViews() {
         // RecyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, mConfig.spanCount));
-        mRecyclerView.setAdapter(new PicturePickerAdapter(this, mCurDisplayPaths, mConfig));
-        if (mConfig.pickerBackgroundColor != PickerConfig.INVALIDATE_VALUE) {
-            mRecyclerView.setBackgroundColor(mConfig.pickerBackgroundColor);
-        }
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this,
+                mPresenter.getConfig().spanCount));
+        mRecyclerView.setAdapter(new PicturePickerAdapter(this, mCurDisplayPaths,
+                mPresenter.getConfig()));
         // 底部菜单控制区域
         findViewById(R.id.ll_bottom_menu).setOnClickListener(this);
         mTvSelectedFolderName = findViewById(R.id.tv_folder_name);
         mTvPreview = findViewById(R.id.tv_preview);
         mTvPreview.setOnClickListener(this);
         // 悬浮按钮
-        FloatingActionButton fab = findViewById(R.id.fab);
-        if (!mConfig.isShowScrollBehavior) {
-            fab.setVisibility(View.GONE);
-            return;
-        }
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+        mFab = findViewById(R.id.fab);
+        mFab.setVisibility(View.GONE);
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mFab.getLayoutParams();
         params.setBehavior(new PicturePickerFabBehavior());
-        fab.setLayoutParams(params);
-        fab.setBackgroundTintList(ColorStateList.valueOf(mConfig.toolbarBkgColor));
-        fab.setOnClickListener(this);
+        mFab.setLayoutParams(params);
+        mFab.setOnClickListener(this);
     }
 
     protected void initData() {
-        mPresenter.initData(this, mConfig);
+        mPresenter.fetchData(this);
+    }
+
+    @Override
+    public void setToolbarBackgroundColor(int color) {
+        mToolbar.setBackgroundColor(color);
+    }
+
+    @Override
+    public void setToolbarBackgroundDrawable(int drawableId) {
+        mToolbar.setBackgroundDrawableRes(drawableId);
+    }
+
+    @Override
+    public void setToolbarScrollable(boolean isScrollable) {
+        if (isScrollable) {
+            AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
+            params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                    | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP);
+            mToolbar.setLayoutParams(params);
+        }
+    }
+
+    @Override
+    public void setBackgroundColor(int color) {
+        mRecyclerView.setBackgroundColor(color);
+    }
+
+    @Override
+    public void setFabColor(int color) {
+        mFab.setBackgroundTintList(ColorStateList.valueOf(color));
+    }
+
+    @Override
+    public void switchFabVisibility(boolean isVisible) {
+        mFab.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -166,12 +167,13 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
-    public void updateEnsureAndPreviewTextContent(int curPicked, int total) {
-        if (mTvToolbarEnsure == null || mTvPreview == null) return;
-        mTvToolbarEnsure.setText(MessageFormat.format("{0} ({1}/{2})",
-                getString(R.string.activity_picture_picker_btn_toolbar_ensure), curPicked, total));
-        mTvPreview.setText(MessageFormat.format("{0} ({1})",
-                getString(R.string.activity_picture_picker_btn_preview), curPicked));
+    public void displayToolbarEnsureText(CharSequence content) {
+        mTvToolbarEnsure.setText(content);
+    }
+
+    @Override
+    public void displayPreviewText(CharSequence content) {
+        mTvPreview.setText(content);
     }
 
     @Override
@@ -207,7 +209,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public void onPictureClicked(ImageView imageView, String uri, int position) {
-        mPresenter.performPictureClicked( mCurDisplayPaths, position, imageView);
+        mPresenter.performPictureClicked(mCurDisplayPaths, position, imageView);
     }
 
     @Override

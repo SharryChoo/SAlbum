@@ -22,18 +22,14 @@ import java.util.HashMap;
  */
 public class PicturePickerModel implements PicturePickerContract.IModel {
 
+    // 用户已选中的图片地址集合(默认构造为空)
+    private ArrayList<String> mPickedPictures = new ArrayList<>();
     // 所有包含图片文件夹Model的集合
     private ArrayList<PictureFolder> mFolderModels;
-
-    // 用户已选中的图片地址集合
-    private ArrayList<String> mPickedPictures;
-
-    // 当前正在展示的图片集合
+    // 当前正在展示的文件夹
     private PictureFolder mCurrentDisplayFolder;
-
     // 图片的最大限量
     private int mThreshold;
-
 
     @Override
     public void setThreshold(int threshold) {
@@ -56,8 +52,10 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
     }
 
     @Override
-    public void setUserPickedSet(@NonNull ArrayList<String> userPicked) {
-        mPickedPictures = userPicked;
+    public void setUserPickedSet(ArrayList<String> userPicked) {
+        if (userPicked != null && !userPicked.isEmpty()) {
+            mPickedPictures = userPicked;
+        }
     }
 
     /**
@@ -98,13 +96,11 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
 
     /**
      * 添加用户选中的图片
-     *
-     * @param imagePath
      */
     @Override
-    public void addPickedPicture(String imagePath) {
-        if (mPickedPictures.indexOf(imagePath) == -1) {
-            mPickedPictures.add(imagePath);
+    public void addPickedPicture(String path) {
+        if (mPickedPictures.indexOf(path) == -1) {
+            mPickedPictures.add(path);
         }
     }
 
@@ -112,9 +108,9 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * 移除用户选中的图片
      */
     @Override
-    public void removePickedPicture(String imagePath) {
-        if (mPickedPictures.indexOf(imagePath) == -1) return;
-        mPickedPictures.remove(imagePath);
+    public void removePickedPicture(String path) {
+        if (mPickedPictures.indexOf(path) == -1) return;
+        mPickedPictures.remove(path);
     }
 
     /**
@@ -125,7 +121,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
         private Context mContext;
         private PicturePickerContract.ModelInitializeCallback mListener;
 
-        public CursorSystemPictureRunnable(Context context, PicturePickerContract.ModelInitializeCallback listener) {
+        CursorSystemPictureRunnable(Context context, PicturePickerContract.ModelInitializeCallback listener) {
             mContext = context;
             mListener = listener;
         }

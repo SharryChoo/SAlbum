@@ -89,7 +89,7 @@ public class PicturePickerDialog {
         final List<PictureFolder> data;
         final AdapterInteraction callback;
 
-        public DialogItemAdapter(Context context, List<PictureFolder> data, AdapterInteraction listener) {
+        DialogItemAdapter(Context context, List<PictureFolder> data, AdapterInteraction listener) {
             this.context = context;
             this.data = data;
             this.callback = listener;

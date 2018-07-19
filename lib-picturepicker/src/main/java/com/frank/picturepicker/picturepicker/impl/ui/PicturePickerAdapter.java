@@ -28,8 +28,8 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
     private Context mContext;
     private List<String> mUris;
-    private AdapterInteraction mInteraction;
     private PickerConfig mConfig;
+    private AdapterInteraction mInteraction;
 
     // 用于延时更新角标
     private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());

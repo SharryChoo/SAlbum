@@ -21,6 +21,7 @@ import com.frank.picturepicker.pricturecrop.manager.CropCallback;
 import com.frank.picturepicker.pricturecrop.manager.PictureCropManager;
 import com.frank.picturepicker.support.loader.PictureLoader;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,20 +45,34 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     }
 
     @Override
-    public void setupUserPickedSet(ArrayList<String> userPicked) {
-        mModel.setUserPickedSet(userPicked == null ? new ArrayList<String>() : userPicked);
-        if (mView == null) return;
-        mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
+    public void init(PickerConfig config) {
+        mConfig = config;
+        mModel.setUserPickedSet(config.userPickedSet == null ?
+                new ArrayList<String>() : config.userPickedSet);
+        mModel.setThreshold(config.threshold);
     }
 
     @Override
-    public void setupThreshold(int threshold) {
-        mModel.setThreshold(threshold);
+    public PickerConfig getConfig() {
+        return mConfig;
     }
 
     @Override
-    public void initData(Context context, PickerConfig config) {
-        this.mConfig = config;
+    public void fetchData(Context context) {
+        // 配置 UI 视图
+        mView.setToolbarScrollable(mConfig.isShowScrollBehavior);
+        mView.switchFabVisibility(mConfig.isShowScrollBehavior);
+        if (mConfig.toolbarBkgColor != PickerConfig.INVALIDATE_VALUE) {
+            mView.setToolbarBackgroundColor(mConfig.toolbarBkgColor);
+            mView.setFabColor(mConfig.toolbarBkgColor);
+        }
+        if (mConfig.toolbarBkgDrawableResId != PickerConfig.INVALIDATE_VALUE) {
+            mView.setToolbarBackgroundDrawable(mConfig.toolbarBkgDrawableResId);
+        }
+        if (mConfig.pickerBackgroundColor != PickerConfig.INVALIDATE_VALUE) {
+            mView.setBackgroundColor(mConfig.pickerBackgroundColor);
+        }
+        // 获取图片数据
         mModel.getSystemPictures(context, new PicturePickerContract.ModelInitializeCallback() {
             @Override
             public void onComplete(List<PictureFolder> pictureFolders) {
@@ -69,7 +84,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
                         mModel.setCurDisplayFolder(allPictureFolder);
                         if (mView == null) return;
                         mView.displayPictures(allPictureFolder.getFolderName(), allPictureFolder.getImagePaths());
-                        mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
+                        mView.displayToolbarEnsureText(buildTitleEnsureText());
+                        mView.displayPreviewText(buildPreviewText());
                     }
                 });
             }
@@ -110,7 +126,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         boolean result = isCanPickedPicture(true);
         if (result) {
             mModel.addPickedPicture(uri);
-            mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
+            mView.displayToolbarEnsureText(buildTitleEnsureText());
+            mView.displayPreviewText(buildPreviewText());
         }
         return result;
     }
@@ -118,7 +135,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
     @Override
     public void performPictureUnchecked(String imagePath) {
         mModel.removePickedPicture(imagePath);
-        mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());
+        mView.displayToolbarEnsureText(buildTitleEnsureText());
+        mView.displayPreviewText(buildPreviewText());
     }
 
     @Override
@@ -195,10 +213,13 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
 
     @Override
     public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> userPickedSet) {
+        mModel.setUserPickedSet(userPickedSet);
         if (mView == null) return;
-        setupUserPickedSet(userPickedSet);
-        if (isEnsure) performEnsureClicked();
-        else mView.notifyUserPickedSetChanged();
+        // 展示标题和预览文本
+        mView.displayToolbarEnsureText(buildTitleEnsureText());
+        mView.displayPreviewText(buildPreviewText());
+        if (isEnsure) performEnsureClicked();// 执行确认事件
+        else mView.notifyUserPickedSetChanged();// 通知更新
     }
 
     @Override
@@ -214,7 +235,8 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         // 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
             mModel.addPickedPicture(path);// 添加到选中的集合中
-            mView.updateEnsureAndPreviewTextContent(fetchUserPickedSet().size(), mModel.getThreshold());// 更新文本
+            mView.displayToolbarEnsureText(buildTitleEnsureText());
+            mView.displayPreviewText(buildPreviewText());
         }
         mView.notifyCameraTakeOnePicture(path);// 通知拍摄了一张照片
     }
@@ -282,5 +304,29 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
             bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
             bind.finish();
         }
+    }
+
+    /**
+     * 构建标题确认文本
+     */
+    private CharSequence buildTitleEnsureText() {
+        return MessageFormat.format(
+                "{0} ({1}/{2})",
+                mView.getString(R.string.activity_picture_picker_btn_toolbar_ensure),
+                mModel.getUserPickedSet().size(),
+                mModel.getThreshold()
+        );
+    }
+
+    /**
+     * 构建预览文本
+     */
+    private CharSequence buildPreviewText() {
+        return MessageFormat.format(
+                "{0} ({1})",
+                mView.getString(R.string.
+                        activity_picture_picker_btn_preview),
+                mModel.getUserPickedSet().size()
+        );
     }
 }
