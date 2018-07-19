@@ -32,7 +32,7 @@ uploadArchives {
             }
             pom.groupId = 'com.ehi'
             pom.artifactId = 'picturepiker'
-            pom.version = '1.0.5'
+            pom.version = '1.0.6'
             pom.project {
                 licenses {
                     license {
