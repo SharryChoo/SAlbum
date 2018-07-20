@@ -18,19 +18,23 @@ public interface PictureWatcherContract {
     interface IView {
 
         /**
-         * 设置动画
-         *  @param enterTransition
-         *
+         * 设置页面进场动画
          */
         void setWindowEnterTransitions(Transition enterTransition);
 
+        /**
+         * 设置页面退场动画
+         */
         void setWindowReturnTransitions(Transition returnTransition);
 
         /**
-         * 设置共享元素动画
+         * 设置共享元素进场动画
          */
         void setSharedElementEnterTransition(Transition enterTransition);
 
+        /**
+         * 设置共享元素退场动画
+         */
         void setSharedElementReturnTransition(Transition returnTransition);
 
         /**
