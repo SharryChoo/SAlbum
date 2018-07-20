@@ -25,7 +25,7 @@ import android.view.animation.OvershootInterpolator;
 /**
  * Created by FrankChoo on 2017/12/28.
  * Email: frankchoochina@gmail.com
- * Version:  1.0
+ * Version:  1.3
  * Description: 可拖拽返回的 ViewPager, 这里用作图片查看器
  */
 public class DraggableViewPager extends ViewPager {
@@ -296,7 +296,7 @@ public class DraggableViewPager extends ViewPager {
 
             @Override
             public void onInvalidated() {
-                super.onInvalidated();
+                notifyDataSetChanged();
             }
         };
 
@@ -330,6 +330,11 @@ public class DraggableViewPager extends ViewPager {
         }
 
         @Override
+        public int getItemPosition(Object object) {
+            return mOriginAdapter.getItemPosition(object);
+        }
+
+        @Override
         public void setPrimaryItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             setPrimaryItem((View) container, position, object);
         }
@@ -338,7 +343,6 @@ public class DraggableViewPager extends ViewPager {
         public void setPrimaryItem(View container, int position, Object object) {
             mCurrentView = (View) object;
         }
-
     }
 
 }
