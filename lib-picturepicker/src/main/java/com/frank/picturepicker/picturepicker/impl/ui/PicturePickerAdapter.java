@@ -66,7 +66,8 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
                 R.layout.recycle_item_activity_picture_picker, parent, false));
         // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
-        int itemSize = parent.getMeasuredWidth() / mConfig.spanCount;
+        int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
+                - parent.getPaddingRight()) / mConfig.spanCount;
         ViewGroup.LayoutParams itemParams = holder.itemView.getLayoutParams();
         itemParams.height = itemSize;
         holder.itemView.setLayoutParams(itemParams);

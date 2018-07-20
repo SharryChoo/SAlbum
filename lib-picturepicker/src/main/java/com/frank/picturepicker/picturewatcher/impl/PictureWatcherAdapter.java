@@ -10,7 +10,7 @@ import java.util.List;
  * Created by Frank on 2018/5/28.
  * Email: frankchoochina@gmail.com
  * Version: 1.0
- * Description:
+ * Description: 图片查看器的 Adapter
  */
 public class PictureWatcherAdapter extends PagerAdapter {
 

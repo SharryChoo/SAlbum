@@ -16,12 +16,12 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description:
  */
-public class PictureWatcherRecyclerAdapter extends RecyclerView.Adapter<PictureWatcherRecyclerAdapter.ViewHolder> {
+public class PictureWatcherPreviewAdapter extends RecyclerView.Adapter<PictureWatcherPreviewAdapter.ViewHolder> {
 
-    final ArrayList<String> userPickedSet;
-    final AdapterInteraction interaction;
+    private final ArrayList<String> userPickedSet;
+    private final AdapterInteraction interaction;
 
-    public PictureWatcherRecyclerAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
+    public PictureWatcherPreviewAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
         this.userPickedSet = userPickedSet;
         this.interaction = interaction;
     }
@@ -44,7 +44,7 @@ public class PictureWatcherRecyclerAdapter extends RecyclerView.Adapter<PictureW
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
-                interaction.onItemClicked((ImageView) v, userPickedSet.get(position), position);
+                interaction.onPreviewItemClicked((ImageView) v, userPickedSet.get(position), position);
             }
         });
     }
@@ -66,7 +66,7 @@ public class PictureWatcherRecyclerAdapter extends RecyclerView.Adapter<PictureW
 
     public interface AdapterInteraction {
 
-        void onItemClicked(ImageView imageView, String uri, int position);
+        void onPreviewItemClicked(ImageView imageView, String uri, int position);
 
     }
 }

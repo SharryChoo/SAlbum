@@ -32,7 +32,8 @@ import java.util.List;
  * Version: 1.2
  * Description: 图片选择器的 Activity
  */
-public class PicturePickerActivity extends AppCompatActivity implements PicturePickerContract.IView,
+public class PicturePickerActivity extends AppCompatActivity
+        implements PicturePickerContract.IView,
         PicturePickerAdapter.AdapterInteraction,
         View.OnClickListener {
 

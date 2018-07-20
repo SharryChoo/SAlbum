@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FrankPicturePicker</string>
+    <string name="app_name">PicturePicker</string>
 
     <string name="activity_et_threshold_hint">选中数量</string>
     <string name="activity_et_span_count_hint">每行数量</string>

@@ -15,5 +15,6 @@
     <string name="activity_picture_watcher_msg_over_threshold_prefix">@string/activity_picture_picker_msg_over_threshold_prefix</string>
     <string name="activity_picture_watcher_msg_over_threshold_suffix">@string/activity_picture_picker_msg_over_threshold_suffix</string>
     <string name="activity_picture_watcher_btn_ensure">@string/activity_picture_picker_btn_toolbar_ensure</string>
+    <string name="activity_picture_watcher_msg_ensure_failed">@string/activity_picture_picker_msg_ensure_failed</string>
 
 </resources>
