@@ -126,6 +126,8 @@ public interface PictureWatcherContract {
          * 让图片预览滚动到指定位置
          */
         void previewPicturesSmoothScrollToPosition(int position);
+
+        void onBackPressed();
     }
 
 
@@ -165,5 +167,15 @@ public interface PictureWatcherContract {
          * 处理返回操作
          */
         void performBackPressed();
+
+        /**
+         * 获取用户选中的数据
+         */
+        ArrayList<String> fetchUserPicked();
+
+        /**
+         * 是否是确认按钮点击了
+         */
+        boolean isEnsurePressed();
     }
 }

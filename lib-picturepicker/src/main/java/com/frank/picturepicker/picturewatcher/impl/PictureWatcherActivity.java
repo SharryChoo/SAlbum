@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturewatcher.impl.mvp.PictureWatcherContract;
 import com.frank.picturepicker.picturewatcher.impl.mvp.PictureWatcherPresenter;
+import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.widget.CheckedIndicatorView;
@@ -289,6 +291,15 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     @Override
     public void showMsg(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPicked());
+        intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, mPresenter.isEnsurePressed());
+        setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
+        super.onBackPressed();
     }
 
     @Override

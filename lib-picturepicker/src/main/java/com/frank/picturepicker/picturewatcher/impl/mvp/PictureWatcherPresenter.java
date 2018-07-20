@@ -45,6 +45,7 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     // Flags
     private boolean mIsSharedElement = false;// 是否支持共享元素
     private boolean mIsSupportPicked = false;// 是否支持图片选择
+    private boolean mIsEnsurePressed = false;// 是否支持图片选择
 
     @Override
     public void attach(PictureWatcherContract.IView view) {
@@ -188,12 +189,23 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
             mView.setWindowReturnTransitions(null);
             mView.setSharedElementReturnTransition(null);
         }
-        executeViewFinish(true);
+        mIsEnsurePressed = true;
+        mView.onBackPressed();
     }
 
     @Override
     public void performBackPressed() {
-        executeViewFinish(false);
+        mView.onBackPressed();
+    }
+
+    @Override
+    public ArrayList<String> fetchUserPicked() {
+        return mUserPickedSet;
+    }
+
+    @Override
+    public boolean isEnsurePressed() {
+        return mIsEnsurePressed;
     }
 
     @Override
