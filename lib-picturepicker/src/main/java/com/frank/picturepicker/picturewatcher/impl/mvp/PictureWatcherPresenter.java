@@ -190,12 +190,12 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
             mView.setSharedElementReturnTransition(null);
         }
         mIsEnsurePressed = true;
-        mView.onBackPressed();
+        mView.finish();
     }
 
     @Override
     public void performBackPressed() {
-        mView.onBackPressed();
+        mView.finish();
     }
 
     @Override

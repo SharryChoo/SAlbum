@@ -294,16 +294,12 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onBackPressed() {
+    public void finish() {
+        // 设置回调
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPicked());
         intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, mPresenter.isEnsurePressed());
         setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
-        super.onBackPressed();
-    }
-
-    @Override
-    public void finish() {
         super.finish();
         // 当前 Activity 关闭时, 使用淡入淡出的动画
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

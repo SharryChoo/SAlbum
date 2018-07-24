@@ -127,7 +127,7 @@ public interface PictureWatcherContract {
          */
         void previewPicturesSmoothScrollToPosition(int position);
 
-        void onBackPressed();
+        void finish();
     }
 
 
