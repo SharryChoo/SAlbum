@@ -43,7 +43,7 @@ public class CheckedIndicatorView extends AppCompatTextView {
     private Point mCenterPoint;
 
     // 用于控制的变量
-    private boolean mChecked = false;
+    private boolean mIsChecked = false;
     private boolean mIsAnimatorStarted = false;
 
     public CheckedIndicatorView(Context context) {
@@ -71,26 +71,26 @@ public class CheckedIndicatorView extends AppCompatTextView {
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                setChecked(!mChecked);
+                setChecked(!mIsChecked);
             }
         });
     }
 
     public void setChecked(boolean isChecked) {
-        if (isChecked != mChecked) {
-            if (mChecked) handleCheck2Unchecked();
-            else handleUnchecked2Check();
+        if (isChecked != mIsChecked) {
+            if (mIsChecked) executeAnimator(false);
+            else executeAnimator(true);
         }
     }
 
     public void setCheckedWithoutAnimator(boolean isChecked) {
-        mChecked = isChecked;
-        mAnimPercent = mChecked ? 1 : 0;
+        mIsChecked = isChecked;
+        mAnimPercent = mIsChecked ? 1 : 0;
         invalidate();
     }
 
     public boolean isChecked() {
-        return mChecked;
+        return mIsChecked;
     }
 
     /**
@@ -118,36 +118,46 @@ public class CheckedIndicatorView extends AppCompatTextView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        // 可用的宽度
         int validateWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+        // 可用的高度
         int validateHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        // 绘制的中心点
         mCenterPoint.x = getPaddingLeft() + validateWidth / 2;
         mCenterPoint.y = getPaddingTop() + validateHeight / 2;
+        // 内圆的半径
         mRadius = Math.min(validateWidth, validateHeight) / 2;
-        mBorderWidth = mRadius / 10;
-        mBorderMargin = mBorderWidth;
+        // 外部边框的宽度
+        mBorderWidth = mRadius / 8;
+        // 外部边框距离内圆的距离
+        mBorderMargin = mBorderWidth / 2;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         // 绘制外环
-        mBorderPaint.setColor(mChecked ? mCheckedBorderColor : mUncheckedBorderColor);
+        mBorderPaint.setColor(mIsChecked ? mCheckedBorderColor : mUncheckedBorderColor);
         mBorderPaint.setStrokeWidth(mBorderWidth);
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, mRadius - mBorderWidth / 2, mBorderPaint);
         // 绘制内环
-        mSolidPaint.setColor(mChecked ? mSolidColor : mUncheckedBorderColor);
+        mSolidPaint.setColor(mIsChecked ? mSolidColor : mUncheckedBorderColor);
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, mAnimPercent
                 * (mRadius - mBorderWidth - mBorderMargin), mSolidPaint);
-        if (mChecked) {
+        // 绘制文本
+        if (mIsChecked) {
             super.onDraw(canvas);
         }
     }
 
     /**
-     * 处理从 选中 到 未选中 状态的改变
+     * 执行动画效果
+     * @param destIsChecked 最终选中的状态
      */
-    private void handleCheck2Unchecked() {
+    private void executeAnimator(final boolean destIsChecked) {
         if (mIsAnimatorStarted) return;
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(1, 0).setDuration(200);
+        int start = destIsChecked ? 0 : 1;
+        int end = destIsChecked ? 1 : 0;
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(start, end).setDuration(destIsChecked ? 300 : 200);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -158,7 +168,7 @@ public class CheckedIndicatorView extends AppCompatTextView {
         valueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mChecked = false;
+                mIsChecked = destIsChecked;
                 mIsAnimatorStarted = true;
             }
 
@@ -167,36 +177,11 @@ public class CheckedIndicatorView extends AppCompatTextView {
                 mIsAnimatorStarted = false;
             }
         });
-        valueAnimator.setInterpolator(new AnticipateInterpolator(2f));
-        valueAnimator.start();
-    }
-
-    /**
-     * 处理从 未选中 到 选中 状态的改变
-     */
-    private void handleUnchecked2Check() {
-        if (mIsAnimatorStarted) return;
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1).setDuration(300);
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mAnimPercent = (float) animation.getAnimatedValue();
-                invalidate();
-            }
-        });
-        valueAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mChecked = true;
-                mIsAnimatorStarted = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mIsAnimatorStarted = false;
-            }
-        });
-        valueAnimator.setInterpolator(new OvershootInterpolator(2f));
+        if (destIsChecked) {
+            valueAnimator.setInterpolator(new OvershootInterpolator(2f));
+        } else {
+            valueAnimator.setInterpolator(new AnticipateInterpolator(2f));
+        }
         valueAnimator.start();
     }
 
