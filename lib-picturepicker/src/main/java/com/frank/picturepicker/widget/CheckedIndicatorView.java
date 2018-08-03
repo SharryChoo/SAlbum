@@ -130,7 +130,7 @@ public class CheckedIndicatorView extends AppCompatTextView {
         // 外部边框的宽度
         mBorderWidth = mRadius / 8;
         // 外部边框距离内圆的距离
-        mBorderMargin = mBorderWidth / 2;
+        mBorderMargin = mBorderWidth;
     }
 
     @Override

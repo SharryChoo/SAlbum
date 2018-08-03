@@ -53,7 +53,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
 
     @Override
     public void setUserPickedSet(ArrayList<String> userPicked) {
-        if (userPicked != null && !userPicked.isEmpty()) {
+        if (userPicked != null) {
             mPickedPictures = userPicked;
         }
     }
