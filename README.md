@@ -25,6 +25,19 @@ dependencies {
 }
 ```
 
+# Preview([图片无法显示](http://note.youdao.com/noteshare?id=ee9a0d7909afc4e66b6dda57df10eda6&sub=125F838B572242DBA6B85FE66D89F77C))
+- 图片裁剪
+  - ![图片裁剪.gif](https://user-gold-cdn.xitu.io/2018/8/6/1650cff2ccf5f4fa?w=282&h=500&f=gif&s=4452628)
+
+- 权限与拍照
+  - ![权限与拍照.gif](https://user-gold-cdn.xitu.io/2018/8/6/1650cff2cfcacddc?w=282&h=500&f=gif&s=3251641)
+
+- Material Design 动画
+  - ![Material Design 动画.gif](https://user-gold-cdn.xitu.io/2018/8/6/1650cff2cfd00353?w=282&h=500&f=gif&s=3963525)
+
+- 共享元素跳转
+  - ![共享元素跳转.gif](https://user-gold-cdn.xitu.io/2018/8/6/1650cff2d58d7b01?w=282&h=500&f=gif&s=4602043)
+
 # How to use
 ### 图片选择器(集成了拍照和裁剪)
 ```
@@ -86,6 +99,3 @@ PictureWatcherManager.with(this)
     .setPictureLoader{ context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
     .start()
 ```
-
-# 更多详情
-https://www.jianshu.com/p/84aef19097a6
