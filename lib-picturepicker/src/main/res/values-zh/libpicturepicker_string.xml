@@ -5,6 +5,7 @@
     <string name="libpicturepicker_picturepicker_ensure">确认</string>
     <string name="libpicturepicker_picturepicker_preview">预览</string>
     <string name="libpicturepicker_picturepicker_all_picture">所有图片</string>
+    <string name="libpicturepicker_picturepicker_root_folder">SD 卡根目录</string>
     <string name="libpicturepicker_picturepicker_tips_over_threshold_prefix">最多只可选择&#160;</string>
     <string name="libpicturepicker_picturepicker_tips_over_threshold_suffix">&#160;张图片</string>
     <string name="libpicturepicker_picturepicker_tips_fetch_album_failed">获取相册数据失败</string>

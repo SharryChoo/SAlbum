@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -49,6 +50,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     // 启动时的 Extra
     public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";
     public static final String START_INTENT_EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
+
     // 返回时的 Extra
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";// 返回的图片
     public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";// 是否是确认选择
@@ -174,7 +176,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     @Override
     public void createPhotoViews(ArrayList<String> pictureUris) {
-        for (String uri : pictureUris) {
+        for (String uri: pictureUris) {
             PhotoView photoView = new PhotoView(this);
             photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -210,6 +212,16 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     public void notifySharedElementChanged(int sharedPosition, String sharedKey) {
         mViewPager.setSharedElementPosition(sharedPosition);
         mPhotoViews.get(sharedPosition).setTransitionName(sharedKey);
+    }
+
+    @Override
+    public void notifyBottomPicturesRemoved(String removedPath, int removedIndex) {
+        mBottomPreviewPictures.getAdapter().notifyItemRemoved(removedIndex);
+    }
+
+    @Override
+    public void notifyBottomPictureAdded(String insertPath, int addedIndex) {
+        mBottomPreviewPictures.getAdapter().notifyItemInserted(addedIndex);
     }
 
     @Override

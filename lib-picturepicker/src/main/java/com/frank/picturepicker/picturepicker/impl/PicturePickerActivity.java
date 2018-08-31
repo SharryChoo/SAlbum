@@ -1,10 +1,15 @@
 package com.frank.picturepicker.picturepicker.impl;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +20,7 @@ import android.widget.Toast;
 
 import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
+import com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity;
 import com.frank.picturepicker.widget.PicturePickerFabBehavior;
 import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
@@ -23,10 +29,11 @@ import com.frank.picturepicker.widget.toolbar.Style;
 import java.util.ArrayList;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.2
- * Description: 图片选择器的 Activity
+ * 图片选择器的 Activity
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.3
+ * @since 2018/9/1 10:17
  */
 public class PicturePickerActivity extends AppCompatActivity implements PicturePickerContract.IView,
         PicturePickerAdapter.AdapterInteraction, View.OnClickListener {
@@ -59,6 +66,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private TextView mTvPreview;
     private TextView mTvToolbarEnsure;
     private FloatingActionButton mFab;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -239,4 +247,5 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
             mPresenter.handleEnsureClicked();
         }
     }
+
 }

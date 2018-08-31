@@ -4,31 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.0
- * Description:
+ * Describe pictures that in the same folder.
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.0
+ * @since 2018/8/31 22:29
  */
 class PictureFolder {
 
-    private String mFolderName;//文件名
-
-    private List<String> mImagePaths = new ArrayList<>();//文件夹内部的图片的Uri
+    private String folderName;//文件名
+    private List<String> picturePaths = new ArrayList<>();//文件夹内部的图片的Uri
 
     public PictureFolder(String folderName) {
-        this.mFolderName = folderName;
+        this.folderName = folderName;
     }
 
     public String getFolderName() {
-        return mFolderName;
+        return folderName;
     }
 
-    public List<String> getImagePaths() {
-        return mImagePaths;
+    public List<String> getPicturePaths() {
+        return picturePaths;
     }
 
-    public void addImagePath(String imageUri) {
-        mImagePaths.add(imageUri);
+    public void addPath(String imageUri) {
+        picturePaths.add(imageUri);
     }
 
 }

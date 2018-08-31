@@ -16,15 +16,13 @@
     </style>
 
     <!--Dialog 动画, 从底部飞入效果-->
-    <style name="AnimTranslationVertical" mce_bogus="1" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/libpicturepicker_translation_b2t_dur300_delta100</item>
-        <item name="android:windowExitAnimation">@anim/libpicturepicker_translation_t2b_dur300_delta100</item>
-    </style>
-
-    <!--Dialog 动画, 窗口抖动效果-->
-    <style name="AnimDither" mce_bogus="1" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/libpicturepicker_dither_in</item>
-        <item name="android:windowExitAnimation">@anim/libpicturepicker_dither_out</item>
+    <style name="PicturePickerBottomMenuDialogAnimation" mce_bogus="1" parent="android:Animation">
+        <item name="android:windowEnterAnimation">
+            @anim/libpicturepicker_translation_b2t_dur300_delta100
+        </item>
+        <item name="android:windowExitAnimation">
+            @anim/libpicturepicker_translation_t2b_dur300_delta100
+        </item>
     </style>
 
 </resources>

@@ -19,10 +19,11 @@ import com.frank.picturepicker.widget.CheckedIndicatorView;
 import java.util.List;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.2
- * Description: 图片选择器的 Adapter
+ * Adapter associated with PicturePicker.
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.3
+ * @since 2018/9/1 10:19
  */
 class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.ViewHolder> {
 
