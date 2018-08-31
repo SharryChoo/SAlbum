@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picturepicker.impl.data;
+package com.frank.picturepicker.picturepicker.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
  * Version: 1.0
  * Description:
  */
-public class PictureFolder {
+class PictureFolder {
 
     private String mFolderName;//文件名
 

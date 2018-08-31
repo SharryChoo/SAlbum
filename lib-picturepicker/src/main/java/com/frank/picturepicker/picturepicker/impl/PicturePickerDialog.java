@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picturepicker.impl.ui;
+package com.frank.picturepicker.picturepicker.impl;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
 import com.frank.picturepicker.support.loader.PictureLoader;
 
 import java.util.List;
@@ -27,7 +26,14 @@ import java.util.List;
  * Version: 1.2
  * Description: 用于图片选择的 Dialog
  */
-public class PicturePickerDialog {
+class PicturePickerDialog {
+
+    /**
+     * Get instance of PicturePickerDialog
+     */
+    public static PicturePickerDialog with(Context context, List<PictureFolder> data) {
+        return new PicturePickerDialog(context, data);
+    }
 
     private Dialog mDialog;
     private OnItemClickedListener mExternalListener;
@@ -41,7 +47,7 @@ public class PicturePickerDialog {
         }
     };
 
-    public PicturePickerDialog(Context context, List<PictureFolder> data) {
+    private PicturePickerDialog(Context context, List<PictureFolder> data) {
         // 初始化控件
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -98,7 +104,7 @@ public class PicturePickerDialog {
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.recycle_item_dialog_picture_picker, parent, false);
+                    R.layout.libpicturepicker_recycle_item_dialog_picture_picker, parent, false);
             return new ViewHolder(view);
         }
 

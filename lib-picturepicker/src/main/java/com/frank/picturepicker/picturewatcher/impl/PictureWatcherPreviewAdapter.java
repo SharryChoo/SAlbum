@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description:
  */
-public class PictureWatcherPreviewAdapter extends RecyclerView.Adapter<PictureWatcherPreviewAdapter.ViewHolder> {
+class PictureWatcherPreviewAdapter extends RecyclerView.Adapter<PictureWatcherPreviewAdapter.ViewHolder> {
 
     private final ArrayList<String> userPickedSet;
     private final AdapterInteraction interaction;

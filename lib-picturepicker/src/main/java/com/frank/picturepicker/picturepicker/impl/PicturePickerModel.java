@@ -1,14 +1,12 @@
-package com.frank.picturepicker.picturepicker.impl.mvp;
+package com.frank.picturepicker.picturepicker.impl;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,42 +18,24 @@ import java.util.HashMap;
  * Version: 1.0
  * Description:
  */
-public class PicturePickerModel implements PicturePickerContract.IModel {
+class PicturePickerModel implements PicturePickerContract.IModel {
 
-    // 用户已选中的图片地址集合(默认构造为空)
-    private ArrayList<String> mPickedPictures = new ArrayList<>();
-    // 所有包含图片文件夹Model的集合
-    private ArrayList<PictureFolder> mFolderModels;
-    // 当前正在展示的文件夹
-    private PictureFolder mCurrentDisplayFolder;
-    // 图片的最大限量
-    private int mThreshold;
+    private final ArrayList<String> mPickedPaths;                     // 用户已选中的图片地址集合(默认构造为空)
+    private final ArrayList<String> mDisplayPaths = new ArrayList<>();      // 当前需要展示的集合
+    private ArrayList<PictureFolder> mFolderModels;                   // 所有包含图片文件夹Model的集合
+    private PictureFolder mCheckedFolder;                            // 当前正在展示的文件夹
 
-    @Override
-    public void setThreshold(int threshold) {
+    PicturePickerModel(ArrayList<String> pickedPaths, int threshold) {
+        mPickedPaths = pickedPaths;
         // 验证一下阈值是否异常
-        if (getUserPickedSet().size() > threshold) {
+        if (getPickedPaths().size() > threshold) {
             throw new RuntimeException("Your picked picture count is over your set threshold!");
         }
-        this.mThreshold = threshold;
     }
-
-    @Override
-    public int getThreshold() {
-        return mThreshold;
-    }
-
 
     @Override
     public void getSystemPictures(Context context, final PicturePickerContract.ModelInitializeCallback listener) {
         new Thread(new CursorSystemPictureRunnable(context, listener)).start();
-    }
-
-    @Override
-    public void setUserPickedSet(ArrayList<String> userPicked) {
-        if (userPicked != null) {
-            mPickedPictures = userPicked;
-        }
     }
 
     /**
@@ -70,7 +50,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * 获取所有的图片文件夹
      */
     @Override
-    public ArrayList<PictureFolder> getAllPictureFolders() {
+    public ArrayList<PictureFolder> getAllFolders() {
         return mFolderModels;
     }
 
@@ -78,20 +58,22 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * 设置当前选中的图片
      */
     @Override
-    public PictureFolder getCurDisplayFolder() {
-        return mCurrentDisplayFolder;
+    public PictureFolder getCheckedFolder() {
+        return mCheckedFolder;
     }
 
-    public void setCurDisplayFolder(PictureFolder curDisplayFolder) {
-        this.mCurrentDisplayFolder = curDisplayFolder;
+    public void setCheckedFolder(PictureFolder checkedFolder) {
+        this.mCheckedFolder = checkedFolder;
+        mDisplayPaths.clear();
+        mDisplayPaths.addAll(checkedFolder.getImagePaths());
     }
 
     /**
      * 获取用户选中的图片
      */
     @Override
-    public ArrayList<String> getUserPickedSet() {
-        return mPickedPictures;
+    public ArrayList<String> getPickedPaths() {
+        return mPickedPaths;
     }
 
     /**
@@ -99,8 +81,8 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      */
     @Override
     public void addPickedPicture(String path) {
-        if (mPickedPictures.indexOf(path) == -1) {
-            mPickedPictures.add(path);
+        if (mPickedPaths.indexOf(path) == -1) {
+            mPickedPaths.add(path);
         }
     }
 
@@ -109,8 +91,13 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      */
     @Override
     public void removePickedPicture(String path) {
-        if (mPickedPictures.indexOf(path) == -1) return;
-        mPickedPictures.remove(path);
+        if (mPickedPaths.indexOf(path) == -1) return;
+        mPickedPaths.remove(path);
+    }
+
+    @Override
+    public ArrayList<String> getDisplayPaths() {
+        return mDisplayPaths;
     }
 
     /**
@@ -129,7 +116,7 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
         @Override
         public void run() {
             ArrayList<PictureFolder> pictureFolders = new ArrayList<>();
-            PictureFolder allPictureFolder = new PictureFolder(mContext.getString(R.string.activity_picture_picker_all_picture));
+            PictureFolder allPictureFolder = new PictureFolder(mContext.getString(R.string.libpicturepicker_picturepicker_all_picture));
             pictureFolders.add(allPictureFolder);
             //key为存放图片的文件夹路径, values为PictureFolderModel的对象
             HashMap<String, PictureFolder> hashMap = new HashMap<>();

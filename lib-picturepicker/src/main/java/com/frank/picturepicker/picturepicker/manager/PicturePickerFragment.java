@@ -4,7 +4,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity;
+import com.frank.picturepicker.picturepicker.impl.PicturePickerActivity;
 
 import java.util.ArrayList;
 

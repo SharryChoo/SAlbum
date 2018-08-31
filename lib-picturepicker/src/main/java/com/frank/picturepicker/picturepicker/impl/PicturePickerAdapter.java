@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picturepicker.impl.ui;
+package com.frank.picturepicker.picturepicker.impl;
 
 import android.content.Context;
 import android.os.Handler;
@@ -24,12 +24,13 @@ import java.util.List;
  * Version: 1.2
  * Description: 图片选择器的 Adapter
  */
-public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.ViewHolder> {
+class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.ViewHolder> {
 
-    private Context mContext;
-    private List<String> mUris;
-    private PickerConfig mConfig;
-    private AdapterInteraction mInteraction;
+    private final Context mContext;
+    private final PickerConfig mConfig;
+    private final List<String> mDisplayPaths;
+    private final List<String> mUserPickedPaths;
+    private final AdapterInteraction mInteraction;
 
     // 用于延时更新角标
     private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
@@ -42,29 +43,28 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
     public interface AdapterInteraction {
 
-        List<String> onUserPickedSet();
-
         boolean onPictureChecked(String uri);
 
-        void onPictureUnchecked(String uri);
+        void onPictureRemoved(String uri);
 
         void onPictureClicked(ImageView imageView, String uri, int position);
 
         void onCameraClicked();
     }
 
-    public PicturePickerAdapter(Context context, List<String> uris, PickerConfig config) {
+    PicturePickerAdapter(Context context, PickerConfig config, List<String> displayPaths, List<String> userPickedPaths) {
         this.mInteraction = (AdapterInteraction) context;
         this.mContext = context;
-        this.mUris = uris;
         this.mConfig = config;
+        this.mDisplayPaths = displayPaths;
+        this.mUserPickedPaths = userPickedPaths;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.recycle_item_activity_picture_picker, parent, false));
+                R.layout.libpicturepicker_recycle_item_activity_picture_picker, parent, false));
         // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
         int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
                 - parent.getPaddingRight()) / mConfig.spanCount;
@@ -94,7 +94,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
             bindCameraHeader(holder);
         } else {
             int relativePosition = position - (mConfig.isCameraSupport ? 1 : 0);
-            final String uri = mUris.get(relativePosition);
+            final String uri = mDisplayPaths.get(relativePosition);
             bindItemView(holder, uri);
         }
     }
@@ -105,7 +105,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
     private void bindCameraHeader(ViewHolder holder) {
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER);
         holder.ivPicture.setImageResource(mConfig.cameraIconDrawableResId == PickerConfig.INVALIDATE_VALUE
-                ? R.drawable.icon_activity_picture_picker_default_camera : mConfig.cameraIconDrawableResId);
+                ? R.drawable.libpicturepicker_picturepicker_camera : mConfig.cameraIconDrawableResId);
         holder.ivPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,11 +124,11 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
         holder.ivPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mInteraction.onPictureClicked((ImageView) v, uri, mUris.indexOf(uri));
+                mInteraction.onPictureClicked((ImageView) v, uri, mDisplayPaths.indexOf(uri));
             }
         });
         // 判断当前 uri 是否被选中了
-        final int index = mInteraction.onUserPickedSet().indexOf(uri);
+        final int index = mUserPickedPaths.indexOf(uri);
         // 设置点击监听
         holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
@@ -139,7 +139,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
             public void onClick(View v) {
                 if (holder.checkIndicator.isChecked()) {// Checked-> Unchecked
                     // 移除选中数据与状态
-                    mInteraction.onPictureUnchecked(uri);
+                    mInteraction.onPictureRemoved(uri);
                     holder.checkIndicator.setChecked(false);
                     // 需要延时的更新索引角标
                     notifyCheckedIndicatorChanged();
@@ -147,7 +147,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
                     // 判断是否达到选择上限
                     holder.checkIndicator.setChecked(mInteraction.onPictureChecked(uri));
                     // 设置文本
-                    holder.checkIndicator.setText(String.valueOf(mInteraction.onUserPickedSet().size()));
+                    holder.checkIndicator.setText(String.valueOf(mUserPickedPaths.size()));
                 }
             }
         });
@@ -155,7 +155,7 @@ public class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdap
 
     @Override
     public int getItemCount() {
-        return mUris.size() + (mConfig.isCameraSupport ? 1 : 0);
+        return mDisplayPaths.size() + (mConfig.isCameraSupport ? 1 : 0);
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picturewatcher.impl.mvp;
+package com.frank.picturepicker.picturewatcher.impl;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,7 +14,6 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturewatcher.impl.PictureWatcherPreviewAdapter;
 import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
 import com.frank.picturepicker.support.util.Utils;
@@ -31,7 +30,7 @@ import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity
  * Version: 1.0
  * Description:
  */
-public class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, PictureWatcherPreviewAdapter.AdapterInteraction {
+class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, PictureWatcherPreviewAdapter.AdapterInteraction {
 
     private PictureWatcherContract.IView mView;
     private WatcherConfig mConfig;
@@ -128,7 +127,7 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     }
 
     @Override
-    public void performPagerChanged(int position) {
+    public void handlePagerChanged(int position) {
         // 更新数据
         mCurPosition = position;
         mCurDisplayUri = mPictureUris.get(position);
@@ -149,7 +148,7 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     }
 
     @Override
-    public void performToolbarCheckedIndicatorClick(boolean isChecked) {
+    public void handleToolbarCheckedIndicatorClick(boolean isChecked) {
         boolean nowVisible = !mUserPickedSet.isEmpty();
         if (isChecked) {
             // 移除选中数据与状态
@@ -167,9 +166,9 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
                 mView.previewPicturesSmoothScrollToPosition(addedIndex);
             } else {
                 mView.showMsg(
-                        mView.getString(R.string.activity_picture_watcher_msg_over_threshold_prefix) +
+                        mView.getString(R.string.libpicturepicker_picturewatcher_tips_over_threshold_prefix) +
                                 mConfig.threshold +
-                                mView.getString(R.string.activity_picture_watcher_msg_over_threshold_suffix)
+                                mView.getString(R.string.libpicturepicker_picturewatcher_tips_over_threshold_suffix)
                 );
             }
         }
@@ -180,9 +179,9 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     }
 
     @Override
-    public void performEnsureClick() {
+    public void handleEnsureClick() {
         if (mUserPickedSet.isEmpty()) {
-            mView.showMsg(mView.getString(R.string.activity_picture_watcher_msg_ensure_failed));
+            mView.showMsg(mView.getString(R.string.libpicturepicker_picturewatcher_tips_ensure_failed));
             return;
         }
         if (Utils.isLollipop()) {
@@ -194,12 +193,12 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     }
 
     @Override
-    public void performBackPressed() {
+    public void handleBackPressed() {
         mView.finish();
     }
 
     @Override
-    public ArrayList<String> fetchUserPicked() {
+    public ArrayList<String> getUserPicked() {
         return mUserPickedSet;
     }
 
@@ -235,7 +234,7 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
      */
     private CharSequence buildEnsureText() {
         return MessageFormat.format("{0}({1}/{2})",
-                mView.getString(R.string.activity_picture_watcher_btn_ensure), mUserPickedSet.size(), mConfig.threshold);
+                mView.getString(R.string.libpicturepicker_picturewatcher_ensure), mUserPickedSet.size(), mConfig.threshold);
     }
 
     /**

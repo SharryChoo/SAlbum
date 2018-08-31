@@ -2,11 +2,9 @@ package com.frank.picturepicker.picturepicker.manager;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -14,8 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
-import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity;
-import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
+import com.frank.picturepicker.picturepicker.impl.PicturePickerActivity;
 import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.permission.PermissionsCallback;

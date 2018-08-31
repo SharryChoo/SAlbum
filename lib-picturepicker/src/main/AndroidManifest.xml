@@ -12,7 +12,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name="com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity"
+            android:name="com.frank.picturepicker.picturepicker.impl.PicturePickerActivity"
             android:launchMode="singleTop"
             android:theme="@style/PicturePickerTheme" />
         <activity

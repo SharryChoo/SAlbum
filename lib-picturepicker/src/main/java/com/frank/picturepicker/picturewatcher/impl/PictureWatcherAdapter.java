@@ -12,7 +12,7 @@ import java.util.List;
  * Version: 1.0
  * Description: 图片查看器的 Adapter
  */
-public class PictureWatcherAdapter extends PagerAdapter {
+class PictureWatcherAdapter extends PagerAdapter {
 
     private List<? extends View> mViews;
 
