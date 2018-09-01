@@ -17,7 +17,7 @@ import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -341,7 +341,7 @@ public class PicturePickerManager {
         }
         Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
-        intent.putExtra(PicturePickerActivity.START_INTENT_EXTRA_CONFIG, mConfig);
+        intent.putExtra(PicturePickerActivity.START_EXTRA_CONFIG, mConfig);
         mPickerFragment.setPickerCallback(pickerCallback);
         mPickerFragment.startActivityForResult(intent, PicturePickerFragment.REQUEST_CODE_PICKED);
     }

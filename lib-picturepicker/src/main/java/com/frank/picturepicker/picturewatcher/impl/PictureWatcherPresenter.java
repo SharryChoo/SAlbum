@@ -13,7 +13,7 @@ import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

@@ -10,7 +10,6 @@ import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
-import com.frank.picturepicker.picturepicker.manager.PicturePickerFragment;
 import com.frank.picturepicker.picturetake.manager.PictureTakeManager;
 import com.frank.picturepicker.picturetake.manager.TakeCallback;
 import com.frank.picturepicker.picturewatcher.manager.PictureWatcherManager;
@@ -247,13 +246,11 @@ class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCa
      * 处理图片选择完成了
      */
     private void performUserPickedSetResult() {
-        if (mView != null && mView instanceof Activity) {
-            Activity bind = (Activity) mView;
-            Intent intent = new Intent();
-            intent.putExtra(PicturePickerActivity.RESULT_INTENT_EXTRA_PICKED_PICTURES, mModel.getPickedPaths());
-            bind.setResult(PicturePickerFragment.REQUEST_CODE_PICKED, intent);
-            bind.finish();
-        }
+        Activity bind = (Activity) mView;
+        Intent intent = new Intent();
+        intent.putExtra(PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES, mModel.getPickedPaths());
+        bind.setResult(Activity.RESULT_OK, intent);
+        bind.finish();
     }
 
     /**

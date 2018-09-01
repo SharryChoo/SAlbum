@@ -1,15 +1,10 @@
 package com.frank.picturepicker.picturepicker.impl;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +15,6 @@ import android.widget.Toast;
 
 import com.frank.picturepicker.R;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
-import com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity;
 import com.frank.picturepicker.widget.PicturePickerFabBehavior;
 import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
@@ -41,8 +35,8 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     /*
        Outer constants.
      */
-    public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
-    public static final String RESULT_INTENT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
+    public static final String START_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
+    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
 
     /*
        Inner constants associated with toolbar.
@@ -115,7 +109,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     protected void initData() {
         mPresenter.start(this, (PickerConfig)
-                getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG));
+                getIntent().getParcelableExtra(START_EXTRA_CONFIG));
     }
 
     @Override
