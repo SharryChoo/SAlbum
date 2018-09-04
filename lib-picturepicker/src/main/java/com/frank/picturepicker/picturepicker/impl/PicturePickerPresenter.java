@@ -46,8 +46,8 @@ class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCa
         this.mModel = new PicturePickerModel(mConfig.userPickedSet == null ? new ArrayList<String>()
                 : mConfig.userPickedSet, mConfig.threshold);
         // 配置 UI 视图
-        mView.setToolbarScrollable(mConfig.isShowScrollBehavior);
-        mView.switchFabVisibility(mConfig.isShowScrollBehavior);
+        mView.setToolbarScrollable(mConfig.isShowToolbarBehavior);
+        mView.switchFabVisibility(mConfig.isShowToolbarBehavior);
         if (mConfig.toolbarBkgColor != PickerConfig.INVALIDATE_VALUE) {
             mView.setToolbarBackgroundColor(mConfig.toolbarBkgColor);
             mView.setFabColor(mConfig.toolbarBkgColor);
