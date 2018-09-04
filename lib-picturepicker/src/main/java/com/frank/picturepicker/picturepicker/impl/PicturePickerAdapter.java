@@ -19,10 +19,11 @@ import com.frank.picturepicker.widget.CheckedIndicatorView;
 import java.util.List;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.2
- * Description: 图片选择器的 Adapter
+ * Adapter associated with PicturePicker.
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.3
+ * @since 2018/9/1 10:19
  */
 class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.ViewHolder> {
 
@@ -106,12 +107,6 @@ class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.Vie
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER);
         holder.ivPicture.setImageResource(mConfig.cameraIconDrawableResId == PickerConfig.INVALIDATE_VALUE
                 ? R.drawable.libpicturepicker_picturepicker_camera : mConfig.cameraIconDrawableResId);
-        holder.ivPicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mInteraction.onCameraClicked();
-            }
-        });
         holder.checkIndicator.setVisibility(View.INVISIBLE);
     }
 
@@ -121,36 +116,12 @@ class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.Vie
     private void bindItemView(final ViewHolder holder, final String uri) {
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         PictureLoader.load(mContext, uri, holder.ivPicture);
-        holder.ivPicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mInteraction.onPictureClicked((ImageView) v, uri, mDisplayPaths.indexOf(uri));
-            }
-        });
         // 判断当前 uri 是否被选中了
         final int index = mUserPickedPaths.indexOf(uri);
         // 设置点击监听
         holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
         holder.checkIndicator.setText(String.valueOf(index + 1));
-        // 设置点击监听器
-        holder.checkIndicator.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (holder.checkIndicator.isChecked()) {// Checked-> Unchecked
-                    // 移除选中数据与状态
-                    mInteraction.onPictureRemoved(uri);
-                    holder.checkIndicator.setChecked(false);
-                    // 需要延时的更新索引角标
-                    notifyCheckedIndicatorChanged();
-                } else {// Unchecked -> Checked
-                    // 判断是否达到选择上限
-                    holder.checkIndicator.setChecked(mInteraction.onPictureChecked(uri));
-                    // 设置文本
-                    holder.checkIndicator.setText(String.valueOf(mUserPickedPaths.size()));
-                }
-            }
-        });
     }
 
     @Override
@@ -165,18 +136,59 @@ class PicturePickerAdapter extends RecyclerView.Adapter<PicturePickerAdapter.Vie
         mMainThreadHandler.postDelayed(mRefreshIndicatorRunnable, 300);
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         final ImageView ivPicture;
         final CheckedIndicatorView checkIndicator;
 
         ViewHolder(View itemView) {
             super(itemView);
+            // Initialize ivPicture.
             ivPicture = itemView.findViewById(R.id.iv_picture);
+            ivPicture.setOnClickListener(this);
+            // Initialize checkIndicator.
             checkIndicator = itemView.findViewById(R.id.check_indicator);
             checkIndicator.setTextColor(mConfig.indicatorTextColor);
             checkIndicator.setSolidColor(mConfig.indicatorSolidColor);
             checkIndicator.setBorderColor(mConfig.indicatorBorderCheckedColor, mConfig.indicatorBorderUncheckedColor);
+            checkIndicator.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (ivPicture == v) {
+                performPictureClicked();
+            } else if (checkIndicator == v) {
+                performCheckIndicatorClicked();
+            }
+        }
+
+        private void performPictureClicked() {
+            // 单独处理相机的点击事件
+            if (mConfig.isCameraSupport && 0 == getAdapterPosition()) {
+                mInteraction.onCameraClicked();
+            } else {
+                int position = getAdapterPosition() - (mConfig.isCameraSupport ? 1 : 0);
+                mInteraction.onPictureClicked(ivPicture, mDisplayPaths.get(position), position);
+            }
+        }
+
+        private void performCheckIndicatorClicked() {
+            // 获取当前点击图片的 path
+            int position = getAdapterPosition() - (mConfig.isCameraSupport ? 1 : 0);
+            String path = mDisplayPaths.get(position);
+            if (checkIndicator.isChecked()) {// Checked-> Unchecked
+                // 移除选中数据与状态
+                mInteraction.onPictureRemoved(path);
+                checkIndicator.setChecked(false);
+                // 需要延时的更新索引角标
+                notifyCheckedIndicatorChanged();
+            } else {// Unchecked -> Checked
+                // 判断是否达到选择上限
+                checkIndicator.setChecked(mInteraction.onPictureChecked(path));
+                // 设置文本
+                checkIndicator.setText(String.valueOf(mUserPickedPaths.size()));
+            }
         }
     }
 

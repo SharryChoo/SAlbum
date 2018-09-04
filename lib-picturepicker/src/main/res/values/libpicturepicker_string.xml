@@ -5,6 +5,7 @@
     <string name="libpicturepicker_picturepicker_ensure">Ensure</string>
     <string name="libpicturepicker_picturepicker_preview">Preview</string>
     <string name="libpicturepicker_picturepicker_all_picture">All Pictures</string>
+    <string name="libpicturepicker_picturepicker_root_folder">Storage Card</string>
     <string name="libpicturepicker_picturepicker_tips_over_threshold_prefix">Pick a maximum of&#160;</string>
     <string name="libpicturepicker_picturepicker_tips_over_threshold_suffix">&#160;pictures.</string>
     <string name="libpicturepicker_picturepicker_tips_fetch_album_failed">Fetch album data failed.</string>

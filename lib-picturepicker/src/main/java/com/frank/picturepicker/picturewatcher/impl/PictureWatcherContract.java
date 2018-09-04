@@ -3,7 +3,6 @@ package com.frank.picturepicker.picturewatcher.impl;
 import android.support.annotation.StringRes;
 import android.transition.Transition;
 
-import com.frank.picturepicker.picturewatcher.impl.PictureWatcherPreviewAdapter;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
 
 import java.util.ArrayList;
@@ -103,6 +102,16 @@ interface PictureWatcherContract {
          * 通知共享元素的变更了
          */
         void notifySharedElementChanged(int sharedPosition, String sharedKey);
+
+        /**
+         * 通知选中的图片被移除了
+         */
+        void notifyBottomPicturesRemoved(String removedPath, int removedIndex);
+
+        /**
+         * 通知图片插入了
+         */
+        void notifyBottomPictureAdded(String insertPath, int addedIndex);
 
         /**
          * 展示消息通知

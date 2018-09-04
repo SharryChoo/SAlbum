@@ -13,17 +13,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.0
- * Description:
+ * MVP frame model associated with PicturePicker.
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.2
+ * @since 2018/8/30 20:00
  */
 class PicturePickerModel implements PicturePickerContract.IModel {
 
-    private final ArrayList<String> mPickedPaths;                     // 用户已选中的图片地址集合(默认构造为空)
+    private final ArrayList<String> mPickedPaths;                           // 用户已选中的图片地址集合(默认构造为空)
     private final ArrayList<String> mDisplayPaths = new ArrayList<>();      // 当前需要展示的集合
-    private ArrayList<PictureFolder> mFolderModels;                   // 所有包含图片文件夹Model的集合
-    private PictureFolder mCheckedFolder;                            // 当前正在展示的文件夹
+    private ArrayList<PictureFolder> mPictureFolders;                       // 所有包含图片数据的集合
+    private PictureFolder mCheckedFolder;                                   // 当前正在展示的文件夹
 
     PicturePickerModel(ArrayList<String> pickedPaths, int threshold) {
         mPickedPaths = pickedPaths;
@@ -34,8 +35,21 @@ class PicturePickerModel implements PicturePickerContract.IModel {
     }
 
     @Override
-    public void getSystemPictures(Context context, final PicturePickerContract.ModelInitializeCallback listener) {
-        new Thread(new CursorSystemPictureRunnable(context, listener)).start();
+    public void getSystemPictures(Context context, final Callback callback) {
+        new Thread(new CursorSystemPictureRunnable(context,
+                new CursorSystemPictureRunnable.RunnableInteraction() {
+                    @Override
+                    public void onComplete(ArrayList<PictureFolder> pictureFolders) {
+                        mPictureFolders = pictureFolders;
+                        callback.onComplete();
+                    }
+
+                    @Override
+                    public void onFailed(Throwable throwable) {
+                        callback.onFailed(throwable);
+                    }
+                })
+        ).start();
     }
 
     /**
@@ -43,7 +57,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
      */
     @Override
     public PictureFolder getPictureFolderAt(int index) {
-        return mFolderModels.get(index);
+        return mPictureFolders.get(index);
     }
 
     /**
@@ -51,7 +65,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
      */
     @Override
     public ArrayList<PictureFolder> getAllFolders() {
-        return mFolderModels;
+        return mPictureFolders;
     }
 
     /**
@@ -65,7 +79,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
     public void setCheckedFolder(PictureFolder checkedFolder) {
         this.mCheckedFolder = checkedFolder;
         mDisplayPaths.clear();
-        mDisplayPaths.addAll(checkedFolder.getImagePaths());
+        mDisplayPaths.addAll(checkedFolder.getPicturePaths());
     }
 
     /**
@@ -103,71 +117,70 @@ class PicturePickerModel implements PicturePickerContract.IModel {
     /**
      * 遍历加载系统图片的线程
      */
-    private class CursorSystemPictureRunnable implements Runnable {
+    private static class CursorSystemPictureRunnable implements Runnable {
 
-        private Context mContext;
-        private PicturePickerContract.ModelInitializeCallback mListener;
+        interface RunnableInteraction {
+            void onComplete(ArrayList<PictureFolder> pictureFolders);
 
-        CursorSystemPictureRunnable(Context context, PicturePickerContract.ModelInitializeCallback listener) {
+            void onFailed(Throwable throwable);
+        }
+
+        private final Context mContext;
+        private final RunnableInteraction mListener;
+
+        CursorSystemPictureRunnable(Context context, RunnableInteraction listener) {
             mContext = context;
             mListener = listener;
         }
 
         @Override
         public void run() {
+            // 用于存储遍历到的所有图片文件夹集合
             ArrayList<PictureFolder> pictureFolders = new ArrayList<>();
+            // 创建一个图片文件夹, 用于保存所有图片
             PictureFolder allPictureFolder = new PictureFolder(mContext.getString(R.string.libpicturepicker_picturepicker_all_picture));
             pictureFolders.add(allPictureFolder);
-            //key为存放图片的文件夹路径, values为PictureFolderModel的对象
-            HashMap<String, PictureFolder> hashMap = new HashMap<>();
+            // key 为图片的文件夹的绝对路径, values 为 PictureFolder 的对象
+            HashMap<String, PictureFolder> caches = new HashMap<>();
             Cursor cursor = createImageCursor();
             try {
-                PictureFolder otherFolderModel;
                 if (cursor != null && cursor.getCount() > 0) {
-                    //是否是第一个遍历到的图片目录
+                    // 是否是第一个遍历到的图片目录
                     while (cursor.moveToNext()) {
-                        String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                        if (TextUtils.isEmpty(imagePath)) continue;
-                        // 1. 添加到所有图片的目录下
-                        allPictureFolder.addImagePath(imagePath);
-                        // 2. 添加到图片所在的目录下
-                        String folderPath = null;
-                        File folder = new File(imagePath).getParentFile();
-                        if (folder != null) folderPath = folder.getAbsolutePath();
-                        if (TextUtils.isEmpty(folderPath)) {
-                            // 找寻最后一个分隔符
-                            int end = imagePath.lastIndexOf(File.separator);
-                            if (end != -1) {
-                                folderPath = imagePath.substring(0, end);
-                            }
+                        // 通过 cursor 获取图片路径
+                        String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                        if (TextUtils.isEmpty(picturePath)) {
+                            continue;
                         }
-                        if (!TextUtils.isEmpty(folderPath)) {
-                            // 通过folderPath在hashMap中寻找是否存在相应的PictureFolderModel对象
-                            if (hashMap.containsKey(folderPath)) {
-                                otherFolderModel = hashMap.get(folderPath);
-                            } else {
-                                // 通过文件路径截取文件名
-                                String folderName = folderPath.substring(folderPath.lastIndexOf(File.separator) + 1);
-                                // 为空说明直接在StorageCard的根目录
-                                if (TextUtils.isEmpty(folderName)) folderName = "/";
-                                otherFolderModel = new PictureFolder(folderName);
-                                hashMap.put(folderPath, otherFolderModel);
-                            }
-                            otherFolderModel.addImagePath(imagePath);
+                        // 添加到所有图片的目录下
+                        allPictureFolder.addPath(picturePath);
+                        // 获取图片父文件夹路径
+                        String pictureFolderPath = getParentFolderPath(picturePath);
+                        if (TextUtils.isEmpty(pictureFolderPath)) {
+                            continue;
                         }
+                        // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
+                        if (!caches.containsKey(pictureFolderPath)) {
+                            String folderName = getLastFileName(pictureFolderPath);
+                            caches.put(pictureFolderPath, new PictureFolder(folderName));
+                        }
+                        // 添加图片到缓存
+                        caches.get(pictureFolderPath).addPath(picturePath);
                     }
                 }
                 // 添加所有文件夹数据
-                pictureFolders.addAll(hashMap.values());
+                pictureFolders.addAll(caches.values());
             } catch (Exception e) {
                 mListener.onFailed(e);
             } finally {
                 if (cursor != null) cursor.close();
             }
-            mFolderModels = pictureFolders;
             mListener.onComplete(pictureFolders);
         }
 
+        /**
+         * Create cursor associated with this runnable.
+         */
         private Cursor createImageCursor() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{MediaStore.Images.Media.DATA};
@@ -175,9 +188,34 @@ class PicturePickerModel implements PicturePickerContract.IModel {
                     MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?";
             String[] selectionArgs = new String[]{"image/jpeg", "image/png", "image/jpg"};
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            Cursor imageCursor = mContext.getContentResolver().query(uri, projection,
+            return mContext.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
-            return imageCursor;
+        }
+
+        /**
+         * Get parent folder associated with this file.
+         */
+        private String getParentFolderPath(String filePath) {
+            String parentFolderPath = new File(filePath).getParentFile().getAbsolutePath();
+            if (TextUtils.isEmpty(parentFolderPath)) {
+                int end = filePath.lastIndexOf(File.separator);
+                if (end != -1) {
+                    parentFolderPath = filePath.substring(0, end);
+                }
+            }
+            return parentFolderPath;
+        }
+
+        /**
+         * Get last file name associated with this filePath.
+         */
+        private String getLastFileName(String filePath) {
+            String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+            // 为空说明直接在 StorageCard 的根目录
+            if (TextUtils.isEmpty(fileName)) {
+                fileName = mContext.getString(R.string.libpicturepicker_picturepicker_root_folder);
+            }
+            return fileName;
         }
     }
 }

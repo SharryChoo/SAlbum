@@ -23,10 +23,11 @@ import com.frank.picturepicker.widget.toolbar.Style;
 import java.util.ArrayList;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.2
- * Description: 图片选择器的 Activity
+ * 图片选择器的 Activity
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.3
+ * @since 2018/9/1 10:17
  */
 public class PicturePickerActivity extends AppCompatActivity implements PicturePickerContract.IView,
         PicturePickerAdapter.AdapterInteraction, View.OnClickListener {
@@ -34,8 +35,8 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     /*
        Outer constants.
      */
-    public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
-    public static final String RESULT_INTENT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
+    public static final String START_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
+    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
 
     /*
        Inner constants associated with toolbar.
@@ -59,6 +60,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private TextView mTvPreview;
     private TextView mTvToolbarEnsure;
     private FloatingActionButton mFab;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +109,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     protected void initData() {
         mPresenter.start(this, (PickerConfig)
-                getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG));
+                getIntent().getParcelableExtra(START_EXTRA_CONFIG));
     }
 
     @Override
@@ -239,4 +241,5 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
             mPresenter.handleEnsureClicked();
         }
     }
+
 }

@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Frank on 2018/6/13.
@@ -162,10 +161,18 @@ interface PicturePickerContract {
 
     interface IModel {
 
+        interface Callback {
+
+            void onComplete();
+
+            void onFailed(Throwable throwable);
+
+        }
+
         /**
          * 获取系统图片
          */
-        void getSystemPictures(Context context, final ModelInitializeCallback listener);
+        void getSystemPictures(Context context, final Callback listener);
 
         /**
          * 获取当前需要显示的文件模型
@@ -203,9 +210,5 @@ interface PicturePickerContract {
         void removePickedPicture(String imagePath);
     }
 
-    interface ModelInitializeCallback {
-        void onComplete(List<PictureFolder> pictureFolders);
 
-        void onFailed(Throwable throwable);
-    }
 }

@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.frank.picturepicker.pricturecrop.manager.CropCallback;
 import com.frank.picturepicker.pricturecrop.manager.PictureCropManager;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class PictureTakeFragment extends Fragment {
     /**
      * Activity Result 相关
      */
-    public static final int REQUEST_CODE_TAKE = 0x00000111;// 图片选择请求码
+    public static final int REQUEST_CODE_TAKE = 0x000222;// 图片选择请求码
 
     public static PictureTakeFragment newInstance() {
         PictureTakeFragment fragment = new PictureTakeFragment();
@@ -39,14 +39,10 @@ public class PictureTakeFragment extends Fragment {
         return fragment;
     }
 
-    // 回调
-    private TakeCallback mTakeCallback;
-
     private Context mContext;
-    // 存储系统相机拍摄的图片临时路径
-    private File mTempFile;
-    // 相关配置
     private TakeConfig mConfig;
+    private TakeCallback mTakeCallback;
+    private File mTempFile;             // Temp file associated with camera.
 
     @Override
     public void onAttach(Context context) {
@@ -83,24 +79,30 @@ public class PictureTakeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQUEST_CODE_TAKE || resultCode != Activity.RESULT_OK) return;
-        try {
-            // 1. 将拍摄后的图片, 压缩到 cameraDestFile 中
-            File cameraDestFile = Utils.createCameraDestFile(mConfig.cameraDirectoryPath);
-            Utils.doCompress(mTempFile.getAbsolutePath(), cameraDestFile.getAbsolutePath(), mConfig.cameraDestQuality);
-            // 2. 处理图片裁剪
-            if (mConfig.isCropSupport) {
-                performCropPicture(cameraDestFile.getAbsolutePath());
-            } else {
-                // 3. 回调
-                mTakeCallback.onTakeComplete(cameraDestFile.getAbsolutePath());
-                // 刷新文件管理器
-                Utils.freshMediaStore(mContext, cameraDestFile);
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Picture compress failed after camera take.", e);
-        } finally {
-            mTempFile.delete();
+        if (resultCode != Activity.RESULT_OK || null == mTakeCallback) return;
+        switch (requestCode) {
+            case REQUEST_CODE_TAKE:
+                try {
+                    // 1. 将拍摄后的图片, 压缩到 cameraDestFile 中
+                    File cameraDestFile = Utils.createCameraDestFile(mConfig.cameraDirectoryPath);
+                    Utils.doCompress(mTempFile.getAbsolutePath(), cameraDestFile.getAbsolutePath(), mConfig.cameraDestQuality);
+                    // 2. 处理图片裁剪
+                    if (mConfig.isCropSupport) {
+                        performCropPicture(cameraDestFile.getAbsolutePath());
+                    } else {
+                        // 3. 回调
+                        mTakeCallback.onTakeComplete(cameraDestFile.getAbsolutePath());
+                        // 刷新文件管理器
+                        Utils.freshMediaStore(mContext, cameraDestFile);
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Picture compress failed after camera take.", e);
+                } finally {
+                    mTempFile.delete();
+                }
+                break;
+            default:
+                break;
         }
     }
 

@@ -18,11 +18,11 @@ import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 import java.util.ArrayList;
 
-import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity.START_INTENT_EXTRA_SHARED_ELEMENT;
+import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity.START_EXTRA_SHARED_ELEMENT;
 
 /**
  * Created by Frank on 2018/6/19.
@@ -216,13 +216,13 @@ public class PictureWatcherManager {
     private void startForResultActual(final WatcherCallback callback) {
         mWatcherFragment.setPickerCallback(callback);
         Intent intent = new Intent(mActivity, PictureWatcherActivity.class);
-        intent.putExtra(PictureWatcherActivity.START_INTENT_EXTRA_CONFIG, mConfig);
+        intent.putExtra(PictureWatcherActivity.START_EXTRA_CONFIG, mConfig);
         // 5.0 以上的系统使用 Transition 跳转
         if (Utils.isLollipop()) {
             ActivityOptions options = null;
             if (mTransitionView != null) {
                 // 共享元素
-                intent.putExtra(START_INTENT_EXTRA_SHARED_ELEMENT, true);
+                intent.putExtra(START_EXTRA_SHARED_ELEMENT, true);
                 String transitionKey = mConfig.pictureUris.get(mConfig.position);
                 mTransitionView.setTransitionName(transitionKey);
                 options = ActivityOptions.makeSceneTransitionAnimation(
