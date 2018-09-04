@@ -1,7 +1,5 @@
-package com.frank.picturepicker.picturewatcher.impl.mvp;
+package com.frank.picturepicker.picturewatcher.impl;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.transition.ChangeBounds;
@@ -14,16 +12,11 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturewatcher.impl.PictureWatcherPreviewAdapter;
-import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-
-import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE;
-import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity.RESULT_EXTRA_PICKED_PICTURES;
 
 /**
  * Created by Frank on 2018/7/20.
@@ -31,16 +24,15 @@ import static com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity
  * Version: 1.0
  * Description:
  */
-public class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, PictureWatcherPreviewAdapter.AdapterInteraction {
+class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, PictureWatcherPreviewAdapter.AdapterInteraction {
 
     private PictureWatcherContract.IView mView;
     private WatcherConfig mConfig;
-    private ArrayList<String> mPictureUris;
-    private ArrayList<String> mUserPickedSet;
-    private PictureWatcherPreviewAdapter mBottomPreviewAdapter;
+    private ArrayList<String> mDisplayPaths;
+    private ArrayList<String> mPickedPaths;
 
     private int mCurPosition = -1;
-    private String mCurDisplayUri;
+    private String mCurDisplayPath;
     private String mSharedKey;// 共享元素的 Key
     // Flags
     private boolean mIsSharedElement = false;// 是否支持共享元素
@@ -56,20 +48,20 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     public void init(WatcherConfig config, boolean isSharedElement) {
         this.mConfig = config;
         // 获取需要展示图片的 URI 集合
-        mPictureUris = config.pictureUris == null ? new ArrayList<String>() : config.pictureUris;
+        mDisplayPaths = config.pictureUris == null ? new ArrayList<String>() : config.pictureUris;
         // 获取已经选中的图片
-        mUserPickedSet = config.userPickedSet;
-        mIsSupportPicked = mUserPickedSet != null;
+        mPickedPaths = config.userPickedSet;
+        mIsSupportPicked = mPickedPaths != null;
         // 获取当前需要展示的 Position 和 URI
         mCurPosition = config.position;
-        mCurDisplayUri = mPictureUris.get(mCurPosition);
+        mCurDisplayPath = mDisplayPaths.get(mCurPosition);
         // 判断是否开启共享动画
         if (!Utils.isLollipop()) return;
         mView.setWindowEnterTransitions(new Slide().setDuration(300));
         mView.setWindowReturnTransitions(new Fade().setDuration(300));
         mIsSharedElement = isSharedElement;
         if (!mIsSharedElement) return;
-        mSharedKey = mCurDisplayUri;
+        mSharedKey = mCurDisplayPath;
         // 设置共享元素场景切换动画
         mView.setWindowEnterTransitions(new Fade().setDuration(500));
         // 设置共享元素进入动画
@@ -96,27 +88,26 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
         mView.setToolbarCheckedIndicatorVisibility(mIsSupportPicked);
 
         // 2. 设置 Pictures 数据
-        mView.createPhotoViews(mPictureUris);
+        mView.createPhotoViews(mDisplayPaths);
         if (mIsSharedElement) {
             // 绑定共享元素
-            mView.bindSharedElementView(mPictureUris.indexOf(mSharedKey), mSharedKey);
+            mView.bindSharedElementView(mDisplayPaths.indexOf(mSharedKey), mSharedKey);
             // 通知共享元素位置变更了
-            mView.notifySharedElementChanged(mPictureUris.indexOf(mSharedKey), mSharedKey);
+            mView.notifySharedElementChanged(mDisplayPaths.indexOf(mSharedKey), mSharedKey);
         }
-        mView.displayPictureAt(mPictureUris, mCurPosition);
+        mView.displayPictureAt(mDisplayPaths, mCurPosition);
 
         // 3. 设置底部菜单和按钮选中的状态
         if (mIsSupportPicked) {
             mView.setToolbarCheckedIndicatorColors(mConfig.indicatorBorderCheckedColor,
                     mConfig.indicatorBorderUncheckedColor, mConfig.indicatorSolidColor, mConfig.indicatorTextColor);
-            mView.setToolbarIndicatorChecked(mUserPickedSet.indexOf(mCurDisplayUri) != -1);
+            mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
             mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
             // 底部菜单
-            mBottomPreviewAdapter = new PictureWatcherPreviewAdapter(mUserPickedSet, this);
-            mView.setPreviewAdapter(mBottomPreviewAdapter);
+            mView.setPreviewAdapter(new PictureWatcherPreviewAdapter(mPickedPaths, this));
             mView.displayPreviewEnsureText(buildEnsureText());
             // 底部菜单延时弹出
-            if (!mUserPickedSet.isEmpty()) {
+            if (!mPickedPaths.isEmpty()) {
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -128,61 +119,61 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     }
 
     @Override
-    public void performPagerChanged(int position) {
+    public void handlePagerChanged(int position) {
         // 更新数据
         mCurPosition = position;
-        mCurDisplayUri = mPictureUris.get(position);
+        mCurDisplayPath = mDisplayPaths.get(position);
         // 展示 Toolbar 左边的指示文本
         mView.displayToolbarLeftText(buildToolbarLeftText());
         // 展示图片
-        mView.displayPictureAt(mPictureUris, mCurPosition);
+        mView.displayPictureAt(mDisplayPaths, mCurPosition);
         if (mIsSupportPicked) {
-            mView.setToolbarIndicatorChecked(mUserPickedSet.indexOf(mCurDisplayUri) != -1);
+            mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
             mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
             mView.displayPreviewEnsureText(buildEnsureText());
         }
         if (mIsSharedElement) {
-            int sharedPosition = mPictureUris.indexOf(mSharedKey);
+            int sharedPosition = mDisplayPaths.indexOf(mSharedKey);
             mView.notifySharedElementChanged(sharedPosition,
                     position == sharedPosition ? mSharedKey : "");
         }
     }
 
     @Override
-    public void performToolbarCheckedIndicatorClick(boolean isChecked) {
-        boolean nowVisible = !mUserPickedSet.isEmpty();
+    public void handleToolbarCheckedIndicatorClick(boolean isChecked) {
+        boolean nowVisible = !mPickedPaths.isEmpty();
         if (isChecked) {
             // 移除选中数据与状态
-            int removedIndex = mUserPickedSet.indexOf(mCurDisplayUri);
-            mUserPickedSet.remove(removedIndex);
+            int removedIndex = mPickedPaths.indexOf(mCurDisplayPath);
+            mPickedPaths.remove(removedIndex);
             // 通知 RecyclerView 数据变更
-            mBottomPreviewAdapter.notifyItemRemoved(removedIndex);
+            mView.notifyBottomPicturesRemoved(mCurDisplayPath, removedIndex);
         } else {
             // 判断是否达到选择上限
-            if (mUserPickedSet.size() < mConfig.threshold) {
-                mUserPickedSet.add(mCurDisplayUri);
-                int addedIndex = mUserPickedSet.indexOf(mCurDisplayUri);
+            if (mPickedPaths.size() < mConfig.threshold) {
+                mPickedPaths.add(mCurDisplayPath);
+                int addedIndex = mPickedPaths.indexOf(mCurDisplayPath);
                 // 通知 RecyclerView 数据变更
-                mBottomPreviewAdapter.notifyItemInserted(addedIndex);
+                mView.notifyBottomPictureAdded(mCurDisplayPath, addedIndex);
                 mView.previewPicturesSmoothScrollToPosition(addedIndex);
             } else {
                 mView.showMsg(
-                        mView.getString(R.string.activity_picture_watcher_msg_over_threshold_prefix) +
+                        mView.getString(R.string.libpicturepicker_picturewatcher_tips_over_threshold_prefix) +
                                 mConfig.threshold +
-                                mView.getString(R.string.activity_picture_watcher_msg_over_threshold_suffix)
+                                mView.getString(R.string.libpicturepicker_picturewatcher_tips_over_threshold_suffix)
                 );
             }
         }
-        mView.setToolbarIndicatorChecked(mUserPickedSet.indexOf(mCurDisplayUri) != -1);
+        mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
         mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
         mView.displayPreviewEnsureText(buildEnsureText());
-        mView.setBottomPreviewVisibility(nowVisible, !mUserPickedSet.isEmpty());
+        mView.setBottomPreviewVisibility(nowVisible, !mPickedPaths.isEmpty());
     }
 
     @Override
-    public void performEnsureClick() {
-        if (mUserPickedSet.isEmpty()) {
-            mView.showMsg(mView.getString(R.string.activity_picture_watcher_msg_ensure_failed));
+    public void handleEnsureClick() {
+        if (mPickedPaths.isEmpty()) {
+            mView.showMsg(mView.getString(R.string.libpicturepicker_picturewatcher_tips_ensure_failed));
             return;
         }
         if (Utils.isLollipop()) {
@@ -194,13 +185,13 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     }
 
     @Override
-    public void performBackPressed() {
+    public void handleBackPressed() {
         mView.finish();
     }
 
     @Override
-    public ArrayList<String> fetchUserPicked() {
-        return mUserPickedSet;
+    public ArrayList<String> getUserPicked() {
+        return mPickedPaths;
     }
 
     @Override
@@ -210,9 +201,9 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
 
     @Override
     public void onPreviewItemClicked(ImageView imageView, String uri, int position) {
-        int indexOfPictureUris = mPictureUris.indexOf(uri);
+        int indexOfPictureUris = mDisplayPaths.indexOf(uri);
         if (indexOfPictureUris != -1) {
-            mView.displayPictureAt(mPictureUris, indexOfPictureUris);
+            mView.displayPictureAt(mDisplayPaths, indexOfPictureUris);
         }
     }
 
@@ -220,14 +211,14 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
      * 构建 Toolbar 左边的文本
      */
     private CharSequence buildToolbarLeftText() {
-        return MessageFormat.format("{0}/{1}", mCurPosition + 1, mPictureUris.size());
+        return MessageFormat.format("{0}/{1}", mCurPosition + 1, mDisplayPaths.size());
     }
 
     /**
      * 构建 Toolbar checked Indicator 的文本
      */
     private CharSequence buildToolbarCheckedIndicatorText() {
-        return String.valueOf(mUserPickedSet.indexOf(mCurDisplayUri) + 1);
+        return String.valueOf(mPickedPaths.indexOf(mCurDisplayPath) + 1);
     }
 
     /**
@@ -235,20 +226,7 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
      */
     private CharSequence buildEnsureText() {
         return MessageFormat.format("{0}({1}/{2})",
-                mView.getString(R.string.activity_picture_watcher_btn_ensure), mUserPickedSet.size(), mConfig.threshold);
-    }
-
-    /**
-     * 执行 View 的销毁
-     */
-    private void executeViewFinish(boolean isEnsureClick) {
-        if (mIsSupportPicked) {
-            Intent intent = new Intent();
-            intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mUserPickedSet);
-            intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, isEnsureClick);
-            ((Activity) mView).setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
-        }
-        ((Activity) mView).onBackPressed();
+                mView.getString(R.string.libpicturepicker_picturewatcher_ensure), mPickedPaths.size(), mConfig.threshold);
     }
 
 }

@@ -19,16 +19,15 @@ import java.lang.ref.SoftReference;
 public class AppBarHelper {
 
     private final int DEFAULT_OPTIONS = 0;
+    private int mOptions = DEFAULT_OPTIONS;
     private Window mWindow;
     private Activity mActivity;
-    private int mOptions = DEFAULT_OPTIONS;
 
     public static AppBarHelper with(Context context) {
         return new AppBarHelper(context);
     }
 
     private AppBarHelper(Context context) {
-        mOptions = 0;
         if (context instanceof Activity) {
             mActivity = new SoftReference<>((Activity) context).get();
             mWindow = mActivity.getWindow();

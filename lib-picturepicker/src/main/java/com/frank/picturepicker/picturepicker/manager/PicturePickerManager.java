@@ -2,11 +2,9 @@ package com.frank.picturepicker.picturepicker.manager;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -14,13 +12,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
-import com.frank.picturepicker.picturepicker.impl.ui.PicturePickerActivity;
-import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
+import com.frank.picturepicker.picturepicker.impl.PicturePickerActivity;
 import com.frank.picturepicker.support.loader.IPictureLoader;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -205,10 +202,18 @@ public class PicturePickerManager {
     }
 
     /**
-     * 是否设置 Behavior 滚动动画
+     * 是否设置 Toolbar Behavior 动画
      */
-    public PicturePickerManager isShowScrollBehavior(boolean isShowScrollBehavior) {
-        mConfig.isShowScrollBehavior = isShowScrollBehavior;
+    public PicturePickerManager isToolbarScrollable(boolean isToolbarScrollable) {
+        mConfig.isToolbarBehavior = isToolbarScrollable;
+        return this;
+    }
+
+    /**
+     * 是否设置 Fab Behavior 滚动动画
+     */
+    public PicturePickerManager isFabScrollable(boolean isFabScrollable) {
+        mConfig.isFabBehavior = isFabScrollable;
         return this;
     }
 
@@ -344,7 +349,7 @@ public class PicturePickerManager {
         }
         Intent intent = new Intent(mActivity, PicturePickerActivity.class);
         // 用户已经选中的图片数量
-        intent.putExtra(PicturePickerActivity.START_INTENT_EXTRA_CONFIG, mConfig);
+        intent.putExtra(PicturePickerActivity.START_EXTRA_CONFIG, mConfig);
         mPickerFragment.setPickerCallback(pickerCallback);
         mPickerFragment.startActivityForResult(intent, PicturePickerFragment.REQUEST_CODE_PICKED);
     }

@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picturepicker.impl.ui;
+package com.frank.picturepicker.picturepicker.impl;
 
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -14,69 +14,61 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturepicker.impl.mvp.PicturePickerContract;
-import com.frank.picturepicker.picturepicker.impl.mvp.PicturePickerPresenter;
 import com.frank.picturepicker.picturepicker.manager.PickerConfig;
 import com.frank.picturepicker.widget.PicturePickerFabBehavior;
 import com.frank.picturepicker.widget.toolbar.AppBarHelper;
 import com.frank.picturepicker.widget.toolbar.GenericToolbar;
 import com.frank.picturepicker.widget.toolbar.Style;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.2
- * Description: 图片选择器的 Activity
+ * 图片选择器的 Activity
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.3
+ * @since 2018/9/1 10:17
  */
-public class PicturePickerActivity extends AppCompatActivity
-        implements PicturePickerContract.IView,
-        PicturePickerAdapter.AdapterInteraction,
-        View.OnClickListener {
+public class PicturePickerActivity extends AppCompatActivity implements PicturePickerContract.IView,
+        PicturePickerAdapter.AdapterInteraction, View.OnClickListener {
 
-    /**
-     * Intent 常量
+    /*
+       Outer constants.
      */
-    public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
-    public static final String RESULT_INTENT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
+    public static final String START_EXTRA_CONFIG = "start_intent_extra_config";// 用户配置的属性
+    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";// 返回的图片
 
-    /**
-     * Toolbar 上添加的控件的 Tag
+    /*
+       Inner constants associated with toolbar.
      */
     private final int TAG_TOOLBAR_BACK = 0x00000001;
     private final int TAG_TOOLBAR_CHECKED_DETAIL = 0x00000002;
     private final int TAG_TOOLBAR_ENSURE = 0x00000003;
 
-    private PicturePickerContract.IPresenter mPresenter = new PicturePickerPresenter();
+    /*
+       Presenter associated with this Activity.
+     */
+    private PicturePickerContract.IPresenter mPresenter = new PicturePickerPresenter(this);
 
-    // View 视图
+    /*
+       Views
+     */
     private GenericToolbar mToolbar;
     private RecyclerView mRecyclerView;
     private TextView mTvToolbarFolderName;
     private TextView mTvSelectedFolderName;
     private TextView mTvPreview;
     private TextView mTvToolbarEnsure;
-
-    // 用于保存数据的相关集合
-    private ArrayList<String> mCurDisplayPaths = new ArrayList<>();// 用户选中的文件夹下所有图片的集合
     private FloatingActionButton mFab;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parseIntent();
-        setContentView(R.layout.activity_picture_picker);
-        mPresenter.attach(this);
+        setContentView(R.layout.libpicturepicker_activity_picture_picker);
         initTitle();
         initViews();
         initData();
-    }
-
-    protected void parseIntent() {
-        mPresenter.init((PickerConfig) getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG));
     }
 
     protected void initTitle() {
@@ -86,22 +78,21 @@ public class PicturePickerActivity extends AppCompatActivity
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.setAdjustToTransparentStatusBar(true);
         // 添加返回按钮
-        mToolbar.addLeftIcon(TAG_TOOLBAR_BACK, R.drawable.icon_common_arrow_back_white, this);
+        mToolbar.addLeftIcon(TAG_TOOLBAR_BACK, R.drawable.libpicturepicker_common_arrow_right_white,
+                this);
         // 添加选中详情的文本
-        mToolbar.addLeftText(TAG_TOOLBAR_CHECKED_DETAIL, getString(R.string.activity_picture_picker_all_picture), 20, null);
+        mToolbar.addLeftText(TAG_TOOLBAR_CHECKED_DETAIL, getString(
+                R.string.libpicturepicker_picturepicker_all_picture), 20, null);
         mTvToolbarFolderName = mToolbar.getViewByTag(TAG_TOOLBAR_CHECKED_DETAIL);
         // 添加图片确认按钮
-        mToolbar.addRightText(TAG_TOOLBAR_ENSURE, getString(R.string.activity_picture_picker_btn_toolbar_ensure), 15, this);
+        mToolbar.addRightText(TAG_TOOLBAR_ENSURE, getString(
+                R.string.libpicturepicker_picturepicker_ensure), 15, this);
         mTvToolbarEnsure = mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE);
     }
 
     protected void initViews() {
         // RecyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this,
-                mPresenter.getConfig().spanCount));
-        mRecyclerView.setAdapter(new PicturePickerAdapter(this, mCurDisplayPaths,
-                mPresenter.getConfig()));
         // 底部菜单控制区域
         findViewById(R.id.ll_bottom_menu).setOnClickListener(this);
         mTvSelectedFolderName = findViewById(R.id.tv_folder_name);
@@ -117,7 +108,8 @@ public class PicturePickerActivity extends AppCompatActivity
     }
 
     protected void initData() {
-        mPresenter.fetchData(this);
+        mPresenter.start(this, (PickerConfig)
+                getIntent().getParcelableExtra(START_EXTRA_CONFIG));
     }
 
     @Override
@@ -147,6 +139,17 @@ public class PicturePickerActivity extends AppCompatActivity
     }
 
     @Override
+    public void setSpanCount(int spanCount) {
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, spanCount));
+    }
+
+    @Override
+    public void setAdapter(PickerConfig config, ArrayList<String> displayPaths, ArrayList<String> userPickedPaths) {
+        mRecyclerView.setAdapter(new PicturePickerAdapter(this, config,
+                displayPaths, userPickedPaths));
+    }
+
+    @Override
     public void setFabColor(int color) {
         mFab.setBackgroundTintList(ColorStateList.valueOf(color));
     }
@@ -157,34 +160,35 @@ public class PicturePickerActivity extends AppCompatActivity
     }
 
     @Override
-    public void displayPictures(String folderName, List<String> uris) {
+    public void setPictureFolderText(String folderName) {
         // 更新文件夹名称
         mTvSelectedFolderName.setText(folderName);
         mTvToolbarFolderName.setText(folderName);
-        // 刷新数据
-        mCurDisplayPaths.clear();
-        mCurDisplayPaths.addAll(uris);
         mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
     @Override
-    public void displayToolbarEnsureText(CharSequence content) {
+    public void setToolbarEnsureText(CharSequence content) {
         mTvToolbarEnsure.setText(content);
     }
 
     @Override
-    public void displayPreviewText(CharSequence content) {
+    public void setPreviewText(CharSequence content) {
         mTvPreview.setText(content);
     }
 
     @Override
-    public void notifyUserPickedSetChanged() {
+    public void notifyPickedPathsChanged() {
         mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
     @Override
-    public void notifyCameraTakeOnePicture(String path) {
-        mCurDisplayPaths.add(0, path);
+    public void notifyDisplayPathsChanged() {
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+    }
+
+    @Override
+    public void notifyDisplayPathsInsertToFirst() {
         mRecyclerView.getAdapter().notifyItemInserted(1);
     }
 
@@ -194,40 +198,47 @@ public class PicturePickerActivity extends AppCompatActivity
     }
 
     @Override
-    public List<String> onUserPickedSet() {
-        return mPresenter.fetchUserPickedSet();
+    public void showBottomMenuDialog(ArrayList<PictureFolder> allPictureFolders) {
+        PicturePickerDialog.with(this, allPictureFolders)
+                .setOnItemClickedListener(new PicturePickerDialog.OnItemClickedListener() {
+                    @Override
+                    public void onDialogItemClicked(int position) {
+                        mPresenter.handleFolderChecked(position);
+                    }
+                })
+                .show();
     }
 
     @Override
     public boolean onPictureChecked(String uri) {
-        return mPresenter.performPictureChecked(uri);
+        return mPresenter.handlePictureChecked(uri);
     }
 
     @Override
-    public void onPictureUnchecked(String uri) {
-        mPresenter.performPictureUnchecked(uri);
+    public void onPictureRemoved(String uri) {
+        mPresenter.handlePictureRemoved(uri);
     }
 
     @Override
     public void onPictureClicked(ImageView imageView, String uri, int position) {
-        mPresenter.performPictureClicked(mCurDisplayPaths, position, imageView);
+        mPresenter.handlePictureClicked(position, imageView);
     }
 
     @Override
     public void onCameraClicked() {
-        mPresenter.performCameraClicked();
+        mPresenter.handleCameraClicked();
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ll_bottom_menu) {// 底部菜单按钮
-            mPresenter.performBottomMenuClicked();
+            mPresenter.handleBottomMenuClicked();
         } else if (v.getId() == R.id.tv_preview) {// 预览按钮
-            mPresenter.performPreviewClicked();
+            mPresenter.handlePreviewClicked();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_BACK)) {// 返回按钮
             onBackPressed();
         } else if (v == mToolbar.getViewByTag(TAG_TOOLBAR_ENSURE) || v.getId() == R.id.fab) {// 确认按钮
-            mPresenter.performEnsureClicked();
+            mPresenter.handleEnsureClicked();
         }
     }
 

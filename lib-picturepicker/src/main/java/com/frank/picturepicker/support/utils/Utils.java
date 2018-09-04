@@ -1,4 +1,4 @@
-package com.frank.picturepicker.support.util;
+package com.frank.picturepicker.support.utils;
 
 import android.content.Context;
 import android.content.Intent;

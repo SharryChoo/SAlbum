@@ -22,9 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturewatcher.impl.mvp.PictureWatcherContract;
-import com.frank.picturepicker.picturewatcher.impl.mvp.PictureWatcherPresenter;
-import com.frank.picturepicker.picturewatcher.manager.PictureWatcherFragment;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
 import com.frank.picturepicker.support.loader.PictureLoader;
 import com.frank.picturepicker.widget.CheckedIndicatorView;
@@ -49,8 +46,9 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         DraggableViewPager.OnPagerChangedListener {
 
     // 启动时的 Extra
-    public static final String START_INTENT_EXTRA_CONFIG = "start_intent_extra_config";
-    public static final String START_INTENT_EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
+    public static final String START_EXTRA_CONFIG = "start_intent_extra_config";
+    public static final String START_EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
+
     // 返回时的 Extra
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";// 返回的图片
     public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";// 是否是确认选择
@@ -74,7 +72,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         mPresenter.attach(this);
         parseIntent();
-        setContentView(R.layout.activity_picture_watcher);
+        setContentView(R.layout.libpicturepicker_activity_picture_watcher);
         initTitle();
         initViews();
         initData();
@@ -82,8 +80,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     protected void parseIntent() {
         mPresenter.init(
-                (WatcherConfig) getIntent().getParcelableExtra(START_INTENT_EXTRA_CONFIG),
-                getIntent().getBooleanExtra(START_INTENT_EXTRA_SHARED_ELEMENT, false)
+                (WatcherConfig) getIntent().getParcelableExtra(START_EXTRA_CONFIG),
+                getIntent().getBooleanExtra(START_EXTRA_SHARED_ELEMENT, false)
         );
     }
 
@@ -91,10 +89,10 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         AppBarHelper.with(this).setStatusBarStyle(Style.TRANSPARENT).apply();
         GenericToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setAdjustToTransparentStatusBar(true);
-        toolbar.addLeftIcon(0, R.drawable.icon_common_arrow_back_white, new View.OnClickListener() {
+        toolbar.addLeftIcon(0, R.drawable.libpicturepicker_common_arrow_right_white, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.performBackPressed();
+                mPresenter.handleBackPressed();
             }
         });
         toolbar.setTitleGravity(Gravity.LEFT);
@@ -106,7 +104,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         toolbar.addRightView(1, mCheckIndicator, 25, 25, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.performToolbarCheckedIndicatorClick(mCheckIndicator.isChecked());
+                mPresenter.handleToolbarCheckedIndicatorClick(mCheckIndicator.isChecked());
             }
         });
     }
@@ -126,7 +124,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         mTvEnsure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.performEnsureClick();
+                mPresenter.handleEnsureClick();
             }
         });
     }
@@ -176,7 +174,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     @Override
     public void createPhotoViews(ArrayList<String> pictureUris) {
-        for (String uri : pictureUris) {
+        for (String uri: pictureUris) {
             PhotoView photoView = new PhotoView(this);
             photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -215,6 +213,16 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void notifyBottomPicturesRemoved(String removedPath, int removedIndex) {
+        mBottomPreviewPictures.getAdapter().notifyItemRemoved(removedIndex);
+    }
+
+    @Override
+    public void notifyBottomPictureAdded(String insertPath, int addedIndex) {
+        mBottomPreviewPictures.getAdapter().notifyItemInserted(addedIndex);
+    }
+
+    @Override
     public void displayPictureAt(ArrayList<String> pictureUris, int curPosition) {
         mViewPager.setCurrentItem(curPosition);
         // 加载当前的位置的图片
@@ -248,7 +256,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     @Override
     public void onPagerChanged(int position) {
-        mPresenter.performPagerChanged(position);
+        mPresenter.handlePagerChanged(position);
     }
 
     @Override
@@ -297,9 +305,9 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     public void finish() {
         // 设置回调
         Intent intent = new Intent();
-        intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mPresenter.fetchUserPicked());
+        intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, mPresenter.getUserPicked());
         intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, mPresenter.isEnsurePressed());
-        setResult(PictureWatcherFragment.REQUEST_CODE_PICKED, intent);
+        setResult(RESULT_OK, intent);
         super.finish();
         // 当前 Activity 关闭时, 使用淡入淡出的动画
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

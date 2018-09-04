@@ -1,5 +1,6 @@
 package com.frank.picturepicker.picturewatcher.manager;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,7 +22,7 @@ public class PictureWatcherFragment extends Fragment {
     /**
      * Activity Result 相关
      */
-    public static final int REQUEST_CODE_PICKED = 0x00001111;// 图片选择请求码
+    public static final int REQUEST_CODE_PICKED = 0x000333;// 图片选择请求码
 
     public static PictureWatcherFragment newInstance() {
         PictureWatcherFragment fragment = new PictureWatcherFragment();
@@ -48,12 +49,17 @@ public class PictureWatcherFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_PICKED && data != null && mWatcherCallback != null) {
-            ArrayList<String> paths = data.getStringArrayListExtra(PictureWatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
-            boolean isEnsure = data.getBooleanExtra(PictureWatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
-            if (paths != null) {
+        if (resultCode != Activity.RESULT_OK || null == data || null == mWatcherCallback) return;
+        switch (requestCode) {
+            case REQUEST_CODE_PICKED:
+                ArrayList<String> paths = data.getStringArrayListExtra(
+                        PictureWatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
+                boolean isEnsure = data.getBooleanExtra(
+                        PictureWatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
                 mWatcherCallback.onWatcherPickedComplete(isEnsure, paths);
-            }
+                break;
+            default:
+                break;
         }
     }
 

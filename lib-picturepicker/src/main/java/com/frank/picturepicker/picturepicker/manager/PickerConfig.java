@@ -38,7 +38,8 @@ public class PickerConfig implements Parcelable {
     public int indicatorBorderUncheckedColor = Color.WHITE;// 指示器边框未被选中的颜色
 
     // 是否展示滚动动画
-    public boolean isShowScrollBehavior = false;
+    public boolean isToolbarBehavior = false;
+    public boolean isFabBehavior = false;
 
     // 是否展示拍照支持
     public String authority;// FileProvider 的 authority 属性
@@ -70,7 +71,8 @@ public class PickerConfig implements Parcelable {
         indicatorSolidColor = in.readInt();
         indicatorBorderCheckedColor = in.readInt();
         indicatorBorderUncheckedColor = in.readInt();
-        isShowScrollBehavior = in.readByte() != 0;
+        isToolbarBehavior = in.readByte() != 0;
+        isFabBehavior = in.readByte() != 0;
         authority = in.readString();
         isCameraSupport = in.readByte() != 0;
         cameraIconDrawableResId = in.readInt();
@@ -94,7 +96,8 @@ public class PickerConfig implements Parcelable {
         dest.writeInt(indicatorSolidColor);
         dest.writeInt(indicatorBorderCheckedColor);
         dest.writeInt(indicatorBorderUncheckedColor);
-        dest.writeByte((byte) (isShowScrollBehavior ? 1 : 0));
+        dest.writeByte((byte) (isToolbarBehavior ? 1 : 0));
+        dest.writeByte((byte) (isFabBehavior ? 1 : 0));
         dest.writeString(authority);
         dest.writeByte((byte) (isCameraSupport ? 1 : 0));
         dest.writeInt(cameraIconDrawableResId);

@@ -9,7 +9,7 @@ import android.text.TextUtils;
 
 import com.frank.picturepicker.support.permission.PermissionsCallback;
 import com.frank.picturepicker.support.permission.PermissionsManager;
-import com.frank.picturepicker.support.util.Utils;
+import com.frank.picturepicker.support.utils.Utils;
 
 /**
  * Created by think on 2018/6/20.

@@ -1,9 +1,8 @@
-package com.frank.picturepicker.picturewatcher.impl.mvp;
+package com.frank.picturepicker.picturewatcher.impl;
 
 import android.support.annotation.StringRes;
 import android.transition.Transition;
 
-import com.frank.picturepicker.picturewatcher.impl.PictureWatcherPreviewAdapter;
 import com.frank.picturepicker.picturewatcher.manager.WatcherConfig;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description: PicturePicture MVP 的约束
  */
-public interface PictureWatcherContract {
+interface PictureWatcherContract {
     interface IView {
 
         /**
@@ -105,6 +104,16 @@ public interface PictureWatcherContract {
         void notifySharedElementChanged(int sharedPosition, String sharedKey);
 
         /**
+         * 通知选中的图片被移除了
+         */
+        void notifyBottomPicturesRemoved(String removedPath, int removedIndex);
+
+        /**
+         * 通知图片插入了
+         */
+        void notifyBottomPictureAdded(String insertPath, int addedIndex);
+
+        /**
          * 展示消息通知
          */
         void showMsg(String msg);
@@ -151,27 +160,27 @@ public interface PictureWatcherContract {
         /**
          * 处理页面的滑动
          */
-        void performPagerChanged(int position);
+        void handlePagerChanged(int position);
 
         /**
          * 处理确认按钮点击
          */
-        void performEnsureClick();
+        void handleEnsureClick();
 
         /**
          * 处理 Toolbar 上索引的点击
          */
-        void performToolbarCheckedIndicatorClick(boolean checked);
+        void handleToolbarCheckedIndicatorClick(boolean checked);
 
         /**
          * 处理返回操作
          */
-        void performBackPressed();
+        void handleBackPressed();
 
         /**
          * 获取用户选中的数据
          */
-        ArrayList<String> fetchUserPicked();
+        ArrayList<String> getUserPicked();
 
         /**
          * 是否是确认按钮点击了

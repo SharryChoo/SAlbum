@@ -1,4 +1,4 @@
-package com.frank.picturepicker.picturepicker.impl.ui;
+package com.frank.picturepicker.picturepicker.impl;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -16,18 +16,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.frank.picturepicker.R;
-import com.frank.picturepicker.picturepicker.impl.data.PictureFolder;
 import com.frank.picturepicker.support.loader.PictureLoader;
 
 import java.util.List;
 
 /**
- * Created by think on 2018/5/26.
- * Email: frankchoochina@gmail.com
- * Version: 1.2
- * Description: 用于图片选择的 Dialog
+ * Dialog associated with picture picker.
+ *
+ * @author Frank <a href="frankchoochina@gmail.com">Contact me.</a>
+ * @version 1.3
+ * @since 2018/9/1 10:19
  */
-public class PicturePickerDialog {
+class PicturePickerDialog {
+
+    /**
+     * Get instance of PicturePickerDialog
+     */
+    public static PicturePickerDialog with(Context context, List<PictureFolder> data) {
+        return new PicturePickerDialog(context, data);
+    }
 
     private Dialog mDialog;
     private OnItemClickedListener mExternalListener;
@@ -41,7 +48,7 @@ public class PicturePickerDialog {
         }
     };
 
-    public PicturePickerDialog(Context context, List<PictureFolder> data) {
+    private PicturePickerDialog(Context context, List<PictureFolder> data) {
         // 初始化控件
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -53,7 +60,7 @@ public class PicturePickerDialog {
         mDialog = new Dialog(context);
         mDialog.setContentView(recyclerView);
         mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        mDialog.getWindow().setWindowAnimations(R.style.AnimTranslationVertical);
+        mDialog.getWindow().setWindowAnimations(R.style.PicturePickerBottomMenuDialogAnimation);
         mDialog.getWindow().setGravity(Gravity.BOTTOM | Gravity.CENTER);
         // 设置 Window 宽高
         WindowManager.LayoutParams params = mDialog.getWindow().getAttributes();
@@ -98,15 +105,15 @@ public class PicturePickerDialog {
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.recycle_item_dialog_picture_picker, parent, false);
+                    R.layout.libpicturepicker_recycle_item_dialog_picture_picker, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
             PictureFolder folder = data.get(holder.getAdapterPosition());
-            if (folder.getImagePaths() == null || folder.getImagePaths().isEmpty()) return;
-            PictureLoader.load(context, folder.getImagePaths().get(0), holder.ivPreview);
+            if (folder.getPicturePaths() == null || folder.getPicturePaths().isEmpty()) return;
+            PictureLoader.load(context, folder.getPicturePaths().get(0), holder.ivPreview);
             holder.tvFolderName.setText(folder.getFolderName());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

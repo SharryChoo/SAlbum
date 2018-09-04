@@ -21,7 +21,7 @@
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layoutAnimation="@anim/layout_anim_recycle_item_in"
+        android:layoutAnimation="@anim/libpicturepicker_recycle_item_in"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.FloatingActionButton
@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="70dp"
         android:layout_marginRight="20dp"
-        android:src="@drawable/icon_activity_picture_picker_ensure"
+        android:src="@drawable/libpicturepicker_picturepicker_fab"
         android:visibility="invisible"
         app:layout_anchor="@+id/recycler_view"
         app:layout_anchorGravity="bottom|right" />
@@ -38,7 +38,7 @@
     <!--底部的照片文件夹选择器-->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="55dp"
         android:layout_gravity="bottom"
         android:background="#a9000000">
 
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|right"
-                android:text="@string/activity_picture_picker_all_picture"
+                android:text="@string/libpicturepicker_picturepicker_all_picture"
                 android:textColor="#ffffffff"
                 android:textSize="15dp" />
 
@@ -66,7 +66,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="4dp"
                 android:paddingLeft="5dp"
-                android:src="@drawable/icon_activity_picture_picker_bottom_arrow" />
+                android:src="@drawable/libpicturepicker_picturepicker_bottom_arrow" />
 
         </LinearLayout>
 
@@ -78,7 +78,7 @@
             android:gravity="center"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-            android:text="@string/activity_picture_picker_btn_preview"
+            android:text="@string/libpicturepicker_picturepicker_preview"
             android:textColor="#ffffffff"
             android:textSize="14dp" />
 
