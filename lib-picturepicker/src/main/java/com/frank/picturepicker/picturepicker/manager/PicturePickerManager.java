@@ -202,18 +202,18 @@ public class PicturePickerManager {
     }
 
     /**
-     * 是否设置 Behavior 滚动动画
+     * 是否设置 Toolbar Behavior 动画
      */
-    public PicturePickerManager isShowToolbarBehavior(boolean isShowToolbarBehavior) {
-        mConfig.isShowToolbarBehavior = isShowToolbarBehavior;
+    public PicturePickerManager isToolbarScrollable(boolean isToolbarScrollable) {
+        mConfig.isToolbarBehavior = isToolbarScrollable;
         return this;
     }
 
     /**
-     * 是否设置 Behavior 滚动动画
+     * 是否设置 Fab Behavior 滚动动画
      */
-    public PicturePickerManager isShowFabBehavior(boolean isShowFabBehavior) {
-        mConfig.isShowFabBehavior = isShowFabBehavior;
+    public PicturePickerManager isFabScrollable(boolean isFabScrollable) {
+        mConfig.isFabBehavior = isFabScrollable;
         return this;
     }
 

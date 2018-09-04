@@ -32,9 +32,9 @@ import java.util.ArrayList;
 class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCallback, CropCallback, WatcherCallback {
 
     private static final String TAG = PicturePickerPresenter.class.getSimpleName();
-    private final PicturePickerContract.IView mView;                          // View associated with this presenter.
-    private PicturePickerModel mModel;                                        // Model associated with this presenter.
-    private PickerConfig mConfig;                                             // Config associated with the PicturePicker.
+    private final PicturePickerContract.IView mView;                                          // View associated with this presenter.
+    private PicturePickerModel mModel;                                                        // Model associated with this presenter.
+    private PickerConfig mConfig;                                                             // Config associated with the PicturePicker.
 
     PicturePickerPresenter(PicturePickerContract.IView view) {
         this.mView = view;
@@ -47,8 +47,8 @@ class PicturePickerPresenter implements PicturePickerContract.IPresenter, TakeCa
         this.mModel = new PicturePickerModel(mConfig.userPickedSet == null ? new ArrayList<String>()
                 : mConfig.userPickedSet, mConfig.threshold);
         // 配置 UI 视图
-        mView.setToolbarScrollable(mConfig.isShowToolbarBehavior);
-        mView.switchFabVisibility(mConfig.isShowToolbarBehavior);
+        mView.setToolbarScrollable(mConfig.isToolbarBehavior);
+        mView.switchFabVisibility(mConfig.isFabBehavior);
         if (mConfig.toolbarBkgColor != PickerConfig.INVALIDATE_VALUE) {
             mView.setToolbarBackgroundColor(mConfig.toolbarBkgColor);
             mView.setFabColor(mConfig.toolbarBkgColor);

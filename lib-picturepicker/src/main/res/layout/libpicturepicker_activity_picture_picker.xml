@@ -38,7 +38,7 @@
     <!--底部的照片文件夹选择器-->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="55dp"
         android:layout_gravity="bottom"
         android:background="#a9000000">
 

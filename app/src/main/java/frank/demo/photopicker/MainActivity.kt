@@ -35,8 +35,8 @@ class MainActivity : AppCompatActivity() {
             PicturePickerManager.with(this)
                     .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
                     .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
-                    .isShowToolbarBehavior(checkboxAnimation.isChecked)// Behavior 动画
-                    .isShowFabBehavior(false)
+                    .isToolbarScrollable(checkboxAnimation.isChecked)// Behavior 动画
+                    .isFabScrollable(checkboxAnimation.isChecked)
                     .setToolbarBackgroundColorRes(R.color.colorPrimary) // Toolbar 背景设置
                     .setIndicatorSolidColorRes(R.color.colorPrimary)// 选中指示器的颜色
                     .setIndicatorBorderColorRes(R.color.colorPrimary, android.R.color.white)// 指示器边界的颜色
