@@ -6,8 +6,8 @@ import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.frank.picturepicker.picturepicker.manager.PicturePickerManager
-import com.frank.picturepicker.widget.toolbar.GenericToolbar
+import com.sharry.picturepicker.picturepicker.manager.PicturePickerManager
+import com.sharry.picturepicker.widget.toolbar.CommonToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initTitle() {
-        GenericToolbar.Builder(this)
+        CommonToolbar.Builder(this)
                 .setBackgroundColorRes(R.color.colorPrimary)
                 .addTitleText(getString(R.string.app_name))
                 .apply()

@@ -1,5 +1,5 @@
 # Current Version 
-[![](https://jitpack.io/v/FrankChoo/PicturePicker.svg)](https://jitpack.io/#FrankChoo/PicturePicker)
+[![](https://jitpack.io/v/SharryChoo/PicturePicker.svg)](https://jitpack.io/#SharryChoo/PicturePicker)
 
 # How to integration
 ### Step 1
@@ -18,7 +18,7 @@ Add it in your **module build.gradle** at the end of repositories
 ```
 dependencies {
     ...
-    implementation 'com.github.FrankChoo:PicturePicker:1.1.+'
+    implementation 'com.github.SharryChoo:PicturePicker:1.1.+'
     implementation 'com.android.support:appcompat-v7:27.+'
     implementation 'com.android.support:design:27.+'
     implementation 'com.android.support:recyclerview-v7:27.+'

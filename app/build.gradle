@@ -5,17 +5,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.ext.COMPILE_SDK_VERSION
     defaultConfig {
-        applicationId "frank.demo.photopicker"
-        minSdkVersion 19
-        targetSdkVersion 27
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        minSdkVersion rootProject.ext.MIN_SDK_VERSION
+        targetSdkVersion rootProject.ext.TARGET_SDK_VERSION
     }
 }
 
@@ -25,15 +18,12 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.android.support:recyclerview-v7:27.1.0'
-    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KOTLIN_VERSION}"
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    implementation "com.android.support:design:${SUPPORT_LIB_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIB_VERSION}"
+    implementation "com.github.bumptech.glide:glide:${GLIDE_VERSION}"
+    annotationProcessor "com.github.bumptech.glide:compiler:${GLIDE_VERSION}"
     implementation project(':lib-picturepicker')
 }
 

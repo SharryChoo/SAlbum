@@ -1,21 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.FrankChoo'
+group='com.github.SharryChoo'
 android {
-    compileSdkVersion 27
-
+    compileSdkVersion rootProject.ext.COMPILE_SDK_VERSION
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        minSdkVersion rootProject.ext.MIN_SDK_VERSION
+        targetSdkVersion rootProject.ext.TARGET_SDK_VERSION
     }
 }
 
@@ -25,9 +16,9 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:design:27.1.0'
-    implementation 'com.android.support:recyclerview-v7:27.1.0'
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    implementation "com.android.support:design:${SUPPORT_LIB_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIB_VERSION}"
 }
 
 apply from: './nexus-push.gradle'

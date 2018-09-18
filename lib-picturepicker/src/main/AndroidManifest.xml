@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.frank.picturepicker">
+    package="com.sharry.picturepicker">
 
     <!--相机权限-->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -12,11 +12,11 @@
         android:supportsRtl="true">
 
         <activity
-            android:name="com.frank.picturepicker.picturepicker.impl.PicturePickerActivity"
+            android:name=".picturepicker.impl.PicturePickerActivity"
             android:launchMode="singleTop"
             android:theme="@style/PicturePickerTheme" />
         <activity
-            android:name="com.frank.picturepicker.picturewatcher.impl.PictureWatcherActivity"
+            android:name=".picturewatcher.impl.PictureWatcherActivity"
             android:launchMode="singleTop"
             android:theme="@style/PictureWatcherTheme" />
 
