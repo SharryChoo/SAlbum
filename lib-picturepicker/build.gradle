@@ -21,5 +21,3 @@ dependencies {
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:recyclerview-v7:$supportLibraryVersion"
 }
-
-apply from: './nexus-push.gradle'
