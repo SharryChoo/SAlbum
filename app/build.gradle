@@ -1,31 +1,26 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion rootProject.ext.COMPILE_SDK_VERSION
+    compileSdkVersion rootProject.compileSdkVersion
     defaultConfig {
-        minSdkVersion rootProject.ext.MIN_SDK_VERSION
-        targetSdkVersion rootProject.ext.TARGET_SDK_VERSION
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        vectorDrawables.useSupportLibrary true
     }
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding='UTF-8'
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${KOTLIN_VERSION}"
-    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
-    implementation "com.android.support:design:${SUPPORT_LIB_VERSION}"
-    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIB_VERSION}"
-    implementation "com.github.bumptech.glide:glide:${GLIDE_VERSION}"
-    annotationProcessor "com.github.bumptech.glide:compiler:${GLIDE_VERSION}"
+    kapt "com.github.bumptech.glide:compiler:$glideVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+    implementation "com.android.support:design:$supportLibraryVersion"
+    implementation "com.android.support:recyclerview-v7:$supportLibraryVersion"
+    implementation "com.github.bumptech.glide:glide:$glideVersion"
     implementation project(':lib-picturepicker')
 }
 
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+

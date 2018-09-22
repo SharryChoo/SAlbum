@@ -5,24 +5,27 @@ buildscript {
         google()
         jcenter()
     }
+    // Define versions in a single place
     ext {
-        // Build versions
-        COMPILE_SDK_VERSION = 27
-        MIN_SDK_VERSION = 16
-        TARGET_SDK_VERSION = 27
-        BUILDTOOLS_VERSION = '27.0.3'
-        // Root project versions
-        GRADLE_VERSION = '3.0.1'
-        KOTLIN_VERSION = '1.2.41'
-        MAVEN_VERSION = '1.5'
-        // Sub module project gradle versions
-        SUPPORT_LIB_VERSION = '27.1.1'
-        GLIDE_VERSION = '4.6.1'
+        // Sdk and tools
+        compileSdkVersion = 27
+        minSdkVersion = 16
+        targetSdkVersion = 27
+        buildToolsVersion = '27.0.3'
+
+        // Root project dependencies
+        gradleVersion = '3.0.1'
+        kotlinVersion = '1.2.41'
+        mavenVersion = '1.5'
+
+        // App dependencies
+        supportLibraryVersion = '27.1.1'
+        glideVersion = '4.6.1'
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:${GRADLE_VERSION}"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${KOTLIN_VERSION}"
-        classpath "com.github.dcendents:android-maven-gradle-plugin:${MAVEN_VERSION}"
+        classpath "com.android.tools.build:gradle:$gradleVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.github.dcendents:android-maven-gradle-plugin:$mavenVersion"
     }
 }
 
