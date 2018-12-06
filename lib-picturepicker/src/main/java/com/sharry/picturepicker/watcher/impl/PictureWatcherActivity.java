@@ -80,7 +80,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         // 5.0 以上的系统使用 Transition 跳转
         if (VersionUtil.isLollipop()) {
             // 携带共享元素跳转
-            String transitionKey = config.getPictureUris().get(0);
+            String transitionKey = config.getPictureUris().get(config.getPosition());
             startActivityForResultInternalWithElement(request, resultTo, intent,
                     transitionKey, sharedElement);
         } else {
@@ -94,16 +94,16 @@ public class PictureWatcherActivity extends AppCompatActivity implements
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static void startActivityForResultInternalWithElement(@NonNull Activity request, @NonNull Fragment resultTo,
-                                                                  @NonNull Intent intent, @NonNull String transitionKey,
+                                                                  @NonNull Intent intent, @Nullable String transitionKey,
                                                                   @Nullable View sharedElement) {
         ActivityOptions options;
-        if (sharedElement != null) {
+        if (sharedElement != null && transitionKey != null) {
             // 共享元素
             intent.putExtra(EXTRA_SHARED_ELEMENT, true);
             sharedElement.setTransitionName(transitionKey);
-            options = ActivityOptions.makeSceneTransitionAnimation(request,
-                    Pair.create(sharedElement, transitionKey));
+            options = ActivityOptions.makeSceneTransitionAnimation(request, Pair.create(sharedElement, transitionKey));
         } else {
+            intent.putExtra(EXTRA_SHARED_ELEMENT, false);
             options = ActivityOptions.makeSceneTransitionAnimation(request);
         }
         // 带共享元素的启动

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--BaseColor-->
+    <color name="libpricturepicker_base_primary_color">#ff00b0ff</color>
+    <color name="libpricturepicker_base_primary_dark_color">#ff00b0ff</color>
+    <color name="libpricturepicker_base_accent_color">#ff64b6f6</color>
+
     <!--PicturePicker-->
     <color name="libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color">#a9000000</color>
     <color name="libpricturepicker_picker_bottom_menu_navi_bg_expand_color">#ffffffff</color>

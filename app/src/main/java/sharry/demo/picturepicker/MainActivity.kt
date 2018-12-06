@@ -1,4 +1,4 @@
-package frank.demo.photopicker
+package sharry.demo.picturepicker
 
 import android.os.Bundle
 import android.os.Environment
@@ -14,11 +14,18 @@ import com.sharry.picturepicker.crop.manager.CropConfig
 import com.sharry.picturepicker.picker.manager.PickerConfig
 import com.sharry.picturepicker.picker.manager.PicturePickerManager
 import com.sharry.picturepicker.widget.toolbar.SToolbar
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
 
 private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolutePath}${File.separator}PicturePicker"
 
+/**
+ * PicturePicker 示例 Activity.
+ *
+ * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
+ * @version 1.0
+ * @since 12/6/2018 10:49 AM
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var pickerConfig: PickerConfig
@@ -27,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.app_activity_main)
         initTitle()
         initViews()
         initData()
