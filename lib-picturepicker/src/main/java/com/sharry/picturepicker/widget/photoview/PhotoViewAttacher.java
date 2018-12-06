@@ -20,7 +20,7 @@ import android.graphics.Matrix;
 import android.graphics.Matrix.ScaleToFit;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.support.v4.view.MotionEventCompat;
+import androidx.core.view.MotionEventCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -105,7 +105,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
             checkAndDisplayMatrix();
 
         /*
-         * Here we decide whether to let the ImageView's parent to start taking
+         * Here we decide whether to let the ImageView's parent to startForResult taking
          * over the touch event.
          *
          * First we check whether this function is enabled. We never want the

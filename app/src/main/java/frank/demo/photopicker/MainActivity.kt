@@ -6,54 +6,106 @@ import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.sharry.picturepicker.picturepicker.manager.PicturePickerManager
-import com.sharry.picturepicker.widget.toolbar.CommonToolbar
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.sharry.picturepicker.camera.manager.CameraConfig
+import com.sharry.picturepicker.crop.manager.CropConfig
+import com.sharry.picturepicker.picker.manager.PickerConfig
+import com.sharry.picturepicker.picker.manager.PicturePickerManager
+import com.sharry.picturepicker.widget.toolbar.SToolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
+private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolutePath}${File.separator}PicturePicker"
+
 class MainActivity : AppCompatActivity() {
 
-    private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolutePath}${File.separator}PicturePicker"
+    private lateinit var pickerConfig: PickerConfig
+    private lateinit var cameraConfig: CameraConfig
+    private lateinit var cropConfig: CropConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initTitle()
         initViews()
+        initData()
     }
 
     private fun initTitle() {
-        CommonToolbar.Builder(this)
+        SToolbar.Builder(this)
                 .setBackgroundColorRes(R.color.colorPrimary)
-                .addTitleText(getString(R.string.app_name))
+                .setTitleText(getString(R.string.app_name))
                 .apply()
     }
 
+    private fun initData() {
+        cameraConfig = CameraConfig.Builder()
+                .setFileProviderAuthority("$packageName.FileProvider")  // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
+                .setCameraDirectory(APP_DIRECTORY)                      // 相机文件存储路径
+                .setCameraQuality(80)
+                .build()
+
+        cropConfig = CropConfig.Builder()
+                .setCropDirectory(APP_DIRECTORY)                         // 裁剪文件存储路径
+                .setCropSize(1000, 1000)
+                .setCropQuality(80)
+                .build()
+
+        pickerConfig = PickerConfig.Builder()
+                .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
+                .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
+                .isToolbarScrollable(cbAnimation.isChecked)// Behavior 动画
+                .isFabScrollable(cbAnimation.isChecked)
+                .setToolbarBackgroundColor(
+                        ContextCompat.getColor(this, R.color.colorPrimary)
+                ) // Toolbar 背景设置
+                .setIndicatorSolidColor(
+                        ContextCompat.getColor(this, R.color.colorPrimary)
+                )// 选中指示器的颜色
+                .setIndicatorBorderColor(
+                        ContextCompat.getColor(this, R.color.colorPrimary),
+                        ContextCompat.getColor(this, android.R.color.white)
+                )// 指示器边界的颜色
+                .setPickerItemBackgroundColor(
+                        ContextCompat.getColor(this, android.R.color.white)
+                )// 条目背景色
+                .build()
+    }
+
     private fun initViews() {
-        btnLaunchAlbum.setOnClickListener {
-            if (TextUtils.isEmpty(etAlbumThreshold.text) || TextUtils.isEmpty(etSpanCount.text)) return@setOnClickListener
+        btnLaunchAlbum.setOnClickListener { _ ->
+            if (TextUtils.isEmpty(etAlbumThreshold.text) || TextUtils.isEmpty(etSpanCount.text)) {
+                return@setOnClickListener
+            }
             PicturePickerManager.with(this)
-                    .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
-                    .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
-                    .isToolbarScrollable(checkboxAnimation.isChecked)// Behavior 动画
-                    .isFabScrollable(checkboxAnimation.isChecked)
-                    .setToolbarBackgroundColorRes(R.color.colorPrimary) // Toolbar 背景设置
-                    .setIndicatorSolidColorRes(R.color.colorPrimary)// 选中指示器的颜色
-                    .setIndicatorBorderColorRes(R.color.colorPrimary, android.R.color.white)// 指示器边界的颜色
-                    .setPickerItemBackgroundColorRes(android.R.color.white)// 条目背景色
-                    // 开启相机支持
-                    .setCameraSupport(checkboxCamera.isChecked)
-                    .setFileProviderAuthority("$packageName.FileProvider")// 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
-                    .setCameraDirectory(APP_DIRECTORY)// 相机文件存储路径
-                    .setCameraQuality(80)
-                    // 开启图片裁剪支持
-                    .setCropSupport(checkboxCrop.isChecked)
-                    .setCropDirectory(APP_DIRECTORY)// 裁剪文件存储路径
-                    .setCropSize(1000, 1000)
-                    .setCropQuality(80)
+                    .setPickerConfig(
+                            pickerConfig.rebuild()
+                                    .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
+                                    .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
+                                    .isToolbarScrollable(cbAnimation.isChecked)
+                                    .isFabScrollable(cbAnimation.isChecked)
+                                    .setCameraConfig(
+                                            if (cbCamera.isChecked) cameraConfig else null
+                                    )
+                                    .setCropConfig(
+                                            if (cbCrop.isChecked) cropConfig else null
+                                    )
+                                    .build()
+                    )
                     // 图片加载框架注入
-                    .setPictureLoader { context, uri, imageView -> Glide.with(context).load(uri).into(imageView) }
-                    .start { it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() } }
+                    .setPictureLoader { context, uri, imageView ->
+                        val options = RequestOptions()
+                                .override(imageView.width, imageView.height)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        Glide.with(context)
+                                .load(uri)
+                                .apply(options)
+                                .into(imageView)
+                    }
+                    .start {
+                        it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
+                    }
         }
     }
 

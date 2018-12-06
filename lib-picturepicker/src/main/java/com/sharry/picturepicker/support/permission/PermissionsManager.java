@@ -16,6 +16,7 @@ import java.util.List;
  * @version 1.0
  * @since 2018/1/5 16:23
  */
+/*@hind*/
 public class PermissionsManager {
 
     public static final String TAG = PermissionsManager.class.getSimpleName();
