@@ -1,11 +1,10 @@
 package com.sharry.picturepicker.watcher.impl;
 
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.transition.Transition;
 
 import java.util.ArrayList;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 
 /**
  * Created by Sharry on 2018/6/13.

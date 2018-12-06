@@ -12,6 +12,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.transition.Transition;
 import android.util.Log;
 import android.util.Pair;
@@ -24,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.sharry.picturepicker.R;
 import com.sharry.picturepicker.support.loader.PictureLoader;
 import com.sharry.picturepicker.support.utils.VersionUtil;
@@ -37,12 +42,6 @@ import com.sharry.picturepicker.widget.toolbar.SToolbar;
 import com.sharry.picturepicker.widget.toolbar.ViewOptions;
 
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * 图片查看器的 Activity, 主题设置为背景透明效果更佳

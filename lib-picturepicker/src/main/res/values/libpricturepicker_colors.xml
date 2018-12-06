@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--PicturePicker-->
+    <color name="libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color">#a9000000</color>
+    <color name="libpricturepicker_picker_bottom_menu_navi_bg_expand_color">#ffffffff</color>
+    <color name="libpricturepicker_picker_bottom_menu_nav_text_collapsed_color">#ffffffff</color>
+    <color name="libpricturepicker_picker_bottom_menu_navi_text_expand_color">#ff333333</color>
+    <color name="libpricturepicker_picker_bottom_menu_content_folders_bg_color">#ffffffff</color>
+
+    <!--PictureWatcher-->
+    <color name="libpricturepicker_watcher_bg_color">#ff000000</color>
+    <color name="libpricturepicker_watcher_bottom_preview_bg_color">#a9000000</color>
+    <color name="libpricturepicker_watcher_bottom_preview_text_color">#ffffffff</color>
+
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--PicturePickerActivity 需要用到的字符串-->
+    <string name="libpicturepicker_picker_ensure">Ensure</string>
+    <string name="libpicturepicker_picker_preview">Preview</string>
+    <string name="libpicturepicker_picker_all_picture">All Pictures</string>
+    <string name="libpicturepicker_picker_root_folder">Storage Card</string>
+    <string name="libpicturepicker_picker_tips_over_threshold_prefix">Pick a maximum of&#160;</string>
+    <string name="libpicturepicker_picker_tips_over_threshold_suffix">&#160;pictures.</string>
+    <string name="libpicturepicker_picker_tips_fetch_album_failed">Fetch album data failed.</string>
+    <string name="libpicturepicker_picker_tips_ensure_failed">Please pick at least one picture.</string>
+    <string name="libpicturepicker_picker_tips_preview_failed">@string/libpicturepicker_picker_tips_ensure_failed</string>
+    <string name="libpicturepicker_picker_fab_behavior" translatable="false">com.sharry.picturepicker.widget.PicturePickerFabBehavior</string>
+
+    <!--PictureWatcherActivity 需要用到的字符串-->
+    <string name="libpicturepicker_watcher_tips_over_threshold_prefix">@string/libpicturepicker_picker_tips_over_threshold_prefix</string>
+    <string name="libpicturepicker_watcher_tips_over_threshold_suffix">@string/libpicturepicker_picker_tips_over_threshold_suffix</string>
+    <string name="libpicturepicker_watcher_ensure">@string/libpicturepicker_picker_ensure</string>
+    <string name="libpicturepicker_watcher_tips_ensure_failed">@string/libpicturepicker_picker_tips_ensure_failed</string>
+
+</resources>

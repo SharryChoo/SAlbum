@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.sharry.picturepicker.picker.impl.PicturePickerActivity;
@@ -14,8 +15,6 @@ import com.sharry.picturepicker.support.permission.PermissionsCallback;
 import com.sharry.picturepicker.support.permission.PermissionsManager;
 
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
 
 import static android.app.Activity.RESULT_OK;
 

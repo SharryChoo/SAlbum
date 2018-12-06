@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">PicturePicker</string>
 
-    <string name="activity_et_threshold_hint">Threshold</string>
-    <string name="activity_et_span_count_hint">Span Count</string>
+    <string name="app_activity_main_et_threshold_hint">Threshold</string>
+    <string name="app_activity_main_et_span_count_hint">Span Count</string>
 
-    <string name="activity_tv_camera">Camera</string>
-    <string name="activity_tv_crop">Crop</string>
-    <string name="activity_tv_anim">Animation</string>
+    <string name="app_activity_main_cb_camera">Camera</string>
+    <string name="app_activity_main_cb_crop">Crop</string>
+    <string name="app_activity_main_cb_anim">Animation</string>
     <string name="activity_btn_launch">Launcher</string>
 </resources>

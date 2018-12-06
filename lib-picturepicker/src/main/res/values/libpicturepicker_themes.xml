@@ -5,6 +5,8 @@
         <item name="colorPrimary">#FF00b0ff</item>
         <item name="colorPrimaryDark">#FF00b0ff</item>
         <item name="colorAccent">#FF64b6f6</item>
+        <!--Customize Snackbar style-->
+        <!--<item name="snackbarStyle">@style/Widget.MaterialComponents.Snackbar</item>-->
     </style>
 
     <!--透明主题-->
@@ -13,16 +15,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@null</item>
-    </style>
-
-    <!--Dialog 动画, 从底部飞入效果-->
-    <style name="PicturePickerBottomMenuDialogAnimation" mce_bogus="1" parent="android:Animation">
-        <item name="android:windowEnterAnimation">
-            @anim/libpicturepicker_translation_b2t_dur300_delta100
-        </item>
-        <item name="android:windowExitAnimation">
-            @anim/libpicturepicker_translation_t2b_dur300_delta100
-        </item>
+        <!--Customize Snackbar style-->
+        <!--<item name="snackbarStyle">@style/Widget.MaterialComponents.Snackbar</item>-->
     </style>
 
 </resources>
