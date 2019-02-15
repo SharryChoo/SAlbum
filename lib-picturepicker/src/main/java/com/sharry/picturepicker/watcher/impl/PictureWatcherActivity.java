@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -106,12 +107,24 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             intent.putExtra(EXTRA_SHARED_ELEMENT, false);
             options = ActivityOptions.makeSceneTransitionAnimation(request);
         }
-        // 带共享元素的启动
-        try {
-            resultTo.startActivityForResult(intent, REQUEST_CODE, options.toBundle());
-        } catch (Exception e) {
-            Log.e(TAG, "Launch PictureWatcherActivity with element failed.", e);
+        // 将 ActivityOptions 中的数据导入 Bundle 中
+        Bundle transactionData = options.toBundle();
+        // 计算 bundle 中数据的大小
+        Parcel parcel = Parcel.obtain();
+        transactionData.writeToParcel(parcel, 0);
+        int dataSize = parcel.dataSize();
+        Log.i(TAG, "Transaction option size is: " + dataSize + " byte");
+        /*
+           不同的 Android 版本会进行不同传值限定, Android 6.0 之后为 200 * 1024 即 200 kb, 这里选取 150 kb 为阈值
+           详情见 frameworks/base/core/jni/android_util_Binder.cpp 的 android_os_BinderProxy_transact 方法
+        */
+        if (dataSize >= 150 * 1024) {
             startActivityForResultInternal(request, resultTo, intent);
+            Log.e(TAG, "Transaction option to large," +
+                    " exchange to normal jump. Options size is " + dataSize);
+        } else {
+            // 共享元素跳转
+            resultTo.startActivityForResult(intent, REQUEST_CODE, transactionData);
         }
     }
 
