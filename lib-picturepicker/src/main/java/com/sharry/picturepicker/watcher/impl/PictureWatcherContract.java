@@ -89,12 +89,14 @@ interface PictureWatcherContract {
         String getString(@StringRes int resId);
 
         /**
-         * 设置底部图片预览按钮的可见性
-         *
-         * @param nowVisible  当前状态
-         * @param destVisible 需要变更的状态
+         * 展示底部预览视图
          */
-        void setBottomPreviewVisibility(boolean nowVisible, boolean destVisible);
+        void showBottomPreview();
+
+        /**
+         * 隐藏底部预览视图
+         */
+        void dismissBottomPreview();
 
         /**
          * 让图片预览滚动到指定位置

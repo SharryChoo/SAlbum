@@ -3,31 +3,22 @@ package com.sharry.picturepicker.watcher.impl;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.Transition;
-import android.util.Log;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,7 +26,6 @@ import android.widget.TextView;
 import com.sharry.picturepicker.R;
 import com.sharry.picturepicker.support.loader.PictureLoader;
 import com.sharry.picturepicker.support.utils.SharedElementUtils;
-import com.sharry.picturepicker.support.utils.VersionUtil;
 import com.sharry.picturepicker.watcher.manager.WatcherConfig;
 import com.sharry.picturepicker.widget.CheckedIndicatorView;
 import com.sharry.picturepicker.widget.DraggableViewPager;
@@ -62,6 +52,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
     public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
+
 
     /**
      * U can launch this activity from here.
@@ -103,8 +94,13 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private LinearLayout mLlBottomPreviewContainer;
     private RecyclerView mBottomPreviewPictures;
     private TextView mTvEnsure;
-
     private ArrayList<PhotoView> mPhotoViews = new ArrayList<>();
+
+    /**
+     * The animator for bottom preview.
+     */
+    private ObjectAnimator mBottomPreviewShowAnimator;
+    private ObjectAnimator mBottomPreviewDismissAnimator;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -254,27 +250,41 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setBottomPreviewVisibility(boolean nowVisible, final boolean destVisible) {
-        if (nowVisible == destVisible) {
+    public void showBottomPreview() {
+        if (mLlBottomPreviewContainer.getVisibility() == View.VISIBLE) {
             return;
         }
-        int startY = nowVisible ? 0 : mLlBottomPreviewContainer.getHeight();
-        int endY = nowVisible ? mLlBottomPreviewContainer.getHeight() : 0;
-        ObjectAnimator animator = ObjectAnimator.ofFloat(mLlBottomPreviewContainer,
-                "translationY", startY, endY);
-        animator.setDuration(200);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mLlBottomPreviewContainer.setVisibility(View.VISIBLE);
-            }
+        if (mBottomPreviewShowAnimator == null) {
+            mBottomPreviewShowAnimator = ObjectAnimator.ofFloat(mLlBottomPreviewContainer,
+                    "translationY", mLlBottomPreviewContainer.getHeight(), 0);
+            mBottomPreviewShowAnimator.setDuration(200);
+            mBottomPreviewShowAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mLlBottomPreviewContainer.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+        mBottomPreviewShowAnimator.start();
+    }
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLlBottomPreviewContainer.setVisibility(destVisible ? View.VISIBLE : View.INVISIBLE);
-            }
-        });
-        animator.start();
+    @Override
+    public void dismissBottomPreview() {
+        if (mLlBottomPreviewContainer.getVisibility() == View.INVISIBLE) {
+            return;
+        }
+        if (mBottomPreviewDismissAnimator == null) {
+            mBottomPreviewDismissAnimator = ObjectAnimator.ofFloat(mLlBottomPreviewContainer,
+                    "translationY", 0, mLlBottomPreviewContainer.getHeight());
+            mBottomPreviewDismissAnimator.setDuration(200);
+            mBottomPreviewDismissAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mLlBottomPreviewContainer.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
+        mBottomPreviewDismissAnimator.start();
     }
 
     @Override

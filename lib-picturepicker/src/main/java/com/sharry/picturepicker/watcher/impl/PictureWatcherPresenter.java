@@ -81,12 +81,11 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mView.setBottomPreviewVisibility(false, true);
+                        mView.showBottomPreview();
                     }
                 }, mSharedElementData != null ? 500 : 0);
             }
         }
-
         // 4. 执行共享元素入场动画
         if (mSharedElementData != null) {
             mView.showSharedElementEnter(mSharedElementData);
@@ -111,7 +110,6 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
 
     @Override
     public void handleToolbarCheckedIndicatorClick(boolean isChecked) {
-        boolean nowVisible = !mPickedPaths.isEmpty();
         if (isChecked) {
             // 移除选中数据与状态
             int removedIndex = mPickedPaths.indexOf(mCurDisplayPath);
@@ -137,7 +135,12 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
         mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
         mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
         mView.displayPreviewEnsureText(buildEnsureText());
-        mView.setBottomPreviewVisibility(nowVisible, !mPickedPaths.isEmpty());
+        // 控制底部导航栏的展示
+        if (mPickedPaths.isEmpty()) {
+            mView.dismissBottomPreview();
+        } else {
+            mView.showBottomPreview();
+        }
     }
 
     @Override
@@ -154,6 +157,7 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
     public void handleBackPressed() {
         if (mSharedElementData != null && mCurPosition == mSharedElementData.sharedPosition) {
             mView.showSharedElementExitAndFinish(mSharedElementData);
+            mView.dismissBottomPreview();
         } else {
             mView.finish();
         }
