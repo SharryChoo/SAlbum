@@ -79,6 +79,9 @@ public class SharedElementUtils {
         target.setPivotX(0);
         target.setPivotY(0);
         AnimatorSet enterAnimators = new AnimatorSet();
+        if (target.getDrawable() == null) {
+            return enterAnimators;
+        }
         enterAnimators.playTogether(
                 ObjectAnimator.ofFloat(target, "scaleX", data.width / (float) target.getWidth(), 1f),
                 ObjectAnimator.ofFloat(target, "scaleY", data.height / (float) target.getHeight(), 1f),
@@ -98,6 +101,9 @@ public class SharedElementUtils {
      */
     public static Animator createSharedElementExitAnimator(PhotoView target, SharedElementData data) {
         AnimatorSet exitAnimators = new AnimatorSet();
+        if (target.getDrawable() == null) {
+            return exitAnimators;
+        }
         // 设置尺寸动画 ChangeBounds
         AnimatorSet boundsAnim = getBoundsChangedAnim(target, data);
         // 设置缩放动画
