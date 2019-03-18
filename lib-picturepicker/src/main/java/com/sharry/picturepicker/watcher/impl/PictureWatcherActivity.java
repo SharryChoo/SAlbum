@@ -10,6 +10,7 @@ import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 
 import com.sharry.picturepicker.R;
 import com.sharry.picturepicker.support.loader.PictureLoader;
+import com.sharry.picturepicker.support.utils.SharedElementUtils;
 import com.sharry.picturepicker.support.utils.VersionUtil;
 import com.sharry.picturepicker.watcher.manager.WatcherConfig;
 import com.sharry.picturepicker.widget.CheckedIndicatorView;
@@ -51,20 +53,15 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/22 23:24
  */
-@SuppressLint("NewApi")
 public class PictureWatcherActivity extends AppCompatActivity implements
         PictureWatcherContract.IView,
         DraggableViewPager.OnPagerChangedListener {
 
-    // 启动时的 Extra
     public static final int REQUEST_CODE = 508;
     private static final String EXTRA_CONFIG = "start_intent_extra_config";
     private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
-
-    // 返回时的 Extra
-    private static final String TAG = PictureWatcherActivity.class.getSimpleName();
-    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";// 返回的图片
-    public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";// 是否是确认选择
+    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
+    public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
 
     /**
      * U can launch this activity from here.
@@ -78,72 +75,27 @@ public class PictureWatcherActivity extends AppCompatActivity implements
                                               @NonNull WatcherConfig config, @Nullable View sharedElement) {
         Intent intent = new Intent(request, PictureWatcherActivity.class);
         intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, config);
-        // 5.0 以上的系统使用 Transition 跳转
-        if (VersionUtil.isLollipop()) {
-            // 携带共享元素跳转
-            String transitionKey = config.getPictureUris().get(config.getPosition());
-            startActivityForResultInternalWithElement(request, resultTo, intent,
-                    transitionKey, sharedElement);
-        } else {
-            // 正常跳转
-            startActivityForResultInternal(request, resultTo, intent);
+        if (sharedElement != null) {
+            intent.putExtra(
+                    PictureWatcherActivity.EXTRA_SHARED_ELEMENT,
+                    SharedElementData.parseFrom(sharedElement, config.getPosition())
+            );
         }
-    }
-
-    /**
-     * 携带共享元素启动当前 Activity
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static void startActivityForResultInternalWithElement(@NonNull Activity request, @NonNull Fragment resultTo,
-                                                                  @NonNull Intent intent, @Nullable String transitionKey,
-                                                                  @Nullable View sharedElement) {
-        ActivityOptions options;
-        if (sharedElement != null && transitionKey != null) {
-            // 共享元素
-            intent.putExtra(EXTRA_SHARED_ELEMENT, true);
-            sharedElement.setTransitionName(transitionKey);
-            options = ActivityOptions.makeSceneTransitionAnimation(request, Pair.create(sharedElement, transitionKey));
-        } else {
-            intent.putExtra(EXTRA_SHARED_ELEMENT, false);
-            options = ActivityOptions.makeSceneTransitionAnimation(request);
-        }
-        // 将 ActivityOptions 中的数据导入 Bundle 中
-        Bundle transactionData = options.toBundle();
-        // 计算 bundle 中数据的大小
-        Parcel parcel = Parcel.obtain();
-        transactionData.writeToParcel(parcel, 0);
-        int dataSize = parcel.dataSize();
-        Log.i(TAG, "Transaction option size is: " + dataSize + " byte");
-        /*
-           不同的 Android 版本会进行不同传值限定, Android 6.0 之后为 200 * 1024 即 200 kb, 这里选取 150 kb 为阈值
-           详情见 frameworks/base/core/jni/android_util_Binder.cpp 的 android_os_BinderProxy_transact 方法
-        */
-        if (dataSize >= 150 * 1024) {
-            startActivityForResultInternal(request, resultTo, intent);
-            Log.e(TAG, "Transaction option to large," +
-                    " exchange to normal jump. Options size is " + dataSize);
-        } else {
-            // 共享元素跳转
-            resultTo.startActivityForResult(intent, REQUEST_CODE, transactionData);
-        }
-    }
-
-    /**
-     * 启动当前 Activity
-     */
-    private static void startActivityForResultInternal(@NonNull Activity request, @NonNull Fragment resultTo,
-                                                       @NonNull Intent intent) {
         // 非共享元素的启动
         resultTo.startActivityForResult(intent, REQUEST_CODE);
         // 使用淡入淡出的效果
-        request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        if (sharedElement != null) {
+            request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        }
     }
 
-    // Presenter
+    /**
+     * The presenter for the view.
+     */
     private PictureWatcherContract.IPresenter mPresenter;
 
-    /*
-       Widgets
+    /**
+     * Widgets for this Activity.
      */
     private TextView mTvTitle;
     private CheckedIndicatorView mCheckIndicator;
@@ -151,6 +103,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     private LinearLayout mLlBottomPreviewContainer;
     private RecyclerView mBottomPreviewPictures;
     private TextView mTvEnsure;
+
     private ArrayList<PhotoView> mPhotoViews = new ArrayList<>();
 
     @Override
@@ -160,37 +113,19 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         setContentView(R.layout.libpicturepicker_activity_picture_watcher);
         initTitle();
         initViews();
-        mPresenter.start();
+        mPresenter.setup();
+    }
+
+    @Override
+    public void onBackPressed() {
+        mPresenter.handleBackPressed();
     }
 
     @Override
     public void finish() {
-        // 处理 finish 之前的相关事宜
-        mPresenter.handleFinish();
+        mPresenter.handleSetResultBeforeFinish();
         super.finish();
-        // 当前 Activity 关闭时, 使用淡入淡出的动画
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    }
-
-    @Override
-    public void setWindowEnterTransitions(Transition enterTransition) {
-        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        getWindow().setEnterTransition(enterTransition);
-    }
-
-    @Override
-    public void setWindowReturnTransitions(Transition returnTransition) {
-        getWindow().setReturnTransition(returnTransition);
-    }
-
-    @Override
-    public void setSharedElementEnterTransition(Transition enterTransition) {
-        getWindow().setSharedElementEnterTransition(enterTransition);
-    }
-
-    @Override
-    public void setSharedElementReturnTransition(Transition returnTransition) {
-        getWindow().setSharedElementReturnTransition(returnTransition);
     }
 
     @Override
@@ -215,8 +150,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     public void createPhotoViews(int photoViewCount) {
         for (int i = 0; i < photoViewCount; i++) {
             PhotoView photoView = new PhotoView(this);
-            photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
             photoView.setOnPhotoTapListener(new OnPhotoTapListener() {
                 @Override
                 public void onPhotoTap(ImageView view, float x, float y) {
@@ -229,26 +164,36 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void bindSharedElementView(int position, String sharedKey) {
-        // Postpone the shared element enter transition.
-        postponeEnterTransition();
-        // 绑定共享元素
-        final PhotoView sharedElement = mPhotoViews.get(position);
-        sharedElement.setTransitionName(sharedKey);
-        sharedElement.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+    public void showSharedElementEnter(final SharedElementData data) {
+        mViewPager.setSharedElementPosition(data.sharedPosition);
+        final PhotoView target = mPhotoViews.get(data.sharedPosition);
+        target.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
-                startPostponedEnterTransition();
+                target.getViewTreeObserver().removeOnPreDrawListener(this);
+                // Execute enter animator.
+                SharedElementUtils.createSharedElementEnterAnimator(target, data).start();
                 return true;
             }
         });
     }
 
     @Override
-    public void notifySharedElementChanged(int sharedPosition, String sharedKey) {
-        mViewPager.setSharedElementPosition(sharedPosition);
-        mPhotoViews.get(sharedPosition).setTransitionName(sharedKey);
+    public void showSharedElementExitAndFinish(SharedElementData data) {
+        final PhotoView target = mPhotoViews.get(data.sharedPosition);
+        Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
+        exitAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mViewPager.setBackgroundColor(Color.TRANSPARENT);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                finish();
+            }
+        });
+        exitAnim.start();
     }
 
     @Override
@@ -310,7 +255,9 @@ public class PictureWatcherActivity extends AppCompatActivity implements
 
     @Override
     public void setBottomPreviewVisibility(boolean nowVisible, final boolean destVisible) {
-        if (nowVisible == destVisible) return;
+        if (nowVisible == destVisible) {
+            return;
+        }
         int startY = nowVisible ? 0 : mLlBottomPreviewContainer.getHeight();
         int endY = nowVisible ? mLlBottomPreviewContainer.getHeight() : 0;
         ObjectAnimator animator = ObjectAnimator.ofFloat(mLlBottomPreviewContainer,
@@ -352,7 +299,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         mPresenter = new PictureWatcherPresenter(
                 this,
                 (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
-                getIntent().getBooleanExtra(EXTRA_SHARED_ELEMENT, false)
+                ((SharedElementData) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
     }
 

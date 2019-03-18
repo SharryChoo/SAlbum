@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.os.Build;
 import android.text.TextUtils;
 
 import java.io.File;
@@ -20,8 +19,6 @@ import java.io.IOException;
  */
 public class PictureUtil {
 
-    private static final String TAG = PictureUtil.class.getSimpleName();
-
     /**
      * 图片压缩
      */
@@ -35,7 +32,9 @@ public class PictureUtil {
         // 1. 邻近采样压缩尺寸(Nearest Neighbour Resampling Compress)
         BitmapFactory.Options options = getBitmapOptions(originPath);
         Bitmap bitmap = BitmapFactory.decodeFile(originPath, options);
-        if (bitmap == null) return;
+        if (bitmap == null) {
+            return;
+        }
         // 2. 旋转一下 Bitmap
         bitmap = rotateBitmap(bitmap, readPictureAngle(originPath));
         // 3. 质量压缩(Quality Compress)
@@ -99,7 +98,9 @@ public class PictureUtil {
      */
     private static void qualityCompress(Bitmap srcBitmap, int quality, String destFilePath) throws IOException {
         File file = new File(destFilePath);
-        if (file.exists()) file.delete();
+        if (file.exists()) {
+            file.delete();
+        }
         file.createNewFile();
         // 进行质量压缩
         FileOutputStream out = new FileOutputStream(file);
@@ -116,7 +117,9 @@ public class PictureUtil {
      * @param angle  旋转的角度
      */
     private static Bitmap rotateBitmap(Bitmap bitmap, int angle) {
-        if (angle == 0) return bitmap;
+        if (angle == 0) {
+            return bitmap;
+        }
         //旋转图片 动作
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
@@ -143,6 +146,8 @@ public class PictureUtil {
                 break;
             case ExifInterface.ORIENTATION_ROTATE_270:
                 degree = 270;
+                break;
+            default:
                 break;
         }
         return degree;

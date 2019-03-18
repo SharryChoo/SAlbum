@@ -133,6 +133,22 @@ public class PhotoView extends AppCompatImageView {
         return changed;
     }
 
+    /**
+     * Thanks for google framework sources, {@link ImageView}
+     */
+    public void animateTransform(Matrix matrix) {
+        Drawable drawable = getDrawable();
+        if (drawable == null) {
+            return;
+        }
+        if (matrix == null) {
+            drawable.setBounds(0, 0, getWidth(), getHeight());
+        } else {
+            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+            setImageMatrix(matrix);
+        }
+    }
+
     public void setRotationTo(float rotationDegree) {
         attacher.setRotationTo(rotationDegree);
     }
