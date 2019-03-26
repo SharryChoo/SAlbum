@@ -43,15 +43,23 @@
             android:layout_height="60dp"
             android:background="@color/libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color">
 
+            <ImageView
+                android:id="@+id/iv_nav_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:paddingLeft="20dp"
+                app:srcCompat="@drawable/libpicturepicker_picker_bottom_indicator" />
+
             <TextView
                 android:id="@+id/tv_folder_name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:drawableLeft="@drawable/libpicturepicker_picker_bottom_arrow"
+                android:layout_toRightOf="@+id/iv_nav_indicator"
                 android:drawablePadding="5dp"
                 android:gravity="center_vertical"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
+                android:paddingStart="5dp"
+                android:paddingLeft="5dp"
                 android:text="@string/libpicturepicker_picker_all_picture"
                 android:textColor="@color/libpricturepicker_picker_bottom_menu_nav_text_collapsed_color"
                 android:textSize="15dp" />

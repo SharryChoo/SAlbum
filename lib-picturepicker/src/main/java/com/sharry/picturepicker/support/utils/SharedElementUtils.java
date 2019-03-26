@@ -79,9 +79,6 @@ public class SharedElementUtils {
         target.setPivotX(0);
         target.setPivotY(0);
         AnimatorSet enterAnimators = new AnimatorSet();
-        if (target.getDrawable() == null) {
-            return enterAnimators;
-        }
         enterAnimators.playTogether(
                 ObjectAnimator.ofFloat(target, "scaleX", data.width / (float) target.getWidth(), 1f),
                 ObjectAnimator.ofFloat(target, "scaleY", data.height / (float) target.getHeight(), 1f),

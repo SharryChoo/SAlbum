@@ -34,7 +34,7 @@ import java.util.ArrayList;
 /**
  * 图片选择器的 Activity
  *
- * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
  * @version 1.3
  * @since 2018/9/1 10:17
  */
@@ -80,6 +80,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     private RecyclerView mRecyclePictures;
     // bottom navigation menu
     private ViewGroup mMenuNavContainer;
+    private ImageView mIvNavIndicator;
     private TextView mTvFolderName;
     private TextView mTvPreview;
     private RecyclerView mRecycleFolders;
@@ -279,6 +280,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
         // Bottom navigation menu.
         mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);
+        mIvNavIndicator = findViewById(R.id.iv_nav_indicator);
         mTvFolderName = findViewById(R.id.tv_folder_name);
         mTvPreview = findViewById(R.id.tv_preview);
         mRecycleFolders = findViewById(R.id.recycle_folders);
@@ -306,7 +308,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
      */
     private class BottomMenuNavigationCallback extends BottomSheetBehavior.BottomSheetCallback {
 
-        private final Drawable folderDrawable;
+        private final Drawable indicatorDrawable;
         private final int bgCollapsedColor;
         private final int bgExpandColor;
         private final int textCollapsedColor;
@@ -315,7 +317,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         private int textColor;
 
         BottomMenuNavigationCallback() {
-            folderDrawable = mTvFolderName.getCompoundDrawables()[0];
+            indicatorDrawable = mIvNavIndicator.getDrawable();
             bgCollapsedColor = ContextCompat.getColor(PicturePickerActivity.this,
                     R.color.libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color);
             bgExpandColor = ContextCompat.getColor(PicturePickerActivity.this,
@@ -342,7 +344,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
                     textCollapsedColor, textExpandColor);
             // Set text drawable color before set text color with the purpose of decrease view draw.
             if (VersionUtil.isLollipop()) {
-                folderDrawable.setTint(textColor);
+                indicatorDrawable.setTint(textColor);
             }
             // Set texts colors associate with the bottom menu.
             mTvFolderName.setTextColor(textColor);
