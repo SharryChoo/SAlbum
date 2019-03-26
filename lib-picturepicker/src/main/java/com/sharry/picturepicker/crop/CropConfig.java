@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.crop.manager;
+package com.sharry.picturepicker.crop;
 
 import android.os.Parcel;
 import android.os.Parcelable;

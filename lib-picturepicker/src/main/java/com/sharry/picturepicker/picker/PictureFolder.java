@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.picker.impl;
+package com.sharry.picturepicker.picker;
 
 import java.util.ArrayList;
 import java.util.List;

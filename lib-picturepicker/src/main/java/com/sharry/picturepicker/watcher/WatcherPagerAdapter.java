@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.watcher.impl;
+package com.sharry.picturepicker.watcher;
 
 import android.support.v4.view.PagerAdapter;
 import android.view.View;

@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.picker.impl;
+package com.sharry.picturepicker.picker;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -22,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sharry.picturepicker.R;
-import com.sharry.picturepicker.picker.manager.PickerConfig;
 import com.sharry.picturepicker.support.utils.ColorUtil;
 import com.sharry.picturepicker.support.utils.VersionUtil;
 import com.sharry.picturepicker.widget.PicturePickerFabBehavior;
@@ -59,7 +58,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
      * @param resultTo Result data will return to this instance.
      * @param config   Launch PicturePickerActivity required data.
      */
-    public static void startActivityForResult(Activity from, Fragment resultTo, PickerConfig config) {
+    static void startActivityForResult(Activity from, Fragment resultTo, PickerConfig config) {
         Intent intent = new Intent(from, PicturePickerActivity.class);
         intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, config);
         resultTo.startActivityForResult(intent, REQUEST_CODE);

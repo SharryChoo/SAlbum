@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
-import com.sharry.picturepicker.watcher.impl.SharedElementData;
+import com.sharry.picturepicker.watcher.SharedElementData;
 import com.sharry.picturepicker.widget.photoview.PhotoView;
 
 /**
@@ -97,10 +97,10 @@ public class SharedElementUtils {
      * @param data   origin data.
      */
     public static Animator createSharedElementExitAnimator(PhotoView target, SharedElementData data) {
-        AnimatorSet exitAnimators = new AnimatorSet();
         if (target.getDrawable() == null) {
-            return exitAnimators;
+            return null;
         }
+        AnimatorSet exitAnimators = new AnimatorSet();
         // 设置尺寸动画 ChangeBounds
         AnimatorSet boundsAnim = getBoundsChangedAnim(target, data);
         // 设置缩放动画

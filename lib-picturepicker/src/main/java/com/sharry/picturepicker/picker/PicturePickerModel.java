@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.picker.impl;
+package com.sharry.picturepicker.picker;
 
 import android.content.Context;
 import android.database.Cursor;

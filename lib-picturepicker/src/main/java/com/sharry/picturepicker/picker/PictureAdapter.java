@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.picker.impl;
+package com.sharry.picturepicker.picker;
 
 import android.content.Context;
 import android.os.Handler;
@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.sharry.picturepicker.R;
-import com.sharry.picturepicker.picker.manager.PickerConfig;
 import com.sharry.picturepicker.support.loader.PictureLoader;
 import com.sharry.picturepicker.widget.CheckedIndicatorView;
 

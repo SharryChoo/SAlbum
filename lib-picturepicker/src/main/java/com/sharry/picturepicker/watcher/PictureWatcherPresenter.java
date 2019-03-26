@@ -1,19 +1,10 @@
-package com.sharry.picturepicker.watcher.impl;
+package com.sharry.picturepicker.watcher;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.transition.ChangeBounds;
-import android.transition.ChangeImageTransform;
-import android.transition.Fade;
-import android.transition.Slide;
-import android.transition.Transition;
-import android.transition.TransitionSet;
-import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
 import com.sharry.picturepicker.R;
-import com.sharry.picturepicker.support.utils.VersionUtil;
-import com.sharry.picturepicker.watcher.manager.WatcherConfig;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

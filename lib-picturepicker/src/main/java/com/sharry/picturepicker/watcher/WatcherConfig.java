@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.watcher.manager;
+package com.sharry.picturepicker.watcher;
 
 import android.graphics.Color;
 import android.os.Parcel;

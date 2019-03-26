@@ -1,8 +1,7 @@
-package com.sharry.picturepicker.watcher.impl;
+package com.sharry.picturepicker.watcher;
 
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.transition.Transition;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.crop.manager;
+package com.sharry.picturepicker.crop;
 
 import android.Manifest;
 import android.app.Activity;

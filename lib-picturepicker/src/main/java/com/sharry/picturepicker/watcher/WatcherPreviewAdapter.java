@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.watcher.impl;
+package com.sharry.picturepicker.watcher;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;

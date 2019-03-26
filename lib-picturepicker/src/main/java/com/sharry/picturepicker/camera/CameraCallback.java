@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.camera.manager;
+package com.sharry.picturepicker.camera;
 
 /**
  * Created by Sharry on 2018/6/13.

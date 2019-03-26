@@ -1,13 +1,13 @@
-package com.sharry.picturepicker.picker.manager;
+package com.sharry.picturepicker.watcher;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.view.View;
 
-import com.sharry.picturepicker.picker.impl.PicturePickerActivity;
 import com.sharry.picturepicker.support.fragment.CallbackFragment;
 import com.sharry.picturepicker.support.loader.IPictureLoader;
 import com.sharry.picturepicker.support.loader.PictureLoader;
@@ -16,24 +16,22 @@ import com.sharry.picturepicker.support.permission.PermissionsManager;
 
 import java.util.ArrayList;
 
-import static android.app.Activity.RESULT_OK;
-
 /**
- * Created by Sharry on 2018/6/13.
+ * Created by Sharry on 2018/6/19.
  * Email: SharryChooCHN@Gmail.com
- * Version: 1.1
- * Description: 图片选择器的管理类
+ * Version: 1.0
+ * Description: 图片查看器的管理类
  */
-public class PicturePickerManager {
+public class PictureWatcherManager {
 
-    public static final String TAG = PicturePickerManager.class.getSimpleName();
+    public static final String TAG = PictureWatcherManager.class.getSimpleName();
 
-    public static PicturePickerManager with(@NonNull Context context) {
+    public static PictureWatcherManager with(@NonNull Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            return new PicturePickerManager(activity);
+            return new PictureWatcherManager(activity);
         } else {
-            throw new IllegalArgumentException("PicturePickerManager.with -> Context can not cast to Activity");
+            throw new IllegalArgumentException("PictureWatcherManager.with -> Context can not cast to Activity");
         }
     }
 
@@ -42,87 +40,95 @@ public class PicturePickerManager {
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
     private Activity mActivity;
-    private PickerConfig mConfig;
+    private WatcherConfig mConfig;
+    private View mTransitionView;
 
-    private PicturePickerManager(@NonNull Activity activity) {
+    private PictureWatcherManager(Activity activity) {
         this.mActivity = activity;
     }
 
     /**
-     * 设置图片加载方案
+     * 设置共享元素
      */
-    public PicturePickerManager setPictureLoader(@NonNull IPictureLoader loader) {
-        PictureLoader.setPictureLoader(loader);
+    public PictureWatcherManager setSharedElement(View transitionView) {
+        mTransitionView = transitionView;
         return this;
     }
 
     /**
-     * 设置图片选择的配置
+     * 设置图片预览的配置
      */
-    public PicturePickerManager setPickerConfig(PickerConfig config) {
+    public PictureWatcherManager setConfig(@NonNull WatcherConfig config) {
         this.mConfig = config;
         return this;
     }
 
     /**
-     * 发起请求
-     *
-     * @param pickerCallback 图片选中的回调
+     * 设置图片加载方案
      */
-    public void start(@NonNull final PickerCallback pickerCallback) {
+    public PictureWatcherManager setPictureLoader(@NonNull IPictureLoader loader) {
+        PictureLoader.setPictureLoader(loader);
+        return this;
+    }
+
+    /**
+     * 调用图片查看器的方法
+     */
+    public void start() {
+        startForResult(null);
+    }
+
+    /**
+     * 调用图片查看器, 一般用于相册
+     */
+    public void startForResult(@Nullable final WatcherCallback callback) {
+        // 请求权限
         PermissionsManager.getManager(mActivity)
                 .request(mPermissions)
                 .execute(new PermissionsCallback() {
                     @Override
                     public void onResult(boolean granted) {
                         if (granted) {
-                            startActual(pickerCallback);
+                            startForResultActual(callback);
                         }
                     }
                 });
     }
 
     /**
-     * 处理 PicturePickerActivity 的启动
+     * 真正执行 Activity 的启动
      */
-    private void startActual(@NonNull final PickerCallback pickerCallback) {
+    private void startForResultActual(@Nullable final WatcherCallback callback) {
         verify();
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mActivity);
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (resultCode != RESULT_OK || null == data) {
+                if (resultCode != Activity.RESULT_OK || null == data || null == callback) {
                     return;
                 }
                 switch (requestCode) {
-                    case PicturePickerActivity.REQUEST_CODE:
+                    case PictureWatcherActivity.REQUEST_CODE:
                         ArrayList<String> paths = data.getStringArrayListExtra(
-                                PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES);
-                        if (paths != null) {
-                            pickerCallback.onPickedComplete(paths);
-                        } else {
-                            Log.e(TAG, "Picked path from PicturePickerActivity is null.");
-                        }
+                                PictureWatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
+                        boolean isEnsure = data.getBooleanExtra(
+                                PictureWatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
+                        callback.onWatcherPickedComplete(isEnsure, paths);
                         break;
                     default:
                         break;
                 }
             }
         });
-        PicturePickerActivity.startActivityForResult(mActivity, callbackFragment, mConfig);
+        PictureWatcherActivity.startActivityForResult(mActivity, callbackFragment, mConfig, mTransitionView);
     }
 
+    /**
+     * 验证 Activity 启动参数
+     */
     private void verify() {
-        // 1. 验证是否实现了图片加载器
         if (PictureLoader.getPictureLoader() == null) {
             throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
-        }
-        // 2. 若开启了裁剪, 则只能选中一张图片
-        if (mConfig.isCropSupport()) {
-            mConfig.rebuild()
-                    .setThreshold(1)
-                    .setPickedPictures(null)
-                    .build();
         }
     }
 

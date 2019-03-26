@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.watcher.impl;
+package com.sharry.picturepicker.watcher;
 
 import android.os.Parcel;
 import android.os.Parcelable;

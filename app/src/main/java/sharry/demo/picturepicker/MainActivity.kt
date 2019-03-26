@@ -9,10 +9,10 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.sharry.picturepicker.camera.manager.CameraConfig
-import com.sharry.picturepicker.crop.manager.CropConfig
-import com.sharry.picturepicker.picker.manager.PickerConfig
-import com.sharry.picturepicker.picker.manager.PicturePickerManager
+import com.sharry.picturepicker.camera.CameraConfig
+import com.sharry.picturepicker.crop.CropConfig
+import com.sharry.picturepicker.picker.PickerConfig
+import com.sharry.picturepicker.picker.PicturePickerManager
 import com.sharry.picturepicker.widget.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File

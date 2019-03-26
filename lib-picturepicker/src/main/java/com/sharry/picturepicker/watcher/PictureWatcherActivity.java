@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.watcher.impl;
+package com.sharry.picturepicker.watcher;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -26,7 +26,6 @@ import android.widget.TextView;
 import com.sharry.picturepicker.R;
 import com.sharry.picturepicker.support.loader.PictureLoader;
 import com.sharry.picturepicker.support.utils.SharedElementUtils;
-import com.sharry.picturepicker.watcher.manager.WatcherConfig;
 import com.sharry.picturepicker.widget.CheckedIndicatorView;
 import com.sharry.picturepicker.widget.DraggableViewPager;
 import com.sharry.picturepicker.widget.photoview.OnPhotoTapListener;
@@ -53,7 +52,6 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
     public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
 
-
     /**
      * U can launch this activity from here.
      *
@@ -62,8 +60,8 @@ public class PictureWatcherActivity extends AppCompatActivity implements
      * @param config        PictureWatcherActivity 的配置
      * @param sharedElement 共享元素
      */
-    public static void startActivityForResult(@NonNull Activity request, @NonNull Fragment resultTo,
-                                              @NonNull WatcherConfig config, @Nullable View sharedElement) {
+    static void startActivityForResult(@NonNull Activity request, @NonNull Fragment resultTo,
+                                       @NonNull WatcherConfig config, @Nullable View sharedElement) {
         Intent intent = new Intent(request, PictureWatcherActivity.class);
         intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, config);
         if (sharedElement != null) {
@@ -178,6 +176,10 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     public void showSharedElementExitAndFinish(SharedElementData data) {
         final PhotoView target = mPhotoViews.get(data.sharedPosition);
         Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
+        if (exitAnim == null) {
+            finish();
+            return;
+        }
         exitAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {

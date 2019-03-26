@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.camera.manager;
+package com.sharry.picturepicker.camera;
 
 import android.Manifest;
 import android.app.Activity;

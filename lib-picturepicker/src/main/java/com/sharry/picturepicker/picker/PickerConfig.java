@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.picker.manager;
+package com.sharry.picturepicker.picker;
 
 import android.graphics.Color;
 import android.os.Parcel;
@@ -8,8 +8,8 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.sharry.picturepicker.camera.manager.CameraConfig;
-import com.sharry.picturepicker.crop.manager.CropConfig;
+import com.sharry.picturepicker.camera.CameraConfig;
+import com.sharry.picturepicker.crop.CropConfig;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.crop.manager;
+package com.sharry.picturepicker.crop;
 
 import android.app.Activity;
 import android.app.Fragment;

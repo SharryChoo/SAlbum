@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.crop.manager;
+package com.sharry.picturepicker.crop;
 
 /**
  * Created by Sharry on 2018/6/13.

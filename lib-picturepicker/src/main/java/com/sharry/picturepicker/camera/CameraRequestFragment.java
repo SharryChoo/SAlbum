@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.camera.manager;
+package com.sharry.picturepicker.camera;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -9,8 +9,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.sharry.picturepicker.crop.manager.CropCallback;
-import com.sharry.picturepicker.crop.manager.PictureCropManager;
+import com.sharry.picturepicker.crop.CropCallback;
+import com.sharry.picturepicker.crop.PictureCropManager;
 import com.sharry.picturepicker.support.utils.FileUtil;
 import com.sharry.picturepicker.support.utils.PictureUtil;
 

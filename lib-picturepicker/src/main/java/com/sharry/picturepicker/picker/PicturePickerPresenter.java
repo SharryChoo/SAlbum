@@ -1,4 +1,4 @@
-package com.sharry.picturepicker.picker.impl;
+package com.sharry.picturepicker.picker;
 
 import android.content.Context;
 import android.os.Handler;
@@ -8,15 +8,14 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.sharry.picturepicker.R;
-import com.sharry.picturepicker.camera.manager.CameraCallback;
-import com.sharry.picturepicker.camera.manager.CameraRequestManager;
-import com.sharry.picturepicker.crop.manager.CropCallback;
-import com.sharry.picturepicker.crop.manager.PictureCropManager;
-import com.sharry.picturepicker.picker.manager.PickerConfig;
+import com.sharry.picturepicker.camera.CameraCallback;
+import com.sharry.picturepicker.camera.CameraRequestManager;
+import com.sharry.picturepicker.crop.CropCallback;
+import com.sharry.picturepicker.crop.PictureCropManager;
 import com.sharry.picturepicker.support.loader.PictureLoader;
-import com.sharry.picturepicker.watcher.manager.PictureWatcherManager;
-import com.sharry.picturepicker.watcher.manager.WatcherCallback;
-import com.sharry.picturepicker.watcher.manager.WatcherConfig;
+import com.sharry.picturepicker.watcher.PictureWatcherManager;
+import com.sharry.picturepicker.watcher.WatcherCallback;
+import com.sharry.picturepicker.watcher.WatcherConfig;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -136,10 +135,10 @@ class PicturePickerPresenter implements PicturePickerContract.IPresenter, Camera
     }
 
     @Override
-    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> userPickedSet) {
+    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> pickedPictures) {
         // 刷新用户选中的集合
         mModel.getPickedPaths().clear();
-        mModel.getPickedPaths().addAll(userPickedSet);
+        mModel.getPickedPaths().addAll(pickedPictures);
         if (mView == null) {
             return;
         }
