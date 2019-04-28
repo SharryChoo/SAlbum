@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--标题栏-->
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.sharry.picturepicker.widget.toolbar.SToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:backIcon="@drawable/picture_picker_common_arrow_right_white"
+            app:statusBarStyle="Transparent"
+            app:subItemInterval="10dp"
+            app:titleGravity="Left"
+            app:titleTextSize="18dp" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <!--中心容器-->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycle_pictures"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!--底部的照片文件夹选择器-->
+    <LinearLayout
+        android:id="@+id/ll_bottom_menu"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:orientation="vertical"
+        app:behavior_peekHeight="60dp"
+        app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <RelativeLayout
+            android:id="@+id/rv_menu_nav_container"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color">
+
+            <ImageView
+                android:id="@+id/iv_nav_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:paddingLeft="20dp"
+                app:srcCompat="@drawable/picture_picker_picker_bottom_indicator" />
+
+            <TextView
+                android:id="@+id/tv_folder_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@+id/iv_nav_indicator"
+                android:drawablePadding="5dp"
+                android:gravity="center_vertical"
+                android:paddingStart="5dp"
+                android:paddingLeft="5dp"
+                android:text="@string/picture_picker_picker_all_picture"
+                android:textColor="@color/libpricturepicker_picker_bottom_menu_nav_text_collapsed_color"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/tv_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="center_vertical|right"
+                android:gravity="center"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/picture_picker_picker_preview"
+                android:textColor="@color/libpricturepicker_picker_bottom_menu_nav_text_collapsed_color"
+                android:textSize="14dp" />
+
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycle_folders"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/libpricturepicker_picker_bottom_menu_content_folders_bg_color" />
+
+    </LinearLayout>
+
+    <!--悬浮按钮-->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="70dp"
+        app:layout_anchor="@+id/recycle_pictures"
+        app:layout_anchorGravity="bottom|right"
+        app:layout_behavior="@string/libpicturepicker_picker_fab_behavior"
+        app:srcCompat="@drawable/picture_picker_picker_fab" />
+
+</android.support.design.widget.CoordinatorLayout>

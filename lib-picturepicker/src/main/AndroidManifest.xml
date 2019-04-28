@@ -12,11 +12,11 @@
         android:supportsRtl="true">
 
         <activity
-            android:name=".picker.PicturePickerActivity"
+            android:name=".activity.PicturePickerActivity"
             android:launchMode="singleTop"
             android:theme="@style/PicturePickerTheme" />
         <activity
-            android:name=".watcher.PictureWatcherActivity"
+            android:name=".activity.PictureWatcherActivity"
             android:launchMode="singleTop"
             android:theme="@style/PictureWatcherTheme" />
 
