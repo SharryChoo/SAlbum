@@ -2,26 +2,32 @@ package com.sharry.picturepicker.facade;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.sharry.picturepicker.fragment.CameraRequestFragment;
-import com.sharry.picturepicker.utils.permission.PermissionsCallback;
-import com.sharry.picturepicker.utils.permission.PermissionsManager;
-import com.sharry.picturepicker.utils.ActivityStateUtil;
 import com.sharry.picturepicker.utils.FileUtil;
+import com.sharry.picturepicker.utils.Preconditions;
+import com.sharry.picturepicker.utils.permission.PermissionsCallback;
+import com.sharry.picturepicker.utils.permission.PermissionsUtil;
 
 /**
- * Created by think on 2018/6/20.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: 从相机拍照获取图片的 Manager
+ * 从相机拍照获取图片的入口
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 4/28/2019 5:02 PM
  */
 public class CameraRequestManager {
 
     private static final String TAG = CameraRequestManager.class.getSimpleName();
+    private static String[] sRequirePermissions = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
 
     public static CameraRequestManager with(@NonNull Context context) {
         if (context instanceof Activity) {
@@ -32,26 +38,19 @@ public class CameraRequestManager {
         }
     }
 
-    // 所需要的权限
-    private String[] mPermissions = {
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
-    private Activity mActivity;
-    private CameraRequestFragment mCallbackFragment;
+
+    private Activity mBind;
     private CameraConfig mConfig;
 
-    private CameraRequestManager(@NonNull Activity activity) {
-        this.mActivity = activity;
-        this.mCallbackFragment = getCallbackFragment(activity);
+    private CameraRequestManager(Activity activity) {
+        this.mBind = activity;
     }
 
     /**
      * 设置配置属性
      */
     public CameraRequestManager setConfig(@NonNull CameraConfig config) {
-        this.mConfig = config;
+        this.mConfig = Preconditions.checkNotNull(config, "Please ensure CameraConfig not null!");
         return this;
     }
 
@@ -59,8 +58,10 @@ public class CameraRequestManager {
      * 获取拍摄照片
      */
     public void take(@NonNull final CameraCallback callback) {
-        PermissionsManager.getManager(mActivity)
-                .request(mPermissions)
+        Preconditions.checkNotNull(callback, "Please ensure callback not null!");
+        Preconditions.checkNotNull(mConfig, "Please ensure U set CameraConfig correct!");
+        PermissionsUtil.with(mBind)
+                .request(sRequirePermissions)
                 .execute(new PermissionsCallback() {
                     @Override
                     public void onResult(boolean granted) {
@@ -74,12 +75,13 @@ public class CameraRequestManager {
     private void takeActual(CameraCallback callback) {
         // 1. 若为指定照片默认输出路径, 给予指定默认的拍照路径
         if (TextUtils.isEmpty(mConfig.getCameraDirectoryPath())) {
-            mConfig.rebuild().setCameraDirectory(FileUtil.createDefaultDirectory(mActivity).getAbsolutePath());
+            mConfig.rebuild().setCameraDirectory(FileUtil.createDefaultDirectory(mBind).getAbsolutePath());
         }
         // 2. 若未指定 FileProvider 的 authority, 则给予默认值
         if (TextUtils.isEmpty(mConfig.getAuthority())) {
-            mConfig.rebuild().setFileProviderAuthority(FileUtil.getDefaultFileProviderAuthority(mActivity));
+            mConfig.rebuild().setFileProviderAuthority(FileUtil.getDefaultFileProviderAuthority(mBind));
         }
+        // 3. 处理图片裁剪的缺省值
         if (mConfig.isCropSupport()) {
             // 给图片裁剪添加缺省的输出文件夹
             if (TextUtils.isEmpty(mConfig.getCropConfig().getCropDirectoryPath())) {
@@ -92,32 +94,13 @@ public class CameraRequestManager {
                         .setFileProviderAuthority(mConfig.getAuthority());
             }
         }
-        // 发起请求
-        mCallbackFragment.takePicture(mConfig, callback);
-    }
-
-    /**
-     * 获取用于回调的 Fragment
-     */
-    private CameraRequestFragment getCallbackFragment(Activity activity) {
-        if (ActivityStateUtil.isIllegalState(activity)) {
-            return null;
-        }
-        CameraRequestFragment callbackFragment = findCallbackFragment(activity);
+        // 4. 发起请求
+        CameraRequestFragment callbackFragment = CameraRequestFragment.getInstance(mBind);
         if (callbackFragment == null) {
-            callbackFragment = CameraRequestFragment.newInstance();
-            FragmentManager fragmentManager = activity.getFragmentManager();
-            fragmentManager.beginTransaction().add(callbackFragment, TAG).commitAllowingStateLoss();
-            fragmentManager.executePendingTransactions();
+            Log.e(TAG, "Launch camera failed.");
+            return;
         }
-        return callbackFragment;
-    }
-
-    /**
-     * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
-     */
-    private CameraRequestFragment findCallbackFragment(Activity activity) {
-        return (CameraRequestFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+        callbackFragment.takePicture(mConfig, callback);
     }
 
 }

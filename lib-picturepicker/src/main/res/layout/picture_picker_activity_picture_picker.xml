@@ -41,7 +41,7 @@
             android:id="@+id/rv_menu_nav_container"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@color/libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color">
+            android:background="@color/picture_picker_picker_bottom_menu_nav_bg_collapsed_color">
 
             <ImageView
                 android:id="@+id/iv_nav_indicator"
@@ -61,7 +61,7 @@
                 android:paddingStart="5dp"
                 android:paddingLeft="5dp"
                 android:text="@string/picture_picker_picker_all_picture"
-                android:textColor="@color/libpricturepicker_picker_bottom_menu_nav_text_collapsed_color"
+                android:textColor="@color/picture_picker_picker_bottom_menu_nav_text_collapsed_color"
                 android:textSize="15dp" />
 
             <TextView
@@ -74,7 +74,7 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="@string/picture_picker_picker_preview"
-                android:textColor="@color/libpricturepicker_picker_bottom_menu_nav_text_collapsed_color"
+                android:textColor="@color/picture_picker_picker_bottom_menu_nav_text_collapsed_color"
                 android:textSize="14dp" />
 
         </RelativeLayout>
@@ -83,7 +83,7 @@
             android:id="@+id/recycle_folders"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/libpricturepicker_picker_bottom_menu_content_folders_bg_color" />
+            android:background="@color/picture_picker_picker_bottom_menu_content_folders_bg_color" />
 
     </LinearLayout>
 
@@ -96,7 +96,7 @@
         android:layout_marginBottom="70dp"
         app:layout_anchor="@+id/recycle_pictures"
         app:layout_anchorGravity="bottom|right"
-        app:layout_behavior="@string/libpicturepicker_picker_fab_behavior"
+        app:layout_behavior="@string/picture_picker_picker_fab_behavior"
         app:srcCompat="@drawable/picture_picker_picker_fab" />
 
 </android.support.design.widget.CoordinatorLayout>

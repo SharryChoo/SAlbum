@@ -2,17 +2,21 @@ package com.sharry.picturepicker.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.sharry.picturepicker.facade.CameraCallback;
 import com.sharry.picturepicker.facade.CameraConfig;
 import com.sharry.picturepicker.facade.CropCallback;
-import com.sharry.picturepicker.facade.PictureCropManager;
+import com.sharry.picturepicker.facade.CropRequestManager;
+import com.sharry.picturepicker.utils.ActivityStateUtil;
 import com.sharry.picturepicker.utils.FileUtil;
 import com.sharry.picturepicker.utils.PictureUtil;
 
@@ -20,26 +24,43 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by Sharry on 2018/6/13.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: 从相机拍照获取图片的 Fragment
+ * 从相机拍照获取图片的 Fragment
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 4/28/2019 4:52 PM
  */
 public class CameraRequestFragment extends Fragment {
 
     public static final String TAG = CameraRequestFragment.class.getSimpleName();
+    private static final int REQUEST_CODE_TAKE = 454;
     public static final String INTENT_ACTION_START_CAMERA = "android.media.action.IMAGE_CAPTURE";
 
     /**
-     * Activity Result 相关
+     * Get callback fragment from here.
      */
-    public static final int REQUEST_CODE_TAKE = 0x000222;// 图片选择请求码
+    @Nullable
+    public static CameraRequestFragment getInstance(@NonNull Activity bind) {
+        if (ActivityStateUtil.isIllegalState(bind)) {
+            return null;
+        }
+        CameraRequestFragment callbackFragment = findFragmentFromActivity(bind);
+        if (callbackFragment == null) {
+            callbackFragment = new CameraRequestFragment();
+            FragmentManager fragmentManager = bind.getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(callbackFragment, TAG)
+                    .commitAllowingStateLoss();
+            fragmentManager.executePendingTransactions();
+        }
+        return callbackFragment;
+    }
 
-    public static CameraRequestFragment newInstance() {
-        CameraRequestFragment fragment = new CameraRequestFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
+    /**
+     * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
+     */
+    private static CameraRequestFragment findFragmentFromActivity(@NonNull Activity activity) {
+        return (CameraRequestFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
     private Context mContext;
@@ -82,7 +103,9 @@ public class CameraRequestFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK || null == mCameraCallback) return;
+        if (resultCode != Activity.RESULT_OK || null == mCameraCallback) {
+            return;
+        }
         switch (requestCode) {
             case REQUEST_CODE_TAKE:
                 try {
@@ -114,7 +137,7 @@ public class CameraRequestFragment extends Fragment {
      * 处理裁剪
      */
     private void performCropPicture(String cameraFilePath) {
-        PictureCropManager.with(mContext)
+        CropRequestManager.with(mContext)
                 .setConfig(
                         mConfig.getCropConfig().rebuild()
                                 .setOriginFile(cameraFilePath)// 需要裁剪的文件路径

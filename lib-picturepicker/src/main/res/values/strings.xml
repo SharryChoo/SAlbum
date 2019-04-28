@@ -11,7 +11,7 @@
     <string name="picture_picker_picker_tips_fetch_album_failed">Fetch album data failed.</string>
     <string name="picture_picker_picker_tips_ensure_failed">Please pick at least one picture.</string>
     <string name="picture_picker_picker_tips_preview_failed">@string/picture_picker_picker_tips_ensure_failed</string>
-    <string name="picturepicker_picker_fab_behavior" translatable="false">com.sharry.picturepicker.widget.PicturePickerFabBehavior</string>
+    <string name="picture_picker_picker_fab_behavior" translatable="false">com.sharry.picturepicker.widget.PicturePickerFabBehavior</string>
 
     <!--PictureWatcherActivity 需要用到的字符串-->
     <string name="picture_picker_watcher_tips_over_threshold_prefix">@string/picture_picker_picker_tips_over_threshold_prefix</string>

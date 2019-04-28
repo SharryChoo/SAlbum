@@ -79,8 +79,12 @@ public class CheckedIndicatorView extends AppCompatTextView {
 
     public void setChecked(boolean isChecked) {
         if (isChecked != mIsChecked) {
-            if (mIsChecked) executeAnimator(false);
-            else executeAnimator(true);
+            if (mIsChecked){
+                executeAnimator(false);
+            }
+            else {
+                executeAnimator(true);
+            }
         }
     }
 
@@ -98,8 +102,12 @@ public class CheckedIndicatorView extends AppCompatTextView {
      * 设置边框的颜色
      */
     public void setBorderColor(@ColorInt int checkedColor, @ColorInt int uncheckedColor) {
-        if (checkedColor != INVALIDATE_VALUE) mCheckedBorderColor = checkedColor;
-        if (uncheckedColor != INVALIDATE_VALUE) mUncheckedBorderColor = uncheckedColor;
+        if (checkedColor != INVALIDATE_VALUE) {
+            mCheckedBorderColor = checkedColor;
+        }
+        if (uncheckedColor != INVALIDATE_VALUE){
+            mUncheckedBorderColor = uncheckedColor;
+        }
     }
 
     /**
@@ -156,7 +164,9 @@ public class CheckedIndicatorView extends AppCompatTextView {
      * @param destIsChecked 最终选中的状态
      */
     private void executeAnimator(final boolean destIsChecked) {
-        if (mIsAnimatorStarted) return;
+        if (mIsAnimatorStarted) {
+            return;
+        }
         int start = destIsChecked ? 0 : 1;
         int end = destIsChecked ? 1 : 0;
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(start, end).setDuration(destIsChecked ? 300 : 200);

@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.sharry.picturepicker.utils.ActivityStateUtil;
 
@@ -26,6 +27,7 @@ public class CallbackFragment extends Fragment {
      * @param bind The activity associated with this fragment.
      * @return an instance of CallbackFragment.
      */
+    @Nullable
     public static CallbackFragment getInstance(@NonNull Activity bind) {
         if (ActivityStateUtil.isIllegalState(bind)) {
             return null;
@@ -61,19 +63,19 @@ public class CallbackFragment extends Fragment {
         setRetainInstance(true);
     }
 
-    /**
-     * 设置图片选择回调
-     */
-    public void setCallback(Callback callback) {
-        this.mCallback = callback;
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (null != mCallback) {
             mCallback.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    /**
+     * 设置图片选择回调
+     */
+    public void setCallback(Callback callback) {
+        this.mCallback = callback;
     }
 
     /**

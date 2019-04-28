@@ -12,7 +12,7 @@ import com.sharry.picturepicker.contract.PicturePickerContract;
 import com.sharry.picturepicker.facade.CameraCallback;
 import com.sharry.picturepicker.facade.CameraRequestManager;
 import com.sharry.picturepicker.facade.CropCallback;
-import com.sharry.picturepicker.facade.PictureCropManager;
+import com.sharry.picturepicker.facade.CropRequestManager;
 import com.sharry.picturepicker.model.PictureFolder;
 import com.sharry.picturepicker.model.PicturePickerModel;
 import com.sharry.picturepicker.facade.PictureLoader;
@@ -124,7 +124,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
             return;
         }
         // 需要裁剪, 则启动裁剪
-        PictureCropManager.with((Context) mView)
+        CropRequestManager.with((Context) mView)
                 .setConfig(
                         mPickerConfig.getCropConfig().rebuild()
                                 .setOriginFile(mModel.getPickedPaths().get(0))

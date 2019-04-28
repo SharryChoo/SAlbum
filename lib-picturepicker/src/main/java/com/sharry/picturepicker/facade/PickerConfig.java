@@ -8,6 +8,8 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.sharry.picturepicker.utils.Preconditions;
+
 import java.util.ArrayList;
 
 /**
@@ -194,6 +196,7 @@ public class PickerConfig implements Parcelable {
         }
 
         private Builder(@NonNull PickerConfig config) {
+            Preconditions.checkNotNull(config);
             this.mConfig = config;
         }
 

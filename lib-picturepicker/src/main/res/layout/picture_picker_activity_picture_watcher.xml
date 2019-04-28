@@ -8,7 +8,7 @@
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/libpricturepicker_watcher_bg_color"
+        android:background="@color/picture_picker_watcher_bg_color"
         android:gravity="center" />
 
     <com.sharry.picturepicker.widget.toolbar.SToolbar
@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/libpricturepicker_watcher_bottom_preview_bg_color"
+        android:background="@color/picture_picker_watcher_bottom_preview_bg_color"
         android:gravity="right"
         android:orientation="vertical"
         android:visibility="invisible">
@@ -44,7 +44,7 @@
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:text="@string/picture_picker_watcher_ensure"
-            android:textColor="@color/libpricturepicker_watcher_bottom_preview_text_color"
+            android:textColor="@color/picture_picker_watcher_bottom_preview_text_color"
             android:textSize="14dp" />
 
     </LinearLayout>

@@ -2,20 +2,20 @@
 <resources>
 
     <!--BaseColor-->
-    <color name="libpricturepicker_base_primary_color">#ff00b0ff</color>
-    <color name="libpricturepicker_base_primary_dark_color">#ff00b0ff</color>
-    <color name="libpricturepicker_base_accent_color">#ff64b6f6</color>
+    <color name="picture_picker_base_primary_color">#ff00b0ff</color>
+    <color name="picture_picker_base_primary_dark_color">#ff00b0ff</color>
+    <color name="picture_picker_base_accent_color">#ff64b6f6</color>
 
     <!--PicturePicker-->
-    <color name="libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color">#a9000000</color>
-    <color name="libpricturepicker_picker_bottom_menu_navi_bg_expand_color">#ffffffff</color>
-    <color name="libpricturepicker_picker_bottom_menu_nav_text_collapsed_color">#ffffffff</color>
-    <color name="libpricturepicker_picker_bottom_menu_navi_text_expand_color">#ff333333</color>
-    <color name="libpricturepicker_picker_bottom_menu_content_folders_bg_color">#ffffffff</color>
+    <color name="picture_picker_picker_bottom_menu_nav_bg_collapsed_color">#a9000000</color>
+    <color name="picture_picker_picker_bottom_menu_navi_bg_expand_color">#ffffffff</color>
+    <color name="picture_picker_picker_bottom_menu_nav_text_collapsed_color">#ffffffff</color>
+    <color name="picture_picker_picker_bottom_menu_navi_text_expand_color">#ff333333</color>
+    <color name="picture_picker_picker_bottom_menu_content_folders_bg_color">#ffffffff</color>
 
     <!--PictureWatcher-->
-    <color name="libpricturepicker_watcher_bg_color">#ff000000</color>
-    <color name="libpricturepicker_watcher_bottom_preview_bg_color">#a9000000</color>
-    <color name="libpricturepicker_watcher_bottom_preview_text_color">#ffffffff</color>
+    <color name="picture_picker_watcher_bg_color">#ff000000</color>
+    <color name="picture_picker_watcher_bottom_preview_bg_color">#a9000000</color>
+    <color name="picture_picker_watcher_bottom_preview_text_color">#ffffffff</color>
 
 </resources>

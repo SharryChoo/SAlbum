@@ -324,13 +324,13 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         BottomMenuNavigationCallback() {
             indicatorDrawable = mIvNavIndicator.getDrawable();
             bgCollapsedColor = ContextCompat.getColor(PicturePickerActivity.this,
-                    R.color.libpricturepicker_picker_bottom_menu_nav_bg_collapsed_color);
+                    R.color.picture_picker_picker_bottom_menu_nav_bg_collapsed_color);
             bgExpandColor = ContextCompat.getColor(PicturePickerActivity.this,
-                    R.color.libpricturepicker_picker_bottom_menu_navi_bg_expand_color);
+                    R.color.picture_picker_picker_bottom_menu_navi_bg_expand_color);
             textCollapsedColor = ContextCompat.getColor(PicturePickerActivity.this,
-                    R.color.libpricturepicker_picker_bottom_menu_nav_text_collapsed_color);
+                    R.color.picture_picker_picker_bottom_menu_nav_text_collapsed_color);
             textExpandColor = ContextCompat.getColor(PicturePickerActivity.this,
-                    R.color.libpricturepicker_picker_bottom_menu_navi_text_expand_color);
+                    R.color.picture_picker_picker_bottom_menu_navi_text_expand_color);
         }
 
         @Override

@@ -7,6 +7,8 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.sharry.picturepicker.utils.Preconditions;
+
 import java.util.ArrayList;
 
 /**
@@ -141,6 +143,7 @@ public class WatcherConfig implements Parcelable {
          * 需要展示的 URI
          */
         public Builder setPictureUri(@NonNull String uri) {
+            Preconditions.checkNotEmpty(uri);
             ArrayList<String> pictureUris = new ArrayList<>();
             pictureUris.add(uri);
             setPictureUris(pictureUris, 0);
@@ -154,6 +157,7 @@ public class WatcherConfig implements Parcelable {
          * @param position    展示的位置
          */
         public Builder setPictureUris(@NonNull ArrayList<String> pictureUris, int position) {
+            Preconditions.checkNotNull(pictureUris);
             mConfig.pictureUris = pictureUris;
             mConfig.position = position;
             return this;

@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import com.sharry.picturepicker.utils.Preconditions;
+
 /**
  * 图片裁剪的相关参数
  *
@@ -157,6 +159,7 @@ public class CropConfig implements Parcelable {
          * 设置 FileProvider 的路径, 7.0 以后用于查找 URI
          */
         public Builder setFileProviderAuthority(@NonNull String authorities) {
+            Preconditions.checkNotEmpty(authorities);
             mConfig.authority = authorities;
             return this;
         }
@@ -173,6 +176,7 @@ public class CropConfig implements Parcelable {
          * 设置需要裁剪的文件地址
          */
         public Builder setCropDirectory(@NonNull String filePath) {
+            Preconditions.checkNotEmpty(filePath);
             this.mConfig.cropDirectoryPath = filePath;
             return this;
         }

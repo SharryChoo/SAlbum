@@ -9,22 +9,28 @@ import android.util.Log;
 
 import com.sharry.picturepicker.activity.PicturePickerActivity;
 import com.sharry.picturepicker.fragment.CallbackFragment;
+import com.sharry.picturepicker.utils.Preconditions;
 import com.sharry.picturepicker.utils.permission.PermissionsCallback;
-import com.sharry.picturepicker.utils.permission.PermissionsManager;
+import com.sharry.picturepicker.utils.permission.PermissionsUtil;
 
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;
 
 /**
- * Created by Sharry on 2018/6/13.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.1
- * Description: 图片选择器的管理类
+ * 图片选择器的管理类
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 4/28/2019 5:03 PM
  */
 public class PicturePickerManager {
 
     public static final String TAG = PicturePickerManager.class.getSimpleName();
+    private static String[] sRequirePermissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
 
     public static PicturePickerManager with(@NonNull Context context) {
         if (context instanceof Activity) {
@@ -35,21 +41,18 @@ public class PicturePickerManager {
         }
     }
 
-    private String[] mPermissions = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
     private Activity mActivity;
     private PickerConfig mConfig;
 
-    private PicturePickerManager(@NonNull Activity activity) {
+    private PicturePickerManager(Activity activity) {
         this.mActivity = activity;
     }
 
     /**
      * 设置图片加载方案
      */
-    public PicturePickerManager setPictureLoader(@NonNull IPictureLoader loader) {
+    public PicturePickerManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
+        Preconditions.checkNotNull(loader, "Please ensure IPictureLoaderEngine not null!");
         PictureLoader.setPictureLoader(loader);
         return this;
     }
@@ -57,8 +60,8 @@ public class PicturePickerManager {
     /**
      * 设置图片选择的配置
      */
-    public PicturePickerManager setPickerConfig(PickerConfig config) {
-        this.mConfig = config;
+    public PicturePickerManager setPickerConfig(@NonNull PickerConfig config) {
+        this.mConfig = Preconditions.checkNotNull(config, "Please ensure PickerConfig not null!");
         return this;
     }
 
@@ -68,8 +71,10 @@ public class PicturePickerManager {
      * @param pickerCallback 图片选中的回调
      */
     public void start(@NonNull final PickerCallback pickerCallback) {
-        PermissionsManager.getManager(mActivity)
-                .request(mPermissions)
+        Preconditions.checkNotNull(pickerCallback, "Please ensure PickerCallback not null!");
+        Preconditions.checkNotNull(mConfig, "Please ensure U set PickerConfig correct!");
+        PermissionsUtil.with(mActivity)
+                .request(sRequirePermissions)
                 .execute(new PermissionsCallback() {
                     @Override
                     public void onResult(boolean granted) {
@@ -84,8 +89,19 @@ public class PicturePickerManager {
      * 处理 PicturePickerActivity 的启动
      */
     private void startActual(@NonNull final PickerCallback pickerCallback) {
-        verify();
+        // 1. 若开启了裁剪, 则只能选中一张图片
+        if (mConfig.isCropSupport()) {
+            mConfig.rebuild()
+                    .setThreshold(1)
+                    .setPickedPictures(null)
+                    .build();
+        }
+        // 2. 获取回调的 Fragment
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mActivity);
+        if (callbackFragment == null) {
+            Log.e(TAG, "Start Picture picker activity failed.");
+            return;
+        }
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -108,20 +124,6 @@ public class PicturePickerManager {
             }
         });
         PicturePickerActivity.launchActivityForResult(mActivity, callbackFragment, mConfig);
-    }
-
-    private void verify() {
-        // 1. 验证是否实现了图片加载器
-        if (PictureLoader.getPictureLoader() == null) {
-            throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
-        }
-        // 2. 若开启了裁剪, 则只能选中一张图片
-        if (mConfig.isCropSupport()) {
-            mConfig.rebuild()
-                    .setThreshold(1)
-                    .setPickedPictures(null)
-                    .build();
-        }
     }
 
 }

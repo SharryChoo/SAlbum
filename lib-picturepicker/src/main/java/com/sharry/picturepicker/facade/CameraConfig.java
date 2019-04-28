@@ -5,6 +5,8 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.sharry.picturepicker.utils.Preconditions;
+
 /**
  * Created by Sharry on 2018/6/21.
  * Email: SharryChooCHN@Gmail.com
@@ -108,6 +110,7 @@ public class CameraConfig implements Parcelable {
          * 设置目的文件
          */
         public Builder setCameraDirectory(@NonNull String filePath) {
+            Preconditions.checkNotEmpty(filePath);
             this.mConfig.cameraDirectoryPath = filePath;
             return this;
         }
@@ -124,6 +127,7 @@ public class CameraConfig implements Parcelable {
          * 设置 FileProvider 的路径, 7.0 以后用于查找 URI
          */
         public Builder setFileProviderAuthority(@NonNull String authorities) {
+            Preconditions.checkNotEmpty(authorities);
             mConfig.authority = authorities;
             return this;
         }

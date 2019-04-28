@@ -117,6 +117,6 @@ public class PermissionsFragment extends Fragment {
     }
 
     void log(String message) {
-        Log.i(PermissionsManager.TAG, message);
+        Log.i(PermissionsUtil.TAG, message);
     }
 }

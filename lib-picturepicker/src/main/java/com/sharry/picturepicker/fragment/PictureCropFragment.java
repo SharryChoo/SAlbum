@@ -2,6 +2,7 @@ package com.sharry.picturepicker.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,10 +12,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.sharry.picturepicker.facade.CropCallback;
 import com.sharry.picturepicker.facade.CropConfig;
+import com.sharry.picturepicker.utils.ActivityStateUtil;
 import com.sharry.picturepicker.utils.FileUtil;
 import com.sharry.picturepicker.utils.PictureUtil;
 
@@ -22,32 +26,49 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Created by Sharry on 2018/6/13.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: 调用系统裁剪工具
+ * 调用系统裁剪工具
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 4/28/2019 4:53 PM
  */
 public class PictureCropFragment extends Fragment {
 
     public static final String TAG = PictureCropFragment.class.getSimpleName();
+    private static final int REQUEST_CODE_CROP = 446;
     public static final String INTENT_ACTION_START_CROP = "com.android.camera.action.CROP";
 
     /**
-     * Activity Result 相关
+     * Get callback fragment from here.
      */
-    public static final int REQUEST_CODE_CROP = 0x000444;// 图片选择请求码
-
-    public static PictureCropFragment newInstance() {
-        PictureCropFragment fragment = new PictureCropFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
+    @Nullable
+    public static PictureCropFragment getInstance(@NonNull Activity bind) {
+        if (ActivityStateUtil.isIllegalState(bind)) {
+            return null;
+        }
+        PictureCropFragment callbackFragment = findFragmentFromActivity(bind);
+        if (callbackFragment == null) {
+            callbackFragment = new PictureCropFragment();
+            FragmentManager fragmentManager = bind.getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(callbackFragment, TAG)
+                    .commitAllowingStateLoss();
+            fragmentManager.executePendingTransactions();
+        }
+        return callbackFragment;
     }
 
+    /**
+     * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
+     */
+    private static PictureCropFragment findFragmentFromActivity(@NonNull Activity activity) {
+        return (PictureCropFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    }
+
+    private File mTempFile;
     private Context mContext;
     private CropConfig mConfig;
     private CropCallback mCropCallback;
-    private File mTempFile;
 
     @Override
     public void onAttach(Context context) {
@@ -88,7 +109,9 @@ public class PictureCropFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK || null == mCropCallback) return;
+        if (resultCode != Activity.RESULT_OK || null == mCropCallback) {
+            return;
+        }
         switch (requestCode) {
             case REQUEST_CODE_CROP:
                 try {

@@ -1,6 +1,7 @@
 package com.sharry.picturepicker.facade;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
 /**
@@ -10,6 +11,11 @@ import android.widget.ImageView;
  * @version 1.0
  * @since 2018/9/18 16:18
  */
-public interface IPictureLoader {
-    void load(Context context, String uri, ImageView imageView);
+public interface IPictureLoaderEngine {
+
+    /**
+     * 加载图片的实现
+     */
+    void load(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView);
+
 }

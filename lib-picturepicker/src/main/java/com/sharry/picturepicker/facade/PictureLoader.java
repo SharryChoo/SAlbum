@@ -2,7 +2,10 @@ package com.sharry.picturepicker.facade;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.ImageView;
+
+import com.sharry.picturepicker.utils.Preconditions;
 
 /**
  * PicturePicker 加载图片的工具类
@@ -13,21 +16,23 @@ import android.widget.ImageView;
  */
 public class PictureLoader {
 
-    private static IPictureLoader mPictureLoader;
+    private static final String TAG = PictureLoader.class.getSimpleName();
+    private static IPictureLoaderEngine sEngine;
 
-    public static void setPictureLoader(@NonNull IPictureLoader loader) {
-        mPictureLoader = loader;
+    static void setPictureLoader(@NonNull IPictureLoaderEngine engine) {
+        Preconditions.checkNotNull(engine, "Please ensure IPictureLoaderEngine not null!");
+        sEngine = engine;
     }
 
-    public static IPictureLoader getPictureLoader() {
-        return mPictureLoader;
+    public static IPictureLoaderEngine getPictureLoader() {
+        return sEngine;
     }
 
-    public static void load(Context context, String uri, ImageView imageView) {
-        if (mPictureLoader == null) {
-            throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
+    public static void load(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
+        if (sEngine == null) {
+            Log.e(TAG, "PictureLoader.load -> please invoke PictureLoader.setPictureLoader first");
         }
-        mPictureLoader.load(context, uri, imageView);
+        sEngine.load(context, uri, imageView);
     }
 
 }

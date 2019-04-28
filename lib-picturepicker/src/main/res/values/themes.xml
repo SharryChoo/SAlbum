@@ -2,9 +2,9 @@
 
     <style name="PicturePickerTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/libpricturepicker_base_primary_color</item>
-        <item name="colorPrimaryDark">@color/libpricturepicker_base_primary_dark_color</item>
-        <item name="colorAccent">@color/libpricturepicker_base_accent_color</item>
+        <item name="colorPrimary">@color/picture_picker_base_primary_color</item>
+        <item name="colorPrimaryDark">@color/picture_picker_base_primary_dark_color</item>
+        <item name="colorAccent">@color/picture_picker_base_accent_color</item>
     </style>
 
     <!--透明主题-->

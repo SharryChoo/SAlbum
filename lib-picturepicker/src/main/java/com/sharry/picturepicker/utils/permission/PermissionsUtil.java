@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
+
+import com.sharry.picturepicker.utils.ActivityStateUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,36 +19,36 @@ import java.util.List;
  * @version 1.0
  * @since 2018/1/5 16:23
  */
-public class PermissionsManager {
+public class PermissionsUtil {
 
-    public static final String TAG = PermissionsManager.class.getSimpleName();
+    public static final String TAG = PermissionsUtil.class.getSimpleName();
     private PermissionsFragment mPermissionsFragment;
     private String[] mPermissions;
 
-    public static PermissionsManager getManager(Context context) {
+    public static PermissionsUtil with(Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            return new PermissionsManager(activity);
+            return new PermissionsUtil(activity);
         } else {
-            throw new IllegalArgumentException("PermissionsManager.getManager -> Context can not cast to Activity");
+            throw new IllegalArgumentException("PermissionsUtil.with -> Context can not cast to Activity");
         }
     }
 
-    private PermissionsManager(Activity activity) {
+    private PermissionsUtil(Activity activity) {
         mPermissionsFragment = getPermissionsFragment(activity);
     }
 
     /**
      * 添加需要请求的权限
      */
-    public PermissionsManager request(String... permissions) {
+    public PermissionsUtil request(String... permissions) {
         return requestArray(permissions);
     }
 
     /**
      * 添加需要请求的权限(Kotlin 不支持从不定长参数转为 Array)
      */
-    public PermissionsManager requestArray(String[] permissions) {
+    public PermissionsUtil requestArray(String[] permissions) {
         ensure(permissions);
         mPermissions = permissions;
         return this;
@@ -56,16 +59,16 @@ public class PermissionsManager {
      */
     public void execute(PermissionsCallback permissionsCallback) {
         if (permissionsCallback == null) {
-            throw new IllegalArgumentException("PermissionsManager.execute -> PermissionsCallback must not be null");
+            throw new IllegalArgumentException("PermissionsUtil.execute -> PermissionsCallback must not be null");
         }
-        requestImplementation(mPermissions, permissionsCallback);
+        executeActual(mPermissions, permissionsCallback);
     }
 
     /**
      * 判断权限是否被授权
      */
     public boolean isGranted(String permission) {
-        return !isMarshmallow() || mPermissionsFragment.isGranted(permission);
+        return !isMarshmallow() || (mPermissionsFragment != null && mPermissionsFragment.isGranted(permission));
     }
 
     /**
@@ -75,13 +78,16 @@ public class PermissionsManager {
      */
     @SuppressWarnings("WeakerAccess")
     public boolean isRevoked(String permission) {
-        return isMarshmallow() && mPermissionsFragment.isRevoked(permission);
+        return isMarshmallow() && (mPermissionsFragment != null && mPermissionsFragment.isRevoked(permission));
     }
 
     /**
      * 获取 PermissionsFragment
      */
     private PermissionsFragment getPermissionsFragment(Activity activity) {
+        if (ActivityStateUtil.isIllegalState(activity)) {
+            return null;
+        }
         PermissionsFragment permissionsFragment = findPermissionsFragment(activity);
         if (permissionsFragment == null) {
             permissionsFragment = PermissionsFragment.getInstance();
@@ -105,17 +111,22 @@ public class PermissionsManager {
      */
     private void ensure(String[] permissions) {
         if (permissions == null || permissions.length == 0) {
-            throw new IllegalArgumentException("PermissionsManager.request -> requestEach requires at least one input permission");
+            throw new IllegalArgumentException("PermissionsUtil.request -> requestEach requires at least one input permission");
         }
     }
 
     /**
      * 执行权限请求
      */
-    private void requestImplementation(String[] permissions, PermissionsCallback callback) {
+    private void executeActual(String[] permissions, PermissionsCallback callback) {
+        if (mPermissionsFragment == null) {
+            Log.e(TAG, "Request failed.");
+            callback.onResult(false);
+            return;
+        }
         List<String> unrequestedPermissions = new ArrayList<>();
         for (String permission : permissions) {
-            mPermissionsFragment.log("Requesting permission -> " + permission);
+            Log.i(TAG, "Requesting permission -> " + permission);
             if (isGranted(permission)) {
                 // Already granted, or not Android M
                 // Return a granted Permission object.

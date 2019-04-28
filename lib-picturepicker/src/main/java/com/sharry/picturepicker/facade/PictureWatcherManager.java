@@ -6,24 +6,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 
 import com.sharry.picturepicker.activity.PictureWatcherActivity;
 import com.sharry.picturepicker.fragment.CallbackFragment;
+import com.sharry.picturepicker.utils.Preconditions;
 import com.sharry.picturepicker.utils.permission.PermissionsCallback;
-import com.sharry.picturepicker.utils.permission.PermissionsManager;
+import com.sharry.picturepicker.utils.permission.PermissionsUtil;
 
 import java.util.ArrayList;
 
 /**
- * Created by Sharry on 2018/6/19.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: 图片查看器的管理类
+ * 图片查看器的管理类
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 4/28/2019 4:34 PM
  */
 public class PictureWatcherManager {
 
     public static final String TAG = PictureWatcherManager.class.getSimpleName();
+    private static String[] sPermissions = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
 
     public static PictureWatcherManager with(@NonNull Context context) {
         if (context instanceof Activity) {
@@ -34,23 +41,19 @@ public class PictureWatcherManager {
         }
     }
 
-    private String[] mPermissions = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
-    private Activity mActivity;
+    private Activity mBind;
     private WatcherConfig mConfig;
     private View mTransitionView;
 
     private PictureWatcherManager(Activity activity) {
-        this.mActivity = activity;
+        this.mBind = activity;
     }
 
     /**
      * 设置共享元素
      */
-    public PictureWatcherManager setSharedElement(View transitionView) {
-        mTransitionView = transitionView;
+    public PictureWatcherManager setSharedElement(@NonNull View transitionView) {
+        mTransitionView = Preconditions.checkNotNull(transitionView, "Please ensure View not null!");
         return this;
     }
 
@@ -58,14 +61,14 @@ public class PictureWatcherManager {
      * 设置图片预览的配置
      */
     public PictureWatcherManager setConfig(@NonNull WatcherConfig config) {
-        this.mConfig = config;
+        this.mConfig = Preconditions.checkNotNull(config, "Please ensure WatcherConfig not null!");
         return this;
     }
 
     /**
      * 设置图片加载方案
      */
-    public PictureWatcherManager setPictureLoader(@NonNull IPictureLoader loader) {
+    public PictureWatcherManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
         PictureLoader.setPictureLoader(loader);
         return this;
     }
@@ -81,9 +84,10 @@ public class PictureWatcherManager {
      * 调用图片查看器, 一般用于相册
      */
     public void startForResult(@Nullable final WatcherCallback callback) {
-        // 请求权限
-        PermissionsManager.getManager(mActivity)
-                .request(mPermissions)
+        Preconditions.checkNotNull(callback, "Please ensure WatcherCall not null!");
+        Preconditions.checkNotNull(mConfig, "Please ensure U set WatcherConfig correct.");
+        PermissionsUtil.with(mBind)
+                .request(sPermissions)
                 .execute(new PermissionsCallback() {
                     @Override
                     public void onResult(boolean granted) {
@@ -97,9 +101,12 @@ public class PictureWatcherManager {
     /**
      * 真正执行 Activity 的启动
      */
-    private void startForResultActual(@Nullable final WatcherCallback callback) {
-        verify();
-        CallbackFragment callbackFragment = CallbackFragment.getInstance(mActivity);
+    private void startForResultActual(final WatcherCallback callback) {
+        CallbackFragment callbackFragment = CallbackFragment.getInstance(mBind);
+        if (callbackFragment == null) {
+            Log.e(TAG, "launch picture watcher failed.");
+            return;
+        }
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -119,16 +126,7 @@ public class PictureWatcherManager {
                 }
             }
         });
-        PictureWatcherActivity.launchActivityForResult(mActivity, callbackFragment, mConfig, mTransitionView);
-    }
-
-    /**
-     * 验证 Activity 启动参数
-     */
-    private void verify() {
-        if (PictureLoader.getPictureLoader() == null) {
-            throw new UnsupportedOperationException("PictureLoader.load -> please invoke setPictureLoader first");
-        }
+        PictureWatcherActivity.launchActivityForResult(mBind, callbackFragment, mConfig, mTransitionView);
     }
 
 }
