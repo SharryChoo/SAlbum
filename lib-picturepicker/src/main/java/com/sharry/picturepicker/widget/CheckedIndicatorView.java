@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -20,7 +21,7 @@ import android.view.animation.OvershootInterpolator;
 /**
  * 用于展示图片被选中的索引 View
  *
- * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
  * @version 1.0
  * @since 2018/6/14 16:24
  */
@@ -61,67 +62,16 @@ public class CheckedIndicatorView extends AppCompatTextView {
         init();
     }
 
-    private void init() {
-        mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
-        mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setColor(mUncheckedBorderColor);
-        mSolidPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
-        mSolidPaint.setColor(mSolidColor);
-        mCenterPoint = new Point();
-        // 设置一个默认的点击事件
-        setOnClickListener(new OnClickListener() {
+    @Override
+    public void setOnClickListener(@Nullable final OnClickListener l) {
+        super.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View v) {
-                setChecked(!mIsChecked);
+            public void onClick(View view) {
+                if (!mIsAnimatorStarted && l != null) {
+                    l.onClick(view);
+                }
             }
         });
-    }
-
-    public void setChecked(boolean isChecked) {
-        if (isChecked != mIsChecked) {
-            if (mIsChecked){
-                executeAnimator(false);
-            }
-            else {
-                executeAnimator(true);
-            }
-        }
-    }
-
-    public void setCheckedWithoutAnimator(boolean isChecked) {
-        mIsChecked = isChecked;
-        mAnimPercent = mIsChecked ? 1 : 0;
-        invalidate();
-    }
-
-    public boolean isChecked() {
-        return mIsChecked;
-    }
-
-    /**
-     * 设置边框的颜色
-     */
-    public void setBorderColor(@ColorInt int checkedColor, @ColorInt int uncheckedColor) {
-        if (checkedColor != INVALIDATE_VALUE) {
-            mCheckedBorderColor = checkedColor;
-        }
-        if (uncheckedColor != INVALIDATE_VALUE){
-            mUncheckedBorderColor = uncheckedColor;
-        }
-    }
-
-    /**
-     * 设置填充的颜色
-     */
-    public void setSolidColor(@ColorInt int solidColor) {
-        if (solidColor != INVALIDATE_VALUE) mSolidColor = solidColor;
-    }
-
-    /**
-     * 动态配置字体的尺寸
-     */
-    public void setTextSize(int dip) {
-        setTextSize(TypedValue.COMPLEX_UNIT_DIP, dip);
     }
 
     @Override
@@ -158,15 +108,77 @@ public class CheckedIndicatorView extends AppCompatTextView {
         }
     }
 
+    public void setChecked(boolean isChecked) {
+        if (isChecked != mIsChecked) {
+            if (mIsChecked) {
+                executeAnimator(false);
+            } else {
+                executeAnimator(true);
+            }
+        }
+    }
+
+    public void setCheckedWithoutAnimator(boolean isChecked) {
+        mIsChecked = isChecked;
+        mAnimPercent = mIsChecked ? 1 : 0;
+        invalidate();
+    }
+
+    public boolean isChecked() {
+        return mIsChecked;
+    }
+
+    /**
+     * 设置边框的颜色
+     */
+    public void setBorderColor(@ColorInt int checkedColor, @ColorInt int uncheckedColor) {
+        if (checkedColor != INVALIDATE_VALUE) {
+            mCheckedBorderColor = checkedColor;
+        }
+        if (uncheckedColor != INVALIDATE_VALUE) {
+            mUncheckedBorderColor = uncheckedColor;
+        }
+    }
+
+    /**
+     * 设置填充的颜色
+     */
+    public void setSolidColor(@ColorInt int solidColor) {
+        if (solidColor != INVALIDATE_VALUE) {
+            mSolidColor = solidColor;
+        }
+    }
+
+    /**
+     * 动态配置字体的尺寸
+     */
+    public void setTextSize(int dip) {
+        setTextSize(TypedValue.COMPLEX_UNIT_DIP, dip);
+    }
+
+    private void init() {
+        mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mBorderPaint.setStyle(Paint.Style.STROKE);
+        mBorderPaint.setColor(mUncheckedBorderColor);
+        mSolidPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
+        mSolidPaint.setColor(mSolidColor);
+        mCenterPoint = new Point();
+        // 设置一个默认的点击事件
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setChecked(!mIsChecked);
+            }
+        });
+    }
+
     /**
      * 执行动画效果
      *
      * @param destIsChecked 最终选中的状态
      */
     private void executeAnimator(final boolean destIsChecked) {
-        if (mIsAnimatorStarted) {
-            return;
-        }
+        if (mIsAnimatorStarted) return;
         int start = destIsChecked ? 0 : 1;
         int end = destIsChecked ? 1 : 0;
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(start, end).setDuration(destIsChecked ? 300 : 200);

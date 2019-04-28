@@ -108,6 +108,9 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
         if (isChecked) {
             // 移除选中数据与状态
             int removedIndex = mPickedPaths.indexOf(mCurDisplayPath);
+            if (removedIndex < 0) {
+                return;
+            }
             mPickedPaths.remove(removedIndex);
             // 通知 RecyclerView 数据变更
             mView.notifyBottomPicturesRemoved(mCurDisplayPath, removedIndex);
