@@ -1,6 +1,6 @@
 package com.sharry.picturepicker.utils;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 /**
  * 处理颜色相关的工具类

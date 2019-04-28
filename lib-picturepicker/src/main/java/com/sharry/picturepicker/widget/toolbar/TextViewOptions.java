@@ -1,17 +1,17 @@
 package com.sharry.picturepicker.widget.toolbar;
 
 import android.graphics.Color;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Dimension;
-import android.support.annotation.NonNull;
+import androidx.annotation.ColorInt;
+import androidx.annotation.Dimension;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import static android.support.annotation.Dimension.PX;
-import static android.support.annotation.Dimension.SP;
+import static androidx.annotation.Dimension.PX;
+import static androidx.annotation.Dimension.SP;
 
 /**
  * Options associated with TextView.

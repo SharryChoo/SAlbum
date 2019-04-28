@@ -1,13 +1,13 @@
 package com.sharry.picturepicker.widget.toolbar;
 
-import android.support.annotation.Dimension;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
+import androidx.annotation.Dimension;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import static android.support.annotation.Dimension.PX;
+import static androidx.annotation.Dimension.PX;
 
 /**
  * Options associated with ImageView.

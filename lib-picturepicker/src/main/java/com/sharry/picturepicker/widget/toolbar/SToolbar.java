@@ -3,15 +3,15 @@ package com.sharry.picturepicker.widget.toolbar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.annotation.Dimension;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.Dimension;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -23,9 +23,9 @@ import android.widget.TextView;
 
 import com.sharry.picturepicker.R;
 
-import static android.support.annotation.Dimension.DP;
-import static android.support.annotation.Dimension.PX;
-import static android.support.annotation.Dimension.SP;
+import static androidx.annotation.Dimension.DP;
+import static androidx.annotation.Dimension.PX;
+import static androidx.annotation.Dimension.SP;
 
 /**
  * SToolbar 的最小高度为系统 ActionBar 的高度

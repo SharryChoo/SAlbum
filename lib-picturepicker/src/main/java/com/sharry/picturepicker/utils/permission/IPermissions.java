@@ -1,6 +1,6 @@
 package com.sharry.picturepicker.utils.permission;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>

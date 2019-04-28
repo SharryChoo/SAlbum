@@ -17,7 +17,7 @@
         android:theme="@style/PicturePickerTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="sharry.demo.picturepicker.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">

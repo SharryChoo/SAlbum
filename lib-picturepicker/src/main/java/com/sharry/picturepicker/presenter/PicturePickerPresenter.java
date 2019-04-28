@@ -3,7 +3,7 @@ package com.sharry.picturepicker.presenter;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 
