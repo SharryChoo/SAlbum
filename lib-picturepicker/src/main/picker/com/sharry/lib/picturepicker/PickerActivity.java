@@ -6,22 +6,22 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sharry.lib.picturepicker.R;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.sharry.lib.picturepicker.toolbar.SToolbar;
 import com.sharry.lib.picturepicker.toolbar.TextViewOptions;
 
@@ -34,57 +34,54 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/1 10:17
  */
-public class PicturePickerActivity extends AppCompatActivity implements PicturePickerContract.IView,
+public class PickerActivity extends AppCompatActivity implements PickerContract.IView,
         PictureAdapter.AdapterInteraction,
         FolderAdapter.AdapterInteraction,
         View.OnClickListener {
 
-    /*
-       Constants.
+    /**
+     * Constants.
      */
     public static final int REQUEST_CODE = 267;
-    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures"; // 返回的图片
-    private static final String EXTRA_CONFIG = "start_intent_extra_config";                          // 用户配置的属性
+    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_intent_extra_picked_pictures";
+    private static final String EXTRA_CONFIG = "start_intent_extra_config";
 
     /**
-     * U can launch PicturePickerActivity from here.
+     * U can launch PickerActivity from here.
      * If U picked success, it will return picked data, U can got it like
-     * {@code ArrayList<String> paths = data.getStringArrayListExtra(PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES)}
+     * {@code ArrayList<String> paths = data.getStringArrayListExtra(PickerActivity.RESULT_EXTRA_PICKED_PICTURES)}
      *
-     * @param from     The Activity that request launch PicturePickerActivity.
+     * @param from     The Activity that request launch PickerActivity.
      * @param resultTo Result data will return to this instance.
-     * @param config   Launch PicturePickerActivity required data.
+     * @param config   Launch PickerActivity required data.
      */
     public static void launchActivityForResult(Activity from, Fragment resultTo, PickerConfig config) {
-        Intent intent = new Intent(from, PicturePickerActivity.class);
-        intent.putExtra(PicturePickerActivity.EXTRA_CONFIG, config);
+        Intent intent = new Intent(from, PickerActivity.class);
+        intent.putExtra(PickerActivity.EXTRA_CONFIG, config);
         resultTo.startActivityForResult(intent, REQUEST_CODE);
     }
 
-    /*
-       Presenter associated with this Activity.
+    /**
+     * Presenter associated with this Activity.
      */
-    private PicturePickerContract.IPresenter mPresenter;
+    private PickerContract.IPresenter mPresenter;
 
-    /*
-       Views
+    /**
+     * Views
      */
     private SToolbar mToolbar;
     private TextView mTvToolbarFolderName;
     private TextView mTvToolbarEnsure;
-    // Content pictures
     private RecyclerView mRecyclePictures;
-    // bottom navigation menu
     private ViewGroup mMenuNavContainer;
     private ImageView mIvNavIndicator;
     private TextView mTvFolderName;
     private TextView mTvPreview;
     private RecyclerView mRecycleFolders;
-    // Floating action bar
     private FloatingActionButton mFab;
 
-    /*
-      CoordinatorLayout behaviors.
+    /**
+     * CoordinatorLayout behaviors.
      */
     private BottomSheetBehavior mBottomMenuBehavior;
     private PicturePickerFabBehavior mFabBehavior;
@@ -92,7 +89,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.picture_picker_activity_picture_picker);
+        setContentView(R.layout.picture_picker_activity_picker);
         initTitle();
         initViews();
         initData();
@@ -138,7 +135,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     @Override
-    public void setFolderAdapter(@NonNull ArrayList<PictureFolder> allFolders) {
+    public void setFolderAdapter(@NonNull ArrayList<FolderModel> allFolders) {
         mRecycleFolders.setAdapter(new FolderAdapter(this, allFolders));
     }
 
@@ -161,7 +158,6 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         // 更新文件夹名称
         mTvFolderName.setText(folderName);
         mTvToolbarFolderName.setText(folderName);
-        mRecyclePictures.getAdapter().notifyDataSetChanged();
     }
 
     @Override
@@ -176,22 +172,34 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public void notifyPickedPathsChanged() {
-        mRecyclePictures.getAdapter().notifyDataSetChanged();
+        RecyclerView.Adapter adapter;
+        if ((adapter = mRecyclePictures.getAdapter()) != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void notifyDisplayPathsChanged() {
-        mRecyclePictures.getAdapter().notifyDataSetChanged();
+        RecyclerView.Adapter adapter;
+        if ((adapter = mRecyclePictures.getAdapter()) != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void notifyDisplayPathsInsertToFirst() {
-        mRecyclePictures.getAdapter().notifyItemInserted(1);
+        RecyclerView.Adapter adapter;
+        if ((adapter = mRecyclePictures.getAdapter()) != null) {
+            adapter.notifyItemInserted(1);
+        }
     }
 
     @Override
     public void notifyFolderDataSetChanged() {
-        mRecycleFolders.getAdapter().notifyDataSetChanged();
+        RecyclerView.Adapter adapter;
+        if ((adapter = mRecycleFolders.getAdapter()) != null) {
+            adapter.notifyItemInserted(1);
+        }
     }
 
     @Override
@@ -202,23 +210,23 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     @Override
     public void setResult(@NonNull ArrayList<String> pickedPaths) {
         Intent intent = new Intent();
-        intent.putExtra(PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
+        intent.putExtra(PickerActivity.RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
         setResult(Activity.RESULT_OK, intent);
         finish();
     }
 
     @Override
-    public boolean onPictureChecked(String uri) {
+    public boolean onPictureChecked(@NonNull String uri) {
         return mPresenter.handlePictureChecked(uri);
     }
 
     @Override
-    public void onPictureRemoved(String uri) {
+    public void onPictureRemoved(@NonNull String uri) {
         mPresenter.handlePictureRemoved(uri);
     }
 
     @Override
-    public void onPictureClicked(ImageView imageView, String uri, int position) {
+    public void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position) {
         mPresenter.handlePictureClicked(position, imageView);
     }
 
@@ -235,11 +243,16 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.tv_folder_name) {// 底部菜单按钮
+        // 底部菜单按钮
+        if (v.getId() == R.id.tv_folder_name) {
             mBottomMenuBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else if (v.getId() == R.id.tv_preview) {// 预览按钮
+        }
+        // 预览按钮
+        else if (v.getId() == R.id.tv_preview) {
             mPresenter.handlePreviewClicked();
-        } else if (v == mTvToolbarEnsure || v.getId() == R.id.fab) {// 确认按钮
+        }
+        // 确认按钮
+        else if (v == mTvToolbarEnsure || v.getId() == R.id.fab) {
             mPresenter.handleEnsureClicked();
         }
     }
@@ -294,7 +307,7 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
     }
 
     protected void initData() {
-        mPresenter = new PicturePickerPresenter(this, this, (PickerConfig)
+        mPresenter = new PickerPresenter(this, this, (PickerConfig)
                 getIntent().getParcelableExtra(EXTRA_CONFIG));
     }
 
@@ -309,18 +322,16 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         private final int bgExpandColor;
         private final int textCollapsedColor;
         private final int textExpandColor;
-        private int bgColor;
-        private int textColor;
 
         BottomMenuNavigationCallback() {
             indicatorDrawable = mIvNavIndicator.getDrawable();
-            bgCollapsedColor = ContextCompat.getColor(PicturePickerActivity.this,
+            bgCollapsedColor = ContextCompat.getColor(PickerActivity.this,
                     R.color.picture_picker_picker_bottom_menu_nav_bg_collapsed_color);
-            bgExpandColor = ContextCompat.getColor(PicturePickerActivity.this,
+            bgExpandColor = ContextCompat.getColor(PickerActivity.this,
                     R.color.picture_picker_picker_bottom_menu_navi_bg_expand_color);
-            textCollapsedColor = ContextCompat.getColor(PicturePickerActivity.this,
+            textCollapsedColor = ContextCompat.getColor(PickerActivity.this,
                     R.color.picture_picker_picker_bottom_menu_nav_text_collapsed_color);
-            textExpandColor = ContextCompat.getColor(PicturePickerActivity.this,
+            textExpandColor = ContextCompat.getColor(PickerActivity.this,
                     R.color.picture_picker_picker_bottom_menu_navi_text_expand_color);
         }
 
@@ -332,12 +343,10 @@ public class PicturePickerActivity extends AppCompatActivity implements PictureP
         @Override
         public void onSlide(@NonNull View view, float fraction) {
             // Get background color associate with the bottom menu navigation bar.
-            bgColor = ColorUtil.gradualChanged(fraction,
-                    bgCollapsedColor, bgExpandColor);
+            int bgColor = ColorUtil.gradualChanged(fraction, bgCollapsedColor, bgExpandColor);
             mMenuNavContainer.setBackgroundColor(bgColor);
-            // Get text color associate with the bottom menu  navigation bar.
-            textColor = ColorUtil.gradualChanged(fraction,
-                    textCollapsedColor, textExpandColor);
+            // Get text color associate with the bottom menu navigation bar.
+            int textColor = ColorUtil.gradualChanged(fraction, textCollapsedColor, textExpandColor);
             // Set text drawable color before set text color with the purpose of decrease view draw.
             if (VersionUtil.isLollipop()) {
                 indicatorDrawable.setTint(textColor);

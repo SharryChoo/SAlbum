@@ -1,21 +1,23 @@
 package com.sharry.lib.picturepicker;
 
 import android.content.Context;
+import android.widget.ImageView;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import android.widget.ImageView;
 
 import java.util.ArrayList;
 
 /**
- * Created by Sharry on 2018/6/13.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: PicturePicture MVP 的约束
+ * PicturePicture MVP 的约束
+ *
+ * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
+ * @version 1.0
+ * @since 2018/6/13.
  */
-interface PicturePickerContract {
+interface PickerContract {
 
     interface IView {
 
@@ -63,7 +65,7 @@ interface PicturePickerContract {
         /**
          * 设置图片文件夹的 Adapter
          */
-        void setFolderAdapter(@NonNull ArrayList<PictureFolder> allFolders);
+        void setFolderAdapter(@NonNull ArrayList<FolderModel> allFolders);
 
         /**
          * 显示选中的图片文件夹
@@ -174,17 +176,17 @@ interface PicturePickerContract {
         /**
          * 获取当前需要显示的文件模型
          */
-        PictureFolder getPictureFolderAt(int index);
+        FolderModel getPictureFolderAt(int index);
 
         /**
          * 获取所有的图片文件夹
          */
-        ArrayList<PictureFolder> getAllFolders();
+        ArrayList<FolderModel> getAllFolders();
 
         /**
          * 获取当前正在展示的图片集合
          */
-        PictureFolder getCheckedFolder();
+        FolderModel getCheckedFolder();
 
         /**
          * 获取用户选中的图片
@@ -194,7 +196,7 @@ interface PicturePickerContract {
         /**
          * 设置当前选中的文件夹
          */
-        void setCheckedFolder(PictureFolder curDisplayFolder);
+        void setCheckedFolder(FolderModel curDisplayFolder);
 
         /**
          * 获取用户选中的图片

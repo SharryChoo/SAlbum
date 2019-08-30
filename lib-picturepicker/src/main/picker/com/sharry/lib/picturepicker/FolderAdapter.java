@@ -1,15 +1,14 @@
 package com.sharry.lib.picturepicker;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sharry.lib.picturepicker.R;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -22,15 +21,11 @@ import java.util.List;
  */
 class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
 
-    public interface AdapterInteraction {
-        void onFolderChecked(int position);
-    }
-
     final Context context;
-    final List<PictureFolder> data;
+    final List<FolderModel> data;
     final AdapterInteraction callback;
 
-    FolderAdapter(Context context, List<PictureFolder> data) {
+    FolderAdapter(Context context, List<FolderModel> data) {
         if (context instanceof AdapterInteraction) {
             this.callback = (AdapterInteraction) context;
         } else {
@@ -41,17 +36,20 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
         this.data = data;
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.picture_picker_recycle_item_picker_folder, parent, false);
+                R.layout.picture_picker_recycle_item_folder, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        PictureFolder folder = data.get(holder.getAdapterPosition());
-        if (folder.getPicturePaths() == null || folder.getPicturePaths().isEmpty()) return;
+        FolderModel folder = data.get(holder.getAdapterPosition());
+        if (folder == null || folder.getPicturePaths() == null || folder.getPicturePaths().isEmpty()) {
+            return;
+        }
         PictureLoader.load(context, folder.getPicturePaths().get(0), holder.ivPreview);
         holder.tvFolderName.setText(folder.getFolderName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -65,6 +63,15 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return data.size();
+    }
+
+    /**
+     * Communicate with Activity.
+     */
+    public interface AdapterInteraction {
+
+        void onFolderChecked(int position);
+
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

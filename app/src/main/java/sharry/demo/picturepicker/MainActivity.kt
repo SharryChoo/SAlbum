@@ -9,10 +9,10 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.sharry.lib.picturepicker.CameraConfig
-import com.sharry.lib.picturepicker.CropConfig
+import com.sharry.lib.picturepicker.TakerConfig
+import com.sharry.lib.picturepicker.CropperConfig
 import com.sharry.lib.picturepicker.PickerConfig
-import com.sharry.lib.picturepicker.PicturePickerManager
+import com.sharry.lib.picturepicker.PickerManager
 import com.sharry.lib.picturepicker.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
@@ -29,8 +29,8 @@ private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolut
 class MainActivity : AppCompatActivity() {
 
     private lateinit var pickerConfig: PickerConfig
-    private lateinit var cameraConfig: CameraConfig
-    private lateinit var cropConfig: CropConfig
+    private lateinit var takerConfig: TakerConfig
+    private lateinit var cropperConfig: CropperConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,13 +48,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initData() {
-        cameraConfig = CameraConfig.Builder()
+        takerConfig = TakerConfig.Builder()
                 .setFileProviderAuthority("$packageName.FileProvider")  // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
                 .setCameraDirectory(APP_DIRECTORY)                      // 相机文件存储路径
                 .setCameraQuality(80)
                 .build()
 
-        cropConfig = CropConfig.Builder()
+        cropperConfig = CropperConfig.Builder()
                 .setCropDirectory(APP_DIRECTORY)                         // 裁剪文件存储路径
                 .setCropSize(1000, 1000)
                 .setCropQuality(80)
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             if (TextUtils.isEmpty(etAlbumThreshold.text) || TextUtils.isEmpty(etSpanCount.text)) {
                 return@setOnClickListener
             }
-            PicturePickerManager.with(this)
+            PickerManager.with(this)
                     .setPickerConfig(
                             pickerConfig.rebuild()
                                     .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
@@ -102,10 +102,10 @@ class MainActivity : AppCompatActivity() {
                                     .isToolbarScrollable(cbAnimation.isChecked)
                                     .isFabScrollable(cbAnimation.isChecked)
                                     .setCameraConfig(
-                                            if (cbCamera.isChecked) cameraConfig else null
+                                            if (cbCamera.isChecked) takerConfig else null
                                     )
                                     .setCropConfig(
-                                            if (cbCrop.isChecked) cropConfig else null
+                                            if (cbCrop.isChecked) cropperConfig else null
                                     )
                                     .build()
                     )

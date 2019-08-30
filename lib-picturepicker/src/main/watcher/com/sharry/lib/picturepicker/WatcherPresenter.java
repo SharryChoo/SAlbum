@@ -16,25 +16,25 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 2019/3/15 21:56
  */
-class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, WatcherPreviewAdapter.AdapterInteraction {
+class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.AdapterInteraction {
 
     /**
      * Final fields.
      */
-    private final PictureWatcherContract.IView mView;
+    private final WatcherContract.IView mView;
     private final WatcherConfig mConfig;
     private final ArrayList<String> mDisplayPaths;
     private final ArrayList<String> mPickedPaths;
-    private final SharedElementData mSharedElementData;
+    private final SharedElementModel mSharedElementModel;
 
     private int mCurPosition;
     private String mCurDisplayPath;
     private boolean mIsEnsurePressed = false;
 
-    PictureWatcherPresenter(PictureWatcherContract.IView view, WatcherConfig config, SharedElementData sharedElementData) {
+    WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementModel sharedElementModel) {
         this.mView = view;
         this.mConfig = config;
-        this.mSharedElementData = sharedElementData;
+        this.mSharedElementModel = sharedElementModel;
         // 获取需要展示图片的 URI 集合
         this.mDisplayPaths = config.getPictureUris();
         // 获取已经选中的图片
@@ -65,7 +65,7 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
             mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
             mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
             // 底部菜单
-            mView.setPreviewAdapter(new WatcherPreviewAdapter(mPickedPaths, this));
+            mView.setPreviewAdapter(new PreviewAdapter(mPickedPaths, this));
             mView.displayPreviewEnsureText(buildEnsureText());
             // 底部菜单延时弹出
             if (!mPickedPaths.isEmpty()) {
@@ -74,12 +74,12 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
                     public void run() {
                         mView.showBottomPreview();
                     }
-                }, mSharedElementData != null ? 500 : 0);
+                }, mSharedElementModel != null ? 500 : 0);
             }
         }
         // 4. 执行共享元素入场动画
-        if (mSharedElementData != null) {
-            mView.showSharedElementEnter(mSharedElementData);
+        if (mSharedElementModel != null) {
+            mView.showSharedElementEnter(mSharedElementModel);
         }
     }
 
@@ -149,8 +149,8 @@ class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, Watc
 
     @Override
     public void handleBackPressed() {
-        if (mSharedElementData != null && mCurPosition == mSharedElementData.sharedPosition) {
-            mView.showSharedElementExitAndFinish(mSharedElementData);
+        if (mSharedElementModel != null && mCurPosition == mSharedElementModel.sharedPosition) {
+            mView.showSharedElementExitAndFinish(mSharedElementModel);
             mView.dismissBottomPreview();
         } else {
             mView.finish();

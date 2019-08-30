@@ -38,8 +38,8 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/22 23:24
  */
-public class PictureWatcherActivity extends AppCompatActivity implements
-        PictureWatcherContract.IView,
+public class WatcherActivity extends AppCompatActivity implements
+        WatcherContract.IView,
         DraggableViewPager.OnPagerChangedListener {
 
     public static final int REQUEST_CODE = 508;
@@ -52,18 +52,18 @@ public class PictureWatcherActivity extends AppCompatActivity implements
      * U can launch this activity from here.
      *
      * @param request       请求的 Activity
-     * @param resultTo      PictureWatcherActivity 返回值的去向
-     * @param config        PictureWatcherActivity 的配置
+     * @param resultTo      WatcherActivity 返回值的去向
+     * @param config        WatcherActivity 的配置
      * @param sharedElement 共享元素
      */
     public static void launchActivityForResult(@NonNull Activity request, @NonNull Fragment resultTo,
                                                @NonNull WatcherConfig config, @Nullable View sharedElement) {
-        Intent intent = new Intent(request, PictureWatcherActivity.class);
-        intent.putExtra(PictureWatcherActivity.EXTRA_CONFIG, config);
+        Intent intent = new Intent(request, WatcherActivity.class);
+        intent.putExtra(WatcherActivity.EXTRA_CONFIG, config);
         if (sharedElement != null) {
             intent.putExtra(
-                    PictureWatcherActivity.EXTRA_SHARED_ELEMENT,
-                    SharedElementData.parseFrom(sharedElement, config.getPosition())
+                    WatcherActivity.EXTRA_SHARED_ELEMENT,
+                    SharedElementModel.parseFrom(sharedElement, config.getPosition())
             );
         }
         // 非共享元素的启动
@@ -77,7 +77,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     /**
      * The presenter for the view.
      */
-    private PictureWatcherContract.IPresenter mPresenter;
+    private WatcherContract.IPresenter mPresenter;
 
     /**
      * Widgets for this Activity.
@@ -132,7 +132,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setPreviewAdapter(WatcherPreviewAdapter adapter) {
+    public void setPreviewAdapter(PreviewAdapter adapter) {
         mBottomPreviewPictures.setAdapter(adapter);
     }
 
@@ -150,11 +150,11 @@ public class PictureWatcherActivity extends AppCompatActivity implements
             });
             mPhotoViews.add(photoView);
         }
-        mViewPager.setAdapter(new WatcherPagerAdapter(mPhotoViews));
+        mViewPager.setAdapter(new PageAdapter(mPhotoViews));
     }
 
     @Override
-    public void showSharedElementEnter(final SharedElementData data) {
+    public void showSharedElementEnter(final SharedElementModel data) {
         mViewPager.setSharedElementPosition(data.sharedPosition);
         final PhotoView target = mPhotoViews.get(data.sharedPosition);
         target.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -169,7 +169,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void showSharedElementExitAndFinish(SharedElementData data) {
+    public void showSharedElementExitAndFinish(SharedElementModel data) {
         final PhotoView target = mPhotoViews.get(data.sharedPosition);
         Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
@@ -304,10 +304,10 @@ public class PictureWatcherActivity extends AppCompatActivity implements
     }
 
     private void initPresenter() {
-        mPresenter = new PictureWatcherPresenter(
+        mPresenter = new WatcherPresenter(
                 this,
                 (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
-                ((SharedElementData) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
+                ((SharedElementModel) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
     }
 

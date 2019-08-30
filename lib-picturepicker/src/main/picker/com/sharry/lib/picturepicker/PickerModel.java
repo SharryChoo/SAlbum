@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @version 1.2
  * @since 2018/8/30 20:00
  */
-class PicturePickerModel implements PicturePickerContract.IModel {
+class PickerModel implements PickerContract.IModel {
 
     private static final ExecutorService sThreadPool = new ThreadPoolExecutor(
             1, 1,
@@ -33,7 +33,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
             new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, PicturePickerModel.class.getSimpleName()
+                    Thread thread = new Thread(r, PickerModel.class.getSimpleName()
                             + "_ExecutorService");
                     thread.setDaemon(false);
                     return thread;
@@ -43,10 +43,10 @@ class PicturePickerModel implements PicturePickerContract.IModel {
 
     private final ArrayList<String> mPickedPaths;                           // 用户已选中的图片地址集合(默认构造为空)
     private final ArrayList<String> mDisplayPaths = new ArrayList<>();      // 当前需要展示的集合
-    private ArrayList<PictureFolder> mPictureFolders;                       // 所有包含图片数据的集合
-    private PictureFolder mCheckedFolder;                                   // 当前正在展示的文件夹
+    private ArrayList<FolderModel> mFolderModels;                       // 所有包含图片数据的集合
+    private FolderModel mCheckedFolder;                                   // 当前正在展示的文件夹
 
-    PicturePickerModel(ArrayList<String> pickedPaths, int threshold) {
+    PickerModel(ArrayList<String> pickedPaths, int threshold) {
         mPickedPaths = pickedPaths;
         // 验证一下阈值是否异常
         if (getPickedPaths().size() > threshold) {
@@ -61,8 +61,8 @@ class PicturePickerModel implements PicturePickerContract.IModel {
                         context,
                         new CursorSystemPictureRunnable.RunnableInteraction() {
                             @Override
-                            public void onComplete(ArrayList<PictureFolder> pictureFolders) {
-                                mPictureFolders = pictureFolders;
+                            public void onComplete(ArrayList<FolderModel> folderModels) {
+                                mFolderModels = folderModels;
                                 callback.onComplete();
                             }
 
@@ -79,23 +79,23 @@ class PicturePickerModel implements PicturePickerContract.IModel {
      * 获取当前需要显示的文件模型
      */
     @Override
-    public PictureFolder getPictureFolderAt(int index) {
-        return mPictureFolders.get(index);
+    public FolderModel getPictureFolderAt(int index) {
+        return mFolderModels.get(index);
     }
 
     /**
      * 获取所有的图片文件夹
      */
     @Override
-    public ArrayList<PictureFolder> getAllFolders() {
-        return mPictureFolders;
+    public ArrayList<FolderModel> getAllFolders() {
+        return mFolderModels;
     }
 
     /**
      * 设置当前选中的图片
      */
     @Override
-    public PictureFolder getCheckedFolder() {
+    public FolderModel getCheckedFolder() {
         return mCheckedFolder;
     }
 
@@ -103,7 +103,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
      * 设置当前选中的文件夹
      */
     @Override
-    public void setCheckedFolder(PictureFolder checkedFolder) {
+    public void setCheckedFolder(FolderModel checkedFolder) {
         this.mCheckedFolder = checkedFolder;
         mDisplayPaths.clear();
         mDisplayPaths.addAll(checkedFolder.getPicturePaths());
@@ -151,7 +151,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
     private static class CursorSystemPictureRunnable implements Runnable {
 
         interface RunnableInteraction {
-            void onComplete(ArrayList<PictureFolder> pictureFolders);
+            void onComplete(ArrayList<FolderModel> folderModels);
 
             void onFailed(Throwable throwable);
         }
@@ -167,12 +167,12 @@ class PicturePickerModel implements PicturePickerContract.IModel {
         @Override
         public void run() {
             // 用于存储遍历到的所有图片文件夹集合
-            ArrayList<PictureFolder> pictureFolders = new ArrayList<>();
+            ArrayList<FolderModel> folderModels = new ArrayList<>();
             // 创建一个图片文件夹, 用于保存所有图片
-            PictureFolder allPictureFolder = new PictureFolder(mContext.getString(R.string.picture_picker_picker_all_picture));
-            pictureFolders.add(allPictureFolder);
-            // key 为图片的文件夹的绝对路径, values 为 PictureFolder 的对象
-            HashMap<String, PictureFolder> caches = new HashMap<>();
+            FolderModel allFolderModel = new FolderModel(mContext.getString(R.string.picture_picker_picker_all_picture));
+            folderModels.add(allFolderModel);
+            // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
+            HashMap<String, FolderModel> caches = new HashMap<>();
             Cursor cursor = createImageCursor();
             try {
                 if (cursor != null && cursor.getCount() > 0) {
@@ -184,7 +184,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
                             continue;
                         }
                         // 添加到所有图片的目录下
-                        allPictureFolder.addPath(picturePath);
+                        allFolderModel.addPath(picturePath);
                         // 获取图片父文件夹路径
                         String pictureFolderPath = getParentFolderPath(picturePath);
                         if (TextUtils.isEmpty(pictureFolderPath)) {
@@ -193,14 +193,14 @@ class PicturePickerModel implements PicturePickerContract.IModel {
                         // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
                         if (!caches.containsKey(pictureFolderPath)) {
                             String folderName = getLastFileName(pictureFolderPath);
-                            caches.put(pictureFolderPath, new PictureFolder(folderName));
+                            caches.put(pictureFolderPath, new FolderModel(folderName));
                         }
                         // 添加图片到缓存
                         caches.get(pictureFolderPath).addPath(picturePath);
                     }
                 }
                 // 添加所有文件夹数据
-                pictureFolders.addAll(caches.values());
+                folderModels.addAll(caches.values());
             } catch (Exception e) {
                 mListener.onFailed(e);
             } finally {
@@ -208,7 +208,7 @@ class PicturePickerModel implements PicturePickerContract.IModel {
                     cursor.close();
                 }
             }
-            mListener.onComplete(pictureFolders);
+            mListener.onComplete(folderModels);
         }
 
         /**

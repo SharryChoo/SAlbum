@@ -10,10 +10,10 @@ import android.view.View;
  * @version 1.0
  * @since 3/15/2019 3:27 PM
  */
-class SharedElementData implements Parcelable {
+class SharedElementModel implements Parcelable {
 
-    static SharedElementData parseFrom(@NonNull View sharedElement, int sharedElementPosition) {
-        SharedElementData result = new SharedElementData();
+    static SharedElementModel parseFrom(@NonNull View sharedElement, int sharedElementPosition) {
+        SharedElementModel result = new SharedElementModel();
         int[] locations = new int[2];
         sharedElement.getLocationOnScreen(locations);
         result.startX = locations[0];
@@ -30,11 +30,11 @@ class SharedElementData implements Parcelable {
     int height;
     int sharedPosition;
 
-    private SharedElementData() {
+    private SharedElementModel() {
 
     }
 
-    SharedElementData(Parcel in) {
+    SharedElementModel(Parcel in) {
         startX = in.readInt();
         startY = in.readInt();
         width = in.readInt();
@@ -58,7 +58,7 @@ class SharedElementData implements Parcelable {
 
     @Override
     public String toString() {
-        return "SharedElementData{" +
+        return "SharedElementModel{" +
                 "startX=" + startX +
                 ", startY=" + startY +
                 ", width=" + width +
@@ -67,15 +67,15 @@ class SharedElementData implements Parcelable {
                 '}';
     }
 
-    public static final Creator<SharedElementData> CREATOR = new Creator<SharedElementData>() {
+    public static final Creator<SharedElementModel> CREATOR = new Creator<SharedElementModel>() {
         @Override
-        public SharedElementData createFromParcel(Parcel in) {
-            return new SharedElementData(in);
+        public SharedElementModel createFromParcel(Parcel in) {
+            return new SharedElementModel(in);
         }
 
         @Override
-        public SharedElementData[] newArray(int size) {
-            return new SharedElementData[size];
+        public SharedElementModel[] newArray(int size) {
+            return new SharedElementModel[size];
         }
     };
 

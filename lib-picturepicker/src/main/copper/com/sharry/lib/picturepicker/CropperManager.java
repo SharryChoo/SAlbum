@@ -32,7 +32,7 @@ public class CropperManager {
     }
 
     private Activity mBind;
-    private CropConfig mConfig;
+    private CropperConfig mConfig;
 
     private CropperManager(Activity activity) {
         this.mBind = activity;
@@ -41,7 +41,7 @@ public class CropperManager {
     /**
      * 设置配置属性
      */
-    public CropperManager setConfig(@NonNull CropConfig config) {
+    public CropperManager setConfig(@NonNull CropperConfig config) {
         this.mConfig = Preconditions.checkNotNull(config, "Please ensure config not null!");
         return this;
     }

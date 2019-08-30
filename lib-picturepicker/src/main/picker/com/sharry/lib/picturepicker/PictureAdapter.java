@@ -3,15 +3,14 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.sharry.lib.picturepicker.R;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -29,26 +28,14 @@ class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
     private final List<String> mDisplayPaths;
     private final List<String> mUserPickedPaths;
     private final AdapterInteraction mInteraction;
-
-    // 用于延时更新角标
-    private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
-    private Runnable mRefreshIndicatorRunnable = new Runnable() {
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mRefreshIndicatorRunnable = new Runnable() {
         @Override
         public void run() {
             notifyDataSetChanged();
         }
     };
 
-    interface AdapterInteraction {
-
-        boolean onPictureChecked(String uri);
-
-        void onPictureRemoved(String uri);
-
-        void onPictureClicked(ImageView imageView, String uri, int position);
-
-        void onCameraClicked();
-    }
 
     PictureAdapter(Context context, PickerConfig config, List<String> displayPaths, List<String> userPickedPaths) {
         if (context instanceof AdapterInteraction) {
@@ -67,7 +54,7 @@ class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ViewHolder holder = new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.picture_picker_recycle_item_picker_picture, parent, false));
+                R.layout.picture_picker_recycle_item_picture, parent, false));
         // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
         int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
                 - parent.getPaddingRight()) / mConfig.getSpanCount();
@@ -102,6 +89,11 @@ class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return mDisplayPaths.size() + (mConfig.isCropSupport() ? 1 : 0);
+    }
+
     /**
      * 绑定相机 Header 的数据
      */
@@ -125,16 +117,25 @@ class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
         holder.checkIndicator.setText(String.valueOf(index + 1));
     }
 
-    @Override
-    public int getItemCount() {
-        return mDisplayPaths.size() + (mConfig.isCropSupport() ? 1 : 0);
-    }
-
     /**
      * 通知选中图片的角标变更
      */
     private void notifyCheckedIndicatorChanged() {
         mMainThreadHandler.postDelayed(mRefreshIndicatorRunnable, 300);
+    }
+
+    /**
+     * Communicate with Activity.
+     */
+    interface AdapterInteraction {
+
+        boolean onPictureChecked(@NonNull String uri);
+
+        void onPictureRemoved(@NonNull String uri);
+
+        void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position);
+
+        void onCameraClicked();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -180,6 +181,9 @@ class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
                 mInteraction.onCameraClicked();
             } else {
                 int position = getAdapterPosition() - (mConfig.isCameraSupport() ? 1 : 0);
+                if (position < 0) {
+                    return;
+                }
                 mInteraction.onPictureClicked(ivPicture, mDisplayPaths.get(position), position);
             }
         }
@@ -187,14 +191,20 @@ class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
         private void performCheckIndicatorClicked() {
             // 获取当前点击图片的 path
             int position = getAdapterPosition() - (mConfig.isCameraSupport() ? 1 : 0);
+            if (position < 0) {
+                return;
+            }
             String path = mDisplayPaths.get(position);
-            if (checkIndicator.isChecked()) {// Checked-> Unchecked
+            // Checked-> Unchecked
+            if (checkIndicator.isChecked()) {
                 // 移除选中数据与状态
                 mInteraction.onPictureRemoved(path);
                 checkIndicator.setChecked(false);
                 // 需要延时的更新索引角标
                 notifyCheckedIndicatorChanged();
-            } else {// Unchecked -> Checked
+            }
+            // Unchecked -> Checked
+            else {
                 // 判断是否达到选择上限
                 checkIndicator.setChecked(mInteraction.onPictureChecked(path));
                 // 设置文本

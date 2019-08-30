@@ -13,34 +13,34 @@ import androidx.annotation.Nullable;
  * @version 1.0
  * @since 2018/6/21 09:07
  */
-public class CameraConfig implements Parcelable {
+public class TakerConfig implements Parcelable {
 
     /**
-     * Get instance of CameraConfig.Builder.
+     * Get instance of TakerConfig.Builder.
      */
     @NonNull
     public static Builder Builder() {
         return new Builder();
     }
 
-    public static final Creator<CameraConfig> CREATOR = new Creator<CameraConfig>() {
+    public static final Creator<TakerConfig> CREATOR = new Creator<TakerConfig>() {
         @Override
-        public CameraConfig createFromParcel(Parcel in) {
-            return new CameraConfig(in);
+        public TakerConfig createFromParcel(Parcel in) {
+            return new TakerConfig(in);
         }
 
         @Override
-        public CameraConfig[] newArray(int size) {
-            return new CameraConfig[size];
+        public TakerConfig[] newArray(int size) {
+            return new TakerConfig[size];
         }
     };
 
     private String authority;                 // fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
     private int cameraDestQuality = 80;       // 拍照后压缩的质量
     private String cameraDirectoryPath;       // 存储文件的目录路径
-    private CropConfig cropConfig;            // 图片裁剪的 Config
+    private CropperConfig cropperConfig;            // 图片裁剪的 Config
 
-    private CameraConfig() {
+    private TakerConfig() {
 
     }
 
@@ -49,14 +49,14 @@ public class CameraConfig implements Parcelable {
         dest.writeString(authority);
         dest.writeInt(cameraDestQuality);
         dest.writeString(cameraDirectoryPath);
-        dest.writeParcelable(cropConfig, flags);
+        dest.writeParcelable(cropperConfig, flags);
     }
 
     /**
      * 是否支持裁剪
      */
     public boolean isCropSupport() {
-        return cropConfig != null;
+        return cropperConfig != null;
     }
 
     public String getAuthority() {
@@ -71,15 +71,15 @@ public class CameraConfig implements Parcelable {
         return cameraDirectoryPath;
     }
 
-    public CropConfig getCropConfig() {
-        return cropConfig;
+    public CropperConfig getCropperConfig() {
+        return cropperConfig;
     }
 
-    protected CameraConfig(Parcel in) {
+    protected TakerConfig(Parcel in) {
         authority = in.readString();
         cameraDestQuality = in.readInt();
         cameraDirectoryPath = in.readString();
-        cropConfig = in.readParcelable(CropConfig.class.getClassLoader());
+        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
     }
 
     @Override
@@ -96,13 +96,13 @@ public class CameraConfig implements Parcelable {
 
     public static class Builder {
 
-        private CameraConfig mConfig;
+        private TakerConfig mConfig;
 
         private Builder() {
-            mConfig = new CameraConfig();
+            mConfig = new TakerConfig();
         }
 
-        private Builder(@NonNull CameraConfig config) {
+        private Builder(@NonNull TakerConfig config) {
             this.mConfig = config;
         }
 
@@ -135,12 +135,12 @@ public class CameraConfig implements Parcelable {
         /**
          * 设置裁剪的配置
          */
-        public Builder setCropConfig(@Nullable CropConfig cropConfig) {
-            mConfig.cropConfig = cropConfig;
+        public Builder setCropConfig(@Nullable CropperConfig cropperConfig) {
+            mConfig.cropperConfig = cropperConfig;
             return this;
         }
 
-        public CameraConfig build() {
+        public TakerConfig build() {
             return mConfig;
         }
     }

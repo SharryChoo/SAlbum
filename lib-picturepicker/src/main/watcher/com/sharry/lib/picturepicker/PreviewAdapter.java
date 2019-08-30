@@ -1,10 +1,11 @@
 package com.sharry.lib.picturepicker;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
@@ -15,12 +16,12 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 2018/9/22 23:23
  */
-class WatcherPreviewAdapter extends RecyclerView.Adapter<WatcherPreviewAdapter.ViewHolder> {
+class PreviewAdapter extends RecyclerView.Adapter<PreviewAdapter.ViewHolder> {
 
     private final ArrayList<String> userPickedSet;
     private final AdapterInteraction interaction;
 
-    WatcherPreviewAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
+    PreviewAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
         this.userPickedSet = userPickedSet;
         this.interaction = interaction;
     }
@@ -46,6 +47,12 @@ class WatcherPreviewAdapter extends RecyclerView.Adapter<WatcherPreviewAdapter.V
         return userPickedSet.size();
     }
 
+    public interface AdapterInteraction {
+
+        void onPreviewItemClicked(ImageView imageView, String uri, int position);
+
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         final ImageView ivPicture;
@@ -63,9 +70,4 @@ class WatcherPreviewAdapter extends RecyclerView.Adapter<WatcherPreviewAdapter.V
         }
     }
 
-    public interface AdapterInteraction {
-
-        void onPreviewItemClicked(ImageView imageView, String uri, int position);
-
-    }
 }

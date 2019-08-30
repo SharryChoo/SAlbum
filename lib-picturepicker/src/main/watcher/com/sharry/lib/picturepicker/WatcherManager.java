@@ -18,20 +18,20 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 4/28/2019 4:34 PM
  */
-public class PictureWatcherManager {
+public class WatcherManager {
 
-    public static final String TAG = PictureWatcherManager.class.getSimpleName();
+    public static final String TAG = WatcherManager.class.getSimpleName();
     private static String[] sPermissions = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
-    public static PictureWatcherManager with(@NonNull Context context) {
+    public static WatcherManager with(@NonNull Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            return new PictureWatcherManager(activity);
+            return new WatcherManager(activity);
         } else {
-            throw new IllegalArgumentException("PictureWatcherManager.with -> Context can not cast to Activity");
+            throw new IllegalArgumentException("WatcherManager.with -> Context can not cast to Activity");
         }
     }
 
@@ -39,14 +39,14 @@ public class PictureWatcherManager {
     private WatcherConfig mConfig;
     private View mTransitionView;
 
-    private PictureWatcherManager(Activity activity) {
+    private WatcherManager(Activity activity) {
         this.mBind = activity;
     }
 
     /**
      * 设置共享元素
      */
-    public PictureWatcherManager setSharedElement(@NonNull View transitionView) {
+    public WatcherManager setSharedElement(@NonNull View transitionView) {
         mTransitionView = Preconditions.checkNotNull(transitionView, "Please ensure View not null!");
         return this;
     }
@@ -54,7 +54,7 @@ public class PictureWatcherManager {
     /**
      * 设置图片预览的配置
      */
-    public PictureWatcherManager setConfig(@NonNull WatcherConfig config) {
+    public WatcherManager setConfig(@NonNull WatcherConfig config) {
         this.mConfig = Preconditions.checkNotNull(config, "Please ensure WatcherConfig not null!");
         return this;
     }
@@ -62,7 +62,7 @@ public class PictureWatcherManager {
     /**
      * 设置图片加载方案
      */
-    public PictureWatcherManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
+    public WatcherManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
         PictureLoader.setPictureLoader(loader);
         return this;
     }
@@ -108,11 +108,11 @@ public class PictureWatcherManager {
                     return;
                 }
                 switch (requestCode) {
-                    case PictureWatcherActivity.REQUEST_CODE:
+                    case WatcherActivity.REQUEST_CODE:
                         ArrayList<String> paths = data.getStringArrayListExtra(
-                                PictureWatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
+                                WatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
                         boolean isEnsure = data.getBooleanExtra(
-                                PictureWatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
+                                WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
                         callback.onWatcherPickedComplete(isEnsure, paths);
                         break;
                     default:
@@ -120,7 +120,7 @@ public class PictureWatcherManager {
                 }
             }
         });
-        PictureWatcherActivity.launchActivityForResult(mBind, callbackFragment, mConfig, mTransitionView);
+        WatcherActivity.launchActivityForResult(mBind, callbackFragment, mConfig, mTransitionView);
     }
 
 }

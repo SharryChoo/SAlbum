@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--PicturePickerActivity 需要用到的字符串-->
+    <!--PickerActivity 需要用到的字符串-->
     <string name="picture_picker_picker_ensure">确认</string>
     <string name="picture_picker_picker_preview">预览</string>
     <string name="picture_picker_picker_all_picture">所有图片</string>

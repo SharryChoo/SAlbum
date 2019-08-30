@@ -22,9 +22,9 @@ import java.io.IOException;
  * @version 1.0
  * @since 4/28/2019 4:52 PM
  */
-public class CameraRequestFragment extends Fragment {
+public class TakerFragment extends Fragment {
 
-    public static final String TAG = CameraRequestFragment.class.getSimpleName();
+    public static final String TAG = TakerFragment.class.getSimpleName();
     private static final int REQUEST_CODE_TAKE = 454;
     public static final String INTENT_ACTION_START_CAMERA = "android.media.action.IMAGE_CAPTURE";
 
@@ -32,13 +32,13 @@ public class CameraRequestFragment extends Fragment {
      * Get callback fragment from here.
      */
     @Nullable
-    public static CameraRequestFragment getInstance(@NonNull Activity bind) {
+    public static TakerFragment getInstance(@NonNull Activity bind) {
         if (ActivityStateUtil.isIllegalState(bind)) {
             return null;
         }
-        CameraRequestFragment callbackFragment = findFragmentFromActivity(bind);
+        TakerFragment callbackFragment = findFragmentFromActivity(bind);
         if (callbackFragment == null) {
-            callbackFragment = new CameraRequestFragment();
+            callbackFragment = new TakerFragment();
             FragmentManager fragmentManager = bind.getFragmentManager();
             fragmentManager.beginTransaction()
                     .add(callbackFragment, TAG)
@@ -51,13 +51,13 @@ public class CameraRequestFragment extends Fragment {
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private static CameraRequestFragment findFragmentFromActivity(@NonNull Activity activity) {
-        return (CameraRequestFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private static TakerFragment findFragmentFromActivity(@NonNull Activity activity) {
+        return (TakerFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
     private Context mContext;
-    private CameraConfig mConfig;
-    private CameraCallback mCameraCallback;
+    private TakerConfig mConfig;
+    private TakerCallback mTakerCallback;
     private File mTempFile;                  // Temp file associated with camera.
 
     @Override
@@ -81,9 +81,9 @@ public class CameraRequestFragment extends Fragment {
     /**
      * 开始拍照
      */
-    public void takePicture(CameraConfig config, CameraCallback callback) {
+    public void takePicture(TakerConfig config, TakerCallback callback) {
         this.mConfig = config;
-        this.mCameraCallback = callback;
+        this.mTakerCallback = callback;
         mTempFile = FileUtil.createTempFileByDestDirectory(config.getCameraDirectoryPath());
         Uri tempUri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mTempFile);
         // 启动相机
@@ -95,7 +95,7 @@ public class CameraRequestFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK || null == mCameraCallback) {
+        if (resultCode != Activity.RESULT_OK || null == mTakerCallback) {
             return;
         }
         switch (requestCode) {
@@ -110,7 +110,7 @@ public class CameraRequestFragment extends Fragment {
                         performCropPicture(cameraDestFile.getAbsolutePath());
                     } else {
                         // 3. 回调
-                        mCameraCallback.onCameraTakeComplete(cameraDestFile.getAbsolutePath());
+                        mTakerCallback.onCameraTakeComplete(cameraDestFile.getAbsolutePath());
                         // 刷新文件管理器
                         FileUtil.freshMediaStore(mContext, cameraDestFile);
                     }
@@ -131,14 +131,14 @@ public class CameraRequestFragment extends Fragment {
     private void performCropPicture(String cameraFilePath) {
         CropperManager.with(mContext)
                 .setConfig(
-                        mConfig.getCropConfig().rebuild()
+                        mConfig.getCropperConfig().rebuild()
                                 .setOriginFile(cameraFilePath)// 需要裁剪的文件路径
                                 .build()
                 )
                 .crop(new CropperCallback() {
                     @Override
                     public void onCropComplete(@NonNull String path) {
-                        mCameraCallback.onCameraTakeComplete(path);
+                        mTakerCallback.onCameraTakeComplete(path);
                     }
                 });
     }

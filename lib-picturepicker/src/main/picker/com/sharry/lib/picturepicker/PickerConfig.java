@@ -56,8 +56,8 @@ public class PickerConfig implements Parcelable {
     // 是否展示滚动动画
     private boolean isToolbarBehavior = false;
     private boolean isFabBehavior = false;
-    private CameraConfig cameraConfig;                                                       // 拍照的配置
-    private CropConfig cropConfig;                                                           // 裁剪的配置
+    private TakerConfig takerConfig;                                                       // 拍照的配置
+    private CropperConfig cropperConfig;                                                           // 裁剪的配置
 
     private PickerConfig() {
     }
@@ -82,8 +82,8 @@ public class PickerConfig implements Parcelable {
         dest.writeInt(indicatorBorderUncheckedColor);
         dest.writeByte((byte) (isToolbarBehavior ? 1 : 0));
         dest.writeByte((byte) (isFabBehavior ? 1 : 0));
-        dest.writeParcelable(cameraConfig, flags);
-        dest.writeParcelable(cropConfig, flags);
+        dest.writeParcelable(takerConfig, flags);
+        dest.writeParcelable(cropperConfig, flags);
     }
 
     @NonNull
@@ -140,27 +140,27 @@ public class PickerConfig implements Parcelable {
     }
 
     @Nullable
-    public CameraConfig getCameraConfig() {
-        return cameraConfig;
+    public TakerConfig getTakerConfig() {
+        return takerConfig;
     }
 
     @Nullable
-    public CropConfig getCropConfig() {
-        return cropConfig;
+    public CropperConfig getCropperConfig() {
+        return cropperConfig;
     }
 
     /**
      * 是否支持相机
      */
     public boolean isCameraSupport() {
-        return cameraConfig != null;
+        return takerConfig != null;
     }
 
     /**
      * 是否支持裁剪
      */
     public boolean isCropSupport() {
-        return cropConfig != null;
+        return cropperConfig != null;
     }
 
     public Builder rebuild() {
@@ -181,8 +181,8 @@ public class PickerConfig implements Parcelable {
         indicatorBorderUncheckedColor = in.readInt();
         isToolbarBehavior = in.readByte() != 0;
         isFabBehavior = in.readByte() != 0;
-        cameraConfig = in.readParcelable(CameraConfig.class.getClassLoader());
-        cropConfig = in.readParcelable(CropConfig.class.getClassLoader());
+        takerConfig = in.readParcelable(TakerConfig.class.getClassLoader());
+        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
     }
 
     public static class Builder {
@@ -307,13 +307,13 @@ public class PickerConfig implements Parcelable {
             return this;
         }
 
-        public Builder setCropConfig(@Nullable CropConfig cropConfig) {
-            mConfig.cropConfig = cropConfig;
+        public Builder setCropConfig(@Nullable CropperConfig cropperConfig) {
+            mConfig.cropperConfig = cropperConfig;
             return this;
         }
 
-        public Builder setCameraConfig(@Nullable CameraConfig cameraConfig) {
-            mConfig.cameraConfig = cameraConfig;
+        public Builder setCameraConfig(@Nullable TakerConfig takerConfig) {
+            mConfig.takerConfig = takerConfig;
             return this;
         }
 

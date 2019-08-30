@@ -6,12 +6,13 @@ import androidx.annotation.StringRes;
 import java.util.ArrayList;
 
 /**
- * Created by Sharry on 2018/6/13.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: PicturePicture MVP 的约束
+ * PicturePicture MVP 的约束
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 2018/6/13.
  */
-interface PictureWatcherContract {
+interface WatcherContract {
 
     interface IView {
         /**
@@ -48,7 +49,7 @@ interface PictureWatcherContract {
         /**
          * 设置底部图片预览的 RecyclerView 的 Adapter
          */
-        void setPreviewAdapter(WatcherPreviewAdapter adapter);
+        void setPreviewAdapter(PreviewAdapter adapter);
 
         /**
          * 展示确认文本
@@ -123,14 +124,14 @@ interface PictureWatcherContract {
          *
          * @param elementData shared element data.
          */
-        void showSharedElementEnter(SharedElementData elementData);
+        void showSharedElementEnter(SharedElementModel elementData);
 
         /**
          * 展示共享元素退场动画
          *
          * @param elementData shared element data.
          */
-        void showSharedElementExitAndFinish(SharedElementData elementData);
+        void showSharedElementExitAndFinish(SharedElementModel elementData);
     }
 
 

@@ -62,7 +62,7 @@ public class CropperFragment extends Fragment {
 
     private File mTempFile;
     private Context mContext;
-    private CropConfig mConfig;
+    private CropperConfig mConfig;
     private CropperCallback mCropperCallback;
 
     @Override
@@ -86,7 +86,7 @@ public class CropperFragment extends Fragment {
     /**
      * 开始裁剪
      */
-    public void cropPicture(CropConfig config, CropperCallback callback) {
+    public void cropPicture(CropperConfig config, CropperCallback callback) {
         this.mConfig = config;
         this.mCropperCallback = callback;
         // Create temp file associated with crop function.
@@ -129,7 +129,7 @@ public class CropperFragment extends Fragment {
 
     }
 
-    private void completion(Intent intent, CropConfig config, Uri originUri, Uri tempUri) {
+    private void completion(Intent intent, CropperConfig config, Uri originUri, Uri tempUri) {
         // 可以选择图片类型, 如果是*表明所有类型的图片
         intent.setDataAndType(originUri, "image/*");
         // 设置可裁剪状态

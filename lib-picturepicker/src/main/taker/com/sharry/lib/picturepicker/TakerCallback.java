@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
  * @version 1.0
  * @since 2019-08-30 09:08
  */
-public interface CameraCallback {
+public interface TakerCallback {
 
     /**
      * 拍照完成的回调

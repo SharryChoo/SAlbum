@@ -18,34 +18,34 @@ import static android.app.Activity.RESULT_OK;
  * @version 1.0
  * @since 4/28/2019 5:03 PM
  */
-public class PicturePickerManager {
+public class PickerManager {
 
-    public static final String TAG = PicturePickerManager.class.getSimpleName();
+    public static final String TAG = PickerManager.class.getSimpleName();
     private static String[] sRequirePermissions = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
-    public static PicturePickerManager with(@NonNull Context context) {
+    public static PickerManager with(@NonNull Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            return new PicturePickerManager(activity);
+            return new PickerManager(activity);
         } else {
-            throw new IllegalArgumentException("PicturePickerManager.with -> Context can not cast to Activity");
+            throw new IllegalArgumentException("PickerManager.with -> Context can not cast to Activity");
         }
     }
 
     private Activity mActivity;
     private PickerConfig mConfig;
 
-    private PicturePickerManager(Activity activity) {
+    private PickerManager(Activity activity) {
         this.mActivity = activity;
     }
 
     /**
      * 设置图片加载方案
      */
-    public PicturePickerManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
+    public PickerManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
         Preconditions.checkNotNull(loader, "Please ensure IPictureLoaderEngine not null!");
         PictureLoader.setPictureLoader(loader);
         return this;
@@ -54,7 +54,7 @@ public class PicturePickerManager {
     /**
      * 设置图片选择的配置
      */
-    public PicturePickerManager setPickerConfig(@NonNull PickerConfig config) {
+    public PickerManager setPickerConfig(@NonNull PickerConfig config) {
         this.mConfig = Preconditions.checkNotNull(config, "Please ensure PickerConfig not null!");
         return this;
     }
@@ -80,7 +80,7 @@ public class PicturePickerManager {
     }
 
     /**
-     * 处理 PicturePickerActivity 的启动
+     * 处理 PickerActivity 的启动
      */
     private void startActual(@NonNull final PickerCallback pickerCallback) {
         // 1. 若开启了裁剪, 则只能选中一张图片
@@ -103,13 +103,13 @@ public class PicturePickerManager {
                     return;
                 }
                 switch (requestCode) {
-                    case PicturePickerActivity.REQUEST_CODE:
+                    case PickerActivity.REQUEST_CODE:
                         ArrayList<String> paths = data.getStringArrayListExtra(
-                                PicturePickerActivity.RESULT_EXTRA_PICKED_PICTURES);
+                                PickerActivity.RESULT_EXTRA_PICKED_PICTURES);
                         if (paths != null) {
                             pickerCallback.onPickedComplete(paths);
                         } else {
-                            Log.e(TAG, "Picked path from PicturePickerActivity is null.");
+                            Log.e(TAG, "Picked path from PickerActivity is null.");
                         }
                         break;
                     default:
@@ -117,7 +117,7 @@ public class PicturePickerManager {
                 }
             }
         });
-        PicturePickerActivity.launchActivityForResult(mActivity, callbackFragment, mConfig);
+        PickerActivity.launchActivityForResult(mActivity, callbackFragment, mConfig);
     }
 
 }

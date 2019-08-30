@@ -17,10 +17,10 @@ android {
     }
     sourceSets {
         main {
-            java.srcDirs += 'src/main/camera'
-            java.srcDirs += 'src/main/copper'
             java.srcDirs += 'src/main/picker'
             java.srcDirs += 'src/main/watcher'
+            java.srcDirs += 'src/main/copper'
+            java.srcDirs += 'src/main/taker'
             java.srcDirs += 'src/main/widget'
             java.srcDirs += 'src/main/utils'
             resDirs.forEach {

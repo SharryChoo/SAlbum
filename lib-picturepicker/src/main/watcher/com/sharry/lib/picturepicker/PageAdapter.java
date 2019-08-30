@@ -14,11 +14,11 @@ import java.util.List;
  * @version 1.0
  * @since 2019-08-30 09:28
  */
-class WatcherPagerAdapter extends PagerAdapter {
+class PageAdapter extends PagerAdapter {
 
     private List<? extends View> mViews;
 
-    WatcherPagerAdapter(List<? extends View> children) {
+    PageAdapter(List<? extends View> children) {
         this.mViews = children;
     }
 

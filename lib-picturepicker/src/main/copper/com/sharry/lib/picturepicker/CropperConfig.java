@@ -11,21 +11,21 @@ import androidx.annotation.NonNull;
  * @version 1.1
  * @since 2018/11/29 16:57
  */
-public class CropConfig implements Parcelable {
+public class CropperConfig implements Parcelable {
 
     public static Builder Builder() {
         return new Builder();
     }
 
-    public static final Creator<CropConfig> CREATOR = new Creator<CropConfig>() {
+    public static final Creator<CropperConfig> CREATOR = new Creator<CropperConfig>() {
         @Override
-        public CropConfig createFromParcel(Parcel in) {
-            return new CropConfig(in);
+        public CropperConfig createFromParcel(Parcel in) {
+            return new CropperConfig(in);
         }
 
         @Override
-        public CropConfig[] newArray(int size) {
-            return new CropConfig[size];
+        public CropperConfig[] newArray(int size) {
+            return new CropperConfig[size];
         }
     };
 
@@ -39,7 +39,7 @@ public class CropConfig implements Parcelable {
     private int outputY = 500;          // 图像输出的高
     private int destQuality = 80;       // 裁剪后图片输出的质量
 
-    private CropConfig() {
+    private CropperConfig() {
     }
 
     public String getOriginFilePath() {
@@ -100,7 +100,7 @@ public class CropConfig implements Parcelable {
         return new Builder(this);
     }
 
-    protected CropConfig(Parcel in) {
+    protected CropperConfig(Parcel in) {
         originFilePath = in.readString();
         cropDirectoryPath = in.readString();
         isCropCircle = in.readByte() != 0;
@@ -117,13 +117,13 @@ public class CropConfig implements Parcelable {
      */
     public static class Builder {
 
-        private CropConfig mConfig;
+        private CropperConfig mConfig;
 
         private Builder() {
-            mConfig = new CropConfig();
+            mConfig = new CropperConfig();
         }
 
-        private Builder(@NonNull CropConfig config) {
+        private Builder(@NonNull CropperConfig config) {
             this.mConfig = config;
         }
 
@@ -188,7 +188,7 @@ public class CropConfig implements Parcelable {
         }
 
         @NonNull
-        public CropConfig build() {
+        public CropperConfig build() {
             return mConfig;
         }
     }

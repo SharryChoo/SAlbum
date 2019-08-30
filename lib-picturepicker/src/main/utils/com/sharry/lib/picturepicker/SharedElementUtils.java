@@ -72,7 +72,7 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementEnterAnimator(PhotoView target, SharedElementData data) {
+    static Animator createSharedElementEnterAnimator(PhotoView target, SharedElementModel data) {
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
         target.setPivotX(0);
@@ -95,7 +95,7 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementExitAnimator(PhotoView target, SharedElementData data) {
+    static Animator createSharedElementExitAnimator(PhotoView target, SharedElementModel data) {
         if (target.getDrawable() == null) {
             return null;
         }
@@ -125,7 +125,7 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    private static AnimatorSet getBoundsChangedAnim(PhotoView target, SharedElementData data) {
+    private static AnimatorSet getBoundsChangedAnim(PhotoView target, SharedElementModel data) {
         final ViewBounds viewBounds = new ViewBounds(target);
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);

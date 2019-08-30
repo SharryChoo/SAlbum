@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--PictureWatcherActivity 需要用到的字符串-->
+    <!--WatcherActivity 需要用到的字符串-->
     <string name="picture_picker_watcher_tips_over_threshold_prefix">@string/picture_picker_picker_tips_over_threshold_prefix</string>
     <string name="picture_picker_watcher_tips_over_threshold_suffix">@string/picture_picker_picker_tips_over_threshold_suffix</string>
     <string name="picture_picker_watcher_ensure">@string/picture_picker_picker_ensure</string>

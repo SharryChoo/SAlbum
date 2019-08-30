@@ -20,19 +20,19 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/1 10:17
  */
-public class PicturePickerPresenter implements PicturePickerContract.IPresenter, CameraCallback, CropperCallback, WatcherCallback {
+public class PickerPresenter implements PickerContract.IPresenter, TakerCallback, CropperCallback, WatcherCallback {
 
-    private static final String TAG = PicturePickerPresenter.class.getSimpleName();
-    private final PicturePickerContract.IView mView;                                                // View associated with this presenter.
-    private final PicturePickerContract.IModel mModel;                                              // Model associated with this presenter.
+    private static final String TAG = PickerPresenter.class.getSimpleName();
+    private final PickerContract.IView mView;                                                // View associated with this presenter.
+    private final PickerContract.IModel mModel;                                              // Model associated with this presenter.
     private final PickerConfig mPickerConfig;                                                       // Config associated with the PicturePicker.
     private final WatcherConfig mWatcherConfig;                                                     // Config associated with the PictureWatcher.
 
-    public PicturePickerPresenter(@NonNull PicturePickerContract.IView view,
-                                  @NonNull Context context, @NonNull PickerConfig config) {
+    public PickerPresenter(@NonNull PickerContract.IView view,
+                           @NonNull Context context, @NonNull PickerConfig config) {
         this.mView = view;
         this.mPickerConfig = config;
-        this.mModel = new PicturePickerModel(mPickerConfig.getUserPickedSet(), mPickerConfig.getThreshold());
+        this.mModel = new PickerModel(mPickerConfig.getUserPickedSet(), mPickerConfig.getThreshold());
         this.mWatcherConfig = WatcherConfig.Builder()
                 .setThreshold(mPickerConfig.getThreshold())
                 .setIndicatorTextColor(mPickerConfig.getIndicatorTextColor())
@@ -67,15 +67,15 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
 
     @Override
     public void handleCameraClicked() {
-        // 这里可以确保 CameraConfig 不为 null
-        CameraRequestManager.with((Context) mView)
-                .setConfig(mPickerConfig.getCameraConfig())
+        // 这里可以确保 TakerConfig 不为 null
+        TakerManager.with((Context) mView)
+                .setConfig(mPickerConfig.getTakerConfig())
                 .take(this);
     }
 
     @Override
     public void handlePictureClicked(int position, ImageView sharedElement) {
-        PictureWatcherManager.with((Context) mView)
+        WatcherManager.with((Context) mView)
                 .setSharedElement(sharedElement)
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .setConfig(
@@ -91,7 +91,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         if (!isCanPreview()) {
             return;
         }
-        PictureWatcherManager.with((Context) mView)
+        WatcherManager.with((Context) mView)
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .setConfig(
                         mWatcherConfig.rebuild()
@@ -114,7 +114,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         // 需要裁剪, 则启动裁剪
         CropperManager.with((Context) mView)
                 .setConfig(
-                        mPickerConfig.getCropConfig().rebuild()
+                        mPickerConfig.getCropperConfig().rebuild()
                                 .setOriginFile(mModel.getPickedPaths().get(0))
                                 .build()
                 )
@@ -138,27 +138,29 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
         mView.setToolbarEnsureText(buildEnsureText());
         mView.setPreviewText(buildPreviewText());
         if (isEnsure) {
-            handleEnsureClicked();// 执行确认事件
+            // 执行确认事件
+            handleEnsureClicked();
         } else {
-            mView.notifyPickedPathsChanged();// 通知更新
+            // 通知更新
+            mView.notifyPickedPathsChanged();
         }
     }
 
     @Override
     public void onCameraTakeComplete(@NonNull String path) {
         // 1. 添加到 <当前展示> 的文件夹下
-        PictureFolder checkedFolder = mModel.getCheckedFolder();
+        FolderModel checkedFolder = mModel.getCheckedFolder();
         checkedFolder.getPicturePaths().add(0, path);
         // 2. 添加到 <所有文件> 的文件夹下
-        PictureFolder allPictureFolder = mModel.getPictureFolderAt(0);
-        if (allPictureFolder != checkedFolder) {
-            allPictureFolder.getPicturePaths().add(0, path);
+        FolderModel allFolderModel = mModel.getPictureFolderAt(0);
+        if (allFolderModel != checkedFolder) {
+            allFolderModel.getPicturePaths().add(0, path);
         }
         // 3. 更新展示的图片集合
         mModel.getDisplayPaths().add(0, path);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
-            mModel.addPickedPicture(path);// 添加到选中的集合中
+            mModel.addPickedPicture(path);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
@@ -196,7 +198,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
 
     private void initModel(Context context) {
         // 获取图片数据
-        mModel.getSystemPictures(context, new PicturePickerContract.IModel.Callback() {
+        mModel.getSystemPictures(context, new PickerContract.IModel.Callback() {
 
             private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -229,7 +231,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
      */
     private void performDisplayCheckedFolder(int position) {
         // Get display folder at position.
-        PictureFolder curDisplayFolder = mModel.getPictureFolderAt(position);
+        FolderModel curDisplayFolder = mModel.getPictureFolderAt(position);
         mModel.setCheckedFolder(curDisplayFolder);
         // Set folder text associated with view.
         mView.setPictureFolderText(curDisplayFolder.getFolderName());
