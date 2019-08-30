@@ -11,6 +11,11 @@ import androidx.annotation.NonNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * MVP frame model associated with PicturePicker.
@@ -20,6 +25,21 @@ import java.util.HashMap;
  * @since 2018/8/30 20:00
  */
 class PicturePickerModel implements PicturePickerContract.IModel {
+
+    private static final ExecutorService sThreadPool = new ThreadPoolExecutor(
+            1, 1,
+            30, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>(),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = new Thread(r, PicturePickerModel.class.getSimpleName()
+                            + "_ExecutorService");
+                    thread.setDaemon(false);
+                    return thread;
+                }
+            }
+    );
 
     private final ArrayList<String> mPickedPaths;                           // 用户已选中的图片地址集合(默认构造为空)
     private final ArrayList<String> mDisplayPaths = new ArrayList<>();      // 当前需要展示的集合
@@ -36,20 +56,23 @@ class PicturePickerModel implements PicturePickerContract.IModel {
 
     @Override
     public void getSystemPictures(Context context, final Callback callback) {
-        new Thread(new CursorSystemPictureRunnable(context,
-                new CursorSystemPictureRunnable.RunnableInteraction() {
-                    @Override
-                    public void onComplete(ArrayList<PictureFolder> pictureFolders) {
-                        mPictureFolders = pictureFolders;
-                        callback.onComplete();
-                    }
+        sThreadPool.execute(
+                new CursorSystemPictureRunnable(
+                        context,
+                        new CursorSystemPictureRunnable.RunnableInteraction() {
+                            @Override
+                            public void onComplete(ArrayList<PictureFolder> pictureFolders) {
+                                mPictureFolders = pictureFolders;
+                                callback.onComplete();
+                            }
 
-                    @Override
-                    public void onFailed(Throwable throwable) {
-                        callback.onFailed(throwable);
-                    }
-                })
-        ).start();
+                            @Override
+                            public void onFailed(Throwable throwable) {
+                                callback.onFailed(throwable);
+                            }
+                        }
+                )
+        );
     }
 
     /**
@@ -228,4 +251,5 @@ class PicturePickerModel implements PicturePickerContract.IModel {
             return fileName;
         }
     }
+
 }
