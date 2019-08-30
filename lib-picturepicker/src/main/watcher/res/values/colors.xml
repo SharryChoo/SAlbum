@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--PictureWatcher-->
+    <color name="picture_picker_watcher_bg_color">#ff000000</color>
+    <color name="picture_picker_watcher_bottom_preview_bg_color">#a9000000</color>
+    <color name="picture_picker_watcher_bottom_preview_text_color">#ffffffff</color>
+
+</resources>

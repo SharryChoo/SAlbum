@@ -7,11 +7,4 @@
         <item name="colorAccent">@color/picture_picker_base_accent_color</item>
     </style>
 
-    <!--透明主题-->
-    <style name="PictureWatcherTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsTranslucent">true</item>
-    </style>
-
 </resources>
