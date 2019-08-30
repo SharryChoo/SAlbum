@@ -3,7 +3,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.SharryChoo'
 
-def srcDirs = [
+def resDirs = [
         "watcher",
         "picker"
 ]
@@ -23,8 +23,7 @@ android {
             java.srcDirs += 'src/main/watcher'
             java.srcDirs += 'src/main/widget'
             java.srcDirs += 'src/main/utils'
-            java.srcDirs += 'src/main/base'
-            srcDirs.forEach {
+            resDirs.forEach {
                 res.srcDirs += 'src/main/' + it + '/res'
             }
         }
