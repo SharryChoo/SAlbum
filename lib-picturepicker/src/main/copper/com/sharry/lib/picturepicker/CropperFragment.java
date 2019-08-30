@@ -91,14 +91,18 @@ public class CropperFragment extends Fragment {
         this.mCropperCallback = callback;
         // Create temp file associated with crop function.
         mTempFile = FileUtil.createTempFileByDestDirectory(config.getCropDirectoryPath());
-        // Get URI associated with target file.
-        Uri originUri = FileUtil.getUriFromFile(mContext, config.getAuthority(), new File(config.getOriginFilePath()));
-        Uri tempUri = FileUtil.getUriFromFile(mContext, config.getAuthority(), mTempFile);
-        // Completion intent instance.
-        Intent intent = new Intent(INTENT_ACTION_START_CROP);
-        completion(intent, config, originUri, tempUri);
-        // launch crop Activity
-        startActivityForResult(intent, REQUEST_CODE_CROP);
+        try {
+            // Get URI associated with target file.
+            Uri originUri = FileUtil.getUriFromFile(mContext, config.getAuthority(), new File(config.getOriginFilePath()));
+            Uri tempUri = FileUtil.getUriFromFile(mContext, config.getAuthority(), mTempFile);
+            // Completion intent instance.
+            Intent intent = new Intent(INTENT_ACTION_START_CROP);
+            completion(intent, config, originUri, tempUri);
+            // launch crop Activity
+            startActivityForResult(intent, REQUEST_CODE_CROP);
+        } catch (Throwable e) {
+            // ignore.
+        }
     }
 
     @Override

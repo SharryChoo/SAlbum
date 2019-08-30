@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,11 +86,15 @@ public class TakerFragment extends Fragment {
         this.mConfig = config;
         this.mTakerCallback = callback;
         mTempFile = FileUtil.createTempFileByDestDirectory(config.getCameraDirectoryPath());
-        Uri tempUri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mTempFile);
-        // 启动相机
-        Intent intent = new Intent(INTENT_ACTION_START_CAMERA);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
-        startActivityForResult(intent, REQUEST_CODE_TAKE);
+        try {
+            Uri tempUri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mTempFile);
+            // 启动相机
+            Intent intent = new Intent(INTENT_ACTION_START_CAMERA);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
+            startActivityForResult(intent, REQUEST_CODE_TAKE);
+        } catch (Throwable e) {
+            // ignore.
+        }
     }
 
     @Override

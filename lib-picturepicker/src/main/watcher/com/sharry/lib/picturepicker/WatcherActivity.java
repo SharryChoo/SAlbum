@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,10 +45,13 @@ public class WatcherActivity extends AppCompatActivity implements
         DraggableViewPager.OnPagerChangedListener {
 
     public static final int REQUEST_CODE = 508;
-    private static final String EXTRA_CONFIG = "start_intent_extra_config";
-    private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
     public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
+
+    private static final String TAG = WatcherActivity.class.getSimpleName();
+    private static final String EXTRA_CONFIG = "start_intent_extra_config";
+    private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
+    private static final int THRESHOLD_TRANSACTION_DATA_SIZE = 150 * 1024;
 
     /**
      * U can launch this activity from here.
@@ -66,11 +71,21 @@ public class WatcherActivity extends AppCompatActivity implements
                     SharedElementModel.parseFrom(sharedElement, config.getPosition())
             );
         }
-        // 非共享元素的启动
-        resultTo.startActivityForResult(intent, REQUEST_CODE);
-        // 使用淡入淡出的效果
-        if (sharedElement != null) {
-            request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        Bundle bundle = intent.getExtras();
+        if (bundle == null) {
+            return;
+        }
+        Parcel parcel = Parcel.obtain();
+        bundle.writeToParcel(parcel, 0);
+        Log.i(TAG, "Transaction data size is: " + parcel.dataSize() + " bytes");
+        if (parcel.dataSize() < THRESHOLD_TRANSACTION_DATA_SIZE) {
+            resultTo.startActivityForResult(intent, REQUEST_CODE);
+            // 使用淡入淡出的效果
+            if (sharedElement != null) {
+                request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+        } else {
+            Log.e(TAG, "Transaction is to large!!! data size is: " + parcel.dataSize() + " bytes");
         }
     }
 
@@ -99,8 +114,8 @@ public class WatcherActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initPresenter();
         setContentView(R.layout.picture_picker_activity_picture_watcher);
+        initPresenter();
         initTitle();
         initViews();
         mPresenter.setup();
@@ -192,12 +207,18 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void notifyBottomPicturesRemoved(String removedPath, int removedIndex) {
-        mBottomPreviewPictures.getAdapter().notifyItemRemoved(removedIndex);
+        RecyclerView.Adapter adapter;
+        if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
+            adapter.notifyItemRemoved(removedIndex);
+        }
     }
 
     @Override
     public void notifyBottomPictureAdded(String insertPath, int addedIndex) {
-        mBottomPreviewPictures.getAdapter().notifyItemInserted(addedIndex);
+        RecyclerView.Adapter adapter;
+        if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
+            adapter.notifyItemInserted(addedIndex);
+        }
     }
 
     @Override
