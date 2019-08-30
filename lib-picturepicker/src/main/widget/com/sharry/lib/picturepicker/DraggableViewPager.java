@@ -33,15 +33,16 @@ import androidx.viewpager.widget.ViewPager;
 public class DraggableViewPager extends ViewPager {
 
     private static final int INVALIDATE_VALUE = -1;
+
     private int mSharedElementPosition = INVALIDATE_VALUE;
-    private int mBackgroundColor = INVALIDATE_VALUE;
-    private float mFingerUpBackgroundAlpha = 1f;// 手指松开时, 当前ViewPager背景的透明度
+    private int mBaseColor = Color.BLACK;
 
     private float mDownX = 0f;
     private float mDownY = 0f;
-    private float mCapturedOriginY = 0f;// 被捕获的 View 的 Y 的起始点
-    private float mDragThresholdHeight = 0f;// 拖动到可以返回的阈值
-    private float mVerticalVelocityThreshold = 1000f;// 竖直方向上速度的阈值
+    private float mCapturedOriginY = 0f;                 // 被捕获的 View 的 Y 的起始点
+    private float mDragThresholdHeight = 0f;             // 拖动到可以返回的阈值
+    private float mVerticalVelocityThreshold = 1000f;    // 竖直方向上速度的阈值
+    private float mFingerUpBackgroundAlpha = 1f;         // 手指松开时, 当前 ViewPager 背景的透明度
 
     private boolean mIsDragging = false;
     private boolean mIsAnimRunning = false;
@@ -107,10 +108,8 @@ public class DraggableViewPager extends ViewPager {
 
     @Override
     public void setBackgroundColor(int color) {
-        if (mBackgroundColor == INVALIDATE_VALUE) {
-            mBackgroundColor = color;
-        }
         super.setBackgroundColor(color);
+        mBaseColor = color;
     }
 
     @Override
@@ -159,7 +158,7 @@ public class DraggableViewPager extends ViewPager {
                 float deltaY = (ev.getRawY() - mDownY) / 5;
                 getCurrentView().setY(mCapturedOriginY + deltaY);
                 mFingerUpBackgroundAlpha = 1 - (Math.abs(deltaY) / mDragThresholdHeight);
-                setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBackgroundAlpha));
+                super.setBackgroundColor(ColorUtil.alphaColor(getBackgroundColor(), mFingerUpBackgroundAlpha));
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
@@ -211,10 +210,13 @@ public class DraggableViewPager extends ViewPager {
         recoverAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                float curY = (float) animation.getAnimatedValue();
-                getCurrentView().setY(curY);
-                setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBackgroundAlpha
-                        + (1 - mFingerUpBackgroundAlpha) * animation.getAnimatedFraction()));
+                getCurrentView().setY((float) animation.getAnimatedValue());
+                DraggableViewPager.super.setBackgroundColor(
+                        ColorUtil.alphaColor(
+                                getBackgroundColor(),
+                                mFingerUpBackgroundAlpha + (1 - mFingerUpBackgroundAlpha) * animation.getAnimatedFraction()
+                        )
+                );
             }
         });
         recoverAnim.addListener(new AnimatorListenerAdapter() {
@@ -249,9 +251,13 @@ public class DraggableViewPager extends ViewPager {
         dismissAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                float curY = (float) animation.getAnimatedValue();
-                getCurrentView().setY(curY);
-                setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBackgroundAlpha * (1 - animation.getAnimatedFraction())));
+                getCurrentView().setY((float) animation.getAnimatedValue());
+                DraggableViewPager.super.setBackgroundColor(
+                        ColorUtil.alphaColor(
+                                getBackgroundColor(),
+                                mFingerUpBackgroundAlpha * (1 - animation.getAnimatedFraction())
+                        )
+                );
             }
         });
         dismissAnim.addListener(new AnimatorListenerAdapter() {
@@ -270,29 +276,12 @@ public class DraggableViewPager extends ViewPager {
     }
 
     /**
-     * 获取用于背景色渐变的基础颜色
+     * 获取用于背景色
      */
-    private int getBaseColor() {
-        return mBackgroundColor == INVALIDATE_VALUE ? Color.BLACK : mBackgroundColor;
+    private int getBackgroundColor() {
+        return mBaseColor;
     }
 
-    /**
-     * 颜色透明化
-     *
-     * @param baseColor     需要更改的颜色
-     * @param alphaPercent: 0 代表全透明, 1 代表不透明
-     */
-    private int alphaColor(int baseColor, float alphaPercent) {
-        if (alphaPercent > 1) {
-            alphaPercent = 1;
-        }
-        if (alphaPercent < 0) {
-            alphaPercent = 0;
-        }
-        int baseAlpha = (baseColor & 0xff000000) >>> 24;
-        int alpha = (int) (baseAlpha * alphaPercent);
-        return alpha << 24 | (baseColor & 0xffffff);
-    }
 
     /**
      * 静态代理的 Adapter 对象

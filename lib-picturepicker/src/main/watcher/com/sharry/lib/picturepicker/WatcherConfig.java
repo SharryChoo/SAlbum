@@ -37,7 +37,7 @@ public class WatcherConfig implements Parcelable {
     // 图片选择的相关配置
     private ArrayList<String> pictureUris;                                           // 需要展示的集合
     private ArrayList<String> userPickedSet;                                         // 图片选中的集合: 根据这个判断是否提供图片选择功能
-    private int threshold;// 阈值
+    private int threshold;                                                           // 阈值
     private int indicatorTextColor = Color.WHITE;                                    // 指示器背景色
     private int indicatorSolidColor = Color.parseColor("#ff64b6f6");     // 指示器选中的填充色
     private int indicatorBorderCheckedColor = indicatorSolidColor;                   // 指示器边框选中的颜色

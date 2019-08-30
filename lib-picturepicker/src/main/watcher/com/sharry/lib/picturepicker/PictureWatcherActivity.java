@@ -334,6 +334,7 @@ public class PictureWatcherActivity extends AppCompatActivity implements
         // 1. 初始化 ViewPager
         mViewPager = findViewById(R.id.view_pager);
         mViewPager.setOnPagerChangedListener(this);
+        mViewPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
         // 2. 初始化底部菜单
         mLlBottomPreviewContainer = findViewById(R.id.ll_bottom_container);
         mBottomPreviewPictures = findViewById(R.id.recycle_pictures);

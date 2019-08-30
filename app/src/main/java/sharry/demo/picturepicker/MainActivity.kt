@@ -2,10 +2,10 @@ package sharry.demo.picturepicker
 
 import android.os.Bundle
 import android.os.Environment
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -61,23 +61,31 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
         pickerConfig = PickerConfig.Builder()
-                .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
-                .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
-                .isToolbarScrollable(cbAnimation.isChecked)// Behavior 动画
+                // 一共选中的数量
+                .setThreshold(etAlbumThreshold.text.toString().toInt())
+                // 每行展示的数目
+                .setSpanCount(etSpanCount.text.toString().toInt())
+                // Behavior 动画
+                .isToolbarScrollable(cbAnimation.isChecked)
                 .isFabScrollable(cbAnimation.isChecked)
+                // Toolbar 背景设置
                 .setToolbarBackgroundColor(
                         ContextCompat.getColor(this, R.color.colorPrimary)
-                ) // Toolbar 背景设置
+                )
+                // 指示器填充色
                 .setIndicatorSolidColor(
                         ContextCompat.getColor(this, R.color.colorPrimary)
-                )// 选中指示器的颜色
+                )
+                // 选中指示器的颜色
                 .setIndicatorBorderColor(
                         ContextCompat.getColor(this, R.color.colorPrimary),
                         ContextCompat.getColor(this, android.R.color.white)
-                )// 指示器边界的颜色
+                )
+                // 指示器边界的颜色
                 .setPickerItemBackgroundColor(
                         ContextCompat.getColor(this, android.R.color.white)
-                )// 条目背景色
+                )
+                // 条目背景色
                 .build()
     }
 

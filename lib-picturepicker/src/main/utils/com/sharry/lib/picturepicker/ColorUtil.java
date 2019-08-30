@@ -1,6 +1,7 @@
 package com.sharry.lib.picturepicker;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.FloatRange;
 
 /**
  * 处理颜色相关的工具类
@@ -53,6 +54,24 @@ class ColorUtil {
         b = (float) Math.pow(b, 1.0 / 2.2) * 255.0f;
 
         return Math.round(a) << 24 | Math.round(r) << 16 | Math.round(g) << 8 | Math.round(b);
+    }
+
+    /**
+     * 颜色透明化
+     *
+     * @param baseColor     需要更改的颜色
+     * @param alphaPercent: 0 代表全透明, 1 代表不透明
+     */
+    static int alphaColor(int baseColor, @FloatRange(from = 0f, to = 1f) float alphaPercent) {
+        if (alphaPercent > 1) {
+            alphaPercent = 1;
+        }
+        if (alphaPercent < 0) {
+            alphaPercent = 0;
+        }
+        int baseAlpha = (baseColor & 0xff000000) >>> 24;
+        int alpha = (int) (baseAlpha * alphaPercent);
+        return alpha << 24 | (baseColor & 0xffffff);
     }
 
 }
