@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.sharry.picturepicker.widget.toolbar.SToolbar
+        <com.sharry.lib.picturepicker.toolbar.SToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

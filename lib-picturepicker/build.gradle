@@ -9,6 +9,17 @@ android {
         targetSdkVersion rootProject.targetSdkVersion
         vectorDrawables.useSupportLibrary true
     }
+    sourceSets {
+        main {
+            java.srcDirs += 'src/main/camera'
+            java.srcDirs += 'src/main/copper'
+            java.srcDirs += 'src/main/picker'
+            java.srcDirs += 'src/main/watcher'
+            java.srcDirs += 'src/main/widget'
+            java.srcDirs += 'src/main/utils'
+            java.srcDirs += 'src/main/base'
+        }
+    }
 }
 
 tasks.withType(JavaCompile) {
