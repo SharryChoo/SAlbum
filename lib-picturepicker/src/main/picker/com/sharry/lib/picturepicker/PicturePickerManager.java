@@ -7,9 +7,6 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import android.util.Log;
 
-import com.sharry.lib.picturepicker.permission.PermissionsCallback;
-import com.sharry.lib.picturepicker.permission.PermissionsUtil;
-
 import java.util.ArrayList;
 
 import static android.app.Activity.RESULT_OK;

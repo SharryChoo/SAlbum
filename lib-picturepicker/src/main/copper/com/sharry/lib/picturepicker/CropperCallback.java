@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
  * @version 1.0
  * @since 4/28/2019 5:07 PM
  */
-public interface CropCallback {
+public interface CropperCallback {
 
     /**
      * 裁剪完成的回调

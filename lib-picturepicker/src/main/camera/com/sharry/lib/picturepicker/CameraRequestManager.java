@@ -7,9 +7,6 @@ import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.sharry.lib.picturepicker.permission.PermissionsCallback;
-import com.sharry.lib.picturepicker.permission.PermissionsUtil;
-
 /**
  * 从相机拍照获取图片的入口
  *

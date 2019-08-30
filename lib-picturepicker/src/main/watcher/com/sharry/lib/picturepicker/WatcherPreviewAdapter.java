@@ -15,12 +15,12 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 2018/9/22 23:23
  */
-public class WatcherPreviewAdapter extends RecyclerView.Adapter<WatcherPreviewAdapter.ViewHolder> {
+class WatcherPreviewAdapter extends RecyclerView.Adapter<WatcherPreviewAdapter.ViewHolder> {
 
     private final ArrayList<String> userPickedSet;
     private final AdapterInteraction interaction;
 
-    public WatcherPreviewAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
+    WatcherPreviewAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
         this.userPickedSet = userPickedSet;
         this.interaction = interaction;
     }

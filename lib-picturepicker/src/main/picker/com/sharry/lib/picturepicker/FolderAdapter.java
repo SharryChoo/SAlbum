@@ -20,7 +20,7 @@ import java.util.List;
  * @version 1.0
  * @since 2018/9/22 15:02
  */
-public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
+class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
 
     public interface AdapterInteraction {
         void onFolderChecked(int position);
@@ -30,7 +30,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder
     final List<PictureFolder> data;
     final AdapterInteraction callback;
 
-    public FolderAdapter(Context context, List<PictureFolder> data) {
+    FolderAdapter(Context context, List<PictureFolder> data) {
         if (context instanceof AdapterInteraction) {
             this.callback = (AdapterInteraction) context;
         } else {

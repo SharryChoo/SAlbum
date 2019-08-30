@@ -156,7 +156,7 @@ public class DraggableViewPager extends ViewPager {
                 mCapturedOriginY = getCurrentView().getY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                float deltaY = (ev.getRawY() - mDownY) / 5;// 添加阻尼感
+                float deltaY = (ev.getRawY() - mDownY) / 5;
                 getCurrentView().setY(mCapturedOriginY + deltaY);
                 mFingerUpBackgroundAlpha = 1 - (Math.abs(deltaY) / mDragThresholdHeight);
                 setBackgroundColor(alphaColor(getBaseColor(), mFingerUpBackgroundAlpha));
@@ -173,6 +173,8 @@ public class DraggableViewPager extends ViewPager {
                 }
                 mVelocityTracker.recycle();
                 mIsDragging = false;
+                break;
+            default:
                 break;
         }
         return true;

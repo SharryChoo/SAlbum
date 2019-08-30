@@ -25,7 +25,7 @@ import com.sharry.lib.picturepicker.photoview.PhotoView;
  * @version 1.0
  * @since 3/18/2019 11:13 AM
  */
-public class SharedElementUtils {
+class SharedElementUtils {
 
     private static Property<PhotoView, Matrix> ANIMATED_TRANSFORM_PROPERTY
             = new Property<PhotoView, Matrix>(Matrix.class, "animatedTransform") {
@@ -72,7 +72,7 @@ public class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    public static Animator createSharedElementEnterAnimator(PhotoView target, SharedElementData data) {
+    static Animator createSharedElementEnterAnimator(PhotoView target, SharedElementData data) {
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
         target.setPivotX(0);
@@ -95,7 +95,7 @@ public class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    public static Animator createSharedElementExitAnimator(PhotoView target, SharedElementData data) {
+    static Animator createSharedElementExitAnimator(PhotoView target, SharedElementData data) {
         if (target.getDrawable() == null) {
             return null;
         }

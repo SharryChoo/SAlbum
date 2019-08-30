@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description: PicturePicture MVP 的约束
  */
-public interface PicturePickerContract {
+interface PicturePickerContract {
 
     interface IView {
 
@@ -163,7 +163,6 @@ public interface PicturePickerContract {
             void onComplete();
 
             void onFailed(Throwable throwable);
-
 
         }
 

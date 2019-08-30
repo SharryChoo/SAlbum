@@ -12,9 +12,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 
 import java.io.File;
 import java.util.List;
@@ -26,9 +27,9 @@ import java.util.List;
  * @version 1.0
  * @since 4/28/2019 4:53 PM
  */
-public class PictureCropFragment extends Fragment {
+public class CropperFragment extends Fragment {
 
-    public static final String TAG = PictureCropFragment.class.getSimpleName();
+    public static final String TAG = CropperFragment.class.getSimpleName();
     private static final int REQUEST_CODE_CROP = 446;
     public static final String INTENT_ACTION_START_CROP = "com.android.camera.action.CROP";
 
@@ -36,13 +37,13 @@ public class PictureCropFragment extends Fragment {
      * Get callback fragment from here.
      */
     @Nullable
-    public static PictureCropFragment getInstance(@NonNull Activity bind) {
+    public static CropperFragment getInstance(@NonNull Activity bind) {
         if (ActivityStateUtil.isIllegalState(bind)) {
             return null;
         }
-        PictureCropFragment callbackFragment = findFragmentFromActivity(bind);
+        CropperFragment callbackFragment = findFragmentFromActivity(bind);
         if (callbackFragment == null) {
-            callbackFragment = new PictureCropFragment();
+            callbackFragment = new CropperFragment();
             FragmentManager fragmentManager = bind.getFragmentManager();
             fragmentManager.beginTransaction()
                     .add(callbackFragment, TAG)
@@ -55,14 +56,14 @@ public class PictureCropFragment extends Fragment {
     /**
      * 在 Activity 中通过 TAG 去寻找我们添加的 Fragment
      */
-    private static PictureCropFragment findFragmentFromActivity(@NonNull Activity activity) {
-        return (PictureCropFragment) activity.getFragmentManager().findFragmentByTag(TAG);
+    private static CropperFragment findFragmentFromActivity(@NonNull Activity activity) {
+        return (CropperFragment) activity.getFragmentManager().findFragmentByTag(TAG);
     }
 
     private File mTempFile;
     private Context mContext;
     private CropConfig mConfig;
-    private CropCallback mCropCallback;
+    private CropperCallback mCropperCallback;
 
     @Override
     public void onAttach(Context context) {
@@ -85,9 +86,9 @@ public class PictureCropFragment extends Fragment {
     /**
      * 开始裁剪
      */
-    public void cropPicture(CropConfig config, CropCallback callback) {
+    public void cropPicture(CropConfig config, CropperCallback callback) {
         this.mConfig = config;
-        this.mCropCallback = callback;
+        this.mCropperCallback = callback;
         // Create temp file associated with crop function.
         mTempFile = FileUtil.createTempFileByDestDirectory(config.getCropDirectoryPath());
         // Get URI associated with target file.
@@ -103,7 +104,7 @@ public class PictureCropFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK || null == mCropCallback) {
+        if (resultCode != Activity.RESULT_OK || null == mCropperCallback) {
             return;
         }
         switch (requestCode) {
@@ -113,13 +114,13 @@ public class PictureCropFragment extends Fragment {
                     File destFile = FileUtil.createCropDestFile(mConfig.getCropDirectoryPath());
                     PictureUtil.doCompress(mTempFile.getAbsolutePath(), destFile.getAbsolutePath(), mConfig.getDestQuality());
                     // 回调
-                    mCropCallback.onCropComplete(destFile.getAbsolutePath());
+                    mCropperCallback.onCropComplete(destFile.getAbsolutePath());
                     // 通知文件变更
                     FileUtil.freshMediaStore(mContext, destFile);
                 } catch (Exception e) {
                     Log.e(TAG, "Picture compress failed after crop.", e);
                 } finally {
-                    mTempFile.delete(); // 删除临时文件
+                    mTempFile.delete();
                 }
                 break;
             default:
@@ -129,17 +130,28 @@ public class PictureCropFragment extends Fragment {
     }
 
     private void completion(Intent intent, CropConfig config, Uri originUri, Uri tempUri) {
-        intent.setDataAndType(originUri, "image/*");//可以选择图片类型, 如果是*表明所有类型的图片
-        intent.putExtra("crop", true);//设置可裁剪状态
-        intent.putExtra("scale", config.getAspectX() == config.getAspectY());//裁剪时是否保留图片的比例, 这里的比例是1:1
-        intent.putExtra("aspectX", config.getAspectX());// X方向上的比例
-        intent.putExtra("aspectY", config.getAspectY());// Y方向上的比例
-        intent.putExtra("outputX", config.getOutputX());// 裁剪区域的宽
-        intent.putExtra("outputY", config.getOutputY());// 裁剪区域的宽
-        intent.putExtra("return-data", false);// 是否将数据保留在Bitmap中返回, 返回的缩略图效果模糊
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());//设置输出的格式
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);// 裁剪后的保存路径, 这里的 URI 不需要区分
-        intent.putExtra("noFaceDetection", true);// 不启用人脸识别
+        // 可以选择图片类型, 如果是*表明所有类型的图片
+        intent.setDataAndType(originUri, "image/*");
+        // 设置可裁剪状态
+        intent.putExtra("crop", true);
+        // 裁剪时是否保留图片的比例, 这里的比例是1:1
+        intent.putExtra("scale", config.getAspectX() == config.getAspectY());
+        // X方向上的比例
+        intent.putExtra("aspectX", config.getAspectX());
+        // Y方向上的比例
+        intent.putExtra("aspectY", config.getAspectY());
+        // 裁剪区域的宽
+        intent.putExtra("outputX", config.getOutputX());
+        // 裁剪区域的宽
+        intent.putExtra("outputY", config.getOutputY());
+        // 是否将数据保留在Bitmap中返回, 返回的缩略图效果模糊
+        intent.putExtra("return-data", false);
+        // 设置输出的格式
+        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        // 裁剪后的保存路径, 这里的 URI 不需要区分
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
+        // 不启用人脸识别
+        intent.putExtra("noFaceDetection", true);
         // 安卓 6.0 以上版本添加读写权限请求
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

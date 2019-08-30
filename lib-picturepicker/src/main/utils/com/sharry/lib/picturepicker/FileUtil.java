@@ -6,10 +6,11 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import androidx.core.content.FileProvider;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,21 +24,21 @@ import java.util.Locale;
  * @version 1.0
  * @since 2018/9/22 17:39
  */
-public class FileUtil {
+class FileUtil {
 
     private static final String TAG = FileUtil.class.getSimpleName();
 
     /**
      * 刷新文件管理器
      */
-    public static void freshMediaStore(Context context, File file) {
+    static void freshMediaStore(Context context, File file) {
         MediaScanner.refresh(context, file);
     }
 
     /**
      * 获取 URI
      */
-    public static Uri getUriFromFile(Context context, String authority, File file) {
+    static Uri getUriFromFile(Context context, String authority, File file) {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
                 FileProvider.getUriForFile(context, authority, file) : Uri.fromFile(file);
     }
@@ -45,7 +46,7 @@ public class FileUtil {
     /**
      * 创建默认文件目录(包名的最后一个字段/系统相册的目录)
      */
-    public static File createDefaultDirectory(Context context) {
+    static File createDefaultDirectory(Context context) {
         // 获取默认路径
         File defaultDir = TextUtils.isEmpty(getDefaultName(context)) ?
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
@@ -60,15 +61,19 @@ public class FileUtil {
      * @param directoryPath 目标文件路径
      * @return 创建的文件
      */
-    public static File createTempFileByDestDirectory(String directoryPath) {
+    static File createTempFileByDestDirectory(String directoryPath) {
         // 获取临时文件目录
         File tempDirectory = new File(directoryPath);
-        if (!tempDirectory.exists()) tempDirectory.mkdirs();
+        if (!tempDirectory.exists()) {
+            tempDirectory.mkdirs();
+        }
         // 创建临时文件
         String tempFileName = "temp_file_" + DateFormat.format("yyyyMMdd_HHmmss", Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File tempFile = new File(tempDirectory, tempFileName);
         try {
-            if (tempFile.exists()) tempFile.delete();
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
             tempFile.createNewFile();
             Log.i(TAG, "create temp file directory success -> " + tempFile.getAbsolutePath());
         } catch (IOException e) {
@@ -82,10 +87,12 @@ public class FileUtil {
      *
      * @param directoryPath 文件目录路径
      */
-    public static File createCameraDestFile(String directoryPath) {
+    static File createCameraDestFile(String directoryPath) {
         // 获取默认路径
         File dir = new File(directoryPath);
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
         // 创建拍照目标文件
         String fileName = "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
@@ -105,16 +112,20 @@ public class FileUtil {
      *
      * @param directoryPath 文件目录路径
      */
-    public static File createCropDestFile(String directoryPath) {
+    static File createCropDestFile(String directoryPath) {
         // 获取默认路径
         File dir = new File(directoryPath);
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
         // 创建拍照目标文件
         String fileName = "crop_" + DateFormat.format("yyyyMMdd_HHmmss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File cropFile = new File(dir, fileName);
         try {
-            if (cropFile.exists()) cropFile.delete();
+            if (cropFile.exists()) {
+                cropFile.delete();
+            }
             cropFile.createNewFile();
             Log.i(TAG, "create crop file success -> " + cropFile.getAbsolutePath());
         } catch (IOException e) {
@@ -126,7 +137,7 @@ public class FileUtil {
     /**
      * 创建默认的 FileProvider 的 Authority
      */
-    public static String getDefaultFileProviderAuthority(Context context) {
+    static String getDefaultFileProviderAuthority(Context context) {
         return context.getPackageName() + ".FileProvider";
     }
 

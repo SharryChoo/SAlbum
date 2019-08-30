@@ -13,7 +13,7 @@ import java.util.Collection;
  * @version 1.0
  * @since 3/29/2019 2:14 PM
  */
-public final class Preconditions {
+final class Preconditions {
 
     private Preconditions() {
         // Utility class.
@@ -26,12 +26,12 @@ public final class Preconditions {
     }
 
     @NonNull
-    public static <T> T checkNotNull(@Nullable T arg) {
+    static <T> T checkNotNull(@Nullable T arg) {
         return checkNotNull(arg, "Argument must not be null");
     }
 
     @NonNull
-    public static <T> T checkNotNull(@Nullable T arg, @NonNull String message) {
+    static <T> T checkNotNull(@Nullable T arg, @NonNull String message) {
         if (arg == null) {
             throw new NullPointerException(message);
         }
@@ -39,7 +39,7 @@ public final class Preconditions {
     }
 
     @NonNull
-    public static String checkNotEmpty(@Nullable String string) {
+    static String checkNotEmpty(@Nullable String string) {
         if (TextUtils.isEmpty(string)) {
             throw new IllegalArgumentException("Must not be null or empty");
         }
@@ -47,7 +47,7 @@ public final class Preconditions {
     }
 
     @NonNull
-    public static <T extends Collection<Y>, Y> T checkNotEmpty(@NonNull T collection) {
+    static <T extends Collection<Y>, Y> T checkNotEmpty(@NonNull T collection) {
         if (collection.isEmpty()) {
             throw new IllegalArgumentException("Must not be empty.");
         }

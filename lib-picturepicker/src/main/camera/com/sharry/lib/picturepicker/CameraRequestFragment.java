@@ -129,13 +129,13 @@ public class CameraRequestFragment extends Fragment {
      * 处理裁剪
      */
     private void performCropPicture(String cameraFilePath) {
-        CropRequestManager.with(mContext)
+        CropperManager.with(mContext)
                 .setConfig(
                         mConfig.getCropConfig().rebuild()
                                 .setOriginFile(cameraFilePath)// 需要裁剪的文件路径
                                 .build()
                 )
-                .crop(new CropCallback() {
+                .crop(new CropperCallback() {
                     @Override
                     public void onCropComplete(@NonNull String path) {
                         mCameraCallback.onCameraTakeComplete(path);

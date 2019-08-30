@@ -22,7 +22,7 @@ import java.util.List;
  * @version 1.3
  * @since 2018/9/1 10:19
  */
-public class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
+class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHolder> {
 
     private final Context mContext;
     private final PickerConfig mConfig;
@@ -39,7 +39,7 @@ public class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHold
         }
     };
 
-    public interface AdapterInteraction {
+    interface AdapterInteraction {
 
         boolean onPictureChecked(String uri);
 
@@ -50,7 +50,7 @@ public class PictureAdapter extends RecyclerView.Adapter<PictureAdapter.ViewHold
         void onCameraClicked();
     }
 
-    public PictureAdapter(Context context, PickerConfig config, List<String> displayPaths, List<String> userPickedPaths) {
+    PictureAdapter(Context context, PickerConfig config, List<String> displayPaths, List<String> userPickedPaths) {
         if (context instanceof AdapterInteraction) {
             this.mInteraction = (AdapterInteraction) context;
         } else {

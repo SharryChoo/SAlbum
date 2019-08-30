@@ -1,9 +1,10 @@
 package com.sharry.lib.picturepicker;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
 
 /**
  * PicturePicker 加载图片的工具类
@@ -12,7 +13,7 @@ import android.widget.ImageView;
  * @version 1.0
  * @since 2018/6/21 16:19
  */
-public class PictureLoader {
+class PictureLoader {
 
     private static final String TAG = PictureLoader.class.getSimpleName();
     private static IPictureLoaderEngine sEngine;
@@ -22,13 +23,14 @@ public class PictureLoader {
         sEngine = engine;
     }
 
-    public static IPictureLoaderEngine getPictureLoader() {
+    static IPictureLoaderEngine getPictureLoader() {
         return sEngine;
     }
 
-    public static void load(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
+    static void load(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "PictureLoader.load -> please invoke PictureLoader.setPictureLoader first");
+            return;
         }
         sEngine.load(context, uri, imageView);
     }

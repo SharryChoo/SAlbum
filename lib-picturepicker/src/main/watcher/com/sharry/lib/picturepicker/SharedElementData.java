@@ -24,17 +24,17 @@ class SharedElementData implements Parcelable {
         return result;
     }
 
-    public int startX;
-    public int startY;
-    public int width;
-    public int height;
-    public int sharedPosition;
+    int startX;
+    int startY;
+    int width;
+    int height;
+    int sharedPosition;
 
     private SharedElementData() {
 
     }
 
-    protected SharedElementData(Parcel in) {
+    SharedElementData(Parcel in) {
         startX = in.readInt();
         startY = in.readInt();
         width = in.readInt();

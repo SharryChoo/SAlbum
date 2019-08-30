@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/1 10:17
  */
-public class PicturePickerPresenter implements PicturePickerContract.IPresenter, CameraCallback, CropCallback, WatcherCallback {
+public class PicturePickerPresenter implements PicturePickerContract.IPresenter, CameraCallback, CropperCallback, WatcherCallback {
 
     private static final String TAG = PicturePickerPresenter.class.getSimpleName();
     private final PicturePickerContract.IView mView;                                                // View associated with this presenter.
@@ -112,7 +112,7 @@ public class PicturePickerPresenter implements PicturePickerContract.IPresenter,
             return;
         }
         // 需要裁剪, 则启动裁剪
-        CropRequestManager.with((Context) mView)
+        CropperManager.with((Context) mView)
                 .setConfig(
                         mPickerConfig.getCropConfig().rebuild()
                                 .setOriginFile(mModel.getPickedPaths().get(0))

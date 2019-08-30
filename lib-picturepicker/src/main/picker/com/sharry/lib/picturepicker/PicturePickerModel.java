@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-import com.sharry.lib.picturepicker.R;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,14 +19,14 @@ import java.util.HashMap;
  * @version 1.2
  * @since 2018/8/30 20:00
  */
-public class PicturePickerModel implements PicturePickerContract.IModel {
+class PicturePickerModel implements PicturePickerContract.IModel {
 
     private final ArrayList<String> mPickedPaths;                           // 用户已选中的图片地址集合(默认构造为空)
     private final ArrayList<String> mDisplayPaths = new ArrayList<>();      // 当前需要展示的集合
     private ArrayList<PictureFolder> mPictureFolders;                       // 所有包含图片数据的集合
     private PictureFolder mCheckedFolder;                                   // 当前正在展示的文件夹
 
-    public PicturePickerModel(ArrayList<String> pickedPaths, int threshold) {
+    PicturePickerModel(ArrayList<String> pickedPaths, int threshold) {
         mPickedPaths = pickedPaths;
         // 验证一下阈值是否异常
         if (getPickedPaths().size() > threshold) {
@@ -98,8 +98,8 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * 添加用户选中的图片
      */
     @Override
-    public void addPickedPicture(String path) {
-        if (mPickedPaths.indexOf(path) == -1) {
+    public void addPickedPicture(@NonNull String path) {
+        if (!mPickedPaths.contains(path)) {
             mPickedPaths.add(path);
         }
     }
@@ -108,9 +108,13 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
      * 移除用户选中的图片
      */
     @Override
-    public void removePickedPicture(String path) {
-        if (mPickedPaths.indexOf(path) == -1) return;
-        mPickedPaths.remove(path);
+    public void removePickedPicture(@NonNull String path) {
+        if (mPickedPaths.indexOf(path) == -1) {
+            return;
+        }
+        if (!mPickedPaths.contains(path)) {
+            mPickedPaths.remove(path);
+        }
     }
 
     @Override
@@ -177,7 +181,9 @@ public class PicturePickerModel implements PicturePickerContract.IModel {
             } catch (Exception e) {
                 mListener.onFailed(e);
             } finally {
-                if (cursor != null) cursor.close();
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
             mListener.onComplete(pictureFolders);
         }

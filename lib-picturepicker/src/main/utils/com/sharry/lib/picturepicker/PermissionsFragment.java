@@ -1,4 +1,4 @@
-package com.sharry.lib.picturepicker.permission;
+package com.sharry.lib.picturepicker;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;

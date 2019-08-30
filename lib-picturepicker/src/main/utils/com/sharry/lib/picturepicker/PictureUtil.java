@@ -17,12 +17,12 @@ import java.io.IOException;
  * @version 1.0
  * @since 2018/9/18 16:23
  */
-public class PictureUtil {
+class PictureUtil {
 
     /**
      * 图片压缩
      */
-    public static void doCompress(String originPath, String destPath, int quality) throws IOException {
+    static void doCompress(String originPath, String destPath, int quality) throws IOException {
         if (TextUtils.isEmpty(originPath)) {
             throw new IllegalArgumentException("PictureUtil.doCompress -> parameter originFilePath must not be null!");
         }

@@ -9,9 +9,6 @@ import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
-import com.sharry.lib.picturepicker.permission.PermissionsCallback;
-import com.sharry.lib.picturepicker.permission.PermissionsUtil;
-
 import java.util.ArrayList;
 
 /**

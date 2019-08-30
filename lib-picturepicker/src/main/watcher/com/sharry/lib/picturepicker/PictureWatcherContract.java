@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Version: 1.0
  * Description: PicturePicture MVP 的约束
  */
-public interface PictureWatcherContract {
+interface PictureWatcherContract {
 
     interface IView {
         /**

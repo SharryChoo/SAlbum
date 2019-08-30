@@ -1,4 +1,4 @@
-package com.sharry.lib.picturepicker.permission;
+package com.sharry.lib.picturepicker;
 
 /**
  * 权限请求的回调
@@ -7,6 +7,8 @@ package com.sharry.lib.picturepicker.permission;
  * @version 1.0
  * @since 2018/1/5 16:22
  */
-public interface PermissionsCallback {
+interface PermissionsCallback {
+
     void onResult(boolean granted);
+
 }

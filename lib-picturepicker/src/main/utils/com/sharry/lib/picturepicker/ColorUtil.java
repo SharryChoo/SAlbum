@@ -9,7 +9,7 @@ import androidx.annotation.ColorInt;
  * @version 1.0
  * @since 2018/9/22 17:39
  */
-public class ColorUtil {
+class ColorUtil {
 
     /**
      * Get ARGB color range in [primitiveColor, destColor]
@@ -18,7 +18,7 @@ public class ColorUtil {
      * @param primitiveColor color associated with primitive changed
      * @param destColor      color associated with dest changed
      */
-    public static int gradualChanged(float fraction, @ColorInt int primitiveColor, @ColorInt int destColor) {
+    static int gradualChanged(float fraction, @ColorInt int primitiveColor, @ColorInt int destColor) {
         int startInt = (Integer) primitiveColor;
         float startA = ((startInt >> 24) & 0xff) / 255.0f;
         float startR = ((startInt >> 16) & 0xff) / 255.0f;

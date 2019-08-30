@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 2019/3/15 21:56
  */
-public class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, WatcherPreviewAdapter.AdapterInteraction {
+class PictureWatcherPresenter implements PictureWatcherContract.IPresenter, WatcherPreviewAdapter.AdapterInteraction {
 
     /**
      * Final fields.
@@ -31,7 +31,7 @@ public class PictureWatcherPresenter implements PictureWatcherContract.IPresente
     private String mCurDisplayPath;
     private boolean mIsEnsurePressed = false;
 
-    public PictureWatcherPresenter(PictureWatcherContract.IView view, WatcherConfig config, SharedElementData sharedElementData) {
+    PictureWatcherPresenter(PictureWatcherContract.IView view, WatcherConfig config, SharedElementData sharedElementData) {
         this.mView = view;
         this.mConfig = config;
         this.mSharedElementData = sharedElementData;

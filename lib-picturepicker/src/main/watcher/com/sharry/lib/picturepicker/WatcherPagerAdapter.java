@@ -1,22 +1,24 @@
 package com.sharry.lib.picturepicker;
 
-import androidx.viewpager.widget.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.viewpager.widget.PagerAdapter;
 
 import java.util.List;
 
 /**
- * Created by Sharry on 2018/5/28.
- * Email: SharryChooCHN@Gmail.com
- * Version: 1.0
- * Description: 图片查看器的 Adapter
+ * 图片查看器的 Adapter
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 2019-08-30 09:28
  */
-public class WatcherPagerAdapter extends PagerAdapter {
+class WatcherPagerAdapter extends PagerAdapter {
 
     private List<? extends View> mViews;
 
-    public WatcherPagerAdapter(List<? extends View> children) {
+    WatcherPagerAdapter(List<? extends View> children) {
         this.mViews = children;
     }
 

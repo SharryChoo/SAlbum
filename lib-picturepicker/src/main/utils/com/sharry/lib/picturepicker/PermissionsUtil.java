@@ -1,12 +1,10 @@
-package com.sharry.lib.picturepicker.permission;
+package com.sharry.lib.picturepicker;
 
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
-
-import com.sharry.lib.picturepicker.ActivityStateUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +17,7 @@ import java.util.List;
  * @version 1.0
  * @since 2018/1/5 16:23
  */
-public class PermissionsUtil {
+class PermissionsUtil {
 
     public static final String TAG = PermissionsUtil.class.getSimpleName();
     private PermissionsFragment mPermissionsFragment;
