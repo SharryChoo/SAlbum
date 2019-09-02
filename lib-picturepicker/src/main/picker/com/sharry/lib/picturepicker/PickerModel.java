@@ -2,13 +2,17 @@ package com.sharry.lib.picturepicker;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -176,8 +180,8 @@ class PickerModel implements PickerContract.IModel {
             folderModels.add(allFolderModel);
             // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
             HashMap<String, FolderModel> caches = new HashMap<>();
-            scanPictures(allFolderModel, caches);
-            scanVideos(allFolderModel, caches);
+            fetchPictures(allFolderModel, caches);
+            fetchVideos(allFolderModel, caches);
             folderModels.addAll(caches.values());
             mListener.onComplete(folderModels);
         }
@@ -185,7 +189,7 @@ class PickerModel implements PickerContract.IModel {
         /**
          * 获取所有图片资源信息
          */
-        private void scanPictures(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
+        private void fetchPictures(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
             Cursor cursor = createImageCursor();
             try {
                 if (cursor != null && cursor.getCount() > 0) {
@@ -225,7 +229,7 @@ class PickerModel implements PickerContract.IModel {
         /**
          * 获取所有视频资源信息
          */
-        private void scanVideos(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
+        private void fetchVideos(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
             Cursor cursor = createVideoCursor();
             try {
                 if (cursor != null && cursor.getCount() > 0) {
@@ -239,6 +243,8 @@ class PickerModel implements PickerContract.IModel {
                         meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                         meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
                         meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                        long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                        meta.thumbNailPath = fetchVideoThumbNail(id, path, meta.date);
                         // 添加到所有图片的目录下
                         allFolderModel.addMeta(meta);
                         // 获取图片父文件夹路径
@@ -265,6 +271,29 @@ class PickerModel implements PickerContract.IModel {
         }
 
         /**
+         * 获取视频缩略图地址
+         */
+        @Nullable
+        private String fetchVideoThumbNail(long id, String path, long date) {
+            String thumbNailPath = null;
+            Cursor cursor = createThumbNailCursor(id);
+            try {
+                if (cursor != null && cursor.getCount() > 0) {
+                    while (cursor.moveToNext()) {
+                        thumbNailPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
+                    }
+                }
+                // 若没有视频缩略图, 则获取视频第一帧
+                if (TextUtils.isEmpty(thumbNailPath)) {
+                    thumbNailPath = generateThumbNail(path, date);
+                }
+            } catch (Throwable throwable) {
+                // ignore.
+            }
+            return thumbNailPath;
+        }
+
+        /**
          * Create image cursor associated with this runnable.
          */
         private Cursor createImageCursor() {
@@ -285,6 +314,7 @@ class PickerModel implements PickerContract.IModel {
         private Cursor createVideoCursor() {
             Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{
+                    MediaStore.Video.Media._ID,
                     MediaStore.Video.Media.DATA,
                     MediaStore.Video.Media.DURATION,
                     MediaStore.Video.Media.DATE_ADDED,
@@ -313,6 +343,66 @@ class PickerModel implements PickerContract.IModel {
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return mContext.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
+        }
+
+        private Cursor createThumbNailCursor(long id) {
+            Uri uri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
+            String[] projection = new String[]{
+                    MediaStore.Video.Thumbnails.DATA,
+                    MediaStore.Video.Thumbnails.VIDEO_ID
+            };
+            String selection = MediaStore.Video.Thumbnails.VIDEO_ID + "=?";
+            String[] selectionArgs = new String[]{String.valueOf(id)};
+            return mContext.getContentResolver().query(uri, projection, selection,
+                    selectionArgs, null);
+        }
+
+        private String generateThumbNail(String videoPath, long videoCreateDate) throws Exception {
+            // 将第一帧缓存到本地
+            File videoThumbNailFile = FileUtil.createVideoThumbnailFile(mContext, videoCreateDate);
+            if (videoThumbNailFile.exists()) {
+                return videoThumbNailFile.getAbsolutePath();
+            } else {
+                videoThumbNailFile.createNewFile();
+            }
+            // 获取 video 第一帧
+            Bitmap bitmap = createVideoThumbnail(videoPath);
+            if (bitmap != null) {
+                FileOutputStream fos = new FileOutputStream(videoThumbNailFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
+                fos.flush();
+            }
+            return videoThumbNailFile.getAbsolutePath();
+        }
+
+        private Bitmap createVideoThumbnail(String videoPath) {
+            Bitmap bitmap = null;
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            try {
+                retriever.setDataSource(videoPath);
+                bitmap = retriever.getFrameAtTime(0);
+            } catch (Throwable throwable) {
+                // ignore.
+            } finally {
+                try {
+                    retriever.release();
+                } catch (Throwable throwable) {
+                    // ignore.
+                }
+            }
+            // 若 bitmap 过大, 则进行缩放
+            if (bitmap != null) {
+                int width = bitmap.getWidth();
+                int height = bitmap.getHeight();
+                int max = Math.max(width, height);
+                if (max > 512) {
+                    float scale = 512f / max;
+                    int w = Math.round(scale * width);
+                    int h = Math.round(scale * height);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true);
+                }
+            }
+            return bitmap;
         }
 
         /**

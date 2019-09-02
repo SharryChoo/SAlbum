@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
@@ -42,6 +43,7 @@ public class MediaMeta implements Parcelable {
     /**
      * 视频缩略图
      */
+    @Nullable
     String thumbNailPath;
 
     /**

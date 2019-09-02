@@ -51,8 +51,14 @@ class FileUtil {
         File defaultDir = TextUtils.isEmpty(getDefaultName(context)) ?
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
                 new File(Environment.getExternalStorageDirectory(), getDefaultName(context));
-        if (!defaultDir.exists()) defaultDir.mkdirs();
+        if (!defaultDir.exists()) {
+            defaultDir.mkdirs();
+        }
         return defaultDir;
+    }
+
+    static File createVideoThumbnailFile(Context context, long videoId) {
+        return new File(context.getCacheDir(), "VideoThumbnail_" + videoId + ".jpg");
     }
 
     /**

@@ -3,6 +3,7 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -183,7 +185,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         PictureLoader.load(mContext, meta.path, holder.ivPicture);
         // 判断当前 uri 是否被选中了
-        final int index = mUserPickedPaths.indexOf(meta.path);
+        final int index = mUserPickedPaths.indexOf(meta);
         // 设置点击监听
         holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
@@ -196,15 +198,21 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void bindVideoItem(final VideoViewHolder holder, final MediaMeta meta) {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        PictureLoader.load(mContext, meta.thumbNailPath, holder.ivPicture);
+        // 展示视频缩略图
+        if (TextUtils.isEmpty(meta.thumbNailPath)) {
+            holder.ivPicture.setImageResource(R.drawable.picture_picker_picker_video_default);
+        } else {
+            assert meta.thumbNailPath != null;
+            PictureLoader.load(mContext, meta.thumbNailPath, holder.ivPicture);
+        }
         // 判断当前 uri 是否被选中了
-        final int index = mUserPickedPaths.indexOf(meta.path);
+        final int index = mUserPickedPaths.indexOf(meta);
         // 设置点击监听
         holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
         holder.checkIndicator.setText(String.valueOf(index + 1));
         // 设置时长
-        holder.tvDuration.setText(meta.duration + "ms");
+        holder.tvDuration.setText(MessageFormat.format("{0}ms", meta.duration));
     }
 
     /**

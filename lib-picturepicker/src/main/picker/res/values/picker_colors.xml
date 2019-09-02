@@ -6,5 +6,6 @@
     <color name="picture_picker_picker_bottom_menu_nav_text_collapsed_color">#ffffffff</color>
     <color name="picture_picker_picker_bottom_menu_navi_text_expand_color">#ff333333</color>
     <color name="picture_picker_picker_bottom_menu_content_folders_bg_color">#ffffffff</color>
+    <color name="picture_picker_picker_recycle_item_video_bg">#A9313131</color>
 
 </resources>

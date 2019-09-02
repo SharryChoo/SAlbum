@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,7 +11,15 @@
         android:id="@+id/iv_picture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:foreground="?attr/selectableItemBackgroundBorderless" />
+        android:src="@drawable/picture_picker_picker_video_default" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/picture_picker_picker_recycle_item_video_bg"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/picture_picker_picker_video_play" />
 
     <com.sharry.lib.picturepicker.CheckedIndicatorView
         android:id="@+id/check_indicator"
@@ -25,6 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:padding="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="13dp"
         tool:text="15:00" />
 
 </FrameLayout>
