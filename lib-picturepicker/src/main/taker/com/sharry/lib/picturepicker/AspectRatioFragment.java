@@ -36,15 +36,15 @@ import com.sharry.lib.camera.AspectRatio;
 /**
  * A simple dialog that allows user to pick an aspect ratio.
  */
-class AspectRatioFragment extends DialogFragment {
+public class AspectRatioFragment extends DialogFragment {
 
     private static final String ARG_ASPECT_RATIOS = "aspect_ratios";
     private static final String ARG_CURRENT_ASPECT_RATIO = "current_aspect_ratio";
 
     private Listener mListener;
 
-    public static AspectRatioFragment newInstance(AspectRatio[] ratios,
-                                                  AspectRatio currentRatio) {
+    static AspectRatioFragment newInstance(AspectRatio[] ratios,
+                                           AspectRatio currentRatio) {
         final AspectRatioFragment fragment = new AspectRatioFragment();
         final Bundle args = new Bundle();
         args.putParcelableArray(ARG_ASPECT_RATIOS, ratios);
