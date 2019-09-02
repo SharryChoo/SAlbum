@@ -74,7 +74,7 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
             } else {
                 Log.i(TAG, "Record file delete failed.");
             }
-            FileUtil.notifyFileDeleted(mContext, mOutputFile.getAbsolutePath());
+            FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
         }
         mOutputFile = null;
     }

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.MediaStore;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -42,67 +42,14 @@ class FileUtil {
         return file;
     }
 
-    static void notifyNewFileCreated(Context context, File file) {
-        FileScanner.refresh(context, file);
-    }
-
-    static void notifyFileDeleted(Context context, String filePath) {
+    static void notifyMediaStore(Context context, String filePath) {
         if (TextUtils.isEmpty(filePath)) {
             return;
         }
-        try {
-            String where = MediaStore.Audio.Media.DATA + " like \"" + filePath;
-            context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, where, null);
-        } catch (Throwable throwable) {
-            // ignore.
-        }
-    }
-
-    static class FileScanner implements MediaScannerConnection.MediaScannerConnectionClient {
-
-        private static final String TAG = FileScanner.class.getSimpleName();
-
-        static void refresh(Context context, File file) {
-            // 4.0 以上的系统使用 FileScanner 更新
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                new FileScanner(context, file);
-            } else {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                intent.setData(Uri.fromFile(file));
-                context.sendBroadcast(intent);
-            }
-        }
-
-        private File mFile;
-        private MediaScannerConnection mMsc;
-
-        private FileScanner(Context context, File file) {
-            this.mFile = file;
-            if (verify()) {
-                this.mMsc = new MediaScannerConnection(context, this);
-                mMsc.connect();
-            }
-        }
-
-        @Override
-        public void onMediaScannerConnected() {
-            mMsc.scanFile(mFile.getAbsolutePath(), null);
-        }
-
-        @Override
-        public void onScanCompleted(String path, Uri uri) {
-            mMsc.disconnect();
-        }
-
-        /**
-         * 验证文件的合法性
-         */
-        private boolean verify() {
-            if (mFile == null || !mFile.exists()) {
-                Log.e(TAG, "Verify failed, scanner target file not exist!");
-                return false;
-            }
-            return true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            MediaScannerConnection.scanFile(context, new String[]{filePath}, null, null);
+        } else {
+            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
     }
 

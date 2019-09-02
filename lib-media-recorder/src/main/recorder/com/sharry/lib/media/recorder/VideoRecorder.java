@@ -171,7 +171,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         // 回调音频完成
         mAudio.complete();
         // 在文件管理器中刷新生成的文件
-        FileUtil.notifyNewFileCreated(mContext, mOutputFile);
+        FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
         mCallback.onComplete(mOutputFile);
         // 释放资源
         release();

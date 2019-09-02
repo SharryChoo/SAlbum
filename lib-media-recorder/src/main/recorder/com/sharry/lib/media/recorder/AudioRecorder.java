@@ -164,10 +164,11 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         // 停止录制
         mProvider.stop();
         // 在文件管理器中刷新生成的文件
-        FileUtil.notifyNewFileCreated(mContext, mOutputFile);
-        // 回调录制完成
-        mCallback.onComplete(mOutputFile);
-        // 释放资源
+        if (mOutputFile != null) {
+            FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
+            // 回调录制完成
+            mCallback.onComplete(mOutputFile);
+        }
         release();
     }
 
