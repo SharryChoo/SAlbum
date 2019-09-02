@@ -242,7 +242,7 @@ class PickerModel implements PickerContract.IModel {
                 meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
                 // 获取缩略图
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                meta.thumbNailPath = fetchVideoThumbNail(id, path, meta.date);
+                meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
                 // 添加到所有图片的目录下
                 allFolderModel.addMeta(meta);
                 // 获取图片父文件夹路径

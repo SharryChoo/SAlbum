@@ -159,8 +159,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
     }
 
     @Override
-    public void onCameraTakeComplete(@NonNull String path) {
-        MediaMeta newMeta = MediaMeta.create(path, true);
+    public void onCameraTakeComplete(@NonNull MediaMeta newMeta) {
         // 1. 添加到 <当前展示> 的文件夹下
         FolderModel checkedFolder = mModel.getCheckedFolder();
         checkedFolder.getMetas().add(0, newMeta);

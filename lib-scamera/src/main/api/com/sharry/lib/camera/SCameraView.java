@@ -259,7 +259,6 @@ public class SCameraView extends FrameLayout implements
      */
     @Nullable
     public Bitmap takePicture() {
-        stopPreview();
         return mPreviewer.getBitmap();
     }
 

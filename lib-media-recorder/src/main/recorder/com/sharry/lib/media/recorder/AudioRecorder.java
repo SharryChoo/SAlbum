@@ -1,5 +1,6 @@
 package com.sharry.lib.media.recorder;
 
+import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.util.Log;
@@ -32,8 +33,8 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
     private final File mOutputFile;
     private IAudioEncoder.Callback mEncodeCallback;
 
-    AudioRecorder(AudioOptions options, IRecorderCallback callback) {
-        super(callback);
+    AudioRecorder(Context context, AudioOptions options, IRecorderCallback callback) {
+        super(context, callback);
         this.mOptions = options;
         // 创建 PCM 数据提供者
         this.mProvider = options.getPcmProvider();
@@ -162,6 +163,8 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         }
         // 停止录制
         mProvider.stop();
+        // 在文件管理器中刷新生成的文件
+        FileUtil.notifyNewFileCreated(mContext, mOutputFile);
         // 回调录制完成
         mCallback.onComplete(mOutputFile);
         // 释放资源
@@ -181,19 +184,6 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             // ignore.
         }
         isRecording = false;
-    }
-
-    /**
-     * 执行录制文件的删除
-     */
-    private void performRecordFileDelete() {
-        if (mOutputFile != null && mOutputFile.exists()) {
-            if (mOutputFile.delete()) {
-                Log.i(TAG, "Record file deleted.");
-            } else {
-                Log.i(TAG, "Record file delete failed.");
-            }
-        }
     }
 
 }

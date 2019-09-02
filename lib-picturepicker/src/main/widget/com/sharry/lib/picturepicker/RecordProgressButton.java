@@ -35,8 +35,8 @@ public class RecordProgressButton extends View {
     private RectF mRect = new RectF();
     private int mInnerRadius;
     private int mOuterRadius;
-    private int mMaxDuration = 100;
-    private int mCurDuration = 0;
+    private long mMaxDuration = 100;
+    private long mCurDuration = 0;
 
     private RecordListener mRecordListener;
     private boolean mIsRecording = false;
@@ -112,7 +112,7 @@ public class RecordProgressButton extends View {
         super.onDraw(canvas);
         // 绘制外部圆环
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(ContextCompat.getColor(getContext(), R.color.picture_picker_base_gray));
+        mPaint.setColor(ContextCompat.getColor(getContext(), R.color.picture_picker_widget_record_progress_outer_corner_gray));
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, mOuterRadius, mPaint);
         // 绘制内部圆环
         mPaint.setColor(Color.WHITE);
@@ -137,14 +137,14 @@ public class RecordProgressButton extends View {
     /**
      * 设置录制的最大时长
      */
-    public void setMaxProgress(int maxDuration) {
+    public void setMaxProgress(long maxDuration) {
         this.mMaxDuration = maxDuration;
     }
 
     /**
      * 设置当前录制的时长
      */
-    public void setCurrentPercent(int curDuration) {
+    public void setCurrentPercent(long curDuration) {
         if (curDuration <= mCurDuration) {
             return;
         }

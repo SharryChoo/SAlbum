@@ -37,8 +37,8 @@ public class TakerConfig implements Parcelable {
 
     private String authority;                 // fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
     private int cameraDestQuality = 80;       // 拍照后压缩的质量
-    private String cameraDirectoryPath;       // 存储文件的目录路径
-    private CropperConfig cropperConfig;            // 图片裁剪的 Config
+    private String directoryPath;             // 存储文件的目录路径
+    private CropperConfig cropperConfig;      // 图片裁剪的 Config
 
     private TakerConfig() {
 
@@ -48,7 +48,7 @@ public class TakerConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(authority);
         dest.writeInt(cameraDestQuality);
-        dest.writeString(cameraDirectoryPath);
+        dest.writeString(directoryPath);
         dest.writeParcelable(cropperConfig, flags);
     }
 
@@ -67,8 +67,8 @@ public class TakerConfig implements Parcelable {
         return cameraDestQuality;
     }
 
-    public String getCameraDirectoryPath() {
-        return cameraDirectoryPath;
+    public String getUseableDirectoryPath() {
+        return directoryPath;
     }
 
     public CropperConfig getCropperConfig() {
@@ -78,7 +78,7 @@ public class TakerConfig implements Parcelable {
     protected TakerConfig(Parcel in) {
         authority = in.readString();
         cameraDestQuality = in.readInt();
-        cameraDirectoryPath = in.readString();
+        directoryPath = in.readString();
         cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
     }
 
@@ -111,7 +111,7 @@ public class TakerConfig implements Parcelable {
          */
         public Builder setCameraDirectory(@NonNull String filePath) {
             Preconditions.checkNotEmpty(filePath);
-            this.mConfig.cameraDirectoryPath = filePath;
+            this.mConfig.directoryPath = filePath;
             return this;
         }
 

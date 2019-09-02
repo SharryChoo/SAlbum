@@ -1,5 +1,6 @@
 package com.sharry.lib.media.recorder;
 
+import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.util.Log;
@@ -7,7 +8,6 @@ import android.util.Log;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.camera.Size;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -27,12 +27,12 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
     private final IVideoEncoder mEncoder;
     private final IVideoEncoder.Context mEncodeContext;
     private final IMuxer mMuxer;
-    private final File mOutputFile;
 
-    VideoRecorder(VideoOptions options, SCameraView cameraView, IRecorderCallback callback) {
-        super(callback);
+    VideoRecorder(Context context, VideoOptions options, SCameraView cameraView, IRecorderCallback callback) {
+        super(context, callback);
         // init audio record
         this.mAudio = new AudioRecorder(
+                context,
                 options.getAudioOptions().reBuilder().setIsJustEncode(true).build(),
                 null
         );
@@ -152,10 +152,12 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             Log.e(TAG, "Not recording.");
             return;
         }
-        // 回调录制取消
+        // 回调音频取消
         mAudio.cancel();
-        mCallback.onCancel();
+        // 删除文件
         performRecordFileDelete();
+        // 回调取消
+        mCallback.onCancel();
         // 释放内存
         release();
     }
@@ -166,8 +168,10 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             Log.e(TAG, "Not recording.");
             return;
         }
-        // 回调成功
+        // 回调音频完成
         mAudio.complete();
+        // 在文件管理器中刷新生成的文件
+        FileUtil.notifyNewFileCreated(mContext, mOutputFile);
         mCallback.onComplete(mOutputFile);
         // 释放资源
         release();
@@ -180,16 +184,6 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             mMuxer.release();
         } catch (Throwable e) {
             // ignore;
-        }
-    }
-
-    private void performRecordFileDelete() {
-        if (mOutputFile != null && mOutputFile.exists()) {
-            if (mOutputFile.delete()) {
-                Log.i(TAG, "Record file deleted.");
-            } else {
-                Log.i(TAG, "Record file delete failed.");
-            }
         }
     }
 

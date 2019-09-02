@@ -19,7 +19,7 @@ public class MediaMeta implements Parcelable {
         size = in.readLong();
         date = in.readLong();
         duration = in.readLong();
-        thumbNailPath = in.readString();
+        thumbnailPath = in.readString();
         mimeType = in.readString();
     }
 
@@ -30,7 +30,7 @@ public class MediaMeta implements Parcelable {
         dest.writeLong(size);
         dest.writeLong(date);
         dest.writeLong(duration);
-        dest.writeString(thumbNailPath);
+        dest.writeString(thumbnailPath);
         dest.writeString(mimeType);
     }
 
@@ -82,7 +82,7 @@ public class MediaMeta implements Parcelable {
      * 视频缩略图
      */
     @Nullable
-    String thumbNailPath;
+    String thumbnailPath;
 
     /**
      * 媒体文件类型
@@ -133,8 +133,8 @@ public class MediaMeta implements Parcelable {
     }
 
     @Nullable
-    public String getThumbNailPath() {
-        return thumbNailPath;
+    public String getThumbnailPath() {
+        return thumbnailPath;
     }
 
     public String getMimeType() {

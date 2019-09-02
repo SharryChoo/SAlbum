@@ -69,7 +69,7 @@ public interface IAudioEncoder {
         final int perSampleSize;                        // 每个采样点的大小
         final boolean isJustEncode;                     // 只进行编码不写入文件
         final String outputFile;                        // 音频输出的文件
-        final IAudioEncoder.Callback callback;          // 视频录制的回调
+        final Callback callback;          // 视频录制的回调
 
         public Context(int sampleRate, int channelCount, int perSampleSize, boolean isJustEncode,
                        String outputFile, Callback callback) {

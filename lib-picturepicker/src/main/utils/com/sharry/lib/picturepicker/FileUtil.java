@@ -6,6 +6,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -31,7 +32,7 @@ class FileUtil {
     /**
      * 刷新文件管理器
      */
-    static void freshMediaStore(Context context, File file) {
+    static void notifyNewFileCreated(Context context, File file) {
         MediaScanner.refresh(context, file);
     }
 
@@ -159,6 +160,21 @@ class FileUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * 通知 MediaStore 文件删除了
+     */
+    static void notifyFileDeleted(Context context, String filePath) {
+        if (TextUtils.isEmpty(filePath)) {
+            return;
+        }
+        try {
+            String where = MediaStore.Audio.Media.DATA + " like \"" + filePath;
+            context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, where, null);
+        } catch (Throwable throwable) {
+            // ignore.
+        }
     }
 
     /**

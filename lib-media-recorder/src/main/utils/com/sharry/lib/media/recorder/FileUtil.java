@@ -5,13 +5,15 @@ import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-
-import androidx.annotation.NonNull;
 
 /**
  * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
@@ -40,8 +42,20 @@ class FileUtil {
         return file;
     }
 
-    static void refreshMediaStore(Context context, File file) {
+    static void notifyNewFileCreated(Context context, File file) {
         FileScanner.refresh(context, file);
+    }
+
+    static void notifyFileDeleted(Context context, String filePath) {
+        if (TextUtils.isEmpty(filePath)) {
+            return;
+        }
+        try {
+            String where = MediaStore.Audio.Media.DATA + " like \"" + filePath;
+            context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, where, null);
+        } catch (Throwable throwable) {
+            // ignore.
+        }
     }
 
     static class FileScanner implements MediaScannerConnection.MediaScannerConnectionClient {
@@ -84,7 +98,7 @@ class FileUtil {
          * 验证文件的合法性
          */
         private boolean verify() {
-            if (!mFile.exists()) {
+            if (mFile == null || !mFile.exists()) {
                 Log.e(TAG, "Verify failed, scanner target file not exist!");
                 return false;
             }

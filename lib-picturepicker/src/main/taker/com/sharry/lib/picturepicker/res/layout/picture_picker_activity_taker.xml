@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <com.sharry.lib.camera.SCameraView
-        android:id="@+id/cameraView"
+        android:id="@+id/camera_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
@@ -19,13 +19,13 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="@+id/cameraView"
-        app:layout_constraintRight_toRightOf="@id/cameraView"
-        app:layout_constraintTop_toTopOf="@+id/cameraView"
+        app:layout_constraintLeft_toLeftOf="@+id/camera_view"
+        app:layout_constraintRight_toRightOf="@id/camera_view"
+        app:layout_constraintTop_toTopOf="@+id/camera_view"
         app:statusBarStyle="Transparent" />
 
     <com.sharry.lib.picturepicker.RecordProgressButton
-        android:id="@+id/recordButton"
+        android:id="@+id/btn_record"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginBottom="25dp"
@@ -34,39 +34,39 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
-        android:id="@+id/ivTakePicture"
+        android:id="@+id/iv_picture_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter" />
 
     <com.sharry.lib.media.player.SVideoView
-        android:id="@+id/videoView"
+        android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible"
         tool:visibility="visible" />
 
     <ImageView
-        android:id="@+id/ivDenied"
+        android:id="@+id/iv_denied"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@id/recordButton"
-        app:layout_constraintEnd_toStartOf="@id/recordButton"
+        app:layout_constraintBottom_toBottomOf="@id/btn_record"
+        app:layout_constraintEnd_toStartOf="@id/btn_record"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/recordButton"
+        app:layout_constraintTop_toTopOf="@id/btn_record"
         app:srcCompat="@drawable/ic_activity_video_record_denied"
         tool:visibility="visible" />
 
     <ImageView
-        android:id="@+id/ivGranted"
+        android:id="@+id/iv_granted"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@id/recordButton"
+        app:layout_constraintBottom_toBottomOf="@id/btn_record"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/recordButton"
-        app:layout_constraintTop_toTopOf="@id/recordButton"
+        app:layout_constraintStart_toEndOf="@id/btn_record"
+        app:layout_constraintTop_toTopOf="@id/btn_record"
         app:srcCompat="@drawable/ic_activity_video_record_granted"
         tool:visibility="visible" />
 

@@ -23,8 +23,9 @@ public class TakerManager {
     private static final String TAG = TakerManager.class.getSimpleName();
     private static String[] sRequirePermissions = {
             Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
     public static TakerManager with(@NonNull Context context) {
@@ -69,9 +70,10 @@ public class TakerManager {
                 });
     }
 
-    private void takeActual(TakerCallback callback) {
+
+    private void takeActual(final TakerCallback callback) {
         completionConfig();
-        // 2. 获取回调的 Fragment
+        // 获取回调的 Fragment
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mBind);
         if (callbackFragment == null) {
             Log.e(TAG, "Start Picture picker activity failed.");
@@ -84,21 +86,29 @@ public class TakerManager {
                     return;
                 }
                 switch (requestCode) {
-                    case PickerActivity.REQUEST_CODE:
-                        // TODO 获取拍照后的图片地址
+                    case TakerActivity.REQUEST_CODE:
+                        MediaMeta mediaMeta = data.getParcelableExtra(TakerActivity.RESULT_EXTRA_MEDIA_META);
+                        // 2. 处理图片裁剪
+                        if (mConfig.isCropSupport() && mediaMeta.isPicture) {
+                            // 进行裁剪
+                            performCropPicture(callback, mediaMeta);
+                        } else {
+                            // 3. 回调
+                            callback.onCameraTakeComplete(mediaMeta);
+                        }
                         break;
                     default:
                         break;
                 }
             }
         });
-        // TODO 启动拍照录像的 Activity
-        TakerActivity.launch(mBind, mConfig);
+        // 启动拍照录像的页面
+        TakerActivity.launchForResult(callbackFragment, mConfig);
     }
 
     private void completionConfig() {
         // 1. 若为指定照片默认输出路径, 给予指定默认的拍照路径
-        if (TextUtils.isEmpty(mConfig.getCameraDirectoryPath())) {
+        if (TextUtils.isEmpty(mConfig.getUseableDirectoryPath())) {
             mConfig.rebuild().setCameraDirectory(FileUtil.createDefaultDirectory(mBind).getAbsolutePath());
         }
         // 2. 若未指定 FileProvider 的 authority, 则给予默认值
@@ -110,7 +120,7 @@ public class TakerManager {
             // 给图片裁剪添加缺省的输出文件夹
             if (TextUtils.isEmpty(mConfig.getCropperConfig().getCropDirectoryPath())) {
                 mConfig.getCropperConfig().rebuild()
-                        .setCropDirectory(mConfig.getCameraDirectoryPath());
+                        .setCropDirectory(mConfig.getUseableDirectoryPath());
             }
             // 给图片裁剪配置缺省 authority.
             if (TextUtils.isEmpty(mConfig.getCropperConfig().getAuthority())) {
@@ -118,6 +128,22 @@ public class TakerManager {
                         .setFileProviderAuthority(mConfig.getAuthority());
             }
         }
+    }
+
+    private void performCropPicture(final TakerCallback callback, MediaMeta mediaMeta) {
+        CropperManager.with(mBind)
+                .setConfig(
+                        mConfig.getCropperConfig().rebuild()
+                                // 需要裁剪的文件路径
+                                .setOriginFile(mediaMeta.path)
+                                .build()
+                )
+                .crop(new CropperCallback() {
+                    @Override
+                    public void onCropComplete(@NonNull String path) {
+                        callback.onCameraTakeComplete(MediaMeta.create(path, true));
+                    }
+                });
     }
 
 }

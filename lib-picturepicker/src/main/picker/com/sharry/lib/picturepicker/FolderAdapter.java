@@ -55,11 +55,11 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
         if (firstMeta.isPicture) {
             PictureLoader.load(context, firstMeta.path, holder.ivPreview);
         } else {
-            if (TextUtils.isEmpty(firstMeta.thumbNailPath)) {
+            if (TextUtils.isEmpty(firstMeta.thumbnailPath)) {
                 holder.ivPreview.setImageResource(R.drawable.ic_picture_picker_picker_video_default);
             } else {
-                assert firstMeta.thumbNailPath != null;
-                PictureLoader.load(context, firstMeta.thumbNailPath, holder.ivPreview);
+                assert firstMeta.thumbnailPath != null;
+                PictureLoader.load(context, firstMeta.thumbnailPath, holder.ivPreview);
             }
         }
         holder.tvFolderName.setText(folder.getFolderName());

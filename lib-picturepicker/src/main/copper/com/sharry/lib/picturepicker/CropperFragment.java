@@ -120,11 +120,14 @@ public class CropperFragment extends Fragment {
                     // 回调
                     mCropperCallback.onCropComplete(destFile.getAbsolutePath());
                     // 通知文件变更
-                    FileUtil.freshMediaStore(mContext, destFile);
+                    FileUtil.notifyNewFileCreated(mContext, destFile);
                 } catch (Exception e) {
                     Log.e(TAG, "Picture compress failed after crop.", e);
                 } finally {
-                    mTempFile.delete();
+                    if (mTempFile != null) {
+                        mTempFile.delete();
+                        FileUtil.notifyFileDeleted(mContext, mTempFile.getAbsolutePath());
+                    }
                 }
                 break;
             default:

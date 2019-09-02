@@ -44,7 +44,7 @@ public class AudioOptions {
     private static final EncodeType.Audio DEFAULT_RECORD_TYPE = EncodeType.Audio.AAC;
     private static final IPCMProvider DEFAULT_PROVIDER = new OpenSLESPCMProvider();
 
-    public static final AudioOptions DEFAULT = new AudioOptions.Builder().build();
+    public static final AudioOptions DEFAULT = new Builder().build();
 
     /**
      * 音频的采样率

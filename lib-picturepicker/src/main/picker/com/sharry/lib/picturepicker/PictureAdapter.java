@@ -202,11 +202,11 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         // 展示视频缩略图
-        if (TextUtils.isEmpty(meta.thumbNailPath)) {
+        if (TextUtils.isEmpty(meta.thumbnailPath)) {
             holder.ivPicture.setImageResource(R.drawable.ic_picture_picker_picker_video_default);
         } else {
-            assert meta.thumbNailPath != null;
-            PictureLoader.load(mContext, meta.thumbNailPath, holder.ivPicture);
+            assert meta.thumbnailPath != null;
+            PictureLoader.load(mContext, meta.thumbnailPath, holder.ivPicture);
         }
         // 判断当前 uri 是否被选中了
         final int index = mUserPickedPaths.indexOf(meta);

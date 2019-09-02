@@ -53,7 +53,7 @@ public interface IVideoEncoder {
         final int frameRate;                            // 录制的帧率
         final int textureId;                            // Camera 的纹理 ID
         final EGLContext eglContext;                    // Camera 的 GL 上下文
-        final IVideoEncoder.Callback callback;          // 视频录制的回调
+        final Callback callback;          // 视频录制的回调
 
         public Context(int frameWidth, int frameHeight, int frameRate, int textureId,
                        EGLContext eglContext, Callback callback) {

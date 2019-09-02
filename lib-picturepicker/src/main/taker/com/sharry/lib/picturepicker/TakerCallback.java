@@ -14,8 +14,8 @@ public interface TakerCallback {
     /**
      * 拍照完成的回调
      *
-     * @param path 照片输出路径
+     * @param newMeta 照片输出路径
      */
-    void onCameraTakeComplete(@NonNull String path);
+    void onCameraTakeComplete(@NonNull MediaMeta newMeta);
 
 }

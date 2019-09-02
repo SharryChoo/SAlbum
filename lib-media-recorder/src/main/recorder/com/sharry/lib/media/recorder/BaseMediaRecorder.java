@@ -1,11 +1,13 @@
 package com.sharry.lib.media.recorder;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -17,11 +19,14 @@ import java.lang.reflect.Proxy;
  */
 abstract class BaseMediaRecorder implements IMediaRecorder {
 
-    static final String TAG = IMediaRecorder.class.getSimpleName();
-    final IRecorderCallback mCallback;
-    volatile boolean isRecording = false;
+    protected static final String TAG = IMediaRecorder.class.getSimpleName();
+    protected final Context mContext;
+    protected final IRecorderCallback mCallback;
+    protected volatile boolean isRecording = false;
+    protected File mOutputFile;
 
-    BaseMediaRecorder(final IRecorderCallback callback) {
+    BaseMediaRecorder(Context context, final IRecorderCallback callback) {
+        this.mContext = context;
         this.mCallback = (IRecorderCallback) Proxy.newProxyInstance(
                 this.getClass().getClassLoader(),
                 new Class[]{IRecorderCallback.class},
@@ -57,6 +62,21 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
         cancel();
         // 回调录制失败
         mCallback.onFailed(errorCode, e);
+    }
+
+    /**
+     * 执行录制文件的删除
+     */
+    void performRecordFileDelete() {
+        if (mOutputFile != null && mOutputFile.exists()) {
+            if (mOutputFile.delete()) {
+                Log.i(TAG, "Record file deleted.");
+            } else {
+                Log.i(TAG, "Record file delete failed.");
+            }
+            FileUtil.notifyFileDeleted(mContext, mOutputFile.getAbsolutePath());
+        }
+        mOutputFile = null;
     }
 
     @Override

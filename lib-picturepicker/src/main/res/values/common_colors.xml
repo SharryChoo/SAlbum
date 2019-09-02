@@ -7,6 +7,6 @@
     <color name="picture_picker_base_accent_color">#ff64b6f6</color>
 
     <!--Common Gray-->
-    <color name="picture_picker_base_gray">#ff64b6f6</color>
+    <color name="picture_picker_widget_record_progress_outer_corner_gray">#FFF5F5F5</color>
 
 </resources>

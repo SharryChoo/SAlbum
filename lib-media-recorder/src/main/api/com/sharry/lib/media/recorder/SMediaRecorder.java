@@ -95,8 +95,6 @@ public final class SMediaRecorder implements IRecorderCallback {
     public void onComplete(@NonNull final File file) {
         // 释放焦点
         mAudioManagerService.abandonAudioFocus(null);
-        // 在文件管理器中刷新生成的文件
-        FileUtil.refreshMediaStore(mContext, file);
         for (IRecorderCallback callback : mCallbacks) {
             callback.onComplete(file);
         }
@@ -130,7 +128,7 @@ public final class SMediaRecorder implements IRecorderCallback {
         // 取消之前的录制动作
         cancel();
         // 创建录制者
-        mImpl = new VideoRecorder(options, cameraView, this);
+        mImpl = new VideoRecorder(mContext, options, cameraView, this);
         // 启动录制者
         mImpl.start();
     }
@@ -157,7 +155,7 @@ public final class SMediaRecorder implements IRecorderCallback {
         // 取消之前的录制动作
         cancel();
         // 创建录制者
-        mImpl = new AudioRecorder(options, this);
+        mImpl = new AudioRecorder(mContext, options, this);
         // 开始录制
         mImpl.start();
     }
