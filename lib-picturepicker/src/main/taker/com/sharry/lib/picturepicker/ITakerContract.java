@@ -35,7 +35,9 @@ public interface ITakerContract {
 
         void startPreview();
 
-        void videoPlay();
+        void playVideoPlayer();
+
+        void stopVideoPlayer();
 
         void videoPlayNext(@NonNull String nextUri);
 

@@ -20,8 +20,6 @@ import com.sharry.lib.media.player.SVideoView;
 import com.sharry.lib.picturepicker.toolbar.ImageViewOptions;
 import com.sharry.lib.picturepicker.toolbar.SToolbar;
 
-import java.io.File;
-
 /**
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
@@ -53,7 +51,7 @@ public class TakerActivity extends AppCompatActivity implements
     private SToolbar mToolbar;
     private RecordProgressButton mBtnRecord;
     private ImageView mIvPicturePreview;
-    private SVideoView mVideoView;
+    private SVideoView mVideoPlayer;
     private ImageView mIvDenied;
     private ImageView mIvGranted;
 
@@ -69,20 +67,20 @@ public class TakerActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mVideoView.resume();
+        mVideoPlayer.resume();
         mCameraView.startPreview();
     }
 
     @Override
     protected void onPause() {
         mCameraView.stopPreview();
-        mVideoView.pause();
+        mVideoPlayer.pause();
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        mVideoView.stop();
+        mVideoPlayer.stop();
         mPresenter.release();
         super.onDestroy();
     }
@@ -90,13 +88,18 @@ public class TakerActivity extends AppCompatActivity implements
     ////////////////////////////////////ITakerContract.IView///////////////////////////////////////
 
     @Override
-    public void videoPlay() {
-        mVideoView.play();
+    public void playVideoPlayer() {
+        mVideoPlayer.play();
+    }
+
+    @Override
+    public void stopVideoPlayer() {
+        mVideoPlayer.stop();
     }
 
     @Override
     public void videoPlayNext(@NonNull String nextUri) {
-        mVideoView.next(nextUri);
+        mVideoPlayer.next(nextUri);
     }
 
     @Override
@@ -121,7 +124,7 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     public void setVideoPlayerVisible(boolean visible) {
-        mVideoView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        mVideoPlayer.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -256,8 +259,8 @@ public class TakerActivity extends AppCompatActivity implements
         mIvPicturePreview = findViewById(R.id.iv_picture_preview);
 
         // Video player
-        mVideoView = findViewById(R.id.video_view);
-        mVideoView.setOnStatusChangedListener(new OnStatusChangedListener.Adapter() {
+        mVideoPlayer = findViewById(R.id.video_view);
+        mVideoPlayer.setOnStatusChangedListener(new OnStatusChangedListener.Adapter() {
             @Override
             public void onPrepared(int totalDuration) {
                 mPresenter.handleVideoPlayPrepared();

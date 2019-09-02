@@ -1,7 +1,6 @@
 package com.sharry.lib.picturepicker;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
@@ -63,7 +62,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
     @Override
     public void handleVideoPlayPrepared() {
-        mView.videoPlay();
+        mView.playVideoPlayer();
     }
 
     @Override
@@ -87,6 +86,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     public void handleDenied() {
         mFetchedBitmap = null;
         if (mVideoFile != null) {
+            mView.stopVideoPlayer();
             mVideoFile.delete();
             mView.notifyFileDeleted(mVideoFile.getAbsolutePath());
             mVideoFile = null;
