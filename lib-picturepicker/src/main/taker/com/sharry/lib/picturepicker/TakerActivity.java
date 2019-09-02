@@ -184,7 +184,6 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     public void onTakePicture() {
-        mCameraView.stopPreview();
         mPresenter.handleTakePicture(mCameraView.takePicture());
     }
 

@@ -119,7 +119,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
     @Override
     @SuppressLint("MissingPermission")
     public void handleRecordStart(SCameraView cameraView) {
-        mFetchedBitmap = cameraView.takePicture();
         mRecorder.start(cameraView, mRecordOptions);
     }
 
@@ -182,17 +181,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
         MediaMeta mediaMeta = MediaMeta.create(mVideoFile.getAbsolutePath(), false);
         mediaMeta.date = currentTime;
         mediaMeta.duration = mRecordDuration;
-        try {
-            File thumbnailFile = FileUtil.createVideoThumbnailFile((Context) mView, currentTime);
-            CompressUtil.doCompress(mFetchedBitmap, thumbnailFile.getAbsolutePath(),
-                    mConfig.getCameraDestQuality(), 512, 512);
-            mediaMeta.thumbnailPath = thumbnailFile.getPath();
-            mView.setResult(mediaMeta);
-        } catch (IOException e) {
-            // ignore.
-        } finally {
-            mView.setResult(mediaMeta);
-        }
+        // TODO 获取图像缩略图
+        mView.setResult(mediaMeta);
     }
 
 }

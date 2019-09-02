@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.sharry.lib.picturepicker">
 
+    <!-- 相机权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <!-- SD 卡读写权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
+
     <application
         android:allowBackup="true"
         android:supportsRtl="true">
@@ -18,10 +25,7 @@
             android:launchMode="singleTop"
             android:theme="@style/PictureWatcherTheme" />
     </application>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- 相机权限 -->
-    <uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
 </manifest>
