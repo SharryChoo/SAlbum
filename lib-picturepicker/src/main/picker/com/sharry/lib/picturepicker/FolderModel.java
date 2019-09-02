@@ -1,5 +1,7 @@
 package com.sharry.lib.picturepicker;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +14,8 @@ import java.util.List;
  */
 class FolderModel {
 
-    private String folderName;
-    private List<MediaMeta> metas = new ArrayList<>();
+    private final String folderName;
+    private final List<MediaMeta> metas = new ArrayList<>();
 
     FolderModel(String folderName) {
         this.folderName = folderName;
@@ -27,8 +29,14 @@ class FolderModel {
         return metas;
     }
 
-    void addMeta(MediaMeta meta) {
-        metas.add(meta);
+    void addMeta(@NonNull MediaMeta meta) {
+        int insertIndex = 0;
+        for (; insertIndex < metas.size(); insertIndex++) {
+            if (metas.get(insertIndex).date < meta.date) {
+                break;
+            }
+        }
+        metas.add(insertIndex, meta);
     }
 
 }

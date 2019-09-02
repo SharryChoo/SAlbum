@@ -178,9 +178,13 @@ class PickerModel implements PickerContract.IModel {
             folderModels.add(allFolderModel);
             // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
             HashMap<String, FolderModel> caches = new HashMap<>();
-            fetchPictures(allFolderModel, caches);
-            fetchVideos(allFolderModel, caches);
-            folderModels.addAll(caches.values());
+            try {
+                fetchPictures(allFolderModel, caches);
+                fetchVideos(allFolderModel, caches);
+                folderModels.addAll(caches.values());
+            } catch (Throwable e) {
+                mListener.onFailed(e);
+            }
             mListener.onComplete(folderModels);
         }
 
@@ -189,104 +193,91 @@ class PickerModel implements PickerContract.IModel {
          */
         private void fetchPictures(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
             Cursor cursor = createImageCursor();
-            try {
-                if (cursor != null && cursor.getCount() > 0) {
-                    // 是否是第一个遍历到的图片目录
-                    while (cursor.moveToNext()) {
-                        // 验证路径是否有效
-                        String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                        if (TextUtils.isEmpty(picturePath)) {
-                            continue;
-                        }
-                        MediaMeta meta = MediaMeta.create(picturePath, true);
-                        // 添加到所有图片的目录下
-                        allFolderModel.addMeta(meta);
-                        // 获取图片父文件夹路径
-                        String folderPath = getParentFolderPath(picturePath);
-                        if (TextUtils.isEmpty(folderPath)) {
-                            continue;
-                        }
-                        // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
-                        if (!caches.containsKey(folderPath)) {
-                            String folderName = getLastFileName(folderPath);
-                            caches.put(folderPath, new FolderModel(folderName));
-                        }
-                        // 添加图片到缓存
-                        caches.get(folderPath).addMeta(meta);
-                    }
-                }
-            } catch (Exception e) {
-                mListener.onFailed(e);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
+            if (cursor == null || cursor.getCount() == 0) {
+                return;
             }
+            // 是否是第一个遍历到的图片目录
+            while (cursor.moveToNext()) {
+                // 验证路径是否有效
+                String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                if (TextUtils.isEmpty(picturePath)) {
+                    continue;
+                }
+                MediaMeta meta = MediaMeta.create(picturePath, true);
+                meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
+                // 添加到所有图片的目录下
+                allFolderModel.addMeta(meta);
+                // 获取图片父文件夹路径
+                String folderPath = getParentFolderPath(picturePath);
+                if (TextUtils.isEmpty(folderPath)) {
+                    continue;
+                }
+                // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
+                if (!caches.containsKey(folderPath)) {
+                    String folderName = getLastFileName(folderPath);
+                    caches.put(folderPath, new FolderModel(folderName));
+                }
+                // 添加图片到缓存
+                caches.get(folderPath).addMeta(meta);
+            }
+            cursor.close();
         }
 
         /**
          * 获取所有视频资源信息
          */
-        private void fetchVideos(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
+        private void fetchVideos(FolderModel allFolderModel, HashMap<String, FolderModel> caches) throws Exception {
             Cursor cursor = createVideoCursor();
-            try {
-                if (cursor != null && cursor.getCount() > 0) {
-                    while (cursor.moveToNext()) {
-                        // 验证路径是否有效
-                        String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
-                        if (TextUtils.isEmpty(path)) {
-                            continue;
-                        }
-                        MediaMeta meta = MediaMeta.create(path, false);
-                        meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-                        meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-                        meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
-                        long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                        meta.thumbNailPath = fetchVideoThumbNail(id, path, meta.date);
-                        // 添加到所有图片的目录下
-                        allFolderModel.addMeta(meta);
-                        // 获取图片父文件夹路径
-                        String folderPath = getParentFolderPath(path);
-                        if (TextUtils.isEmpty(folderPath)) {
-                            continue;
-                        }
-                        // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
-                        if (!caches.containsKey(folderPath)) {
-                            String folderName = getLastFileName(folderPath);
-                            caches.put(folderPath, new FolderModel(folderName));
-                        }
-                        // 添加媒体文件到缓存到缓存
-                        caches.get(folderPath).addMeta(meta);
-                    }
-                }
-            } catch (Exception e) {
-                mListener.onFailed(e);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
+            if (cursor == null || cursor.getCount() == 0) {
+                return;
             }
+            while (cursor.moveToNext()) {
+                // 验证路径是否有效
+                String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                if (TextUtils.isEmpty(path)) {
+                    continue;
+                }
+                MediaMeta meta = MediaMeta.create(path, false);
+                meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+                meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
+                meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                // 获取缩略图
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                meta.thumbNailPath = fetchVideoThumbNail(id, path, meta.date);
+                // 添加到所有图片的目录下
+                allFolderModel.addMeta(meta);
+                // 获取图片父文件夹路径
+                String folderPath = getParentFolderPath(path);
+                if (TextUtils.isEmpty(folderPath)) {
+                    continue;
+                }
+                // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
+                if (!caches.containsKey(folderPath)) {
+                    String folderName = getLastFileName(folderPath);
+                    caches.put(folderPath, new FolderModel(folderName));
+                }
+                // 添加媒体文件到缓存到缓存
+                caches.get(folderPath).addMeta(meta);
+            }
+            cursor.close();
         }
 
         /**
          * 获取视频缩略图地址
          */
         @Nullable
-        private String fetchVideoThumbNail(long id, String path, long date) {
+        private String fetchVideoThumbNail(long id, String path, long date) throws Exception {
             String thumbNailPath = null;
             Cursor cursor = createThumbNailCursor(id);
-            try {
-                if (cursor != null && cursor.getCount() > 0) {
-                    while (cursor.moveToNext()) {
-                        thumbNailPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
-                    }
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    thumbNailPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
                 }
-                // 若没有视频缩略图, 则获取视频第一帧
-                if (TextUtils.isEmpty(thumbNailPath)) {
-                    thumbNailPath = generateThumbNail(path, date);
-                }
-            } catch (Throwable throwable) {
-                // ignore.
+                cursor.close();
+            }
+            // 若没有视频缩略图, 则获取视频第一帧
+            if (TextUtils.isEmpty(thumbNailPath)) {
+                thumbNailPath = generateThumbNail(path, date);
             }
             return thumbNailPath;
         }
@@ -296,7 +287,10 @@ class PickerModel implements PickerContract.IModel {
          */
         private Cursor createImageCursor() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            String[] projection = new String[]{MediaStore.Images.Media.DATA};
+            String[] projection = new String[]{
+                    MediaStore.Images.Media.DATA,
+                    MediaStore.Images.Media.DATE_ADDED
+            };
             String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=?";
