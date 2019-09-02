@@ -73,9 +73,9 @@ class PickerModel implements PickerContract.IModel {
     @Override
     public void getSystemPictures(Context context, final Callback callback) {
         PICKER_THREAD_POOL.execute(
-                new CursorSystemPictureRunnable(
+                new CursorRunnable(
                         context,
-                        new CursorSystemPictureRunnable.RunnableInteraction() {
+                        new CursorRunnable.RunnableInteraction() {
                             @Override
                             public void onComplete(ArrayList<FolderModel> folderModels) {
                                 mFolderModels = folderModels;
@@ -151,9 +151,9 @@ class PickerModel implements PickerContract.IModel {
     }
 
     /**
-     * 遍历加载系统图片的线程
+     * 遍历加载系统图片和视频
      */
-    private static class CursorSystemPictureRunnable implements Runnable {
+    private static class CursorRunnable implements Runnable {
 
         interface RunnableInteraction {
             void onComplete(ArrayList<FolderModel> folderModels);
@@ -164,7 +164,7 @@ class PickerModel implements PickerContract.IModel {
         private final Context mContext;
         private final RunnableInteraction mListener;
 
-        CursorSystemPictureRunnable(Context context, RunnableInteraction listener) {
+        CursorRunnable(Context context, RunnableInteraction listener) {
             mContext = context;
             mListener = listener;
         }

@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
 
-import com.sharry.lib.picturepicker.R;
-
 import java.text.MessageFormat;
 import java.util.ArrayList;
 
@@ -51,7 +49,7 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
         mView.setToolbarCheckedIndicatorVisibility(mConfig.isPickerSupport());
 
         // 2. 设置 Pictures 数据
-        mView.createPhotoViews(mDisplayPaths.size());
+        mView.createViews(mDisplayPaths.size());
         mView.displayPictureAt(mDisplayPaths, mCurPosition);
 
         // 3. 设置底部菜单和按钮选中的状态

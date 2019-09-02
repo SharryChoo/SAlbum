@@ -57,9 +57,9 @@ interface WatcherContract {
         void displayPreviewEnsureText(CharSequence content);
 
         /**
-         * 创建 PhotoViews
+         * 创建 Views
          */
-        void createPhotoViews(int photoViewCount);
+        void createViews(int photoViewCount);
 
         /**
          * 展示指定位置的图片

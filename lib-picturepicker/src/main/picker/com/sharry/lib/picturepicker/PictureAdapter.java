@@ -58,7 +58,11 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        MediaMeta meta = mDisplayMetas.get(position);
+        if (mConfig.isCameraSupport() && position == 0) {
+            return ITEM_TYPE_PICTURE;
+        }
+        int relativePosition = position - (mConfig.isCameraSupport() ? 1 : 0);
+        MediaMeta meta = mDisplayMetas.get(relativePosition);
         int result;
         if (meta == null || meta.isPicture) {
             result = ITEM_TYPE_PICTURE;

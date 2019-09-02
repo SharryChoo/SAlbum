@@ -152,8 +152,8 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void createPhotoViews(int photoViewCount) {
-        for (int i = 0; i < photoViewCount; i++) {
+    public void createViews(int items) {
+        for (int i = 0; i < items; i++) {
             PhotoView photoView = new PhotoView(this);
             photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
