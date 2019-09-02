@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -70,6 +71,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
      * Views
      */
     private SToolbar mToolbar;
+    private ProgressBar mProgressBar;
     private TextView mTvToolbarFolderName;
     private TextView mTvToolbarEnsure;
     private RecyclerView mRecyclePictures;
@@ -142,6 +144,11 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     public void setFabColor(int color) {
         mFab.setBackgroundTintList(ColorStateList.valueOf(color));
+    }
+
+    @Override
+    public void setProgressBarVisible(boolean visible) {
+        mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -304,6 +311,9 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         mFab = findViewById(R.id.fab);
         mFab.setOnClickListener(this);
         mFabBehavior = PicturePickerFabBehavior.from(mFab);
+
+        // Progress bar.
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 
     protected void initData() {

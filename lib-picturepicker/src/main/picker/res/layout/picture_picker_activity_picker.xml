@@ -26,10 +26,17 @@
         android:id="@+id/recycle_pictures"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="60dp"
         android:clipChildren="false"
         android:clipToPadding="false"
+        android:paddingBottom="60dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:visibility="visible" />
 
     <!--底部的照片文件夹选择器-->
     <LinearLayout

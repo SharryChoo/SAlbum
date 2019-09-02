@@ -13,6 +13,44 @@ import androidx.annotation.Nullable;
  */
 public class MediaMeta implements Parcelable {
 
+    protected MediaMeta(Parcel in) {
+        path = in.readString();
+        isPicture = in.readByte() != 0;
+        size = in.readLong();
+        date = in.readLong();
+        duration = in.readLong();
+        thumbNailPath = in.readString();
+        mimeType = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(path);
+        dest.writeByte((byte) (isPicture ? 1 : 0));
+        dest.writeLong(size);
+        dest.writeLong(date);
+        dest.writeLong(duration);
+        dest.writeString(thumbNailPath);
+        dest.writeString(mimeType);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<MediaMeta> CREATOR = new Creator<MediaMeta>() {
+        @Override
+        public MediaMeta createFromParcel(Parcel in) {
+            return new MediaMeta(in);
+        }
+
+        @Override
+        public MediaMeta[] newArray(int size) {
+            return new MediaMeta[size];
+        }
+    };
+
     static MediaMeta create(@NonNull String path, boolean isPicture) {
         return new MediaMeta(path, isPicture);
     }
@@ -55,42 +93,6 @@ public class MediaMeta implements Parcelable {
         this.path = path;
         this.isPicture = isPicture;
     }
-
-    MediaMeta(Parcel in) {
-        path = in.readString();
-        isPicture = in.readByte() != 0;
-        size = in.readLong();
-        date = in.readLong();
-        duration = in.readLong();
-        mimeType = in.readString();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(path);
-        dest.writeByte((byte) (isPicture ? 1 : 0));
-        dest.writeLong(size);
-        dest.writeLong(date);
-        dest.writeLong(duration);
-        dest.writeString(mimeType);
-    }
-
-    public static final Creator<MediaMeta> CREATOR = new Creator<MediaMeta>() {
-        @Override
-        public MediaMeta createFromParcel(Parcel in) {
-            return new MediaMeta(in);
-        }
-
-        @Override
-        public MediaMeta[] newArray(int size) {
-            return new MediaMeta[size];
-        }
-    };
 
     @Override
     public boolean equals(Object o) {

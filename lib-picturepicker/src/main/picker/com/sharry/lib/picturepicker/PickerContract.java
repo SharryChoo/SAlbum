@@ -115,8 +115,12 @@ interface PickerContract {
         String getString(@StringRes int resId);
 
         /**
+         * 设置加载进度
+         */
+        void setProgressBarVisible(boolean visible);
+
+        /**
          * 设置返回值
-         * @param pickedPaths
          */
         void setResult(@NonNull ArrayList<MediaMeta> pickedPaths);
     }

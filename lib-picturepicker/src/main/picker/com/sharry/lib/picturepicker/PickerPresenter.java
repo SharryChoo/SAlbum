@@ -210,16 +210,17 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
     }
 
     private void setupModel(Context context) {
-        // 获取图片数据
+        mView.setProgressBarVisible(true);
         mModel.getSystemPictures(context, new PickerContract.IModel.Callback() {
 
-            private final Handler handler = new Handler(Looper.getMainLooper());
+            private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
             @Override
             public void onComplete() {
-                handler.post(new Runnable() {
+                mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        mView.setProgressBarVisible(false);
                         mView.setFolderAdapter(mModel.getAllFolders());
                         handleFolderChecked(0);
                     }
@@ -229,9 +230,10 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
             @Override
             public void onFailed(Throwable throwable) {
                 Log.e(TAG, throwable.getMessage(), throwable);
-                handler.post(new Runnable() {
+                mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        mView.setProgressBarVisible(false);
                         mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_fetch_album_failed));
                     }
                 });
