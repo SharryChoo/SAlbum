@@ -3,7 +3,7 @@
 
     <string name="picture_picker_picker_ensure">Ensure</string>
     <string name="picture_picker_picker_preview">Preview</string>
-    <string name="picture_picker_picker_all_picture">All Pictures</string>
+    <string name="picture_picker_picker_all_picture">All</string>
     <string name="picture_picker_picker_root_folder">Storage Card</string>
     <string name="picture_picker_picker_tips_over_threshold_prefix">Pick a maximum of&#160;</string>
     <string name="picture_picker_picker_tips_over_threshold_suffix">&#160;pictures.</string>
