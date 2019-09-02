@@ -41,7 +41,5 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
     implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
     implementation "com.google.android.material:material:$materialVersion"
-    implementation project(':lib-scamera')
-    implementation project(':lib-media-player')
-    implementation project(':lib-media-recorder')
+    implementation "com.github.SharryChoo:SMedia:$smedia"
 }

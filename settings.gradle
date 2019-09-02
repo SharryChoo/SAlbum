@@ -1,6 +1,2 @@
 include ':app'
 include ':lib-picturepicker'
-include ':lib-media-player'
-include ':lib-media-recorder'
-include ':lib-scamera'
-include ':lib-opengles'
