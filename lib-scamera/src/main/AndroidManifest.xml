@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.sharry.lib.camera">
+
+    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+</manifest>

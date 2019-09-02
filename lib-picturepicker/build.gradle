@@ -1,11 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.SharryChoo'
+group = 'com.github.SharryChoo'
 
 def resDirs = [
         "watcher/com/sharry/lib/picturepicker",
-        "picker/com/sharry/lib/picturepicker"
+        "picker/com/sharry/lib/picturepicker",
+        "taker/com/sharry/lib/picturepicker"
 ]
 
 android {
@@ -31,12 +32,16 @@ android {
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding='UTF-8'
+    options.encoding = 'UTF-8'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
     implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
     implementation "com.google.android.material:material:$materialVersion"
+    implementation project(':lib-scamera')
+    implementation project(':lib-media-player')
+    implementation project(':lib-media-recorder')
 }

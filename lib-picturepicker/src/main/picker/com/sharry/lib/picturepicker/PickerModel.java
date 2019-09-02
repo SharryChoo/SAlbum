@@ -267,7 +267,7 @@ class PickerModel implements PickerContract.IModel {
         @Nullable
         private String fetchVideoThumbNail(long id, String path, long date) throws Exception {
             String thumbNailPath = null;
-            Cursor cursor = createThumbNailCursor(id);
+            Cursor cursor = createThumbnailCursor(id);
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     thumbNailPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
@@ -276,7 +276,7 @@ class PickerModel implements PickerContract.IModel {
             }
             // 若没有视频缩略图, 则获取视频第一帧
             if (TextUtils.isEmpty(thumbNailPath)) {
-                thumbNailPath = generateThumbNail(path, date);
+                thumbNailPath = generateThumbnail(path, date);
             }
             return thumbNailPath;
         }
@@ -336,7 +336,7 @@ class PickerModel implements PickerContract.IModel {
                     selection, selectionArgs, sortOrder);
         }
 
-        private Cursor createThumbNailCursor(long id) {
+        private Cursor createThumbnailCursor(long id) {
             Uri uri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{
                     MediaStore.Video.Thumbnails.DATA,
@@ -348,11 +348,13 @@ class PickerModel implements PickerContract.IModel {
                     selectionArgs, null);
         }
 
-        private String generateThumbNail(String videoPath, long videoCreateDate) throws Exception {
+        private String generateThumbnail(String videoPath, long videoCreateDate) throws Exception {
             // 将第一帧缓存到本地
-            File videoThumbNailFile = FileUtil.createVideoThumbnailFile(mContext, videoCreateDate);
-            if (videoThumbNailFile.exists()) {
-                return videoThumbNailFile.getAbsolutePath();
+            File videoThumbnailFile = FileUtil.createVideoThumbnailFile(mContext, videoCreateDate);
+            if (videoThumbnailFile.exists()) {
+                return videoThumbnailFile.getAbsolutePath();
+            } else {
+                videoThumbnailFile.createNewFile();
             }
             // 获取 video 第一帧
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -361,13 +363,13 @@ class PickerModel implements PickerContract.IModel {
                 Bitmap bitmap = retriever.getFrameAtTime(0);
                 // 将图像压缩并写入 dstPath
                 if (bitmap != null) {
-                    CompressUtil.doCompress(bitmap, videoThumbNailFile.getAbsolutePath(),
+                    CompressUtil.doCompress(bitmap, videoThumbnailFile.getAbsolutePath(),
                             50, 512, 512);
                 }
             } finally {
                 retriever.release();
             }
-            return videoThumbNailFile.getAbsolutePath();
+            return videoThumbnailFile.getAbsolutePath();
         }
 
         /**

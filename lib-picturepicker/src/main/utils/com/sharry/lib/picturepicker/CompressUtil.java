@@ -47,7 +47,7 @@ class CompressUtil {
     static void doCompress(Bitmap originBitmap, String destPath, int quality, int desireWidth, int desireHeight) throws IOException {
         int width = originBitmap.getWidth();
         int height = originBitmap.getHeight();
-        float scale = Math.max(desireWidth, desireHeight) / Math.max(width, height);
+        float scale = Math.max(desireWidth, desireHeight) / (float) Math.max(width, height);
         int w = Math.round(scale * width);
         int h = Math.round(scale * height);
         Bitmap bitmap = Bitmap.createScaledBitmap(originBitmap, w, h, true);

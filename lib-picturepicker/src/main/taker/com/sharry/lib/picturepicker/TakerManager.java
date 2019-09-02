@@ -3,9 +3,13 @@ package com.sharry.lib.picturepicker;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.NonNull;
+import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * 从相机拍照获取图片的入口
@@ -66,6 +70,33 @@ public class TakerManager {
     }
 
     private void takeActual(TakerCallback callback) {
+        completionConfig();
+        // 2. 获取回调的 Fragment
+        CallbackFragment callbackFragment = CallbackFragment.getInstance(mBind);
+        if (callbackFragment == null) {
+            Log.e(TAG, "Start Picture picker activity failed.");
+            return;
+        }
+        callbackFragment.setCallback(new CallbackFragment.Callback() {
+            @Override
+            public void onActivityResult(int requestCode, int resultCode, Intent data) {
+                if (resultCode != RESULT_OK || null == data) {
+                    return;
+                }
+                switch (requestCode) {
+                    case PickerActivity.REQUEST_CODE:
+                        // TODO 获取拍照后的图片地址
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        // TODO 启动拍照录像的 Activity
+        TakerActivity.launch(mBind, mConfig);
+    }
+
+    private void completionConfig() {
         // 1. 若为指定照片默认输出路径, 给予指定默认的拍照路径
         if (TextUtils.isEmpty(mConfig.getCameraDirectoryPath())) {
             mConfig.rebuild().setCameraDirectory(FileUtil.createDefaultDirectory(mBind).getAbsolutePath());
@@ -87,13 +118,6 @@ public class TakerManager {
                         .setFileProviderAuthority(mConfig.getAuthority());
             }
         }
-        // 4. 发起请求
-        TakerFragment callbackFragment = TakerFragment.getInstance(mBind);
-        if (callbackFragment == null) {
-            Log.e(TAG, "Launch camera failed.");
-            return;
-        }
-        callbackFragment.takePicture(mConfig, callback);
     }
 
 }
