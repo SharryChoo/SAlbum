@@ -11,7 +11,7 @@
         android:id="@+id/iv_picture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/picture_picker_picker_video_default" />
+        android:src="@drawable/ic_picture_picker_picker_video_default" />
 
     <ImageView
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
         android:background="@color/picture_picker_picker_recycle_item_video_bg"
         android:foreground="?attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/picture_picker_picker_video_play" />
+        app:srcCompat="@drawable/ic_picture_picker_picker_video_play" />
 
     <com.sharry.lib.picturepicker.CheckedIndicatorView
         android:id="@+id/check_indicator"

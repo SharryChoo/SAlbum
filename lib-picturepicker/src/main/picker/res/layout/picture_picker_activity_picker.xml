@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:paddingLeft="20dp"
-                app:srcCompat="@drawable/picture_picker_picker_bottom_indicator" />
+                app:srcCompat="@drawable/ic_picture_picker_picker_bottom_indicator" />
 
             <TextView
                 android:id="@+id/tv_folder_name"
@@ -100,6 +100,6 @@
         app:layout_anchor="@+id/recycle_pictures"
         app:layout_anchorGravity="bottom|right"
         app:layout_behavior="@string/picture_picker_picker_fab_behavior"
-        app:srcCompat="@drawable/picture_picker_picker_fab" />
+        app:srcCompat="@drawable/ic_picture_picker_picker_fab" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -14,7 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,7 +172,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void bindCameraHeader(@NonNull PictureViewHolder holder) {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER);
-        holder.ivPicture.setImageResource(R.drawable.picture_picker_picker_camera);
+        holder.ivPicture.setImageResource(R.drawable.ic_picture_picker_picker_camera_header);
         holder.checkIndicator.setVisibility(View.INVISIBLE);
     }
 
@@ -200,7 +199,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         // 展示视频缩略图
         if (TextUtils.isEmpty(meta.thumbNailPath)) {
-            holder.ivPicture.setImageResource(R.drawable.picture_picker_picker_video_default);
+            holder.ivPicture.setImageResource(R.drawable.ic_picture_picker_picker_video_default);
         } else {
             assert meta.thumbNailPath != null;
             PictureLoader.load(mContext, meta.thumbNailPath, holder.ivPicture);
@@ -212,7 +211,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
         holder.checkIndicator.setText(String.valueOf(index + 1));
         // 设置时长
-        holder.tvDuration.setText(MessageFormat.format("{0}ms", meta.duration));
+        holder.tvDuration.setText(DateUtil.format(meta.duration));
     }
 
     /**
