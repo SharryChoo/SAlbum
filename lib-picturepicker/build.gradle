@@ -4,8 +4,8 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.SharryChoo'
 
 def resDirs = [
-        "watcher",
-        "picker"
+        "watcher/com/sharry/lib/picturepicker",
+        "picker/com/sharry/lib/picturepicker"
 ]
 
 android {
