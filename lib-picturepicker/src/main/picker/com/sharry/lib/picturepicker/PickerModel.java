@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -354,47 +353,21 @@ class PickerModel implements PickerContract.IModel {
             File videoThumbNailFile = FileUtil.createVideoThumbnailFile(mContext, videoCreateDate);
             if (videoThumbNailFile.exists()) {
                 return videoThumbNailFile.getAbsolutePath();
-            } else {
-                videoThumbNailFile.createNewFile();
             }
             // 获取 video 第一帧
-            Bitmap bitmap = createVideoThumbnail(videoPath);
-            if (bitmap != null) {
-                FileOutputStream fos = new FileOutputStream(videoThumbNailFile);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
-                fos.flush();
-            }
-            return videoThumbNailFile.getAbsolutePath();
-        }
-
-        private Bitmap createVideoThumbnail(String videoPath) {
-            Bitmap bitmap = null;
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
                 retriever.setDataSource(videoPath);
-                bitmap = retriever.getFrameAtTime(0);
-            } catch (Throwable throwable) {
-                // ignore.
+                Bitmap bitmap = retriever.getFrameAtTime(0);
+                // 将图像压缩并写入 dstPath
+                if (bitmap != null) {
+                    CompressUtil.doCompress(bitmap, videoThumbNailFile.getAbsolutePath(),
+                            50, 512, 512);
+                }
             } finally {
-                try {
-                    retriever.release();
-                } catch (Throwable throwable) {
-                    // ignore.
-                }
+                retriever.release();
             }
-            // 若 bitmap 过大, 则进行缩放
-            if (bitmap != null) {
-                int width = bitmap.getWidth();
-                int height = bitmap.getHeight();
-                int max = Math.max(width, height);
-                if (max > 512) {
-                    float scale = 512f / max;
-                    int w = Math.round(scale * width);
-                    int h = Math.round(scale * height);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true);
-                }
-            }
-            return bitmap;
+            return videoThumbNailFile.getAbsolutePath();
         }
 
         /**

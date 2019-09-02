@@ -11,7 +11,6 @@ import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,7 +107,7 @@ public class TakerFragment extends Fragment {
                 try {
                     // 1. 将拍摄后的图片, 压缩到 cameraDestFile 中
                     File cameraDestFile = FileUtil.createCameraDestFile(mConfig.getCameraDirectoryPath());
-                    PictureUtil.doCompress(mTempFile.getAbsolutePath(), cameraDestFile.getAbsolutePath(),
+                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), cameraDestFile.getAbsolutePath(),
                             mConfig.getCameraDestQuality());
                     // 2. 处理图片裁剪
                     if (mConfig.isCropSupport()) {

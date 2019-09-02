@@ -17,17 +17,17 @@ import java.io.IOException;
  * @version 1.0
  * @since 2018/9/18 16:23
  */
-class PictureUtil {
+class CompressUtil {
 
     /**
      * 图片压缩
      */
     static void doCompress(String originPath, String destPath, int quality) throws IOException {
         if (TextUtils.isEmpty(originPath)) {
-            throw new IllegalArgumentException("PictureUtil.doCompress -> parameter originFilePath must not be null!");
+            throw new IllegalArgumentException("CompressUtil.doCompress -> parameter originFilePath must not be null!");
         }
         if (TextUtils.isEmpty(destPath)) {
-            throw new IllegalArgumentException("PictureUtil.doCompress -> parameter destPath must not be null!");
+            throw new IllegalArgumentException("CompressUtil.doCompress -> parameter destPath must not be null!");
         }
         // 1. 邻近采样压缩尺寸(Nearest Neighbour Resampling Compress)
         BitmapFactory.Options options = getBitmapOptions(originPath);
@@ -37,6 +37,22 @@ class PictureUtil {
         }
         // 2. 旋转一下 Bitmap
         bitmap = rotateBitmap(bitmap, readPictureAngle(originPath));
+        // 3. 质量压缩(Quality Compress)
+        qualityCompress(bitmap, quality, destPath);
+    }
+
+    /**
+     * 图片压缩
+     */
+    static void doCompress(Bitmap originBitmap, String destPath, int quality, int desireWidth, int desireHeight) throws IOException {
+        int width = originBitmap.getWidth();
+        int height = originBitmap.getHeight();
+        float scale = Math.max(desireWidth, desireHeight) / Math.max(width, height);
+        int w = Math.round(scale * width);
+        int h = Math.round(scale * height);
+        Bitmap bitmap = Bitmap.createScaledBitmap(originBitmap, w, h, true);
+        // 2. 旋转一下 Bitmap
+        bitmap = rotateBitmap(bitmap, readPictureAngle(destPath));
         // 3. 质量压缩(Quality Compress)
         qualityCompress(bitmap, quality, destPath);
     }

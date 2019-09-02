@@ -116,7 +116,7 @@ public class CropperFragment extends Fragment {
                 try {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
                     File destFile = FileUtil.createCropDestFile(mConfig.getCropDirectoryPath());
-                    PictureUtil.doCompress(mTempFile.getAbsolutePath(), destFile.getAbsolutePath(), mConfig.getDestQuality());
+                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), destFile.getAbsolutePath(), mConfig.getDestQuality());
                     // 回调
                     mCropperCallback.onCropComplete(destFile.getAbsolutePath());
                     // 通知文件变更
