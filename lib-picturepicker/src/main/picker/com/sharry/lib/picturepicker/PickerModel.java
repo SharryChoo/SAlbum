@@ -366,9 +366,12 @@ class PickerModel implements PickerContract.IModel {
                     CompressUtil.doCompress(bitmap, videoThumbnailFile.getAbsolutePath(),
                             50, 512, 512);
                 }
+            } catch (Throwable e) {
+                // ignore.
             } finally {
                 retriever.release();
             }
+            // 返回路径
             return videoThumbnailFile.getAbsolutePath();
         }
 
