@@ -213,12 +213,12 @@ interface PickerContract {
         /**
          * 添加用户选中的图片
          */
-        void addPickedPicture(@NonNull MediaMeta checkedMeta);
+        void addPicked(@NonNull MediaMeta checkedMeta);
 
         /**
          * 移除用户选中的图片
          */
-        void removePickedPicture(@NonNull MediaMeta removedMeta);
+        void removePicked(@NonNull MediaMeta removedMeta);
     }
 
 }

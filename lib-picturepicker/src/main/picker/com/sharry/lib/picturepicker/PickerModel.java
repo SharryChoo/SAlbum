@@ -134,17 +134,15 @@ class PickerModel implements PickerContract.IModel {
     }
 
     @Override
-    public void addPickedPicture(@NonNull MediaMeta checkedMeta) {
+    public void addPicked(@NonNull MediaMeta checkedMeta) {
         if (!mPickedMetas.contains(checkedMeta)) {
             mPickedMetas.add(checkedMeta);
         }
     }
 
     @Override
-    public void removePickedPicture(@NonNull MediaMeta removedMeta) {
-        if (!mPickedMetas.contains(removedMeta)) {
-            mPickedMetas.remove(removedMeta);
-        }
+    public void removePicked(@NonNull MediaMeta removedMeta) {
+        mPickedMetas.remove(removedMeta);
     }
 
     @Override

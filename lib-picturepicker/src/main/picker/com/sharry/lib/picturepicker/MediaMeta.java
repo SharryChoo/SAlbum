@@ -110,4 +110,34 @@ public class MediaMeta implements Parcelable {
     public int hashCode() {
         return path.hashCode();
     }
+
+    @NonNull
+    public String getPath() {
+        return path;
+    }
+
+    public boolean isPicture() {
+        return isPicture;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public long getDate() {
+        return date;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    @Nullable
+    public String getThumbNailPath() {
+        return thumbNailPath;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
 }

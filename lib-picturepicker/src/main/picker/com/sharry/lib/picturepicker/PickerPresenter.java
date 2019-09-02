@@ -63,7 +63,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
     public boolean handlePictureChecked(MediaMeta checkedMeta) {
         boolean result = isCanPickedPicture(true);
         if (result) {
-            mModel.addPickedPicture(checkedMeta);
+            mModel.addPicked(checkedMeta);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
@@ -72,7 +72,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
 
     @Override
     public void handlePictureRemoved(MediaMeta removedMeta) {
-        mModel.removePickedPicture(removedMeta);
+        mModel.removePicked(removedMeta);
         mView.setToolbarEnsureText(buildEnsureText());
         mView.setPreviewText(buildPreviewText());
     }
@@ -173,7 +173,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         mModel.getDisplayPaths().add(0, newMeta);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
-            mModel.addPickedPicture(newMeta);
+            mModel.addPicked(newMeta);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
