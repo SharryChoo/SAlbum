@@ -63,21 +63,20 @@ interface WatcherContract {
 
         /**
          * 展示指定位置的图片
-         *
-         * @param pictureUris 需要展示的图片集合
+         *  @param pictureUris 需要展示的图片集合
          * @param curPosition 指定位置的图片
          */
-        void displayPictureAt(ArrayList<String> pictureUris, int curPosition);
+        void displayPictureAt(ArrayList<MediaMeta> pictureUris, int curPosition);
 
         /**
          * 通知选中的图片被移除了
          */
-        void notifyBottomPicturesRemoved(String removedPath, int removedIndex);
+        void notifyBottomPicturesRemoved(MediaMeta removedMeta, int removedIndex);
 
         /**
          * 通知图片插入了
          */
-        void notifyBottomPictureAdded(String insertPath, int addedIndex);
+        void notifyBottomPictureAdded(MediaMeta addedMeta, int addedIndex);
 
         /**
          * 展示消息通知
@@ -113,11 +112,10 @@ interface WatcherContract {
 
         /**
          * 设置返回值在 finish 之前
-         *
-         * @param pickedPaths     用户选中的图片
+         *  @param pickedPaths     用户选中的图片
          * @param isEnsurePressed 是否点击了确认按钮
          */
-        void setResultBeforeFinish(@Nullable ArrayList<String> pickedPaths, boolean isEnsurePressed);
+        void setResultBeforeFinish(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed);
 
         /**
          * 展示共享元素入场动画

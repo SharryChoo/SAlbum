@@ -12,8 +12,8 @@ import java.util.List;
  */
 class FolderModel {
 
-    private String folderName;//文件名
-    private List<String> picturePaths = new ArrayList<>();//文件夹内部的图片的Uri
+    private String folderName;
+    private List<MediaMeta> metas = new ArrayList<>();
 
     FolderModel(String folderName) {
         this.folderName = folderName;
@@ -23,12 +23,12 @@ class FolderModel {
         return folderName;
     }
 
-    List<String> getPicturePaths() {
-        return picturePaths;
+    List<MediaMeta> getMetas() {
+        return metas;
     }
 
-    void addPath(String imageUri) {
-        picturePaths.add(imageUri);
+    void addMeta(MediaMeta meta) {
+        metas.add(meta);
     }
 
 }

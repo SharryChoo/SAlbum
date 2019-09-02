@@ -59,8 +59,8 @@ interface PickerContract {
         /**
          * 设置图片的 Adapter
          */
-        void setPicturesAdapter(@NonNull PickerConfig config, @NonNull ArrayList<String> displayPaths,
-                                @NonNull ArrayList<String> userPickedPaths);
+        void setPicturesAdapter(@NonNull PickerConfig config, @NonNull ArrayList<MediaMeta> metas,
+                                @NonNull ArrayList<MediaMeta> userPickedMetas);
 
         /**
          * 设置图片文件夹的 Adapter
@@ -116,21 +116,24 @@ interface PickerContract {
 
         /**
          * 设置返回值
+         * @param pickedPaths
          */
-        void setResult(@NonNull ArrayList<String> pickedPaths);
+        void setResult(@NonNull ArrayList<MediaMeta> pickedPaths);
     }
 
     interface IPresenter {
 
         /**
          * 处理图片被选中了
+         * @param checkedMeta
          */
-        boolean handlePictureChecked(@Nullable String imagePath);
+        boolean handlePictureChecked(@Nullable MediaMeta checkedMeta);
 
         /**
          * 处理图片被移除了
+         * @param removedMeta
          */
-        void handlePictureRemoved(@Nullable String imagePath);
+        void handlePictureRemoved(@Nullable MediaMeta removedMeta);
 
         /**
          * 处理图片被点击了
@@ -191,7 +194,7 @@ interface PickerContract {
         /**
          * 获取用户选中的图片
          */
-        ArrayList<String> getPickedPaths();
+        ArrayList<MediaMeta> getPickedPaths();
 
         /**
          * 设置当前选中的文件夹
@@ -201,17 +204,17 @@ interface PickerContract {
         /**
          * 获取用户选中的图片
          */
-        ArrayList<String> getDisplayPaths();
+        ArrayList<MediaMeta> getDisplayPaths();
 
         /**
          * 添加用户选中的图片
          */
-        void addPickedPicture(@NonNull String imagePath);
+        void addPickedPicture(@NonNull MediaMeta checkedMeta);
 
         /**
          * 移除用户选中的图片
          */
-        void removePickedPicture(@NonNull String imagePath);
+        void removePickedPicture(@NonNull MediaMeta removedMeta);
     }
 
 }

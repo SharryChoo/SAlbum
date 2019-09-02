@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 class PickerModel implements PickerContract.IModel {
 
-    private static final ExecutorService sThreadPool = new ThreadPoolExecutor(
+    private static final ExecutorService PICKER_THREAD_POOL = new ThreadPoolExecutor(
             1, 1,
             30, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(),
@@ -41,13 +41,25 @@ class PickerModel implements PickerContract.IModel {
             }
     );
 
-    private final ArrayList<String> mPickedPaths;                           // 用户已选中的图片地址集合(默认构造为空)
-    private final ArrayList<String> mDisplayPaths = new ArrayList<>();      // 当前需要展示的集合
-    private ArrayList<FolderModel> mFolderModels;                       // 所有包含图片数据的集合
-    private FolderModel mCheckedFolder;                                   // 当前正在展示的文件夹
+    /**
+     * 用户已选中的图片地址集合(默认构造为空)
+     */
+    private final ArrayList<MediaMeta> mPickedMetas;
+    /**
+     * 当前需要展示的集合
+     */
+    private final ArrayList<MediaMeta> mDisplayMetas = new ArrayList<>();
+    /**
+     * 所有包含图片数据的集合
+     */
+    private ArrayList<FolderModel> mFolderModels;
+    /**
+     * 当前正在展示的文件夹
+     */
+    private FolderModel mCheckedFolder;
 
-    PickerModel(ArrayList<String> pickedPaths, int threshold) {
-        mPickedPaths = pickedPaths;
+    PickerModel(ArrayList<MediaMeta> pickedPaths, int threshold) {
+        mPickedMetas = pickedPaths;
         // 验证一下阈值是否异常
         if (getPickedPaths().size() > threshold) {
             throw new RuntimeException("Your picked picture count is over your set threshold!");
@@ -56,7 +68,7 @@ class PickerModel implements PickerContract.IModel {
 
     @Override
     public void getSystemPictures(Context context, final Callback callback) {
-        sThreadPool.execute(
+        PICKER_THREAD_POOL.execute(
                 new CursorSystemPictureRunnable(
                         context,
                         new CursorSystemPictureRunnable.RunnableInteraction() {
@@ -105,44 +117,35 @@ class PickerModel implements PickerContract.IModel {
     @Override
     public void setCheckedFolder(FolderModel checkedFolder) {
         this.mCheckedFolder = checkedFolder;
-        mDisplayPaths.clear();
-        mDisplayPaths.addAll(checkedFolder.getPicturePaths());
+        mDisplayMetas.clear();
+        mDisplayMetas.addAll(checkedFolder.getMetas());
     }
 
     /**
      * 获取用户选中的图片
      */
     @Override
-    public ArrayList<String> getPickedPaths() {
-        return mPickedPaths;
+    public ArrayList<MediaMeta> getPickedPaths() {
+        return mPickedMetas;
     }
 
-    /**
-     * 添加用户选中的图片
-     */
     @Override
-    public void addPickedPicture(@NonNull String path) {
-        if (!mPickedPaths.contains(path)) {
-            mPickedPaths.add(path);
-        }
-    }
-
-    /**
-     * 移除用户选中的图片
-     */
-    @Override
-    public void removePickedPicture(@NonNull String path) {
-        if (mPickedPaths.indexOf(path) == -1) {
-            return;
-        }
-        if (!mPickedPaths.contains(path)) {
-            mPickedPaths.remove(path);
+    public void addPickedPicture(@NonNull MediaMeta checkedMeta) {
+        if (!mPickedMetas.contains(checkedMeta)) {
+            mPickedMetas.add(checkedMeta);
         }
     }
 
     @Override
-    public ArrayList<String> getDisplayPaths() {
-        return mDisplayPaths;
+    public void removePickedPicture(@NonNull MediaMeta removedMeta) {
+        if (!mPickedMetas.contains(removedMeta)) {
+            mPickedMetas.remove(removedMeta);
+        }
+    }
+
+    @Override
+    public ArrayList<MediaMeta> getDisplayPaths() {
+        return mDisplayMetas;
     }
 
     /**
@@ -173,34 +176,43 @@ class PickerModel implements PickerContract.IModel {
             folderModels.add(allFolderModel);
             // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
             HashMap<String, FolderModel> caches = new HashMap<>();
+            scanPictures(allFolderModel, caches);
+            scanVideos(allFolderModel, caches);
+            folderModels.addAll(caches.values());
+            mListener.onComplete(folderModels);
+        }
+
+        /**
+         * 获取所有图片资源信息
+         */
+        private void scanPictures(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
             Cursor cursor = createImageCursor();
             try {
                 if (cursor != null && cursor.getCount() > 0) {
                     // 是否是第一个遍历到的图片目录
                     while (cursor.moveToNext()) {
-                        // 通过 cursor 获取图片路径
+                        // 验证路径是否有效
                         String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                         if (TextUtils.isEmpty(picturePath)) {
                             continue;
                         }
+                        MediaMeta meta = MediaMeta.create(picturePath, true);
                         // 添加到所有图片的目录下
-                        allFolderModel.addPath(picturePath);
+                        allFolderModel.addMeta(meta);
                         // 获取图片父文件夹路径
-                        String pictureFolderPath = getParentFolderPath(picturePath);
-                        if (TextUtils.isEmpty(pictureFolderPath)) {
+                        String folderPath = getParentFolderPath(picturePath);
+                        if (TextUtils.isEmpty(folderPath)) {
                             continue;
                         }
                         // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
-                        if (!caches.containsKey(pictureFolderPath)) {
-                            String folderName = getLastFileName(pictureFolderPath);
-                            caches.put(pictureFolderPath, new FolderModel(folderName));
+                        if (!caches.containsKey(folderPath)) {
+                            String folderName = getLastFileName(folderPath);
+                            caches.put(folderPath, new FolderModel(folderName));
                         }
                         // 添加图片到缓存
-                        caches.get(pictureFolderPath).addPath(picturePath);
+                        caches.get(folderPath).addMeta(meta);
                     }
                 }
-                // 添加所有文件夹数据
-                folderModels.addAll(caches.values());
             } catch (Exception e) {
                 mListener.onFailed(e);
             } finally {
@@ -208,18 +220,96 @@ class PickerModel implements PickerContract.IModel {
                     cursor.close();
                 }
             }
-            mListener.onComplete(folderModels);
         }
 
         /**
-         * Create cursor associated with this runnable.
+         * 获取所有视频资源信息
+         */
+        private void scanVideos(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
+            Cursor cursor = createVideoCursor();
+            try {
+                if (cursor != null && cursor.getCount() > 0) {
+                    while (cursor.moveToNext()) {
+                        // 验证路径是否有效
+                        String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                        if (TextUtils.isEmpty(path)) {
+                            continue;
+                        }
+                        MediaMeta meta = MediaMeta.create(path, false);
+                        meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+                        meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
+                        meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                        // 添加到所有图片的目录下
+                        allFolderModel.addMeta(meta);
+                        // 获取图片父文件夹路径
+                        String folderPath = getParentFolderPath(path);
+                        if (TextUtils.isEmpty(folderPath)) {
+                            continue;
+                        }
+                        // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
+                        if (!caches.containsKey(folderPath)) {
+                            String folderName = getLastFileName(folderPath);
+                            caches.put(folderPath, new FolderModel(folderName));
+                        }
+                        // 添加媒体文件到缓存到缓存
+                        caches.get(folderPath).addMeta(meta);
+                    }
+                }
+            } catch (Exception e) {
+                mListener.onFailed(e);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+
+        /**
+         * Create image cursor associated with this runnable.
          */
         private Cursor createImageCursor() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{MediaStore.Images.Media.DATA};
             String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
-                    MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?";
+                    MediaStore.Images.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Images.Media.MIME_TYPE + "=?";
             String[] selectionArgs = new String[]{"image/jpeg", "image/png", "image/jpg"};
+            String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+            return mContext.getContentResolver().query(uri, projection,
+                    selection, selectionArgs, sortOrder);
+        }
+
+        /**
+         * Create video cursor associated with this runnable.
+         */
+        private Cursor createVideoCursor() {
+            Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            String[] projection = new String[]{
+                    MediaStore.Video.Media.DATA,
+                    MediaStore.Video.Media.DURATION,
+                    MediaStore.Video.Media.DATE_ADDED,
+                    MediaStore.Video.Media.SIZE,
+            };
+            String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Video.Media.MIME_TYPE + "=?";
+            String[] selectionArgs = new String[]{
+                    "video/mp4",
+                    "video/3gp",
+                    "video/aiv",
+                    "video/rmvb",
+                    "video/vob",
+                    "video/flv",
+                    "video/mkv",
+                    "video/mov",
+                    "video/mpg"
+            };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return mContext.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);

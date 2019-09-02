@@ -13,9 +13,9 @@ public interface WatcherCallback {
     /**
      * The callback method will call when pick picture from watcher complete.
      *
-     * @param isEnsure      is clicked ensure button.
-     * @param pickedPictures picked pictures.
+     * @param isEnsure    is clicked ensure button.
+     * @param pickedMetas picked pictures.
      */
-    void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> pickedPictures);
+    void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas);
 
 }

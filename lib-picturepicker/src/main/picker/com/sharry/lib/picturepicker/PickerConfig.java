@@ -3,6 +3,7 @@ package com.sharry.lib.picturepicker;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -22,8 +23,46 @@ public class PickerConfig implements Parcelable {
     public static final int INVALIDATE_VALUE = -1;
     private static final int COLOR_DEFAULT = Color.parseColor("#ff64b6f6");
 
-    public static Builder Builder() {
-        return new Builder();
+    protected PickerConfig(Parcel in) {
+        userPickedSet = in.createTypedArrayList(MediaMeta.CREATOR);
+        threshold = in.readInt();
+        spanCount = in.readInt();
+        toolbarBkgColor = in.readInt();
+        toolbarBkgDrawableResId = in.readInt();
+        pickerBackgroundColor = in.readInt();
+        pickerItemBackgroundColor = in.readInt();
+        indicatorTextColor = in.readInt();
+        indicatorSolidColor = in.readInt();
+        indicatorBorderCheckedColor = in.readInt();
+        indicatorBorderUncheckedColor = in.readInt();
+        isToolbarBehavior = in.readByte() != 0;
+        isFabBehavior = in.readByte() != 0;
+        takerConfig = in.readParcelable(TakerConfig.class.getClassLoader());
+        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(userPickedSet);
+        dest.writeInt(threshold);
+        dest.writeInt(spanCount);
+        dest.writeInt(toolbarBkgColor);
+        dest.writeInt(toolbarBkgDrawableResId);
+        dest.writeInt(pickerBackgroundColor);
+        dest.writeInt(pickerItemBackgroundColor);
+        dest.writeInt(indicatorTextColor);
+        dest.writeInt(indicatorSolidColor);
+        dest.writeInt(indicatorBorderCheckedColor);
+        dest.writeInt(indicatorBorderUncheckedColor);
+        dest.writeByte((byte) (isToolbarBehavior ? 1 : 0));
+        dest.writeByte((byte) (isFabBehavior ? 1 : 0));
+        dest.writeParcelable(takerConfig, flags);
+        dest.writeParcelable(cropperConfig, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<PickerConfig> CREATOR = new Creator<PickerConfig>() {
@@ -38,8 +77,12 @@ public class PickerConfig implements Parcelable {
         }
     };
 
+    public static Builder Builder() {
+        return new Builder();
+    }
+
     // 图片选择的相关配置
-    private ArrayList<String> userPickedSet = new ArrayList<>();
+    private ArrayList<MediaMeta> userPickedSet = new ArrayList<>();
     private int threshold = 9, spanCount = 3;
     // Toolbar 背景色
     private int toolbarBkgColor = COLOR_DEFAULT;                                             // 背景色
@@ -62,32 +105,8 @@ public class PickerConfig implements Parcelable {
     private PickerConfig() {
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringList(userPickedSet);
-        dest.writeInt(threshold);
-        dest.writeInt(spanCount);
-        dest.writeInt(toolbarBkgColor);
-        dest.writeInt(toolbarBkgDrawableResId);
-        dest.writeInt(pickerBackgroundColor);
-        dest.writeInt(pickerItemBackgroundColor);
-        dest.writeInt(indicatorTextColor);
-        dest.writeInt(indicatorSolidColor);
-        dest.writeInt(indicatorBorderCheckedColor);
-        dest.writeInt(indicatorBorderUncheckedColor);
-        dest.writeByte((byte) (isToolbarBehavior ? 1 : 0));
-        dest.writeByte((byte) (isFabBehavior ? 1 : 0));
-        dest.writeParcelable(takerConfig, flags);
-        dest.writeParcelable(cropperConfig, flags);
-    }
-
     @NonNull
-    public ArrayList<String> getUserPickedSet() {
+    public ArrayList<MediaMeta> getUserPickedSet() {
         return userPickedSet;
     }
 
@@ -167,24 +186,6 @@ public class PickerConfig implements Parcelable {
         return new Builder(this);
     }
 
-    protected PickerConfig(Parcel in) {
-        userPickedSet = in.createStringArrayList();
-        threshold = in.readInt();
-        spanCount = in.readInt();
-        toolbarBkgColor = in.readInt();
-        toolbarBkgDrawableResId = in.readInt();
-        pickerBackgroundColor = in.readInt();
-        pickerItemBackgroundColor = in.readInt();
-        indicatorTextColor = in.readInt();
-        indicatorSolidColor = in.readInt();
-        indicatorBorderCheckedColor = in.readInt();
-        indicatorBorderUncheckedColor = in.readInt();
-        isToolbarBehavior = in.readByte() != 0;
-        isFabBehavior = in.readByte() != 0;
-        takerConfig = in.readParcelable(TakerConfig.class.getClassLoader());
-        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
-    }
-
     public static class Builder {
 
         private PickerConfig mConfig;
@@ -213,7 +214,7 @@ public class PickerConfig implements Parcelable {
          *
          * @param pickedPictures 已选中的图片
          */
-        public Builder setPickedPictures(@Nullable ArrayList<String> pickedPictures) {
+        public Builder setPickedPictures(@Nullable ArrayList<MediaMeta> pickedPictures) {
             if (null != pickedPictures) {
                 mConfig.userPickedSet.addAll(pickedPictures);
             }
@@ -322,4 +323,5 @@ public class PickerConfig implements Parcelable {
         }
 
     }
+
 }

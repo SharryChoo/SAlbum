@@ -23,12 +23,12 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
      */
     private final WatcherContract.IView mView;
     private final WatcherConfig mConfig;
-    private final ArrayList<String> mDisplayPaths;
-    private final ArrayList<String> mPickedPaths;
+    private final ArrayList<MediaMeta> mDisplayPaths;
+    private final ArrayList<MediaMeta> mPickedPaths;
     private final SharedElementModel mSharedElementModel;
 
     private int mCurPosition;
-    private String mCurDisplayPath;
+    private MediaMeta mCurDisplay;
     private boolean mIsEnsurePressed = false;
 
     WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementModel sharedElementModel) {
@@ -41,7 +41,7 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
         this.mPickedPaths = config.getUserPickedSet();
         // 获取当前需要展示的 Position 和 URI
         this.mCurPosition = config.getPosition();
-        this.mCurDisplayPath = mDisplayPaths.get(mCurPosition);
+        this.mCurDisplay = mDisplayPaths.get(mCurPosition);
     }
 
     @Override
@@ -62,7 +62,7 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
                     mConfig.getIndicatorSolidColor(),
                     mConfig.getIndicatorTextColor()
             );
-            mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
+            mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplay) != -1);
             mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
             // 底部菜单
             mView.setPreviewAdapter(new PreviewAdapter(mPickedPaths, this));
@@ -87,13 +87,13 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
     public void handlePagerChanged(int position) {
         // 更新数据
         mCurPosition = position;
-        mCurDisplayPath = mDisplayPaths.get(position);
+        mCurDisplay = mDisplayPaths.get(position);
         // 展示 Toolbar 左边的指示文本
         mView.displayToolbarLeftText(buildToolbarLeftText());
         // 展示图片
         mView.displayPictureAt(mDisplayPaths, mCurPosition);
         if (mConfig.isPickerSupport()) {
-            mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
+            mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplay) != -1);
             mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
             mView.displayPreviewEnsureText(buildEnsureText());
         }
@@ -103,20 +103,20 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
     public void handleToolbarCheckedIndicatorClick(boolean isChecked) {
         if (isChecked) {
             // 移除选中数据与状态
-            int removedIndex = mPickedPaths.indexOf(mCurDisplayPath);
+            int removedIndex = mPickedPaths.indexOf(mCurDisplay);
             if (removedIndex < 0) {
                 return;
             }
             mPickedPaths.remove(removedIndex);
             // 通知 RecyclerView 数据变更
-            mView.notifyBottomPicturesRemoved(mCurDisplayPath, removedIndex);
+            mView.notifyBottomPicturesRemoved(mCurDisplay, removedIndex);
         } else {
             // 判断是否达到选择上限
             if (mPickedPaths.size() < mConfig.getThreshold()) {
-                mPickedPaths.add(mCurDisplayPath);
-                int addedIndex = mPickedPaths.indexOf(mCurDisplayPath);
+                mPickedPaths.add(mCurDisplay);
+                int addedIndex = mPickedPaths.indexOf(mCurDisplay);
                 // 通知 RecyclerView 数据变更
-                mView.notifyBottomPictureAdded(mCurDisplayPath, addedIndex);
+                mView.notifyBottomPictureAdded(mCurDisplay, addedIndex);
                 mView.previewPicturesSmoothScrollToPosition(addedIndex);
             } else {
                 mView.showMsg(
@@ -126,7 +126,7 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
                 );
             }
         }
-        mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplayPath) != -1);
+        mView.setToolbarIndicatorChecked(mPickedPaths.indexOf(mCurDisplay) != -1);
         mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
         mView.displayPreviewEnsureText(buildEnsureText());
         // 控制底部导航栏的展示
@@ -181,7 +181,7 @@ class WatcherPresenter implements WatcherContract.IPresenter, PreviewAdapter.Ada
      * 构建 Toolbar checked Indicator 的文本
      */
     private CharSequence buildToolbarCheckedIndicatorText() {
-        return String.valueOf(mPickedPaths.indexOf(mCurDisplayPath) + 1);
+        return String.valueOf(mPickedPaths.indexOf(mCurDisplay) + 1);
     }
 
     /**

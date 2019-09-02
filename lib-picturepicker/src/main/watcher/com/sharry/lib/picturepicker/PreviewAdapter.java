@@ -18,10 +18,10 @@ import java.util.ArrayList;
  */
 class PreviewAdapter extends RecyclerView.Adapter<PreviewAdapter.ViewHolder> {
 
-    private final ArrayList<String> userPickedSet;
+    private final ArrayList<MediaMeta> userPickedSet;
     private final AdapterInteraction interaction;
 
-    PreviewAdapter(ArrayList<String> userPickedSet, AdapterInteraction interaction) {
+    PreviewAdapter(ArrayList<MediaMeta> userPickedSet, AdapterInteraction interaction) {
         this.userPickedSet = userPickedSet;
         this.interaction = interaction;
     }
@@ -39,7 +39,7 @@ class PreviewAdapter extends RecyclerView.Adapter<PreviewAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        PictureLoader.load(holder.ivPicture.getContext(), userPickedSet.get(position), holder.ivPicture);
+        PictureLoader.load(holder.ivPicture.getContext(), userPickedSet.get(position).path, holder.ivPicture);
     }
 
     @Override
@@ -66,7 +66,7 @@ class PreviewAdapter extends RecyclerView.Adapter<PreviewAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
-            interaction.onPreviewItemClicked((ImageView) v, userPickedSet.get(position), position);
+            interaction.onPreviewItemClicked((ImageView) v, userPickedSet.get(position).path, position);
         }
     }
 

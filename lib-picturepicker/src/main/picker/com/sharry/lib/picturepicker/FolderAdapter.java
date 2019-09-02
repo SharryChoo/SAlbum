@@ -47,10 +47,16 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         FolderModel folder = data.get(holder.getAdapterPosition());
-        if (folder == null || folder.getPicturePaths() == null || folder.getPicturePaths().isEmpty()) {
+        if (folder == null || folder.getMetas() == null || folder.getMetas().isEmpty()) {
             return;
         }
-        PictureLoader.load(context, folder.getPicturePaths().get(0), holder.ivPreview);
+        MediaMeta firstMeta = folder.getMetas().get(0);
+        PictureLoader.load(context, firstMeta.path, holder.ivPreview);
+        if (firstMeta.isPicture) {
+            PictureLoader.load(context, firstMeta.path, holder.ivPreview);
+        } else {
+            PictureLoader.load(context, firstMeta.thumbNailPath, holder.ivPreview);
+        }
         holder.tvFolderName.setText(folder.getFolderName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -109,11 +109,11 @@ public class WatcherManager {
                 }
                 switch (requestCode) {
                     case WatcherActivity.REQUEST_CODE:
-                        ArrayList<String> paths = data.getStringArrayListExtra(
+                        ArrayList<MediaMeta> metas = data.getParcelableArrayListExtra(
                                 WatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
                         boolean isEnsure = data.getBooleanExtra(
                                 WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
-                        callback.onWatcherPickedComplete(isEnsure, paths);
+                        callback.onWatcherPickedComplete(isEnsure, metas);
                         break;
                     default:
                         break;

@@ -206,7 +206,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void notifyBottomPicturesRemoved(String removedPath, int removedIndex) {
+    public void notifyBottomPicturesRemoved(MediaMeta removedMeta, int removedIndex) {
         RecyclerView.Adapter adapter;
         if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
             adapter.notifyItemRemoved(removedIndex);
@@ -214,7 +214,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void notifyBottomPictureAdded(String insertPath, int addedIndex) {
+    public void notifyBottomPictureAdded(MediaMeta addedMeta, int addedIndex) {
         RecyclerView.Adapter adapter;
         if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
             adapter.notifyItemInserted(addedIndex);
@@ -222,24 +222,24 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void displayPictureAt(ArrayList<String> pictureUris, int curPosition) {
+    public void displayPictureAt(ArrayList<MediaMeta> pictureUris, int curPosition) {
         mViewPager.setCurrentItem(curPosition);
         // 加载当前的位置的图片
         PhotoView curView = mPhotoViews.get(curPosition);
         if (curView != null && curView.getDrawable() == null) {
-            PictureLoader.load(this, pictureUris.get(curPosition), curView);
+            PictureLoader.load(this, pictureUris.get(curPosition).path, curView);
         }
         // 加载前一个
         int beforeIndex = curPosition - 1;
         PhotoView beforeView = beforeIndex >= 0 ? mPhotoViews.get(beforeIndex) : null;
         if (beforeView != null && beforeView.getDrawable() == null) {
-            PictureLoader.load(this, pictureUris.get(beforeIndex), beforeView);
+            PictureLoader.load(this, pictureUris.get(beforeIndex).path, beforeView);
         }
         // 加载后一个
         int afterIndex = curPosition + 1;
         PhotoView afterView = afterIndex < pictureUris.size() ? mPhotoViews.get(afterIndex) : null;
         if (afterView != null && afterView.getDrawable() == null) {
-            PictureLoader.load(this, pictureUris.get(afterIndex), afterView);
+            PictureLoader.load(this, pictureUris.get(afterIndex).path, afterView);
         }
     }
 
@@ -317,7 +317,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setResultBeforeFinish(@Nullable ArrayList<String> pickedPaths, boolean isEnsurePressed) {
+    public void setResultBeforeFinish(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
         intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, isEnsurePressed);

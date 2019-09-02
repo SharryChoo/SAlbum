@@ -128,10 +128,10 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     @Override
     public void setPicturesAdapter(@NonNull PickerConfig config,
-                                   @NonNull ArrayList<String> displayPaths,
-                                   @NonNull ArrayList<String> userPickedPaths) {
+                                   @NonNull ArrayList<MediaMeta> metas,
+                                   @NonNull ArrayList<MediaMeta> userPickedMetas) {
         mRecyclePictures.setAdapter(new PictureAdapter(this, config,
-                displayPaths, userPickedPaths));
+                metas, userPickedMetas));
     }
 
     @Override
@@ -208,7 +208,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void setResult(@NonNull ArrayList<String> pickedPaths) {
+    public void setResult(@NonNull ArrayList<MediaMeta> pickedPaths) {
         Intent intent = new Intent();
         intent.putExtra(PickerActivity.RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
         setResult(Activity.RESULT_OK, intent);
@@ -216,13 +216,13 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public boolean onPictureChecked(@NonNull String uri) {
-        return mPresenter.handlePictureChecked(uri);
+    public boolean onPictureChecked(@NonNull MediaMeta checkedMeta) {
+        return mPresenter.handlePictureChecked(checkedMeta);
     }
 
     @Override
-    public void onPictureRemoved(@NonNull String uri) {
-        mPresenter.handlePictureRemoved(uri);
+    public void onPictureRemoved(@NonNull MediaMeta removedMeta) {
+        mPresenter.handlePictureRemoved(removedMeta);
     }
 
     @Override

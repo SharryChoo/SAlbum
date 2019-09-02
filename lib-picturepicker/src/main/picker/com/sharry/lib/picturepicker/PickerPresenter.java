@@ -3,11 +3,10 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.sharry.lib.picturepicker.R;
+import androidx.annotation.NonNull;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -20,16 +19,29 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/1 10:17
  */
-public class PickerPresenter implements PickerContract.IPresenter, TakerCallback, CropperCallback, WatcherCallback {
+class PickerPresenter implements PickerContract.IPresenter, TakerCallback, CropperCallback, WatcherCallback {
 
     private static final String TAG = PickerPresenter.class.getSimpleName();
-    private final PickerContract.IView mView;                                                // View associated with this presenter.
-    private final PickerContract.IModel mModel;                                              // Model associated with this presenter.
-    private final PickerConfig mPickerConfig;                                                       // Config associated with the PicturePicker.
-    private final WatcherConfig mWatcherConfig;                                                     // Config associated with the PictureWatcher.
 
-    public PickerPresenter(@NonNull PickerContract.IView view,
-                           @NonNull Context context, @NonNull PickerConfig config) {
+    /**
+     * View associated with this presenter.
+     */
+    private final PickerContract.IView mView;
+    /**
+     * Model associated with this presenter.
+     */
+    private final PickerContract.IModel mModel;
+    /**
+     * Config associated with the PicturePicker.
+     */
+    private final PickerConfig mPickerConfig;
+    /**
+     * Config associated with the PictureWatcher.
+     */
+    private final WatcherConfig mWatcherConfig;
+
+    PickerPresenter(@NonNull PickerContract.IView view,
+                    @NonNull Context context, @NonNull PickerConfig config) {
         this.mView = view;
         this.mPickerConfig = config;
         this.mModel = new PickerModel(mPickerConfig.getUserPickedSet(), mPickerConfig.getThreshold());
@@ -43,15 +55,15 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
                 )
                 .setUserPickedSet(mModel.getPickedPaths())
                 .build();
-        initView();
-        initModel(context);
+        setupView();
+        setupModel(context);
     }
 
     @Override
-    public boolean handlePictureChecked(String path) {
+    public boolean handlePictureChecked(MediaMeta checkedMeta) {
         boolean result = isCanPickedPicture(true);
         if (result) {
-            mModel.addPickedPicture(path);
+            mModel.addPickedPicture(checkedMeta);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
@@ -59,8 +71,8 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
     }
 
     @Override
-    public void handlePictureRemoved(String path) {
-        mModel.removePickedPicture(path);
+    public void handlePictureRemoved(MediaMeta removedMeta) {
+        mModel.removePickedPicture(removedMeta);
         mView.setToolbarEnsureText(buildEnsureText());
         mView.setPreviewText(buildPreviewText());
     }
@@ -115,7 +127,7 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
         CropperManager.with((Context) mView)
                 .setConfig(
                         mPickerConfig.getCropperConfig().rebuild()
-                                .setOriginFile(mModel.getPickedPaths().get(0))
+                                .setOriginFile(mModel.getPickedPaths().get(0).path)
                                 .build()
                 )
                 .crop(this);
@@ -127,10 +139,10 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
     }
 
     @Override
-    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<String> pickedPictures) {
+    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas) {
         // 刷新用户选中的集合
         mModel.getPickedPaths().clear();
-        mModel.getPickedPaths().addAll(pickedPictures);
+        mModel.getPickedPaths().addAll(pickedMetas);
         if (mView == null) {
             return;
         }
@@ -148,19 +160,20 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
 
     @Override
     public void onCameraTakeComplete(@NonNull String path) {
+        MediaMeta newMeta = MediaMeta.create(path, true);
         // 1. 添加到 <当前展示> 的文件夹下
         FolderModel checkedFolder = mModel.getCheckedFolder();
-        checkedFolder.getPicturePaths().add(0, path);
+        checkedFolder.getMetas().add(0, newMeta);
         // 2. 添加到 <所有文件> 的文件夹下
         FolderModel allFolderModel = mModel.getPictureFolderAt(0);
         if (allFolderModel != checkedFolder) {
-            allFolderModel.getPicturePaths().add(0, path);
+            allFolderModel.getMetas().add(0, newMeta);
         }
         // 3. 更新展示的图片集合
-        mModel.getDisplayPaths().add(0, path);
+        mModel.getDisplayPaths().add(0, newMeta);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
-            mModel.addPickedPicture(path);
+            mModel.addPickedPicture(newMeta);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
@@ -172,11 +185,11 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
     @Override
     public void onCropComplete(@NonNull String path) {
         mModel.getPickedPaths().clear();
-        mModel.getPickedPaths().add(path);
+        mModel.getPickedPaths().add(MediaMeta.create(path, true));
         mView.setResult(mModel.getPickedPaths());
     }
 
-    private void initView() {
+    private void setupView() {
         // 配置 UI 视图
         mView.setToolbarScrollable(mPickerConfig.isToolbarBehavior());
         mView.switchFabVisibility(mPickerConfig.isFabBehavior());
@@ -196,7 +209,7 @@ public class PickerPresenter implements PickerContract.IPresenter, TakerCallback
         mView.setPicturesAdapter(mPickerConfig, mModel.getDisplayPaths(), mModel.getPickedPaths());
     }
 
-    private void initModel(Context context) {
+    private void setupModel(Context context) {
         // 获取图片数据
         mModel.getSystemPictures(context, new PickerContract.IModel.Callback() {
 
