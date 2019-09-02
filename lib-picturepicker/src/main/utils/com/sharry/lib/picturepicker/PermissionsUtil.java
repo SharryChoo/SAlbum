@@ -39,14 +39,14 @@ class PermissionsUtil {
     /**
      * 添加需要请求的权限
      */
-    public PermissionsUtil request(String... permissions) {
+    PermissionsUtil request(String... permissions) {
         return requestArray(permissions);
     }
 
     /**
      * 添加需要请求的权限(Kotlin 不支持从不定长参数转为 Array)
      */
-    public PermissionsUtil requestArray(String[] permissions) {
+    PermissionsUtil requestArray(String[] permissions) {
         ensure(permissions);
         mPermissions = permissions;
         return this;
@@ -55,7 +55,7 @@ class PermissionsUtil {
     /**
      * 执行权限请求
      */
-    public void execute(PermissionsCallback permissionsCallback) {
+    void execute(PermissionsCallback permissionsCallback) {
         if (permissionsCallback == null) {
             throw new IllegalArgumentException("PermissionsUtil.execute -> PermissionsCallback must not be null");
         }
@@ -65,7 +65,7 @@ class PermissionsUtil {
     /**
      * 判断权限是否被授权
      */
-    public boolean isGranted(String permission) {
+    boolean isGranted(String permission) {
         return !isMarshmallow() || (mPermissionsFragment != null && mPermissionsFragment.isGranted(permission));
     }
 
@@ -75,7 +75,7 @@ class PermissionsUtil {
      * Always false if SDK &lt; 23.
      */
     @SuppressWarnings("WeakerAccess")
-    public boolean isRevoked(String permission) {
+    boolean isRevoked(String permission) {
         return isMarshmallow() && (mPermissionsFragment != null && mPermissionsFragment.isRevoked(permission));
     }
 
