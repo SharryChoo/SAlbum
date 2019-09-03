@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Color;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -20,6 +21,7 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -34,7 +36,7 @@ public class DraggableViewPager extends ViewPager {
 
     private static final int INVALIDATE_VALUE = -1;
 
-    private int mSharedElementPosition = INVALIDATE_VALUE;
+    private int mIgnoreDismissAnimPosition = INVALIDATE_VALUE;
     private int mBaseColor = Color.BLACK;
 
     private float mDownX = 0f;
@@ -66,7 +68,9 @@ public class DraggableViewPager extends ViewPager {
     }
 
     public interface OnPagerChangedListener {
+
         void onPagerChanged(int position);
+
     }
 
     public void setOnPagerChangedListener(final OnPagerChangedListener listener) {
@@ -91,10 +95,10 @@ public class DraggableViewPager extends ViewPager {
     }
 
     /**
-     * 设置了共享的位置
+     * 设置不执行退出动画的位置
      */
-    public void setSharedElementPosition(int position) {
-        this.mSharedElementPosition = position;
+    public void setIgnoreDismissAnimPosition(int position) {
+        this.mIgnoreDismissAnimPosition = position;
     }
 
     /**
@@ -181,14 +185,19 @@ public class DraggableViewPager extends ViewPager {
 
     @Override
     public void setAdapter(@Nullable PagerAdapter adapter) {
-        super.setAdapter(new DelegatePagerAdapter(adapter));
+        super.setAdapter(new PagerAdapterProxy(adapter));
     }
 
     /**
      * 获取当前正在展示的 View
      */
+    @Nullable
     private View getCurrentView() {
-        return ((DelegatePagerAdapter) getAdapter()).getCurrentView();
+        PagerAdapter adapter = getAdapter();
+        if (adapter instanceof IViewProvider) {
+            return ((IViewProvider) adapter).getCurrentView();
+        }
+        return null;
     }
 
     /**
@@ -240,7 +249,7 @@ public class DraggableViewPager extends ViewPager {
         if (isInvalidateCurrentView()) {
             return;
         }
-        if (getCurrentItem() == mSharedElementPosition) {
+        if (getCurrentItem() == mIgnoreDismissAnimPosition) {
             ((Activity) getContext()).onBackPressed();
             return;
         }
@@ -286,31 +295,17 @@ public class DraggableViewPager extends ViewPager {
     /**
      * 静态代理的 Adapter 对象
      */
-    private static final class DelegatePagerAdapter extends PagerAdapter {
+    private static final class PagerAdapterProxy extends PagerAdapter implements IViewProvider {
 
-        // 记录当前的 View
         private View mCurrentView;
-        // 原始的 Adapter
         private PagerAdapter mOriginAdapter;
-        // 注册代理监听器
-        private DataSetObserver mObserver = new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                notifyDataSetChanged();
-            }
 
-            @Override
-            public void onInvalidated() {
-                notifyDataSetChanged();
-            }
-        };
-
-        DelegatePagerAdapter(PagerAdapter originAdapter) {
+        PagerAdapterProxy(PagerAdapter originAdapter) {
             mOriginAdapter = originAdapter;
-            mOriginAdapter.registerDataSetObserver(mObserver);
         }
 
-        View getCurrentView() {
+        @Override
+        public View getCurrentView() {
             return mCurrentView;
         }
 
@@ -325,29 +320,115 @@ public class DraggableViewPager extends ViewPager {
         }
 
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
+        public Object instantiateItem(@NonNull ViewGroup container, int position) {
             return mOriginAdapter.instantiateItem(container, position);
         }
 
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             mOriginAdapter.destroyItem(container, position, object);
         }
 
         @Override
-        public int getItemPosition(Object object) {
+        public int getItemPosition(@NonNull Object object) {
             return mOriginAdapter.getItemPosition(object);
         }
 
         @Override
         public void setPrimaryItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            setPrimaryItem((View) container, position, object);
+            if (object instanceof View) {
+                mCurrentView = (View) object;
+            } else if (object instanceof Fragment) {
+                mCurrentView = ((Fragment) object).getView();
+            }
+            mOriginAdapter.setPrimaryItem(container, position, object);
         }
 
         @Override
-        public void setPrimaryItem(View container, int position, Object object) {
-            mCurrentView = (View) object;
+        public void setPrimaryItem(@NonNull View container, int position, @NonNull Object object) {
+            if (object instanceof View) {
+                mCurrentView = (View) object;
+            } else if (object instanceof Fragment) {
+                mCurrentView = ((Fragment) object).getView();
+            }
+            mOriginAdapter.setPrimaryItem(container, position, object);
         }
+
+        @Override
+        public void startUpdate(@NonNull ViewGroup container) {
+            mOriginAdapter.startUpdate(container);
+        }
+
+        @Override
+        public void finishUpdate(@NonNull ViewGroup container) {
+            mOriginAdapter.finishUpdate(container);
+        }
+
+        @Override
+        public void startUpdate(@NonNull View container) {
+            mOriginAdapter.startUpdate(container);
+        }
+
+        @NonNull
+        @Override
+        public Object instantiateItem(@NonNull View container, int position) {
+            return mOriginAdapter.instantiateItem(container, position);
+        }
+
+        @Override
+        public void destroyItem(@NonNull View container, int position, @NonNull Object object) {
+            mOriginAdapter.destroyItem(container, position, object);
+        }
+
+        @Override
+        public void finishUpdate(@NonNull View container) {
+            mOriginAdapter.finishUpdate(container);
+        }
+
+        @Nullable
+        @Override
+        public Parcelable saveState() {
+            return mOriginAdapter.saveState();
+        }
+
+        @Override
+        public void restoreState(@Nullable Parcelable state, @Nullable ClassLoader loader) {
+            mOriginAdapter.restoreState(state, loader);
+        }
+
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mOriginAdapter.getPageTitle(position);
+        }
+
+        @Override
+        public float getPageWidth(int position) {
+            return mOriginAdapter.getPageWidth(position);
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            mOriginAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void registerDataSetObserver(@NonNull DataSetObserver observer) {
+            mOriginAdapter.registerDataSetObserver(observer);
+        }
+
+        @Override
+        public void unregisterDataSetObserver(@NonNull DataSetObserver observer) {
+            mOriginAdapter.unregisterDataSetObserver(observer);
+        }
+
+    }
+
+
+    interface IViewProvider {
+
+        View getCurrentView();
+
     }
 
 }

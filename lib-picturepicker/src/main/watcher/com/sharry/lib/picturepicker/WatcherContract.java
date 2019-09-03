@@ -49,7 +49,7 @@ interface WatcherContract {
         /**
          * 设置底部图片预览的 RecyclerView 的 Adapter
          */
-        void setPreviewAdapter(PreviewAdapter adapter);
+        void setPreviewAdapter(ArrayList<MediaMeta> pickedSet);
 
         /**
          * 展示确认文本
@@ -57,16 +57,14 @@ interface WatcherContract {
         void displayPreviewEnsureText(CharSequence content);
 
         /**
-         * 创建 Views
+         * 设置展示的 Adapter
          */
-        void createViews(int photoViewCount);
+        void setDisplayAdapter(ArrayList<MediaMeta> mediaMetas);
 
         /**
          * 展示指定位置的图片
-         *  @param pictureUris 需要展示的图片集合
-         * @param curPosition 指定位置的图片
          */
-        void displayPictureAt(ArrayList<MediaMeta> pictureUris, int curPosition);
+        void displayAt(int position);
 
         /**
          * 通知选中的图片被移除了
@@ -112,7 +110,8 @@ interface WatcherContract {
 
         /**
          * 设置返回值在 finish 之前
-         *  @param pickedPaths     用户选中的图片
+         *
+         * @param pickedPaths     用户选中的图片
          * @param isEnsurePressed 是否点击了确认按钮
          */
         void setResultBeforeFinish(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed);
@@ -120,9 +119,10 @@ interface WatcherContract {
         /**
          * 展示共享元素入场动画
          *
+         * @param mediaMeta   共享元素位置的数据
          * @param elementData shared element data.
          */
-        void showSharedElementEnter(SharedElementModel elementData);
+        void showSharedElementEnter(MediaMeta mediaMeta, SharedElementModel elementData);
 
         /**
          * 展示共享元素退场动画
@@ -134,11 +134,6 @@ interface WatcherContract {
 
 
     interface IPresenter {
-
-        /**
-         * 获取数据
-         */
-        void setup();
 
         /**
          * 处理页面的滑动
@@ -156,6 +151,11 @@ interface WatcherContract {
         void handleToolbarCheckedIndicatorClick(boolean checked);
 
         /**
+         * 处理选中的条目被点击了
+         */
+        void handlePickedItemClicked(MediaMeta pickedUri);
+
+        /**
          * 处理返回事件
          */
         void handleBackPressed();
@@ -164,5 +164,6 @@ interface WatcherContract {
          * 处理 View 的 finish
          */
         void handleSetResultBeforeFinish();
+
     }
 }

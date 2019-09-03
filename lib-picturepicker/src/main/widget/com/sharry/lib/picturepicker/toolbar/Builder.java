@@ -336,7 +336,7 @@ public class Builder {
                     } else if (leftItem.op instanceof ImageViewOptions) {
                         toolbar.addLeftMenuImage((ImageViewOptions) leftItem.op);
                     } else {
-                        throw new NullPointerException("U setup ops cannot support auto generate view, " +
+                        throw new NullPointerException("U setupViews ops cannot support auto generate view, " +
                                 " option is :" + leftItem.op);
                     }
                 } else if (null != leftItem.view) {
@@ -357,7 +357,7 @@ public class Builder {
                     } else if (rightEntity.op instanceof ImageViewOptions) {
                         toolbar.addRightMenuImage((ImageViewOptions) rightEntity.op);
                     } else {
-                        throw new NullPointerException("U setup ops cannot support auto generate view, " +
+                        throw new NullPointerException("U setupViews ops cannot support auto generate view, " +
                                 " option is :" + rightEntity.op);
                     }
                 } else if (null != rightEntity.view) {

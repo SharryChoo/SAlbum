@@ -135,7 +135,10 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun loadGif(context: Context, uri: String, imageView: ImageView) {
-                            Glide.with(context).load(uri).into(imageView)
+                            // Glide 可直接加载视频 uri 获取第一帧
+                            val options = RequestOptions().override(imageView.width, imageView.height)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            Glide.with(context).load(uri).apply(options).into(imageView)
                         }
 
                         override fun loadVideo(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {

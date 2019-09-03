@@ -50,7 +50,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             this.mInteraction = (AdapterInteraction) context;
         } else {
             throw new IllegalArgumentException(context + "must implements " +
-                    PictureAdapter.class.getSimpleName() + ".AdapterInteraction");
+                    PictureAdapter.class.getSimpleName() + ".Interaction");
         }
         this.mContext = context;
         this.mConfig = config;
@@ -133,7 +133,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void bindPictureItem(final PictureViewHolder holder, final MediaMeta meta) {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        holder.ivGifTag.setVisibility("image/gif".equals(meta.mimeType) ? View.VISIBLE : View.GONE);
+        holder.ivGifTag.setVisibility(Constants.MIME_TYPE_GIF.equals(meta.mimeType) ? View.VISIBLE : View.GONE);
         PictureLoader.loadPicture(mContext, meta.path, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mPickedSet.indexOf(meta);

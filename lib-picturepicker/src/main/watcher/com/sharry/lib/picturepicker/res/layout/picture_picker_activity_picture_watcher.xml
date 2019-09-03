@@ -14,8 +14,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:statusBarStyle="Transparent"
         app:backIcon="@drawable/picture_picker_common_arrow_right_white"
+        app:statusBarStyle="Transparent"
         app:subItemInterval="10dp"
         app:titleGravity="Left"
         app:titleTextSize="18dp" />
@@ -47,5 +47,11 @@
             android:textSize="14dp" />
 
     </LinearLayout>
+
+    <com.sharry.lib.picturepicker.photoview.PhotoView
+        android:id="@+id/iv_place_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
 </merge>

@@ -30,7 +30,7 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
             this.callback = (AdapterInteraction) context;
         } else {
             throw new IllegalArgumentException(context + "must implements " +
-                    FolderAdapter.class.getSimpleName() + ".AdapterInteraction");
+                    FolderAdapter.class.getSimpleName() + ".Interaction");
         }
         this.context = context;
         this.data = data;

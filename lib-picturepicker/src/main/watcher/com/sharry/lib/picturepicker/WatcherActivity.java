@@ -13,7 +13,6 @@ import android.os.Parcel;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,7 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.sharry.lib.picturepicker.photoview.OnPhotoTapListener;
 import com.sharry.lib.picturepicker.photoview.PhotoView;
 import com.sharry.lib.picturepicker.toolbar.SToolbar;
 import com.sharry.lib.picturepicker.toolbar.ViewOptions;
@@ -42,7 +40,9 @@ import java.util.ArrayList;
  */
 public class WatcherActivity extends AppCompatActivity implements
         WatcherContract.IView,
-        DraggableViewPager.OnPagerChangedListener {
+        DraggableViewPager.OnPagerChangedListener,
+        WatcherFragment.Interaction,
+        PickedAdapter.Interaction {
 
     public static final int REQUEST_CODE = 508;
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
@@ -98,12 +98,13 @@ public class WatcherActivity extends AppCompatActivity implements
      * Widgets for this Activity.
      */
     private TextView mTvTitle;
+    private PhotoView mIvPlaceHolder;
     private CheckedIndicatorView mCheckIndicator;
-    private DraggableViewPager mViewPager;
+    private DraggableViewPager mWatcherPager;
+    private WatcherPagerAdapter mWatcherAdapter;
     private LinearLayout mLlBottomPreviewContainer;
     private RecyclerView mBottomPreviewPictures;
     private TextView mTvEnsure;
-    private ArrayList<PhotoView> mPhotoViews = new ArrayList<>();
 
     /**
      * The animator for bottom preview.
@@ -115,10 +116,9 @@ public class WatcherActivity extends AppCompatActivity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_picker_activity_picture_watcher);
-        initPresenter();
         initTitle();
         initViews();
-        mPresenter.setup();
+        initPresenter();
     }
 
     @Override
@@ -132,6 +132,8 @@ public class WatcherActivity extends AppCompatActivity implements
         super.finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
+
+    //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
 
     @Override
     public void setToolbarCheckedIndicatorVisibility(boolean isShowCheckedIndicator) {
@@ -147,37 +149,37 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setPreviewAdapter(PreviewAdapter adapter) {
-        mBottomPreviewPictures.setAdapter(adapter);
+    public void setPreviewAdapter(ArrayList<MediaMeta> pickedSet) {
+        mBottomPreviewPictures.setAdapter(new PickedAdapter(pickedSet, this));
     }
 
     @Override
-    public void createViews(int items) {
-        for (int i = 0; i < items; i++) {
-            PhotoView photoView = new PhotoView(this);
-            photoView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
-            photoView.setOnPhotoTapListener(new OnPhotoTapListener() {
-                @Override
-                public void onPhotoTap(ImageView view, float x, float y) {
-                    onBackPressed();
-                }
-            });
-            mPhotoViews.add(photoView);
-        }
-        mViewPager.setAdapter(new PageAdapter(mPhotoViews));
+    public void setDisplayAdapter(ArrayList<MediaMeta> items) {
+        mWatcherAdapter = new WatcherPagerAdapter(getSupportFragmentManager(), items);
+        mWatcherPager.setAdapter(mWatcherAdapter);
     }
 
     @Override
-    public void showSharedElementEnter(final SharedElementModel data) {
-        mViewPager.setSharedElementPosition(data.sharedPosition);
-        final PhotoView target = mPhotoViews.get(data.sharedPosition);
-        target.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+    public void showSharedElementEnter(MediaMeta mediaMeta, final SharedElementModel data) {
+        // 若设置了共享元素, 则这个位置不需要执行 ViewPager 默认的退出动画
+        mWatcherPager.setIgnoreDismissAnimPosition(data.sharedPosition);
+        // 加载共享元素占位图
+        mIvPlaceHolder.setVisibility(View.VISIBLE);
+        PictureLoader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
+        // 执行共享元素
+        mIvPlaceHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                target.getViewTreeObserver().removeOnPreDrawListener(this);
+                mIvPlaceHolder.getViewTreeObserver().removeOnPreDrawListener(this);
                 // Execute enter animator.
-                SharedElementUtils.createSharedElementEnterAnimator(target, data).start();
+                Animator startAnim = SharedElementUtils.createSharedElementEnterAnimator(mIvPlaceHolder, data);
+                startAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mIvPlaceHolder.setVisibility(View.GONE);
+                    }
+                });
+                startAnim.start();
                 return true;
             }
         });
@@ -185,7 +187,7 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void showSharedElementExitAndFinish(SharedElementModel data) {
-        final PhotoView target = mPhotoViews.get(data.sharedPosition);
+        final PhotoView target = mWatcherAdapter.getItem(data.sharedPosition).getPhotoView();
         Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
             finish();
@@ -194,7 +196,7 @@ public class WatcherActivity extends AppCompatActivity implements
         exitAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mViewPager.setBackgroundColor(Color.TRANSPARENT);
+                mWatcherPager.setBackgroundColor(Color.TRANSPARENT);
             }
 
             @Override
@@ -222,25 +224,8 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void displayPictureAt(ArrayList<MediaMeta> pictureUris, int curPosition) {
-        mViewPager.setCurrentItem(curPosition);
-        // 加载当前的位置的图片
-        PhotoView curView = mPhotoViews.get(curPosition);
-        if (curView != null && curView.getDrawable() == null) {
-            PictureLoader.loadPicture(this, pictureUris.get(curPosition).path, curView);
-        }
-        // 加载前一个
-        int beforeIndex = curPosition - 1;
-        PhotoView beforeView = beforeIndex >= 0 ? mPhotoViews.get(beforeIndex) : null;
-        if (beforeView != null && beforeView.getDrawable() == null) {
-            PictureLoader.loadPicture(this, pictureUris.get(beforeIndex).path, beforeView);
-        }
-        // 加载后一个
-        int afterIndex = curPosition + 1;
-        PhotoView afterView = afterIndex < pictureUris.size() ? mPhotoViews.get(afterIndex) : null;
-        if (afterView != null && afterView.getDrawable() == null) {
-            PictureLoader.loadPicture(this, pictureUris.get(afterIndex).path, afterView);
-        }
+    public void displayAt(int position) {
+        mWatcherPager.setCurrentItem(position);
     }
 
     @Override
@@ -251,11 +236,6 @@ public class WatcherActivity extends AppCompatActivity implements
     @Override
     public void displayToolbarIndicatorText(CharSequence indicatorText) {
         mCheckIndicator.setText(indicatorText);
-    }
-
-    @Override
-    public void onPagerChanged(int position) {
-        mPresenter.handlePagerChanged(position);
     }
 
     @Override
@@ -324,12 +304,19 @@ public class WatcherActivity extends AppCompatActivity implements
         setResult(RESULT_OK, intent);
     }
 
-    private void initPresenter() {
-        mPresenter = new WatcherPresenter(
-                this,
-                (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
-                ((SharedElementModel) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
-        );
+
+    ////////////////////////////////////////// OnPagerChangedListener /////////////////////////////////////////////
+    @Override
+    public void onPagerChanged(int position) {
+        if (mPresenter != null) {
+            mPresenter.handlePagerChanged(position);
+        }
+    }
+
+    ////////////////////////////////////////// PickedAdapter.Interaction /////////////////////////////////////////////
+    @Override
+    public void onPreviewItemClicked(ImageView imageView, MediaMeta meta, int position) {
+        mPresenter.handlePickedItemClicked(meta);
     }
 
     private void initTitle() {
@@ -352,10 +339,12 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     private void initViews() {
+        // 占位图
+        mIvPlaceHolder = findViewById(R.id.iv_place_holder);
         // 1. 初始化 ViewPager
-        mViewPager = findViewById(R.id.view_pager);
-        mViewPager.setOnPagerChangedListener(this);
-        mViewPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
+        mWatcherPager = findViewById(R.id.view_pager);
+        mWatcherPager.setOnPagerChangedListener(this);
+        mWatcherPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
         // 2. 初始化底部菜单
         mLlBottomPreviewContainer = findViewById(R.id.ll_bottom_container);
         mBottomPreviewPictures = findViewById(R.id.recycle_pictures);
@@ -368,6 +357,14 @@ public class WatcherActivity extends AppCompatActivity implements
                 mPresenter.handleEnsureClick();
             }
         });
+    }
+
+    private void initPresenter() {
+        mPresenter = new WatcherPresenter(
+                this,
+                (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
+                ((SharedElementModel) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
+        );
     }
 
     private int dp2px(Context context, float dp) {

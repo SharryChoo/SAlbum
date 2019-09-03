@@ -20,6 +20,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.sharry.lib.picturepicker.Constants.*;
+
 /**
  * MVP frame model associated with PicturePicker.
  *
@@ -304,8 +306,14 @@ class PickerModel implements PickerContract.IModel {
             };
             String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=?";
-            String[] selectionArgs = new String[]{"image/jpeg", "image/png", "image/gif"};
+            String[] selectionArgs = new String[]{
+                    MIME_TYPE_JPEG,
+                    MIME_TYPE_PNG,
+                    MIME_TYPE_WEBP,
+                    MIME_TYPE_GIF
+            };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return mContext.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
@@ -322,8 +330,13 @@ class PickerModel implements PickerContract.IModel {
                     MediaStore.Video.Media.MIME_TYPE
             };
             String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=?";
-            String[] selectionArgs = new String[]{"image/jpeg", "image/png"};
+            String[] selectionArgs = new String[]{
+                    MIME_TYPE_JPEG,
+                    MIME_TYPE_PNG,
+                    MIME_TYPE_WEBP
+            };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return mContext.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
@@ -352,15 +365,15 @@ class PickerModel implements PickerContract.IModel {
                     MediaStore.Video.Media.MIME_TYPE + "=? or " +
                     MediaStore.Video.Media.MIME_TYPE + "=?";
             String[] selectionArgs = new String[]{
-                    "video/mp4",
-                    "video/3gp",
-                    "video/aiv",
-                    "video/rmvb",
-                    "video/vob",
-                    "video/flv",
-                    "video/mkv",
-                    "video/mov",
-                    "video/mpg"
+                    MIME_TYPE_MP4,
+                    MIME_TYPE_3GP,
+                    MIME_TYPE_AIV,
+                    MIME_TYPE_RMVB,
+                    MIME_TYPE_VOB,
+                    MIME_TYPE_FLV,
+                    MIME_TYPE_MKV,
+                    MIME_TYPE_MOV,
+                    MIME_TYPE_MPG,
             };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return mContext.getContentResolver().query(uri, projection,
