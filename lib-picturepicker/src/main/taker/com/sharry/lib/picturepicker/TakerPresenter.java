@@ -61,19 +61,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     @Override
-    public void handleVideoPlayPrepared() {
-        mView.playVideoPlayer();
-    }
-
-    @Override
-    public void handleVideoPlayCompleted() {
-        // 播放完成之后, 循环播放
-        if (mVideoFile != null) {
-            mView.videoPlayNext(mVideoFile.getAbsolutePath());
-        }
-    }
-
-    @Override
     public void handleGranted() {
         if (mVideoFile != null) {
             performVideoEnsure();
@@ -159,7 +146,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mView.setDeniedButtonVisible(true);
         // 播放视频
         mView.setVideoPlayerVisible(true);
-        mView.videoPlayNext(mVideoFile.getAbsolutePath());
+        mView.startVideoPlayer(mVideoFile.getAbsolutePath());
     }
 
     private void performPictureEnsure() {

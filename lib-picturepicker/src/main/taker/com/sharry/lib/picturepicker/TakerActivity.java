@@ -3,11 +3,13 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,12 +17,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
-import com.sharry.lib.media.player.OnStatusChangedListener;
-import com.sharry.lib.media.player.SVideoView;
 import com.sharry.lib.picturepicker.toolbar.ImageViewOptions;
 import com.sharry.lib.picturepicker.toolbar.SToolbar;
 
 /**
+ * 图片/视频拍摄页面
+ *
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2019-09-02
@@ -51,7 +53,7 @@ public class TakerActivity extends AppCompatActivity implements
     private SToolbar mToolbar;
     private RecordProgressButton mBtnRecord;
     private ImageView mIvPicturePreview;
-    private SVideoView mVideoPlayer;
+    private VideoView mVideoPlayer;
     private ImageView mIvDenied;
     private ImageView mIvGranted;
 
@@ -80,7 +82,7 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        mVideoPlayer.stop();
+        mVideoPlayer.stopPlayback();
         mPresenter.release();
         super.onDestroy();
     }
@@ -88,18 +90,14 @@ public class TakerActivity extends AppCompatActivity implements
     ////////////////////////////////////ITakerContract.IView///////////////////////////////////////
 
     @Override
-    public void playVideoPlayer() {
-        mVideoPlayer.play();
+    public void startVideoPlayer(@NonNull String nextUri) {
+        mVideoPlayer.setVideoPath(nextUri);
+        mVideoPlayer.start();
     }
 
     @Override
     public void stopVideoPlayer() {
-        mVideoPlayer.stop();
-    }
-
-    @Override
-    public void videoPlayNext(@NonNull String nextUri) {
-        mVideoPlayer.next(nextUri);
+        mVideoPlayer.stopPlayback();
     }
 
     @Override
@@ -258,17 +256,13 @@ public class TakerActivity extends AppCompatActivity implements
         // Taken picture preview
         mIvPicturePreview = findViewById(R.id.iv_picture_preview);
 
-        // Video player
+        // Video Player
         mVideoPlayer = findViewById(R.id.video_view);
-        mVideoPlayer.setOnStatusChangedListener(new OnStatusChangedListener.Adapter() {
+        mVideoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
-            public void onPrepared(int totalDuration) {
-                mPresenter.handleVideoPlayPrepared();
-            }
-
-            @Override
-            public void onCompleted() {
-                mPresenter.handleVideoPlayCompleted();
+            public void onPrepared(MediaPlayer mp) {
+                mp.start();
+                mp.setLooping(true);
             }
         });
 

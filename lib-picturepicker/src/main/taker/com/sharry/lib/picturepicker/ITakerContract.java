@@ -35,11 +35,9 @@ public interface ITakerContract {
 
         void startPreview();
 
-        void playVideoPlayer();
+        void startVideoPlayer(@NonNull String nextUri);
 
         void stopVideoPlayer();
-
-        void videoPlayNext(@NonNull String nextUri);
 
         void setPreviewSource(@NonNull Bitmap bitmap);
 
@@ -51,10 +49,6 @@ public interface ITakerContract {
     }
 
     interface IPresenter {
-
-        void handleVideoPlayPrepared();
-
-        void handleVideoPlayCompleted();
 
         void handleGranted();
 
