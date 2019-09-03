@@ -194,7 +194,8 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void showSharedElementExitAndFinish(SharedElementModel data) {
-        final PhotoView target = mWatcherAdapter.getItem(data.sharedPosition).getPhotoView();
+        final WatcherFragment watcherFragment = mWatcherAdapter.getItem(data.sharedPosition);
+        final PhotoView target = watcherFragment.getPhotoView();
         Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
             finish();
@@ -203,6 +204,7 @@ public class WatcherActivity extends AppCompatActivity implements
         exitAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
+                watcherFragment.dismissOtherView();
                 mWatcherPager.setBackgroundColor(Color.TRANSPARENT);
             }
 

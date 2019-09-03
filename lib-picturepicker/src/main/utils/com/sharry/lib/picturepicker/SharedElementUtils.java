@@ -120,7 +120,7 @@ class SharedElementUtils {
     }
 
     /**
-     * Create bounds changed animator for exit animator.
+     * Create bounds changed animator for dismissOtherView animator.
      *
      * @param target exchange target.
      * @param data   origin data.
