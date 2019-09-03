@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
 
+import java.io.File;
+
 /**
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
@@ -42,7 +44,7 @@ public interface ITakerContract {
 
         void startPreview();
 
-        void startVideoPlayer(@NonNull String nextUri);
+        void startVideoPlayer(@NonNull String authority, File file);
 
         void stopVideoPlayer();
 

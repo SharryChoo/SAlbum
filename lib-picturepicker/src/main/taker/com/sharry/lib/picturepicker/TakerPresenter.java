@@ -78,6 +78,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     @Override
     public void handleDenied() {
         mFetchedBitmap = null;
+        mTryAgainCount = 0;
         if (mVideoFile != null) {
             mView.stopVideoPlayer();
             mVideoFile.delete();
@@ -99,7 +100,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     @Override
     public void handleVideoPlayFailed() {
         if (mTryAgainCount++ < 3) {
-            mView.startVideoPlayer(mVideoFile.getAbsolutePath());
+            mView.startVideoPlayer(mConfig.getAuthority(), mVideoFile);
         } else {
             performRecordFiled();
             mTryAgainCount = 0;
@@ -179,7 +180,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mView.setDeniedButtonVisible(true);
         // 播放视频
         mView.setVideoPlayerVisible(true);
-        mView.startVideoPlayer(mVideoFile.getAbsolutePath());
+        mView.startVideoPlayer(mConfig.getAuthority(), mVideoFile);
     }
 
     private void performPictureEnsure() {

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,6 +19,8 @@ import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.picturepicker.toolbar.ImageViewOptions;
 import com.sharry.lib.picturepicker.toolbar.SToolbar;
+
+import java.io.File;
 
 /**
  * 图片/视频拍摄页面
@@ -133,8 +134,8 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void startVideoPlayer(@NonNull String nextUri) {
-        mVideoPlayer.setVideoPath(nextUri);
+    public void startVideoPlayer(@NonNull String authority, File file) {
+        mVideoPlayer.setVideoURI(FileUtil.getUriFromFile(this, authority, file));
     }
 
     @Override
