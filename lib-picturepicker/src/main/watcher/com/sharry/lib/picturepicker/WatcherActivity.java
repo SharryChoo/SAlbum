@@ -133,6 +133,13 @@ public class WatcherActivity extends AppCompatActivity implements
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
+    @Override
+    protected void onDestroy() {
+        WatcherFragment.ACTIVES.clear();
+        WatcherFragment.IDLES.clear();
+        super.onDestroy();
+    }
+
     //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
 
     @Override

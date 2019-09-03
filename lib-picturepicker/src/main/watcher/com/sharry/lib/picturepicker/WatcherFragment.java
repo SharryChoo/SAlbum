@@ -2,7 +2,7 @@ package com.sharry.lib.picturepicker;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,9 @@ import androidx.fragment.app.Fragment;
 import com.sharry.lib.picturepicker.photoview.OnPhotoTapListener;
 import com.sharry.lib.picturepicker.photoview.PhotoView;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 /**
  * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
  * @version 1.0
@@ -23,11 +26,20 @@ import com.sharry.lib.picturepicker.photoview.PhotoView;
  */
 public class WatcherFragment extends Fragment {
 
-    static WatcherFragment newInstance() {
-        Bundle args = new Bundle();
-        WatcherFragment fragment = new WatcherFragment();
-        fragment.setArguments(args);
-        return fragment;
+    static final SparseArray<WatcherFragment> ACTIVES = new SparseArray<>();
+    static final Queue<WatcherFragment> IDLES = new ArrayDeque<>();
+
+    @NonNull
+    public static WatcherFragment getInstance(int position) {
+        WatcherFragment instance = ACTIVES.get(position);
+        if (instance == null) {
+            instance = IDLES.poll();
+            if (instance == null) {
+                instance = new WatcherFragment();
+            }
+            ACTIVES.put(position, instance);
+        }
+        return instance;
     }
 
     /**
@@ -36,6 +48,7 @@ public class WatcherFragment extends Fragment {
     private Interaction mInteraction;
     private PhotoView mIvPicture;
     private VideoView mVideoPlayer;
+
     private boolean mViewInitlized = false;
 
     /**
@@ -67,6 +80,13 @@ public class WatcherFragment extends Fragment {
         mIvPicture = null;
         mVideoPlayer = null;
         mViewInitlized = false;
+        // Recycle Instance
+        int indexOfValue = ACTIVES.indexOfValue(this);
+        if (indexOfValue != -1) {
+            ACTIVES.removeAt(indexOfValue);
+        }
+        // 添加到空闲队列中
+        IDLES.offer(this);
     }
 
     void setDataSource(@Nullable MediaMeta mediaMeta) {
