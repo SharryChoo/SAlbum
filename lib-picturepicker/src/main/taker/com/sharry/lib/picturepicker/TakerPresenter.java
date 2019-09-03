@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 
+import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.media.recorder.AudioOptions;
 import com.sharry.lib.media.recorder.EncodeType;
@@ -51,8 +52,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         this.mRecorder = SMediaRecorder.with(view);
         this.mRecorder.addRecordCallback(mRecorderCallback);
         this.mRecordOptions = new VideoOptions.Builder()
-                .setFrameRate(24)
-                .setOutputDir(mConfig.getUseableDirectoryPath())
+                .setOutputDir(mConfig.getDirectoryPath())
                 .setEncodeType(EncodeType.Video.H264)
                 .setMuxerType(MuxerType.MP4)
                 .setAudioOptions(AudioOptions.DEFAULT)
@@ -78,8 +78,16 @@ class TakerPresenter implements ITakerContract.IPresenter {
             mView.notifyFileDeleted(mVideoFile.getAbsolutePath());
             mVideoFile = null;
         }
-        // 回到预览状态
-        setupViews();
+        // 置为预览状态
+        mView.setToolbarVisible(true);
+        mView.setCameraViewVisible(true);
+        mView.setRecordButtonVisible(true);
+        mView.setVideoPlayerVisible(false);
+        mView.setGrantedButtonVisible(false);
+        mView.setDeniedButtonVisible(false);
+        mView.setPicturePreviewVisible(false);
+        // 开始预览
+        mView.startPreview();
     }
 
     @Override
@@ -120,6 +128,14 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     private void setupViews() {
+        // 配置 CameraView
+        mView.setPreviewAspect(mConfig.getPreviewAspect() == null ?
+                AspectRatio.DEFAULT : mConfig.getPreviewAspect());
+        mView.setPreviewFullScreen(mConfig.isFullScreen());
+        // 配置 RecorderView
+        mView.setMaxRecordDuration(mConfig.getMaxRecordDuration());
+        mView.isSupportVideoRecord(mConfig.isSupportVideoRecord());
+
         // 置为预览状态
         mView.setToolbarVisible(true);
         mView.setCameraViewVisible(true);
@@ -128,9 +144,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mView.setGrantedButtonVisible(false);
         mView.setDeniedButtonVisible(false);
         mView.setPicturePreviewVisible(false);
-        // 设置录制最大时长
-        mView.setMaxRecordDuration(15 * 1000);
-        mView.setRecordButtonProgress(0);
+
         // 开始预览
         mView.startPreview();
     }
@@ -150,10 +164,10 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     private void performPictureEnsure() {
-        File file = FileUtil.createCameraDestFile(mConfig.getUseableDirectoryPath());
+        File file = FileUtil.createCameraDestFile(mConfig.getDirectoryPath());
         try {
             CompressUtil.doCompress(mFetchedBitmap, file.getAbsolutePath(),
-                    mConfig.getCameraDestQuality(), mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
+                    mConfig.getPictureQuality(), mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
             MediaMeta mediaMeta = MediaMeta.create(file.getAbsolutePath(), true);
             mediaMeta.date = System.currentTimeMillis();
             mView.setResult(mediaMeta);
@@ -168,7 +182,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
         MediaMeta mediaMeta = MediaMeta.create(mVideoFile.getAbsolutePath(), false);
         mediaMeta.date = currentTime;
         mediaMeta.duration = mRecordDuration;
-        // TODO 获取图像缩略图
         mView.setResult(mediaMeta);
     }
 

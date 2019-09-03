@@ -30,7 +30,7 @@ import com.sharry.lib.picturepicker.toolbar.SToolbar;
 public class TakerActivity extends AppCompatActivity implements
         ITakerContract.IView,
         AspectRatioFragment.Listener,
-        RecordProgressButton.RecordListener {
+        RecorderButton.Interaction {
 
     public static final int REQUEST_CODE = 286;
     public static final String RESULT_EXTRA_MEDIA_META = "RESULT_EXTRA_MEDIA_META";
@@ -43,15 +43,15 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     private static final AspectRatio[] ASPECT_RATIOS = {
-            AspectRatio.of(1, 1),   // 1:1
-            AspectRatio.of(4, 3),   // 4:3
-            AspectRatio.of(16, 9),  // 16:9
+            AspectRatio.of(1, 1),
+            AspectRatio.of(4, 3),
+            AspectRatio.of(16, 9),
             AspectRatio.of(2, 1)
     };
     private ITakerContract.IPresenter mPresenter;
     private SCameraView mCameraView;
     private SToolbar mToolbar;
-    private RecordProgressButton mBtnRecord;
+    private RecorderButton mBtnRecord;
     private ImageView mIvPicturePreview;
     private VideoView mVideoPlayer;
     private ImageView mIvDenied;
@@ -90,22 +90,6 @@ public class TakerActivity extends AppCompatActivity implements
     ////////////////////////////////////ITakerContract.IView///////////////////////////////////////
 
     @Override
-    public void startVideoPlayer(@NonNull String nextUri) {
-        mVideoPlayer.setVideoPath(nextUri);
-        mVideoPlayer.start();
-    }
-
-    @Override
-    public void stopVideoPlayer() {
-        mVideoPlayer.stopPlayback();
-    }
-
-    @Override
-    public void setPreviewSource(@NonNull Bitmap bitmap) {
-        mIvPicturePreview.setImageBitmap(bitmap);
-    }
-
-    @Override
     public void setToolbarVisible(boolean visible) {
         mToolbar.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
@@ -138,6 +122,37 @@ public class TakerActivity extends AppCompatActivity implements
     @Override
     public void setPicturePreviewVisible(boolean visible) {
         mIvPicturePreview.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void startVideoPlayer(@NonNull String nextUri) {
+        mVideoPlayer.setVideoPath(nextUri);
+        mVideoPlayer.start();
+    }
+
+    @Override
+    public void stopVideoPlayer() {
+        mVideoPlayer.stopPlayback();
+    }
+
+    @Override
+    public void setPreviewSource(@NonNull Bitmap bitmap) {
+        mIvPicturePreview.setImageBitmap(bitmap);
+    }
+
+    @Override
+    public void setPreviewAspect(@NonNull AspectRatio aspect) {
+        mCameraView.setAspectRatio(aspect);
+    }
+
+    @Override
+    public void setPreviewFullScreen(boolean fullScreen) {
+        mCameraView.setAdjustViewBounds(!fullScreen);
+    }
+
+    @Override
+    public void isSupportVideoRecord(boolean isVideoRecord) {
+        mBtnRecord.setRecordVideo(isVideoRecord);
     }
 
     @Override
@@ -174,14 +189,14 @@ public class TakerActivity extends AppCompatActivity implements
         finish();
     }
 
-    ////////////////////////////////////AspectRatioFragment.Listener///////////////////////////////////////
+    ////////////////////////////////////AspectRatioFragment.Interaction///////////////////////////////////////
 
     @Override
     public void onAspectRatioSelected(@NonNull AspectRatio ratio) {
         mCameraView.setAspectRatio(ratio);
     }
 
-    ////////////////////////////////////RecordProgressButton.RecordListener///////////////////////////////////////
+    ////////////////////////////////////RecordProgressButton.Interaction///////////////////////////////////////
 
     @Override
     public void onTakePicture() {
@@ -201,37 +216,10 @@ public class TakerActivity extends AppCompatActivity implements
     private void initTitle() {
         mToolbar = findViewById(R.id.toolbar);
         int paddingSize = (int) dp2Px(this, 20f);
-        // 全面屏
-        mToolbar.addLeftMenuImage(
-                ImageViewOptions.Builder()
-                        .setDrawableResId(R.drawable.ic_activity_video_record_full_screen)
-                        .setPaddingLeft(paddingSize)
-                        .setListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mCameraView.setAdjustViewBounds(!mCameraView.getAdjustViewBounds());
-                            }
-                        })
-                        .build()
-        );
-        // aspect
-        mToolbar.addLeftMenuImage(
-                ImageViewOptions.Builder()
-                        .setDrawableResId(R.drawable.ic_activity_video_record_aspect)
-                        .setPaddingLeft(paddingSize)
-                        .setListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                AspectRatioFragment.newInstance(ASPECT_RATIOS, mCameraView.getAspectRatio())
-                                        .show(getSupportFragmentManager(), AspectRatioFragment.class.getSimpleName());
-                            }
-                        })
-                        .build()
-        );
         // switch
         mToolbar.addLeftMenuImage(
                 ImageViewOptions.Builder()
-                        .setDrawableResId(R.drawable.ic_activity_video_record_camera_switch)
+                        .setDrawableResId(R.drawable.ic_activity_taker_camera_switch)
                         .setPaddingLeft(paddingSize)
                         .setListener(new View.OnClickListener() {
                             @Override
@@ -243,15 +231,42 @@ public class TakerActivity extends AppCompatActivity implements
                         })
                         .build()
         );
+        // aspect
+        mToolbar.addLeftMenuImage(
+                ImageViewOptions.Builder()
+                        .setDrawableResId(R.drawable.ic_activity_taker_aspect)
+                        .setPaddingLeft(paddingSize)
+                        .setListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                AspectRatioFragment.newInstance(ASPECT_RATIOS, mCameraView.getAspectRatio())
+                                        .show(getSupportFragmentManager(), AspectRatioFragment.class.getSimpleName());
+                            }
+                        })
+                        .build()
+        );
+        // 全面屏
+        mToolbar.addLeftMenuImage(
+                ImageViewOptions.Builder()
+                        .setDrawableResId(R.drawable.ic_activity_taker_full_screen)
+                        .setPaddingLeft(paddingSize)
+                        .setListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mCameraView.setAdjustViewBounds(!mCameraView.getAdjustViewBounds());
+                            }
+                        })
+                        .build()
+        );
     }
 
     private void initViews() {
         // SCameraView
         mCameraView = findViewById(R.id.camera_view);
         mCameraView.setAutoFocus(true);
+
         // RecordProgressButton
         mBtnRecord = findViewById(R.id.btn_record);
-        mBtnRecord.setOnRecordListener(this);
 
         // Taken picture preview
         mIvPicturePreview = findViewById(R.id.iv_picture_preview);

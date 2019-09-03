@@ -56,7 +56,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
                 .setUserPickedSet(mModel.getPickedPaths())
                 .build();
         setupView();
-        setupModel(context);
+        fetchData(context);
     }
 
     @Override
@@ -80,9 +80,15 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
     @Override
     public void handleCameraClicked() {
         // 这里可以确保 TakerConfig 不为 null
-        TakerManager.with((Context) mView)
-                .setConfig(mPickerConfig.getTakerConfig())
-                .take(this);
+        if (mPickerConfig.getTakerConfig() != null) {
+            TakerManager.with((Context) mView)
+                    .setConfig(
+                            mPickerConfig.getTakerConfig().rebuild()
+                                    .setCropConfig(mPickerConfig.getCropperConfig())
+                                    .build()
+                    )
+                    .take(this);
+        }
     }
 
     @Override
@@ -208,7 +214,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         mView.setPicturesAdapter(mPickerConfig, mModel.getDisplayPaths(), mModel.getPickedPaths());
     }
 
-    private void setupModel(Context context) {
+    private void fetchData(Context context) {
         mView.setProgressBarVisible(true);
         mModel.getSystemPictures(context, new PickerContract.IModel.Callback() {
 

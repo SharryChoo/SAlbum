@@ -9,10 +9,11 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.sharry.lib.picturepicker.TakerConfig
+import com.sharry.lib.camera.AspectRatio
 import com.sharry.lib.picturepicker.CropperConfig
 import com.sharry.lib.picturepicker.PickerConfig
 import com.sharry.lib.picturepicker.PickerManager
+import com.sharry.lib.picturepicker.TakerConfig
 import com.sharry.lib.picturepicker.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
@@ -49,13 +50,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun initData() {
         takerConfig = TakerConfig.Builder()
-                .setFileProviderAuthority("$packageName.FileProvider")  // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
-                .setCameraDirectory(APP_DIRECTORY)                      // 相机文件存储路径
-                .setCameraQuality(80)
+                // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
+                .setFileProviderAuthority("$packageName.FileProvider")
+                // 相机文件存储路径
+                .setDirectoryPath(APP_DIRECTORY)
+                // 拍摄后质量压缩
+                .setPictureQuality(80)
+                // 预览画面比例
+                .setPreviewAspect(AspectRatio.of(4, 3))
+                // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
+                .setFullScreen(true)
+                // 设置是否支持视频录制
+                .setVideoRecord(true)
+                // 设置录制最大时长
+                .setMaxRecordDuration(10 * 1000)
                 .build()
 
         cropperConfig = CropperConfig.Builder()
-                .setCropDirectory(APP_DIRECTORY)                         // 裁剪文件存储路径
+                .setCropDirectory(APP_DIRECTORY)
                 .setCropSize(1000, 1000)
                 .setCropQuality(80)
                 .build()

@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.sharry.lib.camera.AspectRatio;
+
 /**
  * 相机拍照的相关参数
  *
@@ -15,12 +17,32 @@ import androidx.annotation.Nullable;
  */
 public class TakerConfig implements Parcelable {
 
-    /**
-     * Get instance of TakerConfig.Builder.
-     */
-    @NonNull
-    public static Builder Builder() {
-        return new Builder();
+    protected TakerConfig(Parcel in) {
+        pictureQuality = in.readInt();
+        authority = in.readString();
+        directoryPath = in.readString();
+        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
+        previewAspect = in.readParcelable(AspectRatio.class.getClassLoader());
+        isFullScreen = in.readByte() != 0;
+        isSupportVideoRecord = in.readByte() != 0;
+        maxRecordDuration = in.readLong();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(pictureQuality);
+        dest.writeString(authority);
+        dest.writeString(directoryPath);
+        dest.writeParcelable(cropperConfig, flags);
+        dest.writeParcelable(previewAspect, flags);
+        dest.writeByte((byte) (isFullScreen ? 1 : 0));
+        dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
+        dest.writeLong(maxRecordDuration);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<TakerConfig> CREATOR = new Creator<TakerConfig>() {
@@ -35,39 +57,74 @@ public class TakerConfig implements Parcelable {
         }
     };
 
-    private String authority;                 // fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
-    private int cameraDestQuality = 80;       // 拍照后压缩的质量
-    private String directoryPath;             // 存储文件的目录路径
-    private CropperConfig cropperConfig;      // 图片裁剪的 Config
-
-    private TakerConfig() {
-
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(authority);
-        dest.writeInt(cameraDestQuality);
-        dest.writeString(directoryPath);
-        dest.writeParcelable(cropperConfig, flags);
+    /**
+     * Get instance of TakerConfig.Builder.
+     */
+    @NonNull
+    public static Builder Builder() {
+        return new Builder();
     }
 
     /**
-     * 是否支持裁剪
+     * 拍照后压缩的质量
      */
+    private int pictureQuality = 80;
+
+    /**
+     * fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
+     */
+    private String authority;
+
+    /**
+     * 文件输出路径
+     */
+    private String directoryPath;
+
+    /**
+     * 裁剪配置
+     */
+    private CropperConfig cropperConfig;
+
+    /**
+     * 初始时相机的预览比例
+     */
+    private AspectRatio previewAspect;
+
+    /**
+     * 相机预览时是否缩放至全屏
+     */
+    private boolean isFullScreen;
+
+    /**
+     * 是否支持视频录制
+     * <p>
+     * 若支持视频录制, 则裁剪无效
+     */
+    private boolean isSupportVideoRecord;
+
+    /**
+     * 视频录制最大时长
+     * <p>
+     * Unit is ms
+     */
+    private long maxRecordDuration = 15 * 1000;
+
+    private TakerConfig() {
+    }
+
+    public Builder rebuild() {
+        return new Builder(this);
+    }
+
     public boolean isCropSupport() {
         return cropperConfig != null;
     }
 
-    public String getAuthority() {
-        return authority;
+    public int getPictureQuality() {
+        return pictureQuality;
     }
 
-    public int getCameraDestQuality() {
-        return cameraDestQuality;
-    }
-
-    public String getUseableDirectoryPath() {
+    public String getDirectoryPath() {
         return directoryPath;
     }
 
@@ -75,23 +132,24 @@ public class TakerConfig implements Parcelable {
         return cropperConfig;
     }
 
-    protected TakerConfig(Parcel in) {
-        authority = in.readString();
-        cameraDestQuality = in.readInt();
-        directoryPath = in.readString();
-        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
+    public AspectRatio getPreviewAspect() {
+        return previewAspect;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public boolean isFullScreen() {
+        return isFullScreen;
     }
 
-    /**
-     * 重新编辑当前对象
-     */
-    public Builder rebuild() {
-        return new Builder(this);
+    public boolean isSupportVideoRecord() {
+        return isSupportVideoRecord;
+    }
+
+    public String getAuthority() {
+        return authority;
+    }
+
+    public long getMaxRecordDuration() {
+        return maxRecordDuration;
     }
 
     public static class Builder {
@@ -107,19 +165,11 @@ public class TakerConfig implements Parcelable {
         }
 
         /**
-         * 设置目的文件
+         * 设置文件输出的目录, 拍摄后的图片会生成在目录下
          */
-        public Builder setCameraDirectory(@NonNull String filePath) {
-            Preconditions.checkNotEmpty(filePath);
-            this.mConfig.directoryPath = filePath;
-            return this;
-        }
-
-        /**
-         * 设置拍照后的压缩质量
-         */
-        public Builder setCameraQuality(int quality) {
-            mConfig.cameraDestQuality = quality;
+        public Builder setDirectoryPath(@NonNull String dirPath) {
+            Preconditions.checkNotEmpty(dirPath);
+            this.mConfig.directoryPath = dirPath;
             return this;
         }
 
@@ -133,10 +183,54 @@ public class TakerConfig implements Parcelable {
         }
 
         /**
+         * 设置拍照后的压缩质量
+         */
+        public Builder setPictureQuality(int quality) {
+            mConfig.pictureQuality = quality;
+            return this;
+        }
+
+        /**
          * 设置裁剪的配置
          */
         public Builder setCropConfig(@Nullable CropperConfig cropperConfig) {
             mConfig.cropperConfig = cropperConfig;
+            return this;
+        }
+
+        /**
+         * 设置裁剪的配置
+         */
+        public Builder setPreviewAspect(@Nullable AspectRatio aspect) {
+            mConfig.previewAspect = aspect;
+            return this;
+        }
+
+        /**
+         * 设置裁剪的配置
+         */
+        public Builder setFullScreen(boolean isFullScreen) {
+            mConfig.isFullScreen = isFullScreen;
+            return this;
+        }
+
+        /**
+         * 是否支持录制是否
+         *
+         * @param isSupportVideoRecord true is support, false is just take picture.
+         */
+        public Builder setVideoRecord(boolean isSupportVideoRecord) {
+            mConfig.isSupportVideoRecord = isSupportVideoRecord;
+            return this;
+        }
+
+        /**
+         * 设置录制最大时长
+         *
+         * @param maxRecordDuration unit ms
+         */
+        public Builder setMaxRecordDuration(long maxRecordDuration) {
+            mConfig.maxRecordDuration = maxRecordDuration;
             return this;
         }
 

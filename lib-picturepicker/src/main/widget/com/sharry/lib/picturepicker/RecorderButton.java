@@ -21,7 +21,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-public class RecordProgressButton extends View {
+public class RecorderButton extends View implements View.OnTouchListener, View.OnClickListener {
 
     private static final int MSG_WHAT_RECORD_START = 848;
 
@@ -38,7 +38,8 @@ public class RecordProgressButton extends View {
     private long mMaxDuration = 100;
     private long mCurDuration = 0;
 
-    private RecordListener mRecordListener;
+    private boolean mIsSupportRecord = false;
+    private Interaction mInteraction;
     private boolean mIsRecording = false;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -47,9 +48,7 @@ public class RecordProgressButton extends View {
                 case MSG_WHAT_RECORD_START:
                     mIsRecording = true;
                     mCurDuration = 0;
-                    if (mRecordListener != null) {
-                        mRecordListener.onRecordStart();
-                    }
+                    mInteraction.onRecordStart();
                     break;
                 default:
                     break;
@@ -57,19 +56,50 @@ public class RecordProgressButton extends View {
         }
     };
 
-    public RecordProgressButton(Context context) {
+    public RecorderButton(Context context) {
         this(context, null);
     }
 
-    public RecordProgressButton(Context context, @Nullable AttributeSet attrs) {
+    public RecorderButton(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public RecordProgressButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public RecorderButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        if (context instanceof Interaction) {
+            mInteraction = (Interaction) context;
+        } else {
+            throw new UnsupportedOperationException("Please ensure u activity implements RecorderButton.Interaction");
+        }
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
+        setOnClickListener(this);
+        setOnTouchListener(this);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (mIsSupportRecord) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    handleActionDown();
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    handleActionUp();
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onClick(View v) {
+        mInteraction.onTakePicture();
     }
 
     @Override
@@ -89,22 +119,6 @@ public class RecordProgressButton extends View {
         // 初始化区域
         mInnerRadius = mMaximumInnerRadius;
         mOuterRadius = mMinimumOuterRadius;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                handleActionDown();
-                break;
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                handleActionUp();
-                break;
-            default:
-                break;
-        }
-        return true;
     }
 
     @Override
@@ -135,6 +149,13 @@ public class RecordProgressButton extends View {
     }
 
     /**
+     * 是否支持录制视频
+     */
+    public void setRecordVideo(boolean isVideoRecord) {
+        mIsSupportRecord = isVideoRecord;
+    }
+
+    /**
      * 设置录制的最大时长
      */
     public void setMaxProgress(long maxDuration) {
@@ -154,13 +175,6 @@ public class RecordProgressButton extends View {
         } else {
             postInvalidate();
         }
-    }
-
-    /**
-     * 设置监听器
-     */
-    public void setOnRecordListener(RecordListener recordListener) {
-        this.mRecordListener = recordListener;
     }
 
     /**
@@ -239,13 +253,9 @@ public class RecordProgressButton extends View {
             public void onAnimationStart(Animator animation) {
                 mMainHandler.removeMessages(MSG_WHAT_RECORD_START);
                 if (mIsRecording) {
-                    if (mRecordListener != null) {
-                        mRecordListener.onRecordFinish(mCurDuration);
-                    }
+                    mInteraction.onRecordFinish(mCurDuration);
                 } else {
-                    if (mRecordListener != null) {
-                        mRecordListener.onTakePicture();
-                    }
+                    mInteraction.onTakePicture();
                 }
                 mIsRecording = false;
             }
@@ -260,12 +270,23 @@ public class RecordProgressButton extends View {
         set.start();
     }
 
-    public interface RecordListener {
+    public interface Interaction {
 
+        /**
+         * Take a picture
+         */
         void onTakePicture();
 
+        /**
+         * Record video.
+         */
         void onRecordStart();
 
+        /**
+         * Record complete.
+         *
+         * @param duration total duration.
+         */
         void onRecordFinish(long duration);
     }
 

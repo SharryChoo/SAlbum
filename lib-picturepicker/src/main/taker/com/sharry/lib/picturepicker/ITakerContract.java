@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 
+import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
 
 /**
@@ -29,6 +30,12 @@ public interface ITakerContract {
 
         void setPicturePreviewVisible(boolean visible);
 
+        void setPreviewAspect(@NonNull AspectRatio aspect);
+
+        void setPreviewFullScreen(boolean fullScreen);
+
+        void isSupportVideoRecord(boolean isVideoRecord);
+
         void setMaxRecordDuration(long maxDuration);
 
         void setRecordButtonProgress(long currentDuration);
@@ -46,6 +53,7 @@ public interface ITakerContract {
         void notifyFileDeleted(String filePath);
 
         void setResult(@NonNull MediaMeta mediaMeta);
+
     }
 
     interface IPresenter {
