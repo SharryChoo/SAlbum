@@ -66,7 +66,9 @@ public interface ITakerContract {
 
         void handleRecordStart(SCameraView cameraView);
 
-        void handleRecordFinish();
+        void handleRecordFinish(long duration);
+
+        void handleVideoPlayFailed();
 
         void release();
     }

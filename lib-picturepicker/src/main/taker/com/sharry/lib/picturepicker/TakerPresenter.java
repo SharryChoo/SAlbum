@@ -41,10 +41,16 @@ class TakerPresenter implements ITakerContract.IPresenter {
             performRecordComplete(file);
         }
 
+        @Override
+        public void onFailed(int errorCode, @NonNull Throwable e) {
+            performRecordFiled();
+        }
+
     };
     private Bitmap mFetchedBitmap;
     private File mVideoFile;
     private long mRecordDuration;
+    private int mTryAgainCount = 0;
 
     TakerPresenter(TakerActivity view, TakerConfig config) {
         this.mView = view;
@@ -91,6 +97,16 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     @Override
+    public void handleVideoPlayFailed() {
+        if (mTryAgainCount++ < 3) {
+            mView.startVideoPlayer(mVideoFile.getAbsolutePath());
+        } else {
+            performRecordFiled();
+            mTryAgainCount = 0;
+        }
+    }
+
+    @Override
     public void handleTakePicture(Bitmap bitmap) {
         if (bitmap == null) {
             mView.toast("获取照片失败");
@@ -118,8 +134,13 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     @Override
-    public void handleRecordFinish() {
-        mRecorder.complete();
+    public void handleRecordFinish(long duration) {
+        if (duration < 1500) {
+            mRecorder.cancel();
+            mView.toast("录制时间过短");
+        } else {
+            mRecorder.complete();
+        }
     }
 
     @Override
@@ -135,7 +156,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
         // 配置 RecorderView
         mView.setMaxRecordDuration(mConfig.getMaxRecordDuration());
         mView.isSupportVideoRecord(mConfig.isSupportVideoRecord());
-
         // 置为预览状态
         mView.setToolbarVisible(true);
         mView.setCameraViewVisible(true);
@@ -144,7 +164,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mView.setGrantedButtonVisible(false);
         mView.setDeniedButtonVisible(false);
         mView.setPicturePreviewVisible(false);
-
         // 开始预览
         mView.startPreview();
     }
@@ -183,6 +202,10 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mediaMeta.date = currentTime;
         mediaMeta.duration = mRecordDuration;
         mView.setResult(mediaMeta);
+    }
+
+    private void performRecordFiled() {
+        mView.toast("录制失败, 请稍后重试...");
     }
 
 }

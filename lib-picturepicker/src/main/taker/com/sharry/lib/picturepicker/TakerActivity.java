@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
@@ -69,8 +70,16 @@ public class TakerActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mVideoPlayer.resume();
-        mCameraView.startPreview();
+        if (mVideoPlayer.getVisibility() == View.VISIBLE) {
+            mVideoPlayer.resume();
+        } else {
+            mVideoPlayer.stopPlayback();
+        }
+        if (mCameraView.getVisibility() == View.VISIBLE) {
+            mCameraView.startPreview();
+        } else {
+            mCameraView.stopPreview();
+        }
     }
 
     @Override
@@ -82,7 +91,6 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        mVideoPlayer.stopPlayback();
         mPresenter.release();
         super.onDestroy();
     }
@@ -127,7 +135,6 @@ public class TakerActivity extends AppCompatActivity implements
     @Override
     public void startVideoPlayer(@NonNull String nextUri) {
         mVideoPlayer.setVideoPath(nextUri);
-        mVideoPlayer.start();
     }
 
     @Override
@@ -210,8 +217,10 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     public void onRecordFinish(long duration) {
-        mPresenter.handleRecordFinish();
+        mPresenter.handleRecordFinish(duration);
     }
+
+    ////////////////////////////////////Private method///////////////////////////////////////
 
     private void initTitle() {
         mToolbar = findViewById(R.id.toolbar);
@@ -278,6 +287,13 @@ public class TakerActivity extends AppCompatActivity implements
             public void onPrepared(MediaPlayer mp) {
                 mp.start();
                 mp.setLooping(true);
+            }
+        });
+        mVideoPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                mPresenter.handleVideoPlayFailed();
+                return true;
             }
         });
 

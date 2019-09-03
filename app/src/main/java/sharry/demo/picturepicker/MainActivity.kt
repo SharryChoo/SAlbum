@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 // 设置是否支持视频录制
                 .setVideoRecord(true)
                 // 设置录制最大时长
-                .setMaxRecordDuration(10 * 1000)
+                .setMaxRecordDuration(5 * 1000)
                 .build()
 
         cropperConfig = CropperConfig.Builder()

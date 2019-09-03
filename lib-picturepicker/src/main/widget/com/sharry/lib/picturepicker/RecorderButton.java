@@ -55,6 +55,8 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
             }
         }
     };
+    private AnimatorSet mDownAnimSet;
+    private AnimatorSet mFinishAnimSet;
 
     public RecorderButton(Context context) {
         this(context, null);
@@ -181,93 +183,103 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
      * 按下的动画
      */
     private void handleActionDown() {
-        // 内圆缩小
-        ValueAnimator innerAnimator = ObjectAnimator.ofInt(mInnerRadius, mMinimumInnerRadius)
-                .setDuration(200);
-        innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mInnerRadius = (int) animation.getAnimatedValue();
-                postInvalidate();
-            }
-        });
-        // 外圆放大
-        ValueAnimator outerAnimator = ObjectAnimator.ofInt(mOuterRadius, mMaximumOuterRadius)
-                .setDuration(200);
-        outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mOuterRadius = (int) animation.getAnimatedValue();
-            }
-        });
-        // 执行动画集合
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(innerAnimator, outerAnimator);
-        set.addListener(new AnimatorListenerAdapter() {
+        if (mDownAnimSet == null) {
+            // 内圆缩小
+            ValueAnimator innerAnimator = ObjectAnimator.ofInt(mInnerRadius, mMinimumInnerRadius)
+                    .setDuration(200);
+            innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mInnerRadius = (int) animation.getAnimatedValue();
+                    postInvalidate();
+                }
+            });
+            // 外圆放大
+            ValueAnimator outerAnimator = ObjectAnimator.ofInt(mOuterRadius, mMaximumOuterRadius)
+                    .setDuration(200);
+            outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mOuterRadius = (int) animation.getAnimatedValue();
+                }
+            });
+            // 执行动画集合
+            mDownAnimSet = new AnimatorSet();
+            mDownAnimSet.playTogether(innerAnimator, outerAnimator);
+            mDownAnimSet.addListener(new AnimatorListenerAdapter() {
 
-            @Override
-            public void onAnimationStart(Animator animation) {
-                // 1s 之后视为录制
-                mMainHandler.sendMessageDelayed(
-                        Message.obtain(mMainHandler, MSG_WHAT_RECORD_START),
-                        1000
-                );
-            }
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    // 1s 之后视为录制
+                    mMainHandler.sendMessageDelayed(
+                            Message.obtain(mMainHandler, MSG_WHAT_RECORD_START),
+                            1000
+                    );
+                }
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mInnerRadius = mMinimumInnerRadius;
-                mOuterRadius = mMaximumOuterRadius;
-            }
-        });
-        set.start();
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mInnerRadius = mMinimumInnerRadius;
+                    mOuterRadius = mMaximumOuterRadius;
+                }
+            });
+        }
+        if (mDownAnimSet.isRunning()) {
+            return;
+        }
+        mDownAnimSet.start();
     }
 
     /**
      * 抬起的动画，
      */
     private void handleActionUp() {
-        // 内圆放大
-        ValueAnimator innerAnimator = ObjectAnimator.ofInt(mInnerRadius, mMaximumInnerRadius).setDuration(200);
-        innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mInnerRadius = (int) animation.getAnimatedValue();
-                postInvalidate();
-            }
-        });
-        // 外圆缩小
-        ValueAnimator outerAnimator = ObjectAnimator.ofInt(mOuterRadius, mMinimumOuterRadius).setDuration(200);
-        outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mOuterRadius = (int) animation.getAnimatedValue();
-            }
-        });
-        // 执行动画集合
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(innerAnimator, outerAnimator);
-        set.addListener(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mMainHandler.removeMessages(MSG_WHAT_RECORD_START);
-                if (mIsRecording) {
-                    mInteraction.onRecordFinish(mCurDuration);
-                } else {
-                    mInteraction.onTakePicture();
+        if (mFinishAnimSet == null) {
+            // 内圆放大
+            ValueAnimator innerAnimator = ObjectAnimator.ofInt(mInnerRadius, mMaximumInnerRadius).setDuration(200);
+            innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mInnerRadius = (int) animation.getAnimatedValue();
+                    postInvalidate();
                 }
-                mIsRecording = false;
-            }
+            });
+            // 外圆缩小
+            ValueAnimator outerAnimator = ObjectAnimator.ofInt(mOuterRadius, mMinimumOuterRadius).setDuration(200);
+            outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mOuterRadius = (int) animation.getAnimatedValue();
+                }
+            });
+            // 执行动画集合
+            mFinishAnimSet = new AnimatorSet();
+            mFinishAnimSet.playTogether(innerAnimator, outerAnimator);
+            mFinishAnimSet.addListener(new AnimatorListenerAdapter() {
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mInnerRadius = mMaximumInnerRadius;
-                mOuterRadius = mMinimumOuterRadius;
-            }
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mMainHandler.removeMessages(MSG_WHAT_RECORD_START);
+                }
 
-        });
-        set.start();
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mInnerRadius = mMaximumInnerRadius;
+                    mOuterRadius = mMinimumOuterRadius;
+                    if (mIsRecording) {
+                        mInteraction.onRecordFinish(mCurDuration);
+                    } else {
+                        mInteraction.onTakePicture();
+                    }
+                    mIsRecording = false;
+                }
+
+            });
+        }
+        if (mFinishAnimSet.isRunning()) {
+            return;
+        }
+        mFinishAnimSet.start();
     }
 
     public interface Interaction {
