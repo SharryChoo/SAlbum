@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
 
                     })
                     .start {
-                        it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
+                        Toast.makeText(this, it[0].toString(), Toast.LENGTH_SHORT).show()
                     }
         }
     }

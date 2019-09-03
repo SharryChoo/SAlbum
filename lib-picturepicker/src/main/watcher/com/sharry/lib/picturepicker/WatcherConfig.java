@@ -3,6 +3,7 @@ package com.sharry.lib.picturepicker;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,23 +18,6 @@ import java.util.ArrayList;
  * @since 2018/9/22 17:56
  */
 public class WatcherConfig implements Parcelable {
-
-    public static Builder Builder() {
-        return new Builder();
-    }
-
-    // 图片选择的相关配置
-    private ArrayList<MediaMeta> mediaMetas;                                         // 需要展示的集合
-    private ArrayList<MediaMeta> userPickedSet;                                      // 图片选中的集合: 根据这个判断是否提供图片选择功能
-    private int threshold;                                                           // 阈值
-    private int indicatorTextColor = Color.WHITE;                                    // 指示器背景色
-    private int indicatorSolidColor = Color.parseColor("#ff64b6f6");     // 指示器选中的填充色
-    private int indicatorBorderCheckedColor = indicatorSolidColor;                   // 指示器边框选中的颜色
-    private int indicatorBorderUncheckedColor = Color.WHITE;                         // 指示器边框未被选中的颜色
-    private int position;                                                            // 定位展示的位置
-
-    public WatcherConfig() {
-    }
 
     protected WatcherConfig(Parcel in) {
         mediaMetas = in.createTypedArrayList(MediaMeta.CREATOR);
@@ -74,6 +58,52 @@ public class WatcherConfig implements Parcelable {
             return new WatcherConfig[size];
         }
     };
+
+    public static Builder Builder() {
+        return new Builder();
+    }
+
+    /**
+     * 需要展示的集合
+     */
+    private ArrayList<MediaMeta> mediaMetas;
+    /**
+     * 图片选中的集合: 根据这个判断是否提供图片选择功能
+     */
+    private ArrayList<MediaMeta> userPickedSet;
+
+    /**
+     * 阈值
+     */
+    private int threshold;
+
+    /**
+     * 指示器背景色
+     */
+    private int indicatorTextColor = Color.WHITE;
+
+    /**
+     * 指示器选中的填充色
+     */
+    private int indicatorSolidColor = Color.parseColor("#ff64b6f6");
+
+    /**
+     * 指示器边框选中的颜色
+     */
+    private int indicatorBorderCheckedColor = indicatorSolidColor;
+
+    /**
+     * 指示器边框未被选中的颜色
+     */
+    private int indicatorBorderUncheckedColor = Color.WHITE;
+
+    /**
+     * 定位展示的位置
+     */
+    private int position;
+
+    public WatcherConfig() {
+    }
 
     @NonNull
     public ArrayList<MediaMeta> getPictureUris() {
@@ -139,8 +169,9 @@ public class WatcherConfig implements Parcelable {
 
         /**
          * 需要展示的 URI 集合
-         *  @param metas 数据集合
-         * @param position    展示的位置
+         *
+         * @param metas    数据集合
+         * @param position 展示的位置
          */
         public Builder setPictureUris(@NonNull ArrayList<MediaMeta> metas, int position) {
             Preconditions.checkNotNull(metas);

@@ -1,5 +1,7 @@
 package com.sharry.lib.picturepicker;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 
 /**
@@ -11,6 +13,11 @@ import java.util.ArrayList;
  */
 public interface PickerCallback {
 
-    void onPickedComplete(ArrayList<String> userPickedSet);
+    /**
+     * 获取选中集合
+     *
+     * @param userPickedSet 用户选中的集合
+     */
+    void onPickedComplete(@NonNull ArrayList<MediaMeta> userPickedSet);
 
 }

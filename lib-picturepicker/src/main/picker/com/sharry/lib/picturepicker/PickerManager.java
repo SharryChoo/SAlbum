@@ -104,10 +104,10 @@ public class PickerManager {
                 }
                 switch (requestCode) {
                     case PickerActivity.REQUEST_CODE:
-                        ArrayList<String> paths = data.getStringArrayListExtra(
+                        ArrayList<MediaMeta> metas = data.getParcelableArrayListExtra(
                                 PickerActivity.RESULT_EXTRA_PICKED_PICTURES);
-                        if (paths != null) {
-                            pickerCallback.onPickedComplete(paths);
+                        if (metas != null) {
+                            pickerCallback.onPickedComplete(metas);
                         } else {
                             Log.e(TAG, "Picked path from PickerActivity is null.");
                         }
