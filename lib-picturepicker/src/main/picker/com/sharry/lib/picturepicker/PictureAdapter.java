@@ -3,7 +3,6 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -186,7 +185,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void bindPictureItem(final PictureViewHolder holder, final MediaMeta meta) {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        PictureLoader.load(mContext, meta.path, holder.ivPicture);
+        PictureLoader.loadPicture(mContext, meta.path, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mUserPickedPaths.indexOf(meta);
         // 设置点击监听
@@ -201,13 +200,8 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void bindVideoItem(final VideoViewHolder holder, final MediaMeta meta) {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        // 展示视频缩略图
-        if (TextUtils.isEmpty(meta.thumbnailPath)) {
-            holder.ivPicture.setImageResource(R.drawable.ic_picture_picker_picker_video_default);
-        } else {
-            assert meta.thumbnailPath != null;
-            PictureLoader.load(mContext, meta.thumbnailPath, holder.ivPicture);
-        }
+        // 加载视频第一帧
+        PictureLoader.loadVideo(mContext, meta.path, meta.thumbnailPath, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mUserPickedPaths.indexOf(meta);
         // 设置点击监听

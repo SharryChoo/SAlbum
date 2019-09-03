@@ -1,7 +1,6 @@
 package com.sharry.lib.picturepicker;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,14 +52,9 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
         }
         MediaMeta firstMeta = folder.getMetas().get(0);
         if (firstMeta.isPicture) {
-            PictureLoader.load(context, firstMeta.path, holder.ivPreview);
+            PictureLoader.loadPicture(context, firstMeta.path, holder.ivPreview);
         } else {
-            if (TextUtils.isEmpty(firstMeta.thumbnailPath)) {
-                holder.ivPreview.setImageResource(R.drawable.ic_picture_picker_picker_video_default);
-            } else {
-                assert firstMeta.thumbnailPath != null;
-                PictureLoader.load(context, firstMeta.thumbnailPath, holder.ivPreview);
-            }
+            PictureLoader.loadVideo(context, firstMeta.path, firstMeta.thumbnailPath, holder.ivPreview);
         }
         holder.tvFolderName.setText(folder.getFolderName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {

@@ -39,7 +39,7 @@ class PreviewAdapter extends RecyclerView.Adapter<PreviewAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        PictureLoader.load(holder.ivPicture.getContext(), userPickedSet.get(position).path, holder.ivPicture);
+        PictureLoader.loadPicture(holder.ivPicture.getContext(), userPickedSet.get(position).path, holder.ivPicture);
     }
 
     @Override

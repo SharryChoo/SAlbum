@@ -227,19 +227,19 @@ public class WatcherActivity extends AppCompatActivity implements
         // 加载当前的位置的图片
         PhotoView curView = mPhotoViews.get(curPosition);
         if (curView != null && curView.getDrawable() == null) {
-            PictureLoader.load(this, pictureUris.get(curPosition).path, curView);
+            PictureLoader.loadPicture(this, pictureUris.get(curPosition).path, curView);
         }
         // 加载前一个
         int beforeIndex = curPosition - 1;
         PhotoView beforeView = beforeIndex >= 0 ? mPhotoViews.get(beforeIndex) : null;
         if (beforeView != null && beforeView.getDrawable() == null) {
-            PictureLoader.load(this, pictureUris.get(beforeIndex).path, beforeView);
+            PictureLoader.loadPicture(this, pictureUris.get(beforeIndex).path, beforeView);
         }
         // 加载后一个
         int afterIndex = curPosition + 1;
         PhotoView afterView = afterIndex < pictureUris.size() ? mPhotoViews.get(afterIndex) : null;
         if (afterView != null && afterView.getDrawable() == null) {
-            PictureLoader.load(this, pictureUris.get(afterIndex).path, afterView);
+            PictureLoader.loadPicture(this, pictureUris.get(afterIndex).path, afterView);
         }
     }
 

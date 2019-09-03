@@ -5,6 +5,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * PicturePicker 加载图片的工具类
@@ -27,12 +28,28 @@ class PictureLoader {
         return sEngine;
     }
 
-    static void load(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
+    static void loadPicture(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
         if (sEngine == null) {
-            Log.e(TAG, "PictureLoader.load -> please invoke PictureLoader.setPictureLoader first");
+            Log.e(TAG, "PictureLoader.loadPicture -> please invoke PictureLoader.setPictureLoader first");
             return;
         }
-        sEngine.load(context, uri, imageView);
+        sEngine.loadPicture(context, uri, imageView);
+    }
+
+    static void loadGif(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
+        if (sEngine == null) {
+            Log.e(TAG, "PictureLoader.loadPicture -> please invoke PictureLoader.setPictureLoader first");
+            return;
+        }
+        sEngine.loadGif(context, uri, imageView);
+    }
+
+    static void loadVideo(@NonNull Context context, @NonNull String uri, @Nullable String thumbnailPath, @NonNull ImageView imageView) {
+        if (sEngine == null) {
+            Log.e(TAG, "PictureLoader.loadPicture -> please invoke PictureLoader.setPictureLoader first");
+            return;
+        }
+        sEngine.loadVideo(context, uri, thumbnailPath, imageView);
     }
 
 }

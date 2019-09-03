@@ -1,8 +1,10 @@
 package sharry.demo.picturepicker
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextUtils
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -10,10 +12,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.sharry.lib.camera.AspectRatio
-import com.sharry.lib.picturepicker.CropperConfig
-import com.sharry.lib.picturepicker.PickerConfig
-import com.sharry.lib.picturepicker.PickerManager
-import com.sharry.lib.picturepicker.TakerConfig
+import com.sharry.lib.picturepicker.*
 import com.sharry.lib.picturepicker.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
@@ -122,15 +121,26 @@ class MainActivity : AppCompatActivity() {
                                     .build()
                     )
                     // 图片加载框架注入
-                    .setPictureLoader { context, uri, imageView ->
-                        val options = RequestOptions()
-                                .override(imageView.width, imageView.height)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        Glide.with(context)
-                                .load(uri)
-                                .apply(options)
-                                .into(imageView)
-                    }
+                    .setPictureLoader(object : IPictureLoaderEngine {
+                        override fun loadPicture(context: Context, uri: String, imageView: ImageView) {
+                            val options = RequestOptions()
+                                    .override(imageView.width, imageView.height)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            Glide.with(context).load(uri).apply(options).into(imageView)
+                        }
+
+                        override fun loadGif(context: Context, uri: String, imageView: ImageView) {
+                            Glide.with(context).load(uri).into(imageView)
+                        }
+
+                        override fun loadVideo(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {
+                            // Glide 可直接加载视频 uri 获取第一帧
+                            val options = RequestOptions().override(imageView.width, imageView.height)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            Glide.with(context).load(uri).apply(options).into(imageView)
+                        }
+
+                    })
                     .start {
                         it.forEach { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
                     }
