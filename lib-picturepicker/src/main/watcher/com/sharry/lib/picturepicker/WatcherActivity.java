@@ -135,9 +135,9 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         WatcherFragment.ACTIVES.clear();
         WatcherFragment.IDLES.clear();
-        super.onDestroy();
     }
 
     //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
