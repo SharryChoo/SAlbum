@@ -85,6 +85,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
                     .setConfig(
                             mPickerConfig.getTakerConfig().rebuild()
                                     .setCropConfig(mPickerConfig.getCropperConfig())
+                                    .setVideoRecord(mPickerConfig.isPickVideo())
                                     .build()
                     )
                     .take(this);
@@ -129,7 +130,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
             mView.setResult(mModel.getPickedPaths());
             return;
         }
-        // 需要裁剪, 则启动裁剪
+        // 启动裁剪
         CropperManager.with((Context) mView)
                 .setConfig(
                         mPickerConfig.getCropperConfig().rebuild()
@@ -216,34 +217,39 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
 
     private void fetchData(Context context) {
         mView.setProgressBarVisible(true);
-        mModel.getSystemPictures(context, new PickerContract.IModel.Callback() {
+        mModel.fetchData(
+                context,
+                mPickerConfig.isPickGif(),
+                mPickerConfig.isPickVideo(),
+                new PickerContract.IModel.Callback() {
 
-            private final Handler mainHandler = new Handler(Looper.getMainLooper());
+                    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-            @Override
-            public void onComplete() {
-                mainHandler.post(new Runnable() {
                     @Override
-                    public void run() {
-                        mView.setProgressBarVisible(false);
-                        mView.setFolderAdapter(mModel.getAllFolders());
-                        handleFolderChecked(0);
+                    public void onComplete() {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mView.setProgressBarVisible(false);
+                                mView.setFolderAdapter(mModel.getAllFolders());
+                                handleFolderChecked(0);
+                            }
+                        });
                     }
-                });
-            }
 
-            @Override
-            public void onFailed(Throwable throwable) {
-                Log.e(TAG, throwable.getMessage(), throwable);
-                mainHandler.post(new Runnable() {
                     @Override
-                    public void run() {
-                        mView.setProgressBarVisible(false);
-                        mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_fetch_album_failed));
+                    public void onFailed(Throwable throwable) {
+                        Log.e(TAG, throwable.getMessage(), throwable);
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mView.setProgressBarVisible(false);
+                                mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_fetch_album_failed));
+                            }
+                        });
                     }
-                });
-            }
-        });
+                }
+        );
     }
 
     /**

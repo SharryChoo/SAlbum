@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/iv_picture"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
+    android:paddingLeft="30dp"
+    android:paddingRight="30dp"
+    android:scaleType="fitCenter"
+    app:srcCompat="@drawable/ic_picture_picker_picker_camera_header" />

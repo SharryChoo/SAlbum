@@ -20,8 +20,9 @@ import java.util.ArrayList;
  */
 public class PickerConfig implements Parcelable {
 
-    public static final int INVALIDATE_VALUE = -1;
-    private static final int COLOR_DEFAULT = Color.parseColor("#ff64b6f6");
+
+    static final int INVALIDATE_VALUE = -1;
+    static final int COLOR_DEFAULT = Color.parseColor("#ff64b6f6");
 
     protected PickerConfig(Parcel in) {
         userPickedSet = in.createTypedArrayList(MediaMeta.CREATOR);
@@ -37,6 +38,8 @@ public class PickerConfig implements Parcelable {
         indicatorBorderUncheckedColor = in.readInt();
         isToolbarBehavior = in.readByte() != 0;
         isFabBehavior = in.readByte() != 0;
+        isPickVideo = in.readByte() != 0;
+        isPickGif = in.readByte() != 0;
         takerConfig = in.readParcelable(TakerConfig.class.getClassLoader());
         cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
     }
@@ -56,6 +59,8 @@ public class PickerConfig implements Parcelable {
         dest.writeInt(indicatorBorderUncheckedColor);
         dest.writeByte((byte) (isToolbarBehavior ? 1 : 0));
         dest.writeByte((byte) (isFabBehavior ? 1 : 0));
+        dest.writeByte((byte) (isPickVideo ? 1 : 0));
+        dest.writeByte((byte) (isPickGif ? 1 : 0));
         dest.writeParcelable(takerConfig, flags);
         dest.writeParcelable(cropperConfig, flags);
     }
@@ -81,26 +86,54 @@ public class PickerConfig implements Parcelable {
         return new Builder();
     }
 
-    // 图片选择的相关配置
+    /**
+     * 用户已经选中的集合
+     */
     private ArrayList<MediaMeta> userPickedSet = new ArrayList<>();
-    private int threshold = 9, spanCount = 3;
-    // Toolbar 背景色
-    private int toolbarBkgColor = COLOR_DEFAULT;                                             // 背景色
-    private int toolbarBkgDrawableResId = INVALIDATE_VALUE;                                  // 背景的Drawable
-    // 整体背景色
+
+    /**
+     * 最大选取阈值
+     */
+    private int threshold = 9;
+
+    /**
+     * 每行展示数量
+     */
+    private int spanCount = 3;
+
+    /**
+     * Toolbar 背景
+     */
+    private int toolbarBkgColor = COLOR_DEFAULT;
+    private int toolbarBkgDrawableResId = INVALIDATE_VALUE;
+
+    /**
+     * 整体背景色
+     */
     private int pickerBackgroundColor = INVALIDATE_VALUE;
-    // Item 背景色
     private int pickerItemBackgroundColor = Color.WHITE;
-    // 指示器背景色
+
+    /**
+     * 指示器背景色
+     */
     private int indicatorTextColor = Color.WHITE;
-    private int indicatorSolidColor = COLOR_DEFAULT;                                        // 指示器选中的填充色
-    private int indicatorBorderCheckedColor = indicatorSolidColor;                          // 指示器边框选中的颜色
-    private int indicatorBorderUncheckedColor = Color.WHITE;                                // 指示器边框未被选中的颜色
-    // 是否展示滚动动画
+    private int indicatorSolidColor = COLOR_DEFAULT;
+    private int indicatorBorderCheckedColor = indicatorSolidColor;
+    private int indicatorBorderUncheckedColor = Color.WHITE;
+
+    /**
+     * 控制 Flag
+     */
     private boolean isToolbarBehavior = false;
     private boolean isFabBehavior = false;
-    private TakerConfig takerConfig;                                                       // 拍照的配置
-    private CropperConfig cropperConfig;                                                           // 裁剪的配置
+    private boolean isPickVideo = false;
+    private boolean isPickGif = false;
+
+    /**
+     * 其他功能的 Config
+     */
+    private TakerConfig takerConfig;
+    private CropperConfig cropperConfig;
 
     private PickerConfig() {
     }
@@ -156,6 +189,14 @@ public class PickerConfig implements Parcelable {
 
     public boolean isFabBehavior() {
         return isFabBehavior;
+    }
+
+    public boolean isPickVideo() {
+        return isPickVideo;
+    }
+
+    public boolean isPickGif() {
+        return isPickGif;
     }
 
     @Nullable
@@ -308,11 +349,41 @@ public class PickerConfig implements Parcelable {
             return this;
         }
 
+        /**
+         * 是否支持选取视频
+         *
+         * @param isPickVideo if true is support.
+         */
+        public Builder isPickVideo(boolean isPickVideo) {
+            mConfig.isPickVideo = isPickVideo;
+            return this;
+        }
+
+        /**
+         * 是否支持选取 GIF 图
+         *
+         * @param isPickGif if true is support.
+         */
+        public Builder isPickGif(boolean isPickGif) {
+            mConfig.isPickGif = isPickGif;
+            return this;
+        }
+
+        /**
+         * 裁剪项的配置
+         *
+         * @param cropperConfig if null is deny crop, if not null is granted.
+         */
         public Builder setCropConfig(@Nullable CropperConfig cropperConfig) {
             mConfig.cropperConfig = cropperConfig;
             return this;
         }
 
+        /**
+         * 拍摄项的配置
+         *
+         * @param takerConfig if null is deny taker, if not null is granted.
+         */
         public Builder setCameraConfig(@Nullable TakerConfig takerConfig) {
             mConfig.takerConfig = takerConfig;
             return this;

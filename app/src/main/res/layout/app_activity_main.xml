@@ -52,6 +52,26 @@
         android:padding="10dp">
 
         <CheckBox
+            android:id="@+id/cbGif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_activity_main_cb_gif" />
+
+        <CheckBox
+            android:id="@+id/cbVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="@string/app_activity_main_cb_video" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <CheckBox
             android:id="@+id/cbCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

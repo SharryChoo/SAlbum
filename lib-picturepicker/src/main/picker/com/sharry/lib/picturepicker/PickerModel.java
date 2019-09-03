@@ -70,10 +70,12 @@ class PickerModel implements PickerContract.IModel {
     }
 
     @Override
-    public void getSystemPictures(Context context, final Callback callback) {
+    public void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback callback) {
         PICKER_THREAD_POOL.execute(
                 new CursorRunnable(
                         context,
+                        supportGif,
+                        supportVideo,
                         new CursorRunnable.RunnableInteraction() {
                             @Override
                             public void onComplete(ArrayList<FolderModel> folderModels) {
@@ -160,12 +162,15 @@ class PickerModel implements PickerContract.IModel {
             void onFailed(Throwable throwable);
         }
 
+        private final boolean mSupportGif, mSupportVideo;
         private final Context mContext;
         private final RunnableInteraction mListener;
 
-        CursorRunnable(Context context, RunnableInteraction listener) {
-            mContext = context;
-            mListener = listener;
+        CursorRunnable(Context context, boolean supportGif, boolean supportVideo, RunnableInteraction listener) {
+            this.mContext = context;
+            this.mListener = listener;
+            this.mSupportGif = supportGif;
+            this.mSupportVideo = supportVideo;
         }
 
         @Override
@@ -179,7 +184,9 @@ class PickerModel implements PickerContract.IModel {
             HashMap<String, FolderModel> caches = new HashMap<>();
             try {
                 fetchPictures(allFolderModel, caches);
-                fetchVideos(allFolderModel, caches);
+                if (mSupportVideo) {
+                    fetchVideos(allFolderModel, caches);
+                }
                 folderModels.addAll(caches.values());
             } catch (Throwable e) {
                 mListener.onFailed(e);
@@ -191,7 +198,7 @@ class PickerModel implements PickerContract.IModel {
          * 获取所有图片资源信息
          */
         private void fetchPictures(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
-            Cursor cursor = createImageCursor();
+            Cursor cursor = mSupportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif();
             if (cursor == null || cursor.getCount() == 0) {
                 return;
             }
@@ -204,6 +211,7 @@ class PickerModel implements PickerContract.IModel {
                 }
                 MediaMeta meta = MediaMeta.create(picturePath, true);
                 meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
+                meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
                 // 添加到所有图片的目录下
                 allFolderModel.addMeta(meta);
                 // 获取图片父文件夹路径
@@ -211,13 +219,14 @@ class PickerModel implements PickerContract.IModel {
                 if (TextUtils.isEmpty(folderPath)) {
                     continue;
                 }
-                // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
-                if (!caches.containsKey(folderPath)) {
-                    String folderName = getLastFileName(folderPath);
-                    caches.put(folderPath, new FolderModel(folderName));
-                }
                 // 添加图片到缓存
-                caches.get(folderPath).addMeta(meta);
+                FolderModel folder = caches.get(folderPath);
+                if (folder == null) {
+                    String folderName = getLastFileName(folderPath);
+                    folder = new FolderModel(folderName);
+                    caches.put(folderPath, folder);
+                }
+                folder.addMeta(meta);
             }
             cursor.close();
         }
@@ -240,6 +249,7 @@ class PickerModel implements PickerContract.IModel {
                 meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                 meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
                 meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
                 // 获取缩略图
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
                 meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
@@ -250,13 +260,14 @@ class PickerModel implements PickerContract.IModel {
                 if (TextUtils.isEmpty(folderPath)) {
                     continue;
                 }
-                // 尝试从缓存中查找 pictureFolder 对象, 没有则创建新对象加入缓存
-                if (!caches.containsKey(folderPath)) {
+                // 添加图片到缓存
+                FolderModel folder = caches.get(folderPath);
+                if (folder == null) {
                     String folderName = getLastFileName(folderPath);
-                    caches.put(folderPath, new FolderModel(folderName));
+                    folder = new FolderModel(folderName);
+                    caches.put(folderPath, folder);
                 }
-                // 添加媒体文件到缓存到缓存
-                caches.get(folderPath).addMeta(meta);
+                folder.addMeta(meta);
             }
             cursor.close();
         }
@@ -284,16 +295,35 @@ class PickerModel implements PickerContract.IModel {
         /**
          * Create image cursor associated with this runnable.
          */
-        private Cursor createImageCursor() {
+        private Cursor createPictureCursorWithGif() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{
                     MediaStore.Images.Media.DATA,
-                    MediaStore.Images.Media.DATE_ADDED
+                    MediaStore.Images.Media.DATE_ADDED,
+                    MediaStore.Video.Media.MIME_TYPE
             };
             String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Images.Media.MIME_TYPE + "=?";
-            String[] selectionArgs = new String[]{"image/jpeg", "image/png", "image/jpg"};
+            String[] selectionArgs = new String[]{"image/jpeg", "image/png", "image/gif"};
+            String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+            return mContext.getContentResolver().query(uri, projection,
+                    selection, selectionArgs, sortOrder);
+        }
+
+        /**
+         * Create image cursor associated with this runnable.
+         */
+        private Cursor createPictureCursorWithoutGif() {
+            Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            String[] projection = new String[]{
+                    MediaStore.Images.Media.DATA,
+                    MediaStore.Images.Media.DATE_ADDED,
+                    MediaStore.Video.Media.MIME_TYPE
+            };
+            String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
+                    MediaStore.Images.Media.MIME_TYPE + "=?";
+            String[] selectionArgs = new String[]{"image/jpeg", "image/png"};
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return mContext.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
@@ -310,6 +340,7 @@ class PickerModel implements PickerContract.IModel {
                     MediaStore.Video.Media.DURATION,
                     MediaStore.Video.Media.DATE_ADDED,
                     MediaStore.Video.Media.SIZE,
+                    MediaStore.Video.Media.MIME_TYPE
             };
             String selection = MediaStore.Images.Media.MIME_TYPE + "=? or " +
                     MediaStore.Video.Media.MIME_TYPE + "=? or " +

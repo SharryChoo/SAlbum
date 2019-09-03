@@ -178,7 +178,7 @@ interface PickerContract {
         /**
          * 获取系统图片
          */
-        void getSystemPictures(Context context, final Callback listener);
+        void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback listener);
 
         /**
          * 获取当前需要显示的文件模型

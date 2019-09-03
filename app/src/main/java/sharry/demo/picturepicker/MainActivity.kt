@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity() {
                 // Behavior 动画
                 .isToolbarScrollable(cbAnimation.isChecked)
                 .isFabScrollable(cbAnimation.isChecked)
+                .isPickGif(cbGif.isChecked)
+                .isPickVideo(cbVideo.isChecked)
                 // Toolbar 背景设置
                 .setToolbarBackgroundColor(
                         ContextCompat.getColor(this, R.color.colorPrimary)
@@ -112,6 +114,8 @@ class MainActivity : AppCompatActivity() {
                                     .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
                                     .isToolbarScrollable(cbAnimation.isChecked)
                                     .isFabScrollable(cbAnimation.isChecked)
+                                    .isPickGif(cbGif.isChecked)
+                                    .isPickVideo(cbVideo.isChecked)
                                     .setCameraConfig(
                                             if (cbCamera.isChecked) takerConfig else null
                                     )
@@ -126,7 +130,8 @@ class MainActivity : AppCompatActivity() {
                             val options = RequestOptions()
                                     .override(imageView.width, imageView.height)
                                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            Glide.with(context).load(uri).apply(options).into(imageView)
+                            // 保证为静态图
+                            Glide.with(context).asBitmap().load(uri).apply(options).into(imageView)
                         }
 
                         override fun loadGif(context: Context, uri: String, imageView: ImageView) {

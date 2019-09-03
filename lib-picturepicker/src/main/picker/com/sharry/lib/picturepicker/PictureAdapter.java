@@ -26,13 +26,13 @@ import java.util.List;
 class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int ITEM_TYPE_PICTURE = 838;
-    private static final int ITEM_TYPE_GIF = 347;
+    private static final int ITEM_TYPE_CAMERA_HEADER = 347;
     private static final int ITEM_TYPE_VIDEO = 664;
 
     private final Context mContext;
     private final PickerConfig mConfig;
-    private final List<MediaMeta> mDisplayMetas;
-    private final List<MediaMeta> mUserPickedPaths;
+    private final List<MediaMeta> mDataSet;
+    private final List<MediaMeta> mPickedSet;
     private final AdapterInteraction mInteraction;
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final Runnable mRefreshIndicatorRunnable = new Runnable() {
@@ -42,7 +42,10 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     };
 
-    PictureAdapter(Context context, PickerConfig config, ArrayList<MediaMeta> metas, ArrayList<MediaMeta> userPickedPaths) {
+    PictureAdapter(Context context,
+                   PickerConfig config,
+                   ArrayList<MediaMeta> dataSet,
+                   ArrayList<MediaMeta> pickedSet) {
         if (context instanceof AdapterInteraction) {
             this.mInteraction = (AdapterInteraction) context;
         } else {
@@ -51,17 +54,17 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         this.mContext = context;
         this.mConfig = config;
-        this.mDisplayMetas = metas;
-        this.mUserPickedPaths = userPickedPaths;
+        this.mDataSet = dataSet;
+        this.mPickedSet = pickedSet;
     }
 
     @Override
     public int getItemViewType(int position) {
         if (mConfig.isCameraSupport() && position == 0) {
-            return ITEM_TYPE_PICTURE;
+            return ITEM_TYPE_CAMERA_HEADER;
         }
         int relativePosition = position - (mConfig.isCameraSupport() ? 1 : 0);
-        MediaMeta meta = mDisplayMetas.get(relativePosition);
+        MediaMeta meta = mDataSet.get(relativePosition);
         int result;
         if (meta == null || meta.isPicture) {
             result = ITEM_TYPE_PICTURE;
@@ -74,109 +77,54 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        RecyclerView.ViewHolder vh;
         switch (viewType) {
+            case ITEM_TYPE_CAMERA_HEADER:
+                vh = new CameraHeaderHolder(parent);
+                break;
             case ITEM_TYPE_VIDEO:
-                VideoViewHolder videoViewHolder = new VideoViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(
-                                R.layout.picture_picker_recycle_item_video,
-                                parent,
-                                false
-                        )
-                );
-                setupVideoViewHolder(parent, videoViewHolder);
-                return videoViewHolder;
+                vh = new VideoViewHolder(parent);
+                break;
             case ITEM_TYPE_PICTURE:
             default:
-                PictureViewHolder pictureViewHolder = new PictureViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(
-                                R.layout.picture_picker_recycle_item_picture,
-                                parent,
-                                false
-                        )
-                );
-                setupPictureViewHolder(parent, pictureViewHolder);
-                return pictureViewHolder;
+                vh = new PictureViewHolder(parent);
+                break;
         }
+        return vh;
     }
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
-        if (mConfig.isCameraSupport() && position == 0) {
-            bindCameraHeader((PictureViewHolder) holder);
-        } else {
-            int relativePosition = position - (mConfig.isCameraSupport() ? 1 : 0);
+        if (holder instanceof CameraHeaderHolder) {
+            // nothing.
+        } else if (holder instanceof PictureViewHolder) {
+            int relativePosition = mConfig.isCameraSupport() ? position - 1 : position;
             if (relativePosition < 0) {
                 return;
             }
-            final MediaMeta meta = mDisplayMetas.get(relativePosition);
+            final MediaMeta meta = mDataSet.get(relativePosition);
             if (meta == null) {
                 return;
             }
-            if (meta.isPicture) {
-                bindPictureItem((PictureViewHolder) holder, meta);
-            } else {
-                bindVideoItem((VideoViewHolder) holder, meta);
+            bindPictureItem((PictureViewHolder) holder, meta);
+        } else if (holder instanceof VideoViewHolder) {
+            int relativePosition = mConfig.isCameraSupport() ? position - 1 : position;
+            if (relativePosition < 0) {
+                return;
             }
+            final MediaMeta meta = mDataSet.get(relativePosition);
+            if (meta == null) {
+                return;
+            }
+            bindVideoItem((VideoViewHolder) holder, meta);
+        } else {
+            // nothing.
         }
     }
 
     @Override
     public int getItemCount() {
-        return mDisplayMetas.size() + (mConfig.isCropSupport() ? 1 : 0);
-    }
-
-    private void setupPictureViewHolder(ViewGroup parent, PictureViewHolder holder) {
-        // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
-        int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
-                - parent.getPaddingRight()) / mConfig.getSpanCount();
-        ViewGroup.LayoutParams itemParams = holder.itemView.getLayoutParams();
-        itemParams.height = itemSize;
-        holder.itemView.setLayoutParams(itemParams);
-        // 设置指示器的宽高为 ItemView 的五分之一
-        int indicatorSize = itemSize / 5;
-        ViewGroup.MarginLayoutParams indicatorParams =
-                (ViewGroup.MarginLayoutParams) holder.checkIndicator.getLayoutParams();
-        // 动态调整大小
-        indicatorParams.width = indicatorSize;
-        indicatorParams.height = indicatorSize;
-        // 动态调整 Margin
-        indicatorParams.rightMargin = indicatorSize / 5;
-        indicatorParams.topMargin = indicatorSize / 5;
-        holder.checkIndicator.setLayoutParams(indicatorParams);
-        // 设置指示器的文本尺寸为指示器宽高的二分之一
-        holder.checkIndicator.setTextSize(TypedValue.COMPLEX_UNIT_PX, indicatorSize / 2);
-    }
-
-    private void setupVideoViewHolder(ViewGroup parent, VideoViewHolder holder) {
-        // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
-        int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
-                - parent.getPaddingRight()) / mConfig.getSpanCount();
-        ViewGroup.LayoutParams itemParams = holder.itemView.getLayoutParams();
-        itemParams.height = itemSize;
-        holder.itemView.setLayoutParams(itemParams);
-        // 设置指示器的宽高为 ItemView 的五分之一
-        int indicatorSize = itemSize / 5;
-        ViewGroup.MarginLayoutParams indicatorParams =
-                (ViewGroup.MarginLayoutParams) holder.checkIndicator.getLayoutParams();
-        // 动态调整大小
-        indicatorParams.width = indicatorSize;
-        indicatorParams.height = indicatorSize;
-        // 动态调整 Margin
-        indicatorParams.rightMargin = indicatorSize / 5;
-        indicatorParams.topMargin = indicatorSize / 5;
-        holder.checkIndicator.setLayoutParams(indicatorParams);
-        // 设置指示器的文本尺寸为指示器宽高的二分之一
-        holder.checkIndicator.setTextSize(TypedValue.COMPLEX_UNIT_PX, indicatorSize / 2);
-    }
-
-    /**
-     * 绑定相机 Header 的数据
-     */
-    private void bindCameraHeader(@NonNull PictureViewHolder holder) {
-        holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
-        holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER);
-        holder.ivPicture.setImageResource(R.drawable.ic_picture_picker_picker_camera_header);
-        holder.checkIndicator.setVisibility(View.INVISIBLE);
+        return mDataSet.size() + (mConfig.isCropSupport() ? 1 : 0);
     }
 
     /**
@@ -185,9 +133,10 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void bindPictureItem(final PictureViewHolder holder, final MediaMeta meta) {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        holder.ivGifTag.setVisibility("image/gif".equals(meta.mimeType) ? View.VISIBLE : View.GONE);
         PictureLoader.loadPicture(mContext, meta.path, holder.ivPicture);
         // 判断当前 uri 是否被选中了
-        final int index = mUserPickedPaths.indexOf(meta);
+        final int index = mPickedSet.indexOf(meta);
         // 设置点击监听
         holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
@@ -203,7 +152,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // 加载视频第一帧
         PictureLoader.loadVideo(mContext, meta.path, meta.thumbnailPath, holder.ivPicture);
         // 判断当前 uri 是否被选中了
-        final int index = mUserPickedPaths.indexOf(meta);
+        final int index = mPickedSet.indexOf(meta);
         // 设置点击监听
         holder.checkIndicator.setVisibility(View.VISIBLE);
         holder.checkIndicator.setCheckedWithoutAnimator(index != -1);
@@ -220,17 +169,24 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     /**
-     * Communicate with Activity.
+     * Camera header item view holder.
      */
-    interface AdapterInteraction {
+    class CameraHeaderHolder extends RecyclerView.ViewHolder {
 
-        boolean onPictureChecked(@NonNull MediaMeta checkedMeta);
+        CameraHeaderHolder(ViewGroup parent) {
+            super(LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.picture_picker_recycle_item_header_camera,
+                    parent,
+                    false
+            ));
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mInteraction.onCameraClicked();
+                }
+            });
+        }
 
-        void onPictureRemoved(@NonNull MediaMeta removedMeta);
-
-        void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position);
-
-        void onCameraClicked();
     }
 
     /**
@@ -240,6 +196,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         final ImageView ivPicture;
         final CheckedIndicatorView checkIndicator;
+        final ImageView ivGifTag;
         final Runnable pictureClickedRunnable = new Runnable() {
             @Override
             public void run() {
@@ -247,11 +204,16 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         };
 
-        PictureViewHolder(View itemView) {
-            super(itemView);
+        PictureViewHolder(ViewGroup parent) {
+            super(
+                    LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.picture_picker_recycle_item_picture, parent, false)
+            );
             // Initialize ivPicture.
             ivPicture = itemView.findViewById(R.id.iv_picture);
             ivPicture.setOnClickListener(this);
+            // Initialize ivGifTag
+            ivGifTag = itemView.findViewById(R.id.iv_gif_tag);
             // Initialize checkIndicator.
             checkIndicator = itemView.findViewById(R.id.check_indicator);
             checkIndicator.setTextColor(mConfig.getIndicatorTextColor());
@@ -261,6 +223,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     mConfig.getIndicatorBorderUncheckedColor()
             );
             checkIndicator.setOnClickListener(this);
+            adjustItemView(parent);
         }
 
         @Override
@@ -273,26 +236,43 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }
 
+        private void adjustItemView(ViewGroup parent) {
+            // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
+            int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
+                    - parent.getPaddingRight()) / mConfig.getSpanCount();
+            ViewGroup.LayoutParams itemParams = itemView.getLayoutParams();
+            itemParams.height = itemSize;
+            itemView.setLayoutParams(itemParams);
+            // 设置指示器的宽高为 ItemView 的五分之一
+            int indicatorSize = itemSize / 5;
+            ViewGroup.MarginLayoutParams indicatorParams =
+                    (ViewGroup.MarginLayoutParams) checkIndicator.getLayoutParams();
+            // 动态调整大小
+            indicatorParams.width = indicatorSize;
+            indicatorParams.height = indicatorSize;
+            // 动态调整 Margin
+            indicatorParams.rightMargin = indicatorSize / 5;
+            indicatorParams.topMargin = indicatorSize / 5;
+            checkIndicator.setLayoutParams(indicatorParams);
+            // 设置指示器的文本尺寸为指示器宽高的二分之一
+            checkIndicator.setTextSize(TypedValue.COMPLEX_UNIT_PX, indicatorSize / 2);
+        }
+
         private void performPictureClicked() {
-            // 单独处理相机的点击事件
-            if (mConfig.isCameraSupport() && 0 == getAdapterPosition()) {
-                mInteraction.onCameraClicked();
-            } else {
-                int position = getAdapterPosition() - (mConfig.isCameraSupport() ? 1 : 0);
-                if (position < 0) {
-                    return;
-                }
-                mInteraction.onPictureClicked(ivPicture, mDisplayMetas.get(position).path, position);
+            int relativePosition = mConfig.isCameraSupport() ? getAdapterPosition() - 1 : getAdapterPosition();
+            if (relativePosition < 0) {
+                return;
             }
+            mInteraction.onPictureClicked(ivPicture, mDataSet.get(relativePosition).path, relativePosition);
         }
 
         private void performCheckIndicatorClicked() {
             // 获取当前点击图片的 path
-            int position = getAdapterPosition() - (mConfig.isCameraSupport() ? 1 : 0);
-            if (position < 0) {
+            int relativePosition = mConfig.isCameraSupport() ? getAdapterPosition() - 1 : getAdapterPosition();
+            if (relativePosition < 0) {
                 return;
             }
-            MediaMeta meta = mDisplayMetas.get(position);
+            MediaMeta meta = mDataSet.get(relativePosition);
             // Checked-> Unchecked
             if (checkIndicator.isChecked()) {
                 // 移除选中数据与状态
@@ -306,9 +286,10 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 // 判断是否达到选择上限
                 checkIndicator.setChecked(mInteraction.onPictureChecked(meta));
                 // 设置文本
-                checkIndicator.setText(String.valueOf(mUserPickedPaths.size()));
+                checkIndicator.setText(String.valueOf(mPickedSet.size()));
             }
         }
+
     }
 
     /**
@@ -326,8 +307,14 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         };
 
-        VideoViewHolder(View itemView) {
-            super(itemView);
+        VideoViewHolder(ViewGroup parent) {
+            super(
+                    LayoutInflater.from(parent.getContext()).inflate(
+                            R.layout.picture_picker_recycle_item_video,
+                            parent,
+                            false
+                    )
+            );
             // Initialize ivPicture.
             ivPicture = itemView.findViewById(R.id.iv_picture);
             ivPicture.setOnClickListener(this);
@@ -342,6 +329,8 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             checkIndicator.setOnClickListener(this);
             // Initialize tvDuration
             tvDuration = itemView.findViewById(R.id.tv_duration);
+            // adjust.
+            adjustItemView(parent);
         }
 
         @Override
@@ -354,26 +343,43 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }
 
+        private void adjustItemView(ViewGroup parent) {
+            // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
+            int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
+                    - parent.getPaddingRight()) / mConfig.getSpanCount();
+            ViewGroup.LayoutParams itemParams = itemView.getLayoutParams();
+            itemParams.height = itemSize;
+            itemView.setLayoutParams(itemParams);
+            // 设置指示器的宽高为 ItemView 的五分之一
+            int indicatorSize = itemSize / 5;
+            ViewGroup.MarginLayoutParams indicatorParams =
+                    (ViewGroup.MarginLayoutParams) checkIndicator.getLayoutParams();
+            // 动态调整大小
+            indicatorParams.width = indicatorSize;
+            indicatorParams.height = indicatorSize;
+            // 动态调整 Margin
+            indicatorParams.rightMargin = indicatorSize / 5;
+            indicatorParams.topMargin = indicatorSize / 5;
+            checkIndicator.setLayoutParams(indicatorParams);
+            // 设置指示器的文本尺寸为指示器宽高的二分之一
+            checkIndicator.setTextSize(TypedValue.COMPLEX_UNIT_PX, indicatorSize / 2);
+        }
+
         private void performPictureClicked() {
-            // 单独处理相机的点击事件
-            if (mConfig.isCameraSupport() && 0 == getAdapterPosition()) {
-                mInteraction.onCameraClicked();
-            } else {
-                int position = getAdapterPosition() - (mConfig.isCameraSupport() ? 1 : 0);
-                if (position < 0) {
-                    return;
-                }
-                mInteraction.onPictureClicked(ivPicture, mDisplayMetas.get(position).path, position);
+            int relativePosition = mConfig.isCameraSupport() ? getAdapterPosition() - 1 : getAdapterPosition();
+            if (relativePosition < 0) {
+                return;
             }
+            mInteraction.onPictureClicked(ivPicture, mDataSet.get(relativePosition).path, relativePosition);
         }
 
         private void performCheckIndicatorClicked() {
             // 获取当前点击图片的 path
-            int position = getAdapterPosition() - (mConfig.isCameraSupport() ? 1 : 0);
-            if (position < 0) {
+            int relativePosition = mConfig.isCameraSupport() ? getAdapterPosition() - 1 : getAdapterPosition();
+            if (relativePosition < 0) {
                 return;
             }
-            MediaMeta meta = mDisplayMetas.get(position);
+            MediaMeta meta = mDataSet.get(relativePosition);
             // Checked-> Unchecked
             if (checkIndicator.isChecked()) {
                 // 移除选中数据与状态
@@ -387,9 +393,24 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 // 判断是否达到选择上限
                 checkIndicator.setChecked(mInteraction.onPictureChecked(meta));
                 // 设置文本
-                checkIndicator.setText(String.valueOf(mUserPickedPaths.size()));
+                checkIndicator.setText(String.valueOf(mPickedSet.size()));
             }
         }
+
+    }
+
+    /**
+     * Communicate with Activity.
+     */
+    interface AdapterInteraction {
+
+        boolean onPictureChecked(@NonNull MediaMeta checkedMeta);
+
+        void onPictureRemoved(@NonNull MediaMeta removedMeta);
+
+        void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position);
+
+        void onCameraClicked();
     }
 
 }
