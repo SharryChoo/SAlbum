@@ -148,12 +148,12 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         if (v.getId() == R.id.video_view || v.getId() == R.id.fl_container) {
             showControlPanel();
         } else if (v.getId() == R.id.iv_control) {
-            // 切换为播放态
+            // 切换为暂停态
             if (mVideoView.isPlaying()) {
                 mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
                 mVideoView.pause();
             }
-            // 切换为暂停态
+            // 切换为播放态
             else {
                 mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_pasue);
                 mVideoView.start();
