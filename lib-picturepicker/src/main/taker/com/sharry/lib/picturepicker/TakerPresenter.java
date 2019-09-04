@@ -69,6 +69,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
     @Override
     public void handleGranted() {
+        mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
         if (mVideoFile != null) {
             performVideoEnsure();
         } else {

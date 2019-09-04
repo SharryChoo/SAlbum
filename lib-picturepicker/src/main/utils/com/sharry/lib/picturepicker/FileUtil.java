@@ -158,11 +158,11 @@ class FileUtil {
      * 通知 MediaStore 文件删除了
      */
     static void notifyMediaStore(Context context, String filePath) {
-        if (TextUtils.isEmpty(filePath)) {
+        if (context == null || TextUtils.isEmpty(filePath)) {
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            MediaScannerConnection.scanFile(context, new String[]{filePath}, null, null);
+            MediaScannerConnection.scanFile(context.getApplicationContext(), new String[]{filePath}, null, null);
         } else {
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
