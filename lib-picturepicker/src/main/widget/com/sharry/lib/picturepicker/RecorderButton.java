@@ -15,12 +15,23 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+/**
+ * 相机拍摄录制的按钮
+ * <p>
+ * Please ensure u Activity implement {@link Interaction} correct when u use this widget.
+ *
+ * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @version 1.0
+ * @since 2019-09-04 09:15
+ */
 public class RecorderButton extends View implements View.OnTouchListener, View.OnClickListener {
 
     private static final int MSG_WHAT_RECORD_START = 848;
@@ -38,7 +49,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     private long mMaxDuration = 100;
     private long mCurDuration = 0;
 
-    private boolean mIsSupportRecord = false;
+    private boolean mIsLongClickEnable = false;
     private Interaction mInteraction;
     private boolean mIsRecording = false;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper()) {
@@ -57,6 +68,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     };
     private AnimatorSet mDownAnimSet;
     private AnimatorSet mFinishAnimSet;
+    private int mProgressColor;
 
     public RecorderButton(Context context) {
         this(context, null);
@@ -76,13 +88,14 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
+        mProgressColor = ContextCompat.getColor(context, R.color.picture_picker_base_primary_color);
         setOnClickListener(this);
         setOnTouchListener(this);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (mIsSupportRecord) {
+        if (mIsLongClickEnable) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     handleActionDown();
@@ -101,6 +114,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
 
     @Override
     public void onClick(View v) {
+        Log.e("TAG", "onClick onTakePicture");
         mInteraction.onTakePicture();
     }
 
@@ -145,16 +159,23 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
             // 配置画笔
             mPaint.setStrokeWidth(strokeWidth);
             mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setColor(ContextCompat.getColor(getContext(), R.color.picture_picker_base_primary_color));
+            mPaint.setColor(mProgressColor);
             canvas.drawArc(mRect, -90, (mCurDuration * 360f / mMaxDuration), false, mPaint);
         }
     }
 
     /**
-     * 是否支持录制视频
+     * 设置进度条的颜色
      */
-    public void setRecordVideo(boolean isVideoRecord) {
-        mIsSupportRecord = isVideoRecord;
+    public void setProgressColor(@ColorInt int color) {
+        mProgressColor = color;
+    }
+
+    /**
+     * 是否支持长按
+     */
+    public void setLongClickEnable(boolean isLongClickEnable) {
+        mIsLongClickEnable = isLongClickEnable;
     }
 
     /**
@@ -269,6 +290,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
                     if (mIsRecording) {
                         mInteraction.onRecordFinish(mCurDuration);
                     } else {
+                        Log.e("TAG", "onAnimationEnd onTakePicture");
                         mInteraction.onTakePicture();
                     }
                     mIsRecording = false;

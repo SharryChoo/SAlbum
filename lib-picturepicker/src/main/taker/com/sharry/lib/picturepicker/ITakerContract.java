@@ -2,6 +2,7 @@ package com.sharry.lib.picturepicker;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 
 import com.sharry.lib.camera.AspectRatio;
@@ -18,37 +19,40 @@ public interface ITakerContract {
 
     interface IView {
 
-        void setToolbarVisible(boolean visible);
-
-        void setCameraViewVisible(boolean visible);
-
-        void setRecordButtonVisible(boolean visible);
-
-        void setVideoPlayerVisible(boolean visible);
-
-        void setGrantedButtonVisible(boolean visible);
-
-        void setDeniedButtonVisible(boolean visible);
-
-        void setPicturePreviewVisible(boolean visible);
-
         void setPreviewAspect(@NonNull AspectRatio aspect);
 
         void setPreviewFullScreen(boolean fullScreen);
 
-        void isSupportVideoRecord(boolean isVideoRecord);
+        void setSupportVideoRecord(boolean isVideoRecord);
 
         void setMaxRecordDuration(long maxDuration);
 
         void setRecordButtonProgress(long currentDuration);
 
-        void startPreview();
+        void setProgressColor(int recordProgressColor);
+
+        void setPreviewSource(@NonNull Bitmap bitmap);
 
         void startVideoPlayer(@NonNull String authority, File file);
 
         void stopVideoPlayer();
 
-        void setPreviewSource(@NonNull Bitmap bitmap);
+        int STATUS_CAMERA_PREVIEW = 1;
+        int STATUS_PICTURE_PREVIEW = 2;
+        int STATUS_VIDEO_PLAY = 3;
+
+        @IntDef(value = {
+                STATUS_CAMERA_PREVIEW,
+                STATUS_PICTURE_PREVIEW,
+                STATUS_VIDEO_PLAY
+        })
+        @interface Status {
+        }
+
+        void setStatus(@Status int status);
+
+        @Status
+        int getStatus();
 
         void toast(@NonNull String content);
 
@@ -72,7 +76,7 @@ public interface ITakerContract {
 
         void handleVideoPlayFailed();
 
-        void release();
+        void handleViewDestroy();
     }
 
 }

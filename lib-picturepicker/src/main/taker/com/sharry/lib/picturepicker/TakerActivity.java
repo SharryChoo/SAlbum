@@ -58,6 +58,7 @@ public class TakerActivity extends AppCompatActivity implements
     private VideoView mVideoPlayer;
     private ImageView mIvDenied;
     private ImageView mIvGranted;
+    private int mStatus;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,61 +93,12 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        mPresenter.release();
+        mPresenter.handleViewDestroy();
         super.onDestroy();
     }
 
     ////////////////////////////////////ITakerContract.IView///////////////////////////////////////
 
-    @Override
-    public void setToolbarVisible(boolean visible) {
-        mToolbar.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void setCameraViewVisible(boolean visible) {
-        mCameraView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void setRecordButtonVisible(boolean visible) {
-        mBtnRecord.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void setVideoPlayerVisible(boolean visible) {
-        mVideoPlayer.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void setGrantedButtonVisible(boolean visible) {
-        mIvGranted.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void setDeniedButtonVisible(boolean visible) {
-        mIvDenied.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void setPicturePreviewVisible(boolean visible) {
-        mIvPicturePreview.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void startVideoPlayer(@NonNull String authority, File file) {
-        mVideoPlayer.setVideoURI(FileUtil.getUriFromFile(this, authority, file));
-    }
-
-    @Override
-    public void stopVideoPlayer() {
-        mVideoPlayer.stopPlayback();
-    }
-
-    @Override
-    public void setPreviewSource(@NonNull Bitmap bitmap) {
-        mIvPicturePreview.setImageBitmap(bitmap);
-    }
 
     @Override
     public void setPreviewAspect(@NonNull AspectRatio aspect) {
@@ -159,13 +111,8 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void isSupportVideoRecord(boolean isVideoRecord) {
-        mBtnRecord.setRecordVideo(isVideoRecord);
-    }
-
-    @Override
-    public void toast(@NonNull String content) {
-        Toast.makeText(this, content, Toast.LENGTH_SHORT).show();
+    public void setSupportVideoRecord(boolean isVideoRecord) {
+        mBtnRecord.setLongClickEnable(isVideoRecord);
     }
 
     @Override
@@ -179,8 +126,77 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void startPreview() {
-        mCameraView.startPreview();
+    public void setProgressColor(int recordProgressColor) {
+        mBtnRecord.setProgressColor(recordProgressColor);
+    }
+
+    @Override
+    public void setPreviewSource(@NonNull Bitmap bitmap) {
+        mIvPicturePreview.setImageBitmap(bitmap);
+    }
+
+    @Override
+    public void startVideoPlayer(@NonNull String authority, File file) {
+        mVideoPlayer.setVideoURI(FileUtil.getUriFromFile(this, authority, file));
+    }
+
+    @Override
+    public void stopVideoPlayer() {
+        mVideoPlayer.stopPlayback();
+    }
+
+    @Override
+    public void setStatus(int status) {
+        mStatus = status;
+        switch (status) {
+            case STATUS_VIDEO_PLAY:
+                // 停止预览
+                mCameraView.stopPreview();
+                // 置为视频播放状态
+                mToolbar.setVisibility(View.INVISIBLE);
+                mCameraView.setVisibility(View.INVISIBLE);
+                mBtnRecord.setVisibility(View.INVISIBLE);
+                mIvPicturePreview.setVisibility(View.INVISIBLE);
+                mVideoPlayer.setVisibility(View.VISIBLE);
+                mIvGranted.setVisibility(View.VISIBLE);
+                mIvDenied.setVisibility(View.VISIBLE);
+                break;
+            case STATUS_PICTURE_PREVIEW:
+                // 停止预览
+                mCameraView.stopPreview();
+                // 置为照片预览状态
+                mToolbar.setVisibility(View.INVISIBLE);
+                mCameraView.setVisibility(View.INVISIBLE);
+                mBtnRecord.setVisibility(View.INVISIBLE);
+                mVideoPlayer.setVisibility(View.INVISIBLE);
+                mIvPicturePreview.setVisibility(View.VISIBLE);
+                mIvGranted.setVisibility(View.VISIBLE);
+                mIvDenied.setVisibility(View.VISIBLE);
+                break;
+            case STATUS_CAMERA_PREVIEW:
+            default:
+                // 置为预览状态
+                mToolbar.setVisibility(View.VISIBLE);
+                mCameraView.setVisibility(View.VISIBLE);
+                mBtnRecord.setVisibility(View.VISIBLE);
+                mVideoPlayer.setVisibility(View.INVISIBLE);
+                mIvPicturePreview.setVisibility(View.INVISIBLE);
+                mIvGranted.setVisibility(View.INVISIBLE);
+                mIvDenied.setVisibility(View.INVISIBLE);
+                // 开始预览
+                mCameraView.startPreview();
+                break;
+        }
+    }
+
+    @Override
+    public int getStatus() {
+        return mStatus;
+    }
+
+    @Override
+    public void toast(@NonNull String content) {
+        Toast.makeText(this, content, Toast.LENGTH_SHORT).show();
     }
 
     @Override

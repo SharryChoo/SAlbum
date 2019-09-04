@@ -19,9 +19,10 @@ class PictureLoader {
     private static final String TAG = PictureLoader.class.getSimpleName();
     private static IPictureLoaderEngine sEngine;
 
-    static void setPictureLoader(@NonNull IPictureLoaderEngine engine) {
-        Preconditions.checkNotNull(engine, "Please ensure IPictureLoaderEngine not null!");
-        sEngine = engine;
+    static void setPictureLoader(@Nullable IPictureLoaderEngine engine) {
+        if (engine != null) {
+            sEngine = engine;
+        }
     }
 
     static IPictureLoaderEngine getPictureLoader() {

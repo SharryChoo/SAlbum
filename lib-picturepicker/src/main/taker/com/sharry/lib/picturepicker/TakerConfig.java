@@ -1,8 +1,10 @@
 package com.sharry.lib.picturepicker;
 
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -25,7 +27,8 @@ public class TakerConfig implements Parcelable {
         previewAspect = in.readParcelable(AspectRatio.class.getClassLoader());
         isFullScreen = in.readByte() != 0;
         isSupportVideoRecord = in.readByte() != 0;
-        maxRecordDuration = in.readLong();
+        maximumDuration = in.readLong();
+        minimumDuration = in.readLong();
     }
 
     @Override
@@ -37,7 +40,8 @@ public class TakerConfig implements Parcelable {
         dest.writeParcelable(previewAspect, flags);
         dest.writeByte((byte) (isFullScreen ? 1 : 0));
         dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
-        dest.writeLong(maxRecordDuration);
+        dest.writeLong(maximumDuration);
+        dest.writeLong(minimumDuration);
     }
 
     @Override
@@ -107,7 +111,19 @@ public class TakerConfig implements Parcelable {
      * <p>
      * Unit is ms
      */
-    private long maxRecordDuration = 15 * 1000;
+    private long maximumDuration = 15 * 1000;
+
+    /**
+     * 视频录制最短时长
+     * <p>
+     * Unit is ms
+     */
+    private long minimumDuration = 1000;
+
+    /**
+     * 录制时进度条的颜色
+     */
+    private int recordProgressColor = Color.parseColor("#ff00b0ff");
 
     private TakerConfig() {
     }
@@ -148,9 +164,18 @@ public class TakerConfig implements Parcelable {
         return authority;
     }
 
-    public long getMaxRecordDuration() {
-        return maxRecordDuration;
+    public long getMaximumDuration() {
+        return maximumDuration;
     }
+
+    public long getMinimumDuration() {
+        return minimumDuration;
+    }
+
+    public int getRecordProgressColor() {
+        return recordProgressColor;
+    }
+
 
     public static class Builder {
 
@@ -230,7 +255,25 @@ public class TakerConfig implements Parcelable {
          * @param maxRecordDuration unit ms
          */
         public Builder setMaxRecordDuration(long maxRecordDuration) {
-            mConfig.maxRecordDuration = maxRecordDuration;
+            mConfig.maximumDuration = maxRecordDuration;
+            return this;
+        }
+
+        /**
+         * 设置录制最短时长
+         *
+         * @param minimumDuration unit ms
+         */
+        public Builder seMinRecordDuration(long minimumDuration) {
+            mConfig.minimumDuration = minimumDuration;
+            return this;
+        }
+
+        /**
+         * 设置录制进度条的颜色
+         */
+        public Builder setRecordProgressColor(@ColorInt int colorRecordProgress) {
+            mConfig.recordProgressColor = colorRecordProgress;
             return this;
         }
 
