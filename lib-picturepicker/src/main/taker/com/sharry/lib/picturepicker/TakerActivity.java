@@ -117,6 +117,11 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void setRecordButtonVisible(boolean visible) {
+        mBtnRecord.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
     public void setSupportVideoRecord(boolean isVideoRecord) {
         mBtnRecord.setLongClickEnable(isVideoRecord);
     }

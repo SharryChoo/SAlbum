@@ -23,6 +23,8 @@ public interface ITakerContract {
 
         void setPreviewFullScreen(boolean fullScreen);
 
+        void setRecordButtonVisible(boolean visible);
+
         void setSupportVideoRecord(boolean isVideoRecord);
 
         void setMaxRecordDuration(long maxDuration);
