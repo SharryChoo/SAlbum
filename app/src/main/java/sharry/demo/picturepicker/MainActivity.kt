@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                 // 拍摄后质量压缩
                 .setPictureQuality(80)
                 // 预览画面比例
-                .setPreviewAspect(AspectRatio.of(4, 3))
+                .setPreviewAspect(AspectRatio.DEFAULT)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
                 .setFullScreen(false)
                 // 设置是否支持视频录制

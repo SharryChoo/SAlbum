@@ -13,21 +13,22 @@
         android:allowBackup="true"
         android:supportsRtl="true">
         <activity
-            android:name=".VideoPlayerActivity"
+            android:name=".PickerActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/PicturePickerTheme" />
+        <activity
+            android:name=".WatcherActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/PictureWatcherTheme" />
         <activity
             android:name=".TakerActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PickerActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/PicturePickerTheme" />
-        <activity
-            android:name=".WatcherActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/PictureWatcherTheme" />
+            android:name=".VideoPlayerActivity"
+            android:launchMode="singleTop" />
     </application>
 
 </manifest>

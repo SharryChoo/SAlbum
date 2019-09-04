@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -65,6 +66,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     /**
      * Widget.
      */
+    private FrameLayout mFlContainer;
     private VideoView mVideoView;
     private TextView mTvCurrent;
     private AppCompatSeekBar mSeekBar;
@@ -143,7 +145,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.video_view) {
+        if (v.getId() == R.id.video_view || v.getId() == R.id.fl_container) {
             showControlPanel();
         } else if (v.getId() == R.id.iv_control) {
             // 切换为播放态
@@ -159,6 +161,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
             }
         } else if (v.getId() == R.id.cl_control) {
             hindControlPanel();
+        } else {
+            // ignore.
         }
     }
 
@@ -167,6 +171,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     }
 
     private void initViews() {
+        // 设置外层窗体, 让其可响应事件
+        mFlContainer = findViewById(R.id.fl_container);
+        mFlContainer.setOnClickListener(this);
         // 配置 Video View
         mVideoView = findViewById(R.id.video_view);
         mVideoView.setOnPreparedListener(this);
