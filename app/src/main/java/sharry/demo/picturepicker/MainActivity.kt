@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                 // 预览画面比例
                 .setPreviewAspect(AspectRatio.of(4, 3))
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
-                .setFullScreen(true)
+                .setFullScreen(false)
                 // 设置是否支持视频录制
                 .setVideoRecord(true)
                 // 设置录制最大时长

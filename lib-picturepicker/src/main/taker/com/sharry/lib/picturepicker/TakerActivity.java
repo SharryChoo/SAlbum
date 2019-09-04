@@ -14,6 +14,8 @@ import android.widget.VideoView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
@@ -108,6 +110,10 @@ public class TakerActivity extends AppCompatActivity implements
     @Override
     public void setPreviewFullScreen(boolean fullScreen) {
         mCameraView.setAdjustViewBounds(!fullScreen);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCameraView.getLayoutParams();
+        params.topToTop = fullScreen ? ConstraintSet.PARENT_ID : ConstraintSet.UNSET;
+        params.topToBottom = fullScreen ? ConstraintSet.UNSET : R.id.toolbar;
+        mCameraView.setLayoutParams(params);
     }
 
     @Override
@@ -279,7 +285,7 @@ public class TakerActivity extends AppCompatActivity implements
                         .setListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                mCameraView.setAdjustViewBounds(!mCameraView.getAdjustViewBounds());
+                                setPreviewFullScreen(mCameraView.getAdjustViewBounds());
                             }
                         })
                         .build()

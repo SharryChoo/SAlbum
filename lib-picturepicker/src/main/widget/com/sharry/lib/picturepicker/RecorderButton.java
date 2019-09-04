@@ -270,6 +270,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
      * 录制结束的动画
      */
     private void handleRecordFinish() {
+        mIsRecording = false;
         if (mFinishAnimSet == null) {
             // 内圆放大
             ValueAnimator innerAnimator = ObjectAnimator.ofInt(mCurInnerRadius, mInnerRadiusRange[1]).setDuration(200);
@@ -302,6 +303,8 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
                     if (isTakePicture) {
                         mHandler.removeMessages(MSG_WHAT_CALL_RECORD_START);
                     }
+                    // 重置为 0
+                    mCurDuration = 0;
                 }
 
                 @Override
@@ -311,7 +314,8 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
                     } else {
                         mInteraction.onRecordFinish(mCurDuration);
                     }
-                    reset();
+                    // 重新响应触摸事件
+                    setEnabled(true);
                 }
             });
         }
@@ -322,17 +326,6 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         mStartAnimSet.cancel();
         // 启动结束动画
         mFinishAnimSet.start();
-        Log.e("TAG", "truely finish");
-    }
-
-    private void reset() {
-        // 重置为 0
-        mCurDuration = 0;
-        invalidate();
-        // 重新响应触摸事件
-        setEnabled(true);
-        // 置为非录制状态
-        mIsRecording = false;
     }
 
     public interface Interaction {

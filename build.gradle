@@ -25,7 +25,7 @@ buildscript {
         glideVersion = '4.6.1'
 
         // my dependencies
-        smedia = '0.0.4-alpha'
+        smedia = '0.0.5-alpha'
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradleVersion"
