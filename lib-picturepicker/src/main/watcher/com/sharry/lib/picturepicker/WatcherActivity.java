@@ -86,6 +86,13 @@ public class WatcherActivity extends AppCompatActivity implements
             }
         } else {
             Log.e(TAG, "Transaction is to large!!! data size is: " + parcel.dataSize() + " bytes");
+            intent = new Intent(request, WatcherActivity.class);
+            intent.putExtra(WatcherActivity.EXTRA_CONFIG, config);
+            resultTo.startActivityForResult(intent, REQUEST_CODE);
+            // 使用淡入淡出的效果
+            if (sharedElement != null) {
+                request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
         }
     }
 
