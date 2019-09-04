@@ -6,7 +6,8 @@ group = 'com.github.SharryChoo'
 def resDirs = [
         "watcher/com/sharry/lib/picturepicker",
         "picker/com/sharry/lib/picturepicker",
-        "taker/com/sharry/lib/picturepicker"
+        "taker/com/sharry/lib/picturepicker",
+        "player/com/sharry/lib/picturepicker"
 ]
 
 android {
@@ -20,6 +21,7 @@ android {
         main {
             java.srcDirs += 'src/main/picker'
             java.srcDirs += 'src/main/watcher'
+            java.srcDirs += 'src/main/player'
             java.srcDirs += 'src/main/copper'
             java.srcDirs += 'src/main/taker'
             java.srcDirs += 'src/main/widget'

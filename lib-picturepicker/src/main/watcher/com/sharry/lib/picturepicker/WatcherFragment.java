@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,7 +46,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
      */
     private Interaction mInteraction;
     private PhotoView mIvPicture;
-    private VideoView mVideoPlayer;
     private ImageView mIvPlayIcon;
 
     private boolean mViewInitlized = false;
@@ -79,7 +77,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     public void onDestroyView() {
         super.onDestroyView();
         mIvPicture = null;
-        mVideoPlayer = null;
         mViewInitlized = false;
         // Recycle Instance
         int indexOfValue = ACTIVES.indexOfValue(this);
@@ -93,7 +90,7 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.iv_play_icon) {
-            // TODO 播放视频
+            VideoPlayerActivity.launch(v.getContext(), mDataSource);
         }
     }
 
@@ -104,7 +101,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
 
     private void initView(View view) {
         mIvPicture = view.findViewById(R.id.iv_picture);
-        mVideoPlayer = view.findViewById(R.id.video_player);
         mIvPicture.setOnPhotoTapListener(new OnPhotoTapListener() {
             @Override
             public void onPhotoTap(ImageView view, float x, float y) {
@@ -121,9 +117,9 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
         if (mDataSource == null || !mViewInitlized) {
             return;
         }
+        mIvPicture.setVisibility(View.VISIBLE);
         if (mDataSource.isPicture) {
             mIvPlayIcon.setVisibility(View.GONE);
-            mIvPicture.setVisibility(View.VISIBLE);
             if (Constants.MIME_TYPE_GIF.equals(mDataSource.mimeType)) {
                 PictureLoader.loadGif(mIvPicture.getContext(), mDataSource.path, mIvPicture);
             } else {
@@ -131,7 +127,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
             }
         } else {
             mIvPlayIcon.setVisibility(View.VISIBLE);
-            mIvPicture.setVisibility(View.VISIBLE);
             PictureLoader.loadVideo(mIvPicture.getContext(), mDataSource.path, mDataSource.thumbnailPath, mIvPicture);
         }
     }
@@ -149,7 +144,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     void dismissOtherView() {
         if (mViewInitlized) {
             mIvPlayIcon.setVisibility(View.GONE);
-            mVideoPlayer.setVisibility(View.GONE);
             mIvPicture.setVisibility(View.VISIBLE);
         }
     }

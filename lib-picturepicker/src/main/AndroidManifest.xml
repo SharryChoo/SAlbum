@@ -3,19 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.sharry.lib.picturepicker">
 
+    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
     <!-- 相机权限 -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <!-- SD 卡读写权限 -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- SD 卡读写权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
 
     <application
         android:allowBackup="true"
         android:supportsRtl="true">
         <activity
+            android:name=".VideoPlayerActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".TakerActivity"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".PickerActivity"
             android:launchMode="singleTop"
@@ -25,7 +29,5 @@
             android:launchMode="singleTop"
             android:theme="@style/PictureWatcherTheme" />
     </application>
-
-
 
 </manifest>

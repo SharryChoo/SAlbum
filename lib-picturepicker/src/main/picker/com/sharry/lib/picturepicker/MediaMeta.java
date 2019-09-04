@@ -75,6 +75,8 @@ public class MediaMeta implements Parcelable {
 
     /**
      * 时长(视频)
+     * <p>
+     * Unit ms
      */
     long duration = 0;
 
