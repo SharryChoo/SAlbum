@@ -118,6 +118,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
             mRecorder.cancel();
             mView.toast("录制时间过短");
         } else {
+            // Recorder 的 Complete 是异步操作, 这里先将录制按钮异常, 防止用户误触
+            mView.setRecordButtonVisible(false);
             mRecorder.complete();
         }
     }
