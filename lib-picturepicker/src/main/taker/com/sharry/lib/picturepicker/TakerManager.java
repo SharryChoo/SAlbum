@@ -118,11 +118,6 @@ public class TakerManager {
                 mConfig.getCropperConfig().rebuild()
                         .setCropDirectory(mConfig.getDirectoryPath());
             }
-            // 给图片裁剪配置缺省 authority.
-            if (TextUtils.isEmpty(mConfig.getCropperConfig().getAuthority())) {
-                mConfig.getCropperConfig().rebuild()
-                        .setFileProviderAuthority(mConfig.getAuthority());
-            }
         }
     }
 

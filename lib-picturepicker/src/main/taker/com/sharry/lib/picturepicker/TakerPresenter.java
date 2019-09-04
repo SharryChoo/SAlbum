@@ -87,7 +87,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     @Override
     public void handleVideoPlayFailed() {
         if (mTryAgainCount++ < COUNT_PLAY_TRY_AGAIN) {
-            mView.startVideoPlayer(mConfig.getAuthority(), mVideoFile);
+            mView.startVideoPlayer(mVideoFile.getAbsolutePath());
         } else {
             // 重新尝试了 3 次仍然没有播放成功, 说明录制的视频有问题, 当做录制失败处理
             performRecordFiled();
@@ -176,7 +176,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private void performRecordComplete(File file) {
         mVideoFile = file;
         mView.setStatus(ITakerContract.IView.STATUS_VIDEO_PLAY);
-        mView.startVideoPlayer(mConfig.getAuthority(), mVideoFile);
+        mView.startVideoPlayer(mVideoFile.getAbsolutePath());
     }
 
     /**

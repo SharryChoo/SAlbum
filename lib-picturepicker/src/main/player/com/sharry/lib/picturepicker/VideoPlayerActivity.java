@@ -91,6 +91,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     protected void onPause() {
         super.onPause();
         mVideoView.stopPlayback();
+        mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
     }
 
     @Override

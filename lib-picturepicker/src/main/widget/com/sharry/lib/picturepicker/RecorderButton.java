@@ -20,7 +20,6 @@ import android.view.View;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 /**
  * 相机拍摄录制的按钮
@@ -41,12 +40,26 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     private final Paint mPaint;
     private final RectF mRect = new RectF();
     private final Point mCenterPoint = new Point();
+
+    /**
+     * 圆环的半径
+     */
     private int[] mInnerRadiusRange = new int[2];
     private int[] mOuterRadiusRange = new int[2];
     private int mCurInnerRadius;
     private int mCurOuterRadius;
+
+    /**
+     * 录制进度
+     */
     private long mMaxDuration = 100;
     private long mCurDuration = 0;
+
+    /**
+     * 颜色相关
+     */
+    private final int mOuterColor = Color.parseColor("#FFF5F5F5");
+    private final int mInnerColor = Color.WHITE;
     private int mProgressColor;
 
     /**
@@ -98,7 +111,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
-        mProgressColor = ContextCompat.getColor(context, R.color.picture_picker_base_primary_color);
+        mProgressColor = Color.parseColor("#ff00b0ff");
         setOnClickListener(this);
         setOnTouchListener(this);
     }
@@ -157,10 +170,10 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         super.onDraw(canvas);
         // 绘制外部圆环
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(ContextCompat.getColor(getContext(), R.color.picture_picker_widget_record_progress_outer_corner_gray));
+        mPaint.setColor(mOuterColor);
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, mCurOuterRadius, mPaint);
         // 绘制内部圆环
-        mPaint.setColor(Color.WHITE);
+        mPaint.setColor(mInnerColor);
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, mCurInnerRadius, mPaint);
         if (mIsRecording) {
             // 绘制进度

@@ -22,8 +22,6 @@ import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.picturepicker.toolbar.ImageViewOptions;
 import com.sharry.lib.picturepicker.toolbar.SToolbar;
 
-import java.io.File;
-
 /**
  * 图片/视频拍摄页面
  *
@@ -40,6 +38,7 @@ public class TakerActivity extends AppCompatActivity implements
     public static final String RESULT_EXTRA_MEDIA_META = "RESULT_EXTRA_MEDIA_META";
     private static final String EXTRA_TAKER_CONFIG = "extra_taker_config";
 
+
     public static void launchForResult(CallbackFragment fragment, TakerConfig config) {
         Intent intent = new Intent(fragment.getActivity(), TakerActivity.class);
         intent.putExtra(EXTRA_TAKER_CONFIG, config);
@@ -52,9 +51,19 @@ public class TakerActivity extends AppCompatActivity implements
             AspectRatio.of(16, 9),
             AspectRatio.of(2, 1)
     };
+
+    /**
+     * The presenter associated with this Activity.
+     */
     private ITakerContract.IPresenter mPresenter;
-    private SCameraView mCameraView;
+
+    /**
+     * Widgets
+     */
     private SToolbar mToolbar;
+    private ImageView mIvAspect;
+    private ImageView mIvFullScreen;
+    private SCameraView mCameraView;
     private RecorderButton mBtnRecord;
     private ImageView mIvPicturePreview;
     private VideoView mVideoPlayer;
@@ -147,8 +156,8 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void startVideoPlayer(@NonNull String authority, File file) {
-        mVideoPlayer.setVideoURI(FileUtil.getUriFromFile(this, authority, file));
+    public void startVideoPlayer(@NonNull String filePath) {
+        mVideoPlayer.setVideoPath(filePath);
     }
 
     @Override
@@ -188,6 +197,8 @@ public class TakerActivity extends AppCompatActivity implements
             default:
                 // 置为预览状态
                 mToolbar.setVisibility(View.VISIBLE);
+                mIvFullScreen.setVisibility(View.VISIBLE);
+                mIvAspect.setVisibility(View.VISIBLE);
                 mCameraView.setVisibility(View.VISIBLE);
                 mBtnRecord.setVisibility(View.VISIBLE);
                 mVideoPlayer.setVisibility(View.INVISIBLE);
@@ -240,11 +251,15 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     public void onRecordStart() {
+        mIvAspect.setVisibility(View.INVISIBLE);
+        mIvFullScreen.setVisibility(View.INVISIBLE);
         mPresenter.handleRecordStart(mCameraView);
     }
 
     @Override
     public void onRecordFinish(long duration) {
+        mIvAspect.setVisibility(View.VISIBLE);
+        mIvFullScreen.setVisibility(View.VISIBLE);
         mPresenter.handleRecordFinish(duration);
     }
 
@@ -295,6 +310,9 @@ public class TakerActivity extends AppCompatActivity implements
                         })
                         .build()
         );
+        // 获取 Toolbar 上的控件
+        mIvAspect = mToolbar.getLeftMenuView(1);
+        mIvFullScreen = mToolbar.getLeftMenuView(2);
     }
 
     private void initViews() {

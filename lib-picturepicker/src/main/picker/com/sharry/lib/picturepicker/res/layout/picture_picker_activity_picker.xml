@@ -13,7 +13,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:backIcon="@drawable/picture_picker_common_arrow_right_white"
+            app:backIcon="@drawable/ic_picture_picker_picker_right_arrow"
             app:statusBarStyle="Transparent"
             app:subItemInterval="10dp"
             app:titleGravity="Left"

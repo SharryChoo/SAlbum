@@ -9,8 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import com.sharry.lib.camera.AspectRatio
 import com.sharry.lib.picturepicker.*
 import com.sharry.lib.picturepicker.toolbar.SToolbar
@@ -31,6 +29,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pickerConfig: PickerConfig
     private lateinit var takerConfig: TakerConfig
     private lateinit var cropperConfig: CropperConfig
+    private val pictureLoader = object : IPictureLoaderEngine {
+
+        override fun loadPicture(context: Context, uri: String, imageView: ImageView) {
+            // 保证为静态图
+            Glide.with(context).asBitmap().load(uri).into(imageView)
+        }
+
+        override fun loadGif(context: Context, uri: String, imageView: ImageView) {
+            // 保证为 GIF 图
+            Glide.with(context).asGif().load(uri).into(imageView)
+        }
+
+        override fun loadVideo(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {
+            // Glide 可直接加载视频 uri 获取第一帧
+            Glide.with(context).asBitmap().load(uri).into(imageView)
+        }
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +65,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initData() {
         takerConfig = TakerConfig.Builder()
-                // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
-                .setFileProviderAuthority("$packageName.FileProvider")
                 // 相机文件存储路径
                 .setDirectoryPath(APP_DIRECTORY)
                 // 拍摄后质量压缩
@@ -66,21 +80,17 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
         cropperConfig = CropperConfig.Builder()
+                // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
+                .setFileProviderAuthority("$packageName.FileProvider")
+                // 裁剪后文件输出的路径
                 .setCropDirectory(APP_DIRECTORY)
+                // 裁剪期望的尺寸
                 .setCropSize(1000, 1000)
+                // 裁剪后的质量
                 .setCropQuality(80)
                 .build()
 
         pickerConfig = PickerConfig.Builder()
-                // 一共选中的数量
-                .setThreshold(etAlbumThreshold.text.toString().toInt())
-                // 每行展示的数目
-                .setSpanCount(etSpanCount.text.toString().toInt())
-                // Behavior 动画
-                .isToolbarScrollable(cbAnimation.isChecked)
-                .isFabScrollable(cbAnimation.isChecked)
-                .isPickGif(cbGif.isChecked)
-                .isPickVideo(cbVideo.isChecked)
                 // Toolbar 背景设置
                 .setToolbarBackgroundColor(
                         ContextCompat.getColor(this, R.color.colorPrimary)
@@ -108,47 +118,33 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             PickerManager.with(this)
+                    // 设置选择配置文件
                     .setPickerConfig(
                             pickerConfig.rebuild()
-                                    .setThreshold(etAlbumThreshold.text.toString().toInt())// 一共选中的数量
-                                    .setSpanCount(etSpanCount.text.toString().toInt())// 每行展示的数目
+                                    // 阈值
+                                    .setThreshold(etAlbumThreshold.text.toString().toInt())
+                                    // 每行展示的数量
+                                    .setSpanCount(etSpanCount.text.toString().toInt())
+                                    // 是否开启 Toolbar Behavior 动画
                                     .isToolbarScrollable(cbAnimation.isChecked)
+                                    // 是否开启 Fab Behavior 动画
                                     .isFabScrollable(cbAnimation.isChecked)
+                                    // 是否选择 GIF 图
                                     .isPickGif(cbGif.isChecked)
+                                    // 是否选择视频
                                     .isPickVideo(cbVideo.isChecked)
+                                    // 设置相机配置, 非 null 说明支持相机(拍摄/录制)
                                     .setCameraConfig(
                                             if (cbCamera.isChecked) takerConfig else null
                                     )
+                                    // 设置裁剪配置, 非 null 说明支持裁剪
                                     .setCropConfig(
                                             if (cbCrop.isChecked) cropperConfig else null
                                     )
                                     .build()
                     )
                     // 图片加载框架注入
-                    .setPictureLoader(object : IPictureLoaderEngine {
-                        override fun loadPicture(context: Context, uri: String, imageView: ImageView) {
-                            val options = RequestOptions()
-                                    .override(imageView.width, imageView.height)
-                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            // 保证为静态图
-                            Glide.with(context).asBitmap().load(uri).apply(options).into(imageView)
-                        }
-
-                        override fun loadGif(context: Context, uri: String, imageView: ImageView) {
-                            // Glide 可直接加载视频 uri 获取第一帧
-                            val options = RequestOptions().override(imageView.width, imageView.height)
-                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            Glide.with(context).load(uri).apply(options).into(imageView)
-                        }
-
-                        override fun loadVideo(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {
-                            // Glide 可直接加载视频 uri 获取第一帧
-                            val options = RequestOptions().override(imageView.width, imageView.height)
-                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            Glide.with(context).load(uri).apply(options).into(imageView)
-                        }
-
-                    })
+                    .setPictureLoader(pictureLoader)
                     .start {
                         Toast.makeText(this, it[0].toString(), Toast.LENGTH_SHORT).show()
                     }

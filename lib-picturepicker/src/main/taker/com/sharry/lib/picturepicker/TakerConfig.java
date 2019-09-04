@@ -21,7 +21,6 @@ public class TakerConfig implements Parcelable {
 
     protected TakerConfig(Parcel in) {
         pictureQuality = in.readInt();
-        authority = in.readString();
         directoryPath = in.readString();
         cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
         previewAspect = in.readParcelable(AspectRatio.class.getClassLoader());
@@ -34,7 +33,6 @@ public class TakerConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(pictureQuality);
-        dest.writeString(authority);
         dest.writeString(directoryPath);
         dest.writeParcelable(cropperConfig, flags);
         dest.writeParcelable(previewAspect, flags);
@@ -73,11 +71,6 @@ public class TakerConfig implements Parcelable {
      * 拍照后压缩的质量
      */
     private int pictureQuality = 80;
-
-    /**
-     * fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
-     */
-    private String authority;
 
     /**
      * 文件输出路径
@@ -160,10 +153,6 @@ public class TakerConfig implements Parcelable {
         return isSupportVideoRecord;
     }
 
-    public String getAuthority() {
-        return authority;
-    }
-
     public long getMaximumDuration() {
         return maximumDuration;
     }
@@ -195,15 +184,6 @@ public class TakerConfig implements Parcelable {
         public Builder setDirectoryPath(@NonNull String dirPath) {
             Preconditions.checkNotEmpty(dirPath);
             this.mConfig.directoryPath = dirPath;
-            return this;
-        }
-
-        /**
-         * 设置 FileProvider 的路径, 7.0 以后用于查找 URI
-         */
-        public Builder setFileProviderAuthority(@NonNull String authorities) {
-            Preconditions.checkNotEmpty(authorities);
-            mConfig.authority = authorities;
             return this;
         }
 
