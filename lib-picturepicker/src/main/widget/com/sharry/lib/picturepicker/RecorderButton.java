@@ -15,7 +15,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -39,7 +38,6 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     /**
      * 用于绘制的相关属性
      */
-
     private final Paint mPaint;
     private final RectF mRect = new RectF();
     private final Point mCenterPoint = new Point();
@@ -49,11 +47,11 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     private int mCurOuterRadius;
     private long mMaxDuration = 100;
     private long mCurDuration = 0;
-
-    private AnimatorSet mStartAnimSet;
-    private AnimatorSet mFinishAnimSet;
     private int mProgressColor;
 
+    /**
+     * Flags
+     */
     private boolean mIsLongClickEnable = false;
     private boolean mIsRecording = false;
 
@@ -75,6 +73,12 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         }
     };
 
+    /**
+     * 动画集合
+     */
+    private AnimatorSet mStartAnimSet;
+    private AnimatorSet mFinishAnimSet;
+
     public RecorderButton(Context context) {
         this(context, null);
     }
@@ -90,6 +94,7 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         } else {
             throw new UnsupportedOperationException("Please ensure u activity implements RecorderButton.Interaction");
         }
+        // 初始化画笔
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
@@ -157,19 +162,21 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         // 绘制内部圆环
         mPaint.setColor(Color.WHITE);
         canvas.drawCircle(mCenterPoint.x, mCenterPoint.y, mCurInnerRadius, mPaint);
-        // 绘制进度
-        int strokeWidth = mInnerRadiusRange[0] >> 2;
-        int halfOfStrokeWidth = strokeWidth >> 1;
-        // 确定进度的范围
-        mRect.top = mCenterPoint.y - mCurOuterRadius + halfOfStrokeWidth;
-        mRect.left = mCenterPoint.x - mCurOuterRadius + halfOfStrokeWidth;
-        mRect.right = mRect.left + (mCurOuterRadius << 1) - strokeWidth;
-        mRect.bottom = mRect.top + (mCurOuterRadius << 1) - strokeWidth;
-        // 配置画笔
-        mPaint.setStrokeWidth(strokeWidth);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(mProgressColor);
-        canvas.drawArc(mRect, -90, (mCurDuration * 360f / mMaxDuration), false, mPaint);
+        if (mIsRecording) {
+            // 绘制进度
+            int strokeWidth = mInnerRadiusRange[0] >> 2;
+            int halfOfStrokeWidth = strokeWidth >> 1;
+            // 确定进度的范围
+            mRect.top = mCenterPoint.y - mCurOuterRadius + halfOfStrokeWidth;
+            mRect.left = mCenterPoint.x - mCurOuterRadius + halfOfStrokeWidth;
+            mRect.right = mRect.left + (mCurOuterRadius << 1) - strokeWidth;
+            mRect.bottom = mRect.top + (mCurOuterRadius << 1) - strokeWidth;
+            // 配置画笔
+            mPaint.setStrokeWidth(strokeWidth);
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setColor(mProgressColor);
+            canvas.drawArc(mRect, -90, (mCurDuration * 360f / mMaxDuration), false, mPaint);
+        }
     }
 
     /**
@@ -210,8 +217,6 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
         }
         this.mCurDuration = curDuration;
         if (mCurDuration >= mMaxDuration) {
-            // 停止点击事件的响应
-            setEnabled(false);
             // 处理录制结束
             handleRecordFinish();
         } else {
@@ -220,45 +225,11 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     }
 
     /**
-     * 按下的动画
+     * 处理录制开始
      */
     private void handleRecordStart() {
         if (mStartAnimSet == null) {
-            // 内圆缩小
-            ValueAnimator innerAnimator = ObjectAnimator.ofInt(mCurInnerRadius, mInnerRadiusRange[0])
-                    .setDuration(200);
-            innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mCurInnerRadius = (int) animation.getAnimatedValue();
-                    invalidate();
-                }
-            });
-            // 外圆放大
-            ValueAnimator outerAnimator = ObjectAnimator.ofInt(mCurOuterRadius, mOuterRadiusRange[1])
-                    .setDuration(200);
-            outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mCurOuterRadius = (int) animation.getAnimatedValue();
-                }
-            });
-            // 执行动画集合
-            mStartAnimSet = new AnimatorSet();
-            mStartAnimSet.playTogether(innerAnimator, outerAnimator);
-            mStartAnimSet.addListener(new AnimatorListenerAdapter() {
-
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    mIsRecording = true;
-                    // 1s 之后回调外界开始录制, 1s 之内视为拍照
-                    mHandler.sendMessageDelayed(
-                            Message.obtain(mHandler, MSG_WHAT_CALL_RECORD_START),
-                            1000
-                    );
-                }
-
-            });
+            mStartAnimSet = createStartAnim();
         }
         if (mStartAnimSet.isStarted()) {
             return;
@@ -267,65 +238,117 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     }
 
     /**
-     * 录制结束的动画
+     * 处理录制结束
      */
     private void handleRecordFinish() {
-        mIsRecording = false;
+        if (!mIsRecording) {
+            return;
+        }
         if (mFinishAnimSet == null) {
-            // 内圆放大
-            ValueAnimator innerAnimator = ObjectAnimator.ofInt(mCurInnerRadius, mInnerRadiusRange[1]).setDuration(200);
-            innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mCurInnerRadius = (int) animation.getAnimatedValue();
-                    invalidate();
-                }
-            });
-            // 外圆缩小
-            ValueAnimator outerAnimator = ObjectAnimator.ofInt(mCurOuterRadius, mOuterRadiusRange[0]).setDuration(200);
-            outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mCurOuterRadius = (int) animation.getAnimatedValue();
-                }
-            });
-            // 执行动画集合
-            mFinishAnimSet = new AnimatorSet();
-            mFinishAnimSet.playTogether(innerAnimator, outerAnimator);
-            mFinishAnimSet.addListener(new AnimatorListenerAdapter() {
-
-                boolean isTakePicture = false;
-
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    // 尝试移除录制开始的消息, 若移除成功则说明录制尚未启动, 则触发拍照
-                    isTakePicture = mHandler.hasMessages(MSG_WHAT_CALL_RECORD_START);
-                    if (isTakePicture) {
-                        mHandler.removeMessages(MSG_WHAT_CALL_RECORD_START);
-                    }
-                    // 重置为 0
-                    mCurDuration = 0;
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (isTakePicture) {
-                        mInteraction.onTakePicture();
-                    } else {
-                        mInteraction.onRecordFinish(mCurDuration);
-                    }
-                    // 重新响应触摸事件
-                    setEnabled(true);
-                }
-            });
+            mFinishAnimSet = createFinishAnim();
         }
         if (mFinishAnimSet.isStarted()) {
             return;
         }
-        // 取消开始动画
+        // 取消录制开始动画
         mStartAnimSet.cancel();
         // 启动结束动画
         mFinishAnimSet.start();
+    }
+
+    private AnimatorSet createStartAnim() {
+        // 内圆缩小
+        ValueAnimator innerAnimator = ObjectAnimator.ofInt(mCurInnerRadius, mInnerRadiusRange[0])
+                .setDuration(200);
+        innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mCurInnerRadius = (int) animation.getAnimatedValue();
+                invalidate();
+            }
+        });
+        // 外圆放大
+        ValueAnimator outerAnimator = ObjectAnimator.ofInt(mCurOuterRadius, mOuterRadiusRange[1])
+                .setDuration(200);
+        outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mCurOuterRadius = (int) animation.getAnimatedValue();
+            }
+        });
+        // 执行动画集合
+        AnimatorSet startAnimSet = new AnimatorSet();
+        startAnimSet.playTogether(innerAnimator, outerAnimator);
+        startAnimSet.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                // 能够执行该方法说明录制已经开始了
+                mIsRecording = true;
+                // 1s 之后回调外界开始录制, 1s 之内视为拍照
+                mHandler.sendMessageDelayed(
+                        Message.obtain(mHandler, MSG_WHAT_CALL_RECORD_START),
+                        1000
+                );
+            }
+
+        });
+        return startAnimSet;
+    }
+
+    private AnimatorSet createFinishAnim() {
+        // 内圆放大
+        ValueAnimator innerAnimator = ObjectAnimator.ofInt(mCurInnerRadius, mInnerRadiusRange[1]).setDuration(200);
+        innerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mCurInnerRadius = (int) animation.getAnimatedValue();
+                invalidate();
+            }
+        });
+        // 外圆缩小
+        ValueAnimator outerAnimator = ObjectAnimator.ofInt(mCurOuterRadius, mOuterRadiusRange[0]).setDuration(200);
+        outerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mCurOuterRadius = (int) animation.getAnimatedValue();
+            }
+        });
+        // 执行动画集合
+        AnimatorSet finishAnimSet = new AnimatorSet();
+        finishAnimSet.playTogether(innerAnimator, outerAnimator);
+        finishAnimSet.addListener(new AnimatorListenerAdapter() {
+
+            boolean isTakePicture = false;
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                // 禁止响应触摸事件
+                setEnabled(false);
+                // 尝试移除录制开始的消息, 若移除成功则说明录制尚未启动, 则触发拍照
+                isTakePicture = mHandler.hasMessages(MSG_WHAT_CALL_RECORD_START);
+                if (isTakePicture) {
+                    mHandler.removeMessages(MSG_WHAT_CALL_RECORD_START);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (isTakePicture) {
+                    mInteraction.onTakePicture();
+                } else {
+                    mInteraction.onRecordFinish(mCurDuration);
+                }
+                // 置为非录制状态
+                mIsRecording = false;
+                // 重置为 0
+                mCurDuration = 0;
+                // 重新响应触摸事件
+                setEnabled(true);
+            }
+
+        });
+        return finishAnimSet;
     }
 
     public interface Interaction {
