@@ -122,7 +122,7 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     public void setRecordButtonProgress(long currentDuration) {
-        mBtnRecord.setCurrentPercent(currentDuration);
+        mBtnRecord.setCurrentProgress(currentDuration);
     }
 
     @Override
