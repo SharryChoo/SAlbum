@@ -196,7 +196,7 @@ class PickerPresenter implements PickerContract.IPresenter,
         mDisplaySet.add(0, newMeta);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
-            mPickedSet.add(0, newMeta);
+            mPickedSet.add(newMeta);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
