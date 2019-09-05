@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * @since 2018/9/1 10:17
  */
 public class PickerActivity extends AppCompatActivity implements PickerContract.IView,
-        PictureAdapter.AdapterInteraction,
+        PictureAdapter.Interaction,
         FolderAdapter.AdapterInteraction,
         View.OnClickListener {
 
@@ -96,6 +96,17 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         initViews();
         initData();
     }
+
+    @Override
+    public void onBackPressed() {
+        if (BottomSheetBehavior.STATE_COLLAPSED != mBottomMenuBehavior.getState()) {
+            mBottomMenuBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    //////////////////////////////////////////////PickerContract.IView/////////////////////////////////////////////////
 
     @Override
     public void setToolbarBackgroundColor(int color) {
@@ -222,6 +233,18 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         finish();
     }
 
+    //////////////////////////////////////////////PictureAdapter.Interaction/////////////////////////////////////////////////
+
+    @Override
+    public void onCameraClicked() {
+        mPresenter.handleCameraClicked();
+    }
+
+    @Override
+    public void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position) {
+        mPresenter.handlePictureClicked(position, imageView);
+    }
+
     @Override
     public boolean onPictureChecked(@NonNull MediaMeta checkedMeta) {
         return mPresenter.handlePictureChecked(checkedMeta);
@@ -232,21 +255,15 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         mPresenter.handlePictureRemoved(removedMeta);
     }
 
-    @Override
-    public void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position) {
-        mPresenter.handlePictureClicked(position, imageView);
-    }
-
-    @Override
-    public void onCameraClicked() {
-        mPresenter.handleCameraClicked();
-    }
+    //////////////////////////////////////////////FolderAdapter.Interaction/////////////////////////////////////////////////
 
     @Override
     public void onFolderChecked(int position) {
         mPresenter.handleFolderChecked(position);
         mBottomMenuBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
+
+    //////////////////////////////////////////////View.OnClickListener/////////////////////////////////////////////////
 
     @Override
     public void onClick(View v) {
@@ -261,15 +278,6 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         // 确认按钮
         else if (v == mTvToolbarEnsure || v.getId() == R.id.fab) {
             mPresenter.handleEnsureClicked();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (BottomSheetBehavior.STATE_COLLAPSED != mBottomMenuBehavior.getState()) {
-            mBottomMenuBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        } else {
-            super.onBackPressed();
         }
     }
 

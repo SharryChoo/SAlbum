@@ -210,16 +210,16 @@ public class PickerConfig implements Parcelable {
     }
 
     /**
-     * 是否支持相机
+     * Used in package.
      */
-    public boolean isCameraSupport() {
+    boolean isCameraSupport() {
         return takerConfig != null;
     }
 
     /**
-     * 是否支持裁剪
+     * Used in package.
      */
-    public boolean isCropSupport() {
+    boolean isCropSupport() {
         return cropperConfig != null;
     }
 

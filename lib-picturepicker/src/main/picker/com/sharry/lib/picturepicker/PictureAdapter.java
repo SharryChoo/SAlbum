@@ -33,7 +33,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final PickerConfig mConfig;
     private final List<MediaMeta> mDataSet;
     private final List<MediaMeta> mPickedSet;
-    private final AdapterInteraction mInteraction;
+    private final Interaction mInteraction;
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final Runnable mRefreshIndicatorRunnable = new Runnable() {
         @Override
@@ -46,8 +46,8 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                    PickerConfig config,
                    ArrayList<MediaMeta> dataSet,
                    ArrayList<MediaMeta> pickedSet) {
-        if (context instanceof AdapterInteraction) {
-            this.mInteraction = (AdapterInteraction) context;
+        if (context instanceof Interaction) {
+            this.mInteraction = (Interaction) context;
         } else {
             throw new IllegalArgumentException(context + "must implements " +
                     PictureAdapter.class.getSimpleName() + ".Interaction");
@@ -63,7 +63,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (mConfig.isCameraSupport() && position == 0) {
             return ITEM_TYPE_CAMERA_HEADER;
         }
-        int relativePosition = position - (mConfig.isCameraSupport() ? 1 : 0);
+        int relativePosition = mConfig.isCameraSupport() ? position - 1 : position;
         MediaMeta meta = mDataSet.get(relativePosition);
         int result;
         if (meta == null || meta.isPicture) {
@@ -171,7 +171,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /**
      * Camera header item view holder.
      */
-    class CameraHeaderHolder extends RecyclerView.ViewHolder {
+    class CameraHeaderHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         CameraHeaderHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(
@@ -179,14 +179,20 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     parent,
                     false
             ));
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mInteraction.onCameraClicked();
-                }
-            });
+            // 将 ItemView 的高度修正为宽度 parent 的宽度的三分之一
+            int itemSize = (parent.getMeasuredWidth() - parent.getPaddingLeft()
+                    - parent.getPaddingRight()) / mConfig.getSpanCount();
+            ViewGroup.LayoutParams itemParams = itemView.getLayoutParams();
+            itemParams.height = itemSize;
+            itemView.setLayoutParams(itemParams);
+            // 注入点击事件
+            itemView.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            mInteraction.onCameraClicked();
+        }
     }
 
     /**
@@ -402,15 +408,15 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /**
      * Communicate with Activity.
      */
-    interface AdapterInteraction {
+    interface Interaction {
+
+        void onCameraClicked();
+
+        void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position);
 
         boolean onPictureChecked(@NonNull MediaMeta checkedMeta);
 
         void onPictureRemoved(@NonNull MediaMeta removedMeta);
-
-        void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position);
-
-        void onCameraClicked();
     }
 
 }

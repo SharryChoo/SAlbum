@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
+import androidx.annotation.Nullable;
+
 import com.sharry.lib.picturepicker.photoview.PhotoView;
 
 /**
@@ -95,8 +97,8 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementExitAnimator(PhotoView target, SharedElementModel data) {
-        if (target.getDrawable() == null) {
+    static Animator createSharedElementExitAnimator(@Nullable PhotoView target, SharedElementModel data) {
+        if (target == null || target.getDrawable() == null) {
             return null;
         }
         AnimatorSet exitAnimators = new AnimatorSet();

@@ -57,12 +57,6 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
             PictureLoader.loadVideo(context, firstMeta.path, firstMeta.thumbnailPath, holder.ivPreview);
         }
         holder.tvFolderName.setText(folder.getFolderName());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                callback.onFolderChecked(holder.getAdapterPosition());
-            }
-        });
     }
 
     @Override
@@ -87,6 +81,12 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
             super(itemView);
             tvFolderName = itemView.findViewById(R.id.tv_folder_name);
             ivPreview = itemView.findViewById(R.id.iv_preview);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callback.onFolderChecked(getAdapterPosition());
+                }
+            });
         }
     }
 

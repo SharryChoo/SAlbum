@@ -19,7 +19,10 @@ import java.util.ArrayList;
  * @version 1.3
  * @since 2018/9/1 10:17
  */
-class PickerPresenter implements PickerContract.IPresenter, TakerCallback, CropperCallback, WatcherCallback {
+class PickerPresenter implements PickerContract.IPresenter,
+        WatcherCallback,
+        TakerCallback,
+        CropperCallback {
 
     private static final String TAG = PickerPresenter.class.getSimpleName();
 
@@ -58,6 +61,8 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         setupView();
         fetchData(context);
     }
+
+    //////////////////////////////////////////////PickerContract.IPresenter/////////////////////////////////////////////////
 
     @Override
     public boolean handlePictureChecked(MediaMeta checkedMeta) {
@@ -126,18 +131,19 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
             return;
         }
         // 不需要裁剪, 直接返回
-        if (!mPickerConfig.isCropSupport()) {
+        if (mPickerConfig.isCropSupport()) {
+            // 启动裁剪
+            assert mPickerConfig.getCropperConfig() != null;
+            CropperManager.with((Context) mView)
+                    .setConfig(
+                            mPickerConfig.getCropperConfig().rebuild()
+                                    .setOriginFile(mModel.getPickedMetas().get(0).path)
+                                    .build()
+                    )
+                    .crop(this);
+        } else {
             mView.setResult(mModel.getPickedMetas());
-            return;
         }
-        // 启动裁剪
-        CropperManager.with((Context) mView)
-                .setConfig(
-                        mPickerConfig.getCropperConfig().rebuild()
-                                .setOriginFile(mModel.getPickedMetas().get(0).path)
-                                .build()
-                )
-                .crop(this);
     }
 
     @Override
@@ -145,14 +151,13 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         performDisplayCheckedFolder(position);
     }
 
+    //////////////////////////////////////////////WatcherCallback/////////////////////////////////////////////////
+
     @Override
     public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas) {
         // 刷新用户选中的集合
         mModel.getPickedMetas().clear();
         mModel.getPickedMetas().addAll(pickedMetas);
-        if (mView == null) {
-            return;
-        }
         // 展示标题和预览文本
         mView.setToolbarEnsureText(buildEnsureText());
         mView.setPreviewText(buildPreviewText());
@@ -164,6 +169,8 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
             mView.notifyPickedPathsChanged();
         }
     }
+
+    //////////////////////////////////////////////TakerCallback/////////////////////////////////////////////////
 
     @Override
     public void onCameraTakeComplete(@NonNull MediaMeta newMeta) {
@@ -187,6 +194,8 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         mView.notifyNewMetaInsertToFirst();
         mView.notifyFolderDataSetChanged();
     }
+
+    //////////////////////////////////////////////CropperCallback/////////////////////////////////////////////////
 
     @Override
     public void onCropComplete(@NonNull String path) {
