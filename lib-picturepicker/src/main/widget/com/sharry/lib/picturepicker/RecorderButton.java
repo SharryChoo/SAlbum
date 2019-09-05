@@ -124,10 +124,11 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (mIsLongClickEnable) {
-            switch (event.getAction()) {
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     handleRecordStart();
                     break;
+                case MotionEvent.ACTION_CANCEL:
                 case MotionEvent.ACTION_UP:
                     handleRecordFinish();
                     break;

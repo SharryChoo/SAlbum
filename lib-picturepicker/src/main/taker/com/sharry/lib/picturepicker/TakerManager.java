@@ -70,7 +70,6 @@ public class TakerManager {
                 });
     }
 
-
     private void takeActual(final TakerCallback callback) {
         completionConfig();
         // 获取回调的 Fragment
