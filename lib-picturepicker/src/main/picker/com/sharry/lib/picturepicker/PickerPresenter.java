@@ -53,7 +53,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
                         mPickerConfig.getIndicatorBorderCheckedColor(),
                         mPickerConfig.getIndicatorBorderUncheckedColor()
                 )
-                .setUserPickedSet(mModel.getPickedPaths())
+                .setUserPickedSet(mModel.getPickedMetas())
                 .build();
         setupView();
         fetchData(context);
@@ -99,7 +99,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .setConfig(
                         mWatcherConfig.rebuild()
-                                .setPictureUris(mModel.getDisplayPaths(), position)
+                                .setPictureUris(mModel.getCurrentMetas(), position)
                                 .build()
                 )
                 .startForResult(this);
@@ -114,7 +114,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .setConfig(
                         mWatcherConfig.rebuild()
-                                .setPictureUris(mModel.getPickedPaths(), 0)
+                                .setPictureUris(mModel.getPickedMetas(), 0)
                                 .build()
                 )
                 .startForResult(this);
@@ -127,14 +127,14 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         }
         // 不需要裁剪, 直接返回
         if (!mPickerConfig.isCropSupport()) {
-            mView.setResult(mModel.getPickedPaths());
+            mView.setResult(mModel.getPickedMetas());
             return;
         }
         // 启动裁剪
         CropperManager.with((Context) mView)
                 .setConfig(
                         mPickerConfig.getCropperConfig().rebuild()
-                                .setOriginFile(mModel.getPickedPaths().get(0).path)
+                                .setOriginFile(mModel.getPickedMetas().get(0).path)
                                 .build()
                 )
                 .crop(this);
@@ -148,8 +148,8 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
     @Override
     public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas) {
         // 刷新用户选中的集合
-        mModel.getPickedPaths().clear();
-        mModel.getPickedPaths().addAll(pickedMetas);
+        mModel.getPickedMetas().clear();
+        mModel.getPickedMetas().addAll(pickedMetas);
         if (mView == null) {
             return;
         }
@@ -168,7 +168,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
     @Override
     public void onCameraTakeComplete(@NonNull MediaMeta newMeta) {
         // 1. 添加到 <当前展示> 的文件夹下
-        FolderModel checkedFolder = mModel.getCheckedFolder();
+        FolderModel checkedFolder = mModel.getCurrentFolder();
         checkedFolder.getMetas().add(0, newMeta);
         // 2. 添加到 <所有文件> 的文件夹下
         FolderModel allFolderModel = mModel.getPictureFolderAt(0);
@@ -176,7 +176,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
             allFolderModel.getMetas().add(0, newMeta);
         }
         // 3. 更新展示的图片集合
-        mModel.getDisplayPaths().add(0, newMeta);
+        mModel.getCurrentMetas().add(0, newMeta);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
             mModel.addPicked(newMeta);
@@ -184,15 +184,15 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
             mView.setPreviewText(buildPreviewText());
         }
         // 3.2 通知 UI 更新视图
-        mView.notifyDisplayPathsInsertToFirst();
+        mView.notifyNewMetaInsertToFirst();
         mView.notifyFolderDataSetChanged();
     }
 
     @Override
     public void onCropComplete(@NonNull String path) {
-        mModel.getPickedPaths().clear();
-        mModel.getPickedPaths().add(MediaMeta.create(path, true));
-        mView.setResult(mModel.getPickedPaths());
+        mModel.getPickedMetas().clear();
+        mModel.getPickedMetas().add(MediaMeta.create(path, true));
+        mView.setResult(mModel.getPickedMetas());
     }
 
     private void setupView() {
@@ -212,7 +212,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         // 设置图片的列数
         mView.setPicturesSpanCount(mPickerConfig.getSpanCount());
         // 设置 RecyclerView 的 Adapter
-        mView.setPicturesAdapter(mPickerConfig, mModel.getDisplayPaths(), mModel.getPickedPaths());
+        mView.setPicturesAdapter(mPickerConfig, mModel.getCurrentMetas(), mModel.getPickedMetas());
     }
 
     private void fetchData(Context context) {
@@ -276,7 +276,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
      * @return true is can picked, false is cannot picked.
      */
     private boolean isCanPickedPicture(boolean isShowFailedMsg) {
-        if (mModel.getPickedPaths().size() == mPickerConfig.getThreshold() && mView != null) {
+        if (mModel.getPickedMetas().size() == mPickerConfig.getThreshold() && mView != null) {
             if (isShowFailedMsg) {
                 mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_over_threshold_prefix)
                         + mPickerConfig.getThreshold()
@@ -294,7 +294,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
      * @return true is can launch, false is cannot launch.
      */
     private boolean isCanPreview() {
-        if (mModel.getPickedPaths().size() == 0 && mView != null) {
+        if (mModel.getPickedMetas().size() == 0 && mView != null) {
             mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_preview_failed));
             return false;
         }
@@ -307,7 +307,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
      * @return true is can ensure, false is cannot ensure.
      */
     private boolean isCanEnsure() {
-        if (mModel.getPickedPaths().size() == 0 && mView != null) {
+        if (mModel.getPickedMetas().size() == 0 && mView != null) {
             mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_ensure_failed));
             return false;
         }
@@ -321,7 +321,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         return MessageFormat.format(
                 "{0} ({1}/{2})",
                 mView.getString(R.string.picture_picker_picker_ensure),
-                mModel.getPickedPaths().size(),
+                mModel.getPickedMetas().size(),
                 mPickerConfig.getThreshold()
         );
     }
@@ -333,7 +333,7 @@ class PickerPresenter implements PickerContract.IPresenter, TakerCallback, Cropp
         return MessageFormat.format(
                 "{0} ({1})",
                 mView.getString(R.string.picture_picker_picker_preview),
-                mModel.getPickedPaths().size()
+                mModel.getPickedMetas().size()
         );
     }
 }

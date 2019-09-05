@@ -102,7 +102,7 @@ interface PickerContract {
         /**
          * 通过相机拍摄了一张照片
          */
-        void notifyDisplayPathsInsertToFirst();
+        void notifyNewMetaInsertToFirst();
 
         /**
          * 展示消息通知
@@ -129,12 +129,14 @@ interface PickerContract {
 
         /**
          * 处理图片被选中了
+         *
          * @param checkedMeta
          */
         boolean handlePictureChecked(@Nullable MediaMeta checkedMeta);
 
         /**
          * 处理图片被移除了
+         *
          * @param removedMeta
          */
         void handlePictureRemoved(@Nullable MediaMeta removedMeta);
@@ -193,12 +195,12 @@ interface PickerContract {
         /**
          * 获取当前正在展示的图片集合
          */
-        FolderModel getCheckedFolder();
+        FolderModel getCurrentFolder();
 
         /**
          * 获取用户选中的图片
          */
-        ArrayList<MediaMeta> getPickedPaths();
+        ArrayList<MediaMeta> getPickedMetas();
 
         /**
          * 设置当前选中的文件夹
@@ -206,9 +208,9 @@ interface PickerContract {
         void setCheckedFolder(FolderModel curDisplayFolder);
 
         /**
-         * 获取用户选中的图片
+         * 获取当前文件夹下所有的图片
          */
-        ArrayList<MediaMeta> getDisplayPaths();
+        ArrayList<MediaMeta> getCurrentMetas();
 
         /**
          * 添加用户选中的图片

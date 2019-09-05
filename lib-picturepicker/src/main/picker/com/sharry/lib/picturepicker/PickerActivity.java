@@ -194,7 +194,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void notifyDisplayPathsInsertToFirst() {
+    public void notifyNewMetaInsertToFirst() {
         RecyclerView.Adapter adapter;
         if ((adapter = mRecyclePictures.getAdapter()) != null) {
             adapter.notifyItemInserted(1);
@@ -205,7 +205,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     public void notifyFolderDataSetChanged() {
         RecyclerView.Adapter adapter;
         if ((adapter = mRecycleFolders.getAdapter()) != null) {
-            adapter.notifyItemInserted(1);
+            adapter.notifyDataSetChanged();
         }
     }
 

@@ -66,7 +66,7 @@ class PickerModel implements PickerContract.IModel {
     PickerModel(ArrayList<MediaMeta> pickedPaths, int threshold) {
         mPickedMetas = pickedPaths;
         // 验证一下阈值是否异常
-        if (getPickedPaths().size() > threshold) {
+        if (getPickedMetas().size() > threshold) {
             throw new RuntimeException("Your picked picture count is over your set threshold!");
         }
     }
@@ -114,7 +114,7 @@ class PickerModel implements PickerContract.IModel {
      * 设置当前选中的图片
      */
     @Override
-    public FolderModel getCheckedFolder() {
+    public FolderModel getCurrentFolder() {
         return mCheckedFolder;
     }
 
@@ -132,7 +132,7 @@ class PickerModel implements PickerContract.IModel {
      * 获取用户选中的图片
      */
     @Override
-    public ArrayList<MediaMeta> getPickedPaths() {
+    public ArrayList<MediaMeta> getPickedMetas() {
         return mPickedMetas;
     }
 
@@ -149,7 +149,7 @@ class PickerModel implements PickerContract.IModel {
     }
 
     @Override
-    public ArrayList<MediaMeta> getDisplayPaths() {
+    public ArrayList<MediaMeta> getCurrentMetas() {
         return mDisplayMetas;
     }
 
