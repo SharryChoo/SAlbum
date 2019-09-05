@@ -1,8 +1,11 @@
 package com.sharry.lib.picturepicker;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.util.Log;
+
+import java.lang.reflect.Field;
 
 /**
  * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
@@ -19,6 +22,20 @@ class ActivityStateUtil {
             return true;
         }
         return false;
+    }
+
+    static void fixRequestOrientation(Activity activity) {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.O) {
+            try {
+                Field field = Activity.class.getDeclaredField("mActivityInfo");
+                field.setAccessible(true);
+                ActivityInfo o = (ActivityInfo) field.get(activity);
+                o.screenOrientation = -1;
+                field.setAccessible(false);
+            } catch (Throwable e) {
+                // ignore.
+            }
+        }
     }
 
 }

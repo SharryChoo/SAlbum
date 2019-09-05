@@ -29,6 +29,8 @@ import com.sharry.libtoolbar.ViewOptions;
 
 import java.util.ArrayList;
 
+import static com.sharry.lib.picturepicker.ActivityStateUtil.fixRequestOrientation;
+
 /**
  * 图片查看器的 Activity, 主题设置为背景透明效果更佳
  *
@@ -115,6 +117,7 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        fixRequestOrientation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_picker_activity_picture_watcher);
         initTitle();

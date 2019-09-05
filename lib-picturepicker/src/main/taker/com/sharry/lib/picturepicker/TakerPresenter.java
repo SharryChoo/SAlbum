@@ -1,7 +1,6 @@
 package com.sharry.lib.picturepicker;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
@@ -9,18 +8,15 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.sharry.lib.camera.AspectRatio;
-import com.sharry.lib.camera.IPreviewer;
 import com.sharry.lib.camera.SCameraView;
-import com.sharry.lib.media.recorder.AudioOptions;
 import com.sharry.lib.media.recorder.EncodeType;
 import com.sharry.lib.media.recorder.IRecorderCallback;
 import com.sharry.lib.media.recorder.MuxerType;
+import com.sharry.lib.media.recorder.Options;
 import com.sharry.lib.media.recorder.SMediaRecorder;
-import com.sharry.lib.media.recorder.VideoOptions;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 
 /**
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
@@ -35,7 +31,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private final ITakerContract.IView mView;
     private final TakerConfig mConfig;
     private final SMediaRecorder mRecorder;
-    private final VideoOptions mRecordOptions;
+    private final Options.Video mRecordOptions;
     private Bitmap mFetchedBitmap;
     private File mVideoFile;
     private long mRecordDuration;
@@ -63,11 +59,11 @@ class TakerPresenter implements ITakerContract.IPresenter {
             }
 
         });
-        this.mRecordOptions = new VideoOptions.Builder()
+        this.mRecordOptions = new Options.Video.Builder()
                 .setOutputDir(mConfig.getDirectoryPath())
                 .setEncodeType(EncodeType.Video.H264)
                 .setMuxerType(MuxerType.MP4)
-                .setAudioOptions(AudioOptions.DEFAULT)
+                .setAudioOptions(Options.Audio.DEFAULT)
                 .build();
         // 配置视图
         setupViews();
