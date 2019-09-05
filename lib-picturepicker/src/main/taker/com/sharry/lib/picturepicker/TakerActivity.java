@@ -1,11 +1,9 @@
 package com.sharry.lib.picturepicker;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -19,8 +17,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
-import com.sharry.lib.picturepicker.toolbar.ImageViewOptions;
-import com.sharry.lib.picturepicker.toolbar.SToolbar;
+import com.sharry.libtoolbar.ImageViewOptions;
+import com.sharry.libtoolbar.SToolbar;
 
 /**
  * 图片/视频拍摄页面
@@ -267,7 +265,7 @@ public class TakerActivity extends AppCompatActivity implements
 
     private void initTitle() {
         mToolbar = findViewById(R.id.toolbar);
-        int paddingSize = (int) dp2Px(this, 20f);
+        int paddingSize = DensityUtil.dp2px(this, 20f);
         // switch
         mToolbar.addLeftMenuImage(
                 ImageViewOptions.Builder()
@@ -369,8 +367,4 @@ public class TakerActivity extends AppCompatActivity implements
         );
     }
 
-    public static float dp2Px(@NonNull Context context, float dpVal) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                dpVal, context.getResources().getDisplayMetrics());
-    }
 }

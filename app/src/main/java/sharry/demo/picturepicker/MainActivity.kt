@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.sharry.lib.camera.AspectRatio
 import com.sharry.lib.picturepicker.*
-import com.sharry.lib.picturepicker.toolbar.SToolbar
+import com.sharry.libtoolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
 
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 // 设置是否支持视频录制
                 .setVideoRecord(true)
                 // 设置录制最大时长
-                .setMaxRecordDuration(30 * 1000)
+                .setMaxRecordDuration(15 * 1000)
                 .build()
 
         cropperConfig = CropperConfig.Builder()

@@ -45,11 +45,15 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
     implementation "com.google.android.material:material:$materialVersion"
     // My dependencies.
-    api "com.github.SharryChoo.SMedia:lib-media-recorder:$smedia"
-    api "com.github.SharryChoo.SMedia:lib-opengles:$smedia"
-    api "com.github.SharryChoo.SMedia:lib-scamera:$smedia"
     // 需要去 root project 解决依赖冲突
-    def camerax_version = "1.0.0-alpha03"
-    implementation "androidx.camera:camera-core:${camerax_version}"
-    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    def stoolbarVersion = "1.0.4-x"
+    api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
+    def smediaVersion = "0.0.6-alpha"
+    api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
+    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
+    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
+    // 需要去 root project 解决依赖冲突
+    def cameraxVersion = "1.0.0-alpha04"
+    implementation "androidx.camera:camera-core:$cameraxVersion"
+    implementation "androidx.camera:camera-camera2:$cameraxVersion"
 }

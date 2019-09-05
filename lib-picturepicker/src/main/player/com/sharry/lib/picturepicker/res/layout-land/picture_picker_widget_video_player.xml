@@ -7,7 +7,7 @@
     android:background="@color/picture_picker_player_bg_color"
     android:orientation="vertical">
 
-    <com.sharry.lib.picturepicker.toolbar.SToolbar
+    <com.sharry.libtoolbar.SToolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible"

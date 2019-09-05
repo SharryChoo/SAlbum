@@ -23,9 +23,6 @@ buildscript {
         recycleViewVersion = '1.0.0'
         materialVersion = '1.0.0'
         glideVersion = '4.6.1'
-
-        // my dependencies
-        smedia = '0.0.6-alpha'
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradleVersion"

@@ -5,13 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -26,8 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.sharry.lib.picturepicker.photoview.PhotoView;
-import com.sharry.lib.picturepicker.toolbar.SToolbar;
-import com.sharry.lib.picturepicker.toolbar.ViewOptions;
+import com.sharry.libtoolbar.SToolbar;
+import com.sharry.libtoolbar.ViewOptions;
 
 import java.util.ArrayList;
 
@@ -338,9 +336,9 @@ public class WatcherActivity extends AppCompatActivity implements
         mCheckIndicator = new CheckedIndicatorView(this);
         toolbar.addRightMenuView(mCheckIndicator, new ViewOptions.Builder()
                 .setVisibility(View.INVISIBLE)
-                .setWidthExcludePadding(dp2px(this, 25))
-                .setHeightExcludePadding(dp2px(this, 25))
-                .setPaddingRight(dp2px(this, 10))
+                .setWidthExcludePadding(DensityUtil.dp2px(this, 25))
+                .setHeightExcludePadding(DensityUtil.dp2px(this, 25))
+                .setPaddingRight(DensityUtil.dp2px(this, 10))
                 .setListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -377,11 +375,6 @@ public class WatcherActivity extends AppCompatActivity implements
                 (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
                 ((SharedElementModel) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
-    }
-
-    private int dp2px(Context context, float dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-                context.getResources().getDisplayMetrics());
     }
 
 }
