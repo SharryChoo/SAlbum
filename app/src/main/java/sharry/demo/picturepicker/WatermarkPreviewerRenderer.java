@@ -158,7 +158,7 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
     }
 
     private void setupWatermark(int surfaceWidth, int surfaceHeight) {
-        Bitmap bitmap = createTextureFromRes(R.drawable.ic_video_record_watermark);
+        Bitmap bitmap = createTextureFromRes(R.drawable.ic_demo_watermark);
         float height = bitmap.getHeight();
         float width = bitmap.getWidth();
         height = height * (1 / (float) surfaceHeight);
