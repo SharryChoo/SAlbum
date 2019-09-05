@@ -192,7 +192,7 @@ class PickerPresenter implements PickerContract.IPresenter,
         if (folderAll != mCheckedFolder) {
             folderAll.addMeta(newMeta);
         }
-        // 3. 更新展示的图片集合
+        // 3. 更新展示的集合
         mDisplaySet.add(0, newMeta);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
@@ -226,12 +226,12 @@ class PickerPresenter implements PickerContract.IPresenter,
             mView.setToolbarBackgroundDrawable(mPickerConfig.getToolbarBkgDrawableResId());
         }
         if (mPickerConfig.getPickerBackgroundColor() != PickerConfig.INVALIDATE_VALUE) {
-            mView.setPicturesBackgroundColor(mPickerConfig.getPickerBackgroundColor());
+            mView.setBackgroundColor(mPickerConfig.getPickerBackgroundColor());
         }
         // 设置图片的列数
-        mView.setPicturesSpanCount(mPickerConfig.getSpanCount());
+        mView.setSpanCount(mPickerConfig.getSpanCount());
         // 设置 RecyclerView 的 Adapter
-        mView.setPicturesAdapter(mPickerConfig, mDisplaySet, mPickedSet);
+        mView.setPickerAdapter(mPickerConfig, mDisplaySet, mPickedSet);
     }
 
     private void fetchData(Context context) {

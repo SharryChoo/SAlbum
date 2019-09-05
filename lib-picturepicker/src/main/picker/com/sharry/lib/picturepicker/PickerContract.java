@@ -49,18 +49,18 @@ interface PickerContract {
         /**
          * 设置整体的背景色
          */
-        void setPicturesBackgroundColor(int color);
+        void setBackgroundColor(int color);
 
         /**
          * 设置 RecyclerView 的列数
          */
-        void setPicturesSpanCount(int spanCount);
+        void setSpanCount(int spanCount);
 
         /**
          * 设置图片的 Adapter
          */
-        void setPicturesAdapter(@NonNull PickerConfig config, @NonNull ArrayList<MediaMeta> metas,
-                                @NonNull ArrayList<MediaMeta> userPickedMetas);
+        void setPickerAdapter(@NonNull PickerConfig config, @NonNull ArrayList<MediaMeta> metas,
+                              @NonNull ArrayList<MediaMeta> userPickedMetas);
 
         /**
          * 设置图片文件夹的 Adapter

@@ -74,12 +74,12 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     private ProgressBar mProgressBar;
     private TextView mTvToolbarFolderName;
     private TextView mTvToolbarEnsure;
-    private RecyclerView mRecyclePictures;
+    private RecyclerView mRvPicker;
     private ViewGroup mMenuNavContainer;
     private ImageView mIvNavIndicator;
     private TextView mTvFolderName;
     private TextView mTvPreview;
-    private RecyclerView mRecycleFolders;
+    private RecyclerView mRvFolders;
     private FloatingActionButton mFab;
 
     /**
@@ -130,26 +130,26 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void setPicturesBackgroundColor(int color) {
-        mRecyclePictures.setBackgroundColor(color);
+    public void setBackgroundColor(int color) {
+        mRvPicker.setBackgroundColor(color);
     }
 
     @Override
-    public void setPicturesSpanCount(int spanCount) {
-        mRecyclePictures.setLayoutManager(new GridLayoutManager(this, spanCount));
+    public void setSpanCount(int spanCount) {
+        mRvPicker.setLayoutManager(new GridLayoutManager(this, spanCount));
     }
 
     @Override
-    public void setPicturesAdapter(@NonNull PickerConfig config,
-                                   @NonNull ArrayList<MediaMeta> metas,
-                                   @NonNull ArrayList<MediaMeta> userPickedMetas) {
-        mRecyclePictures.setAdapter(new PictureAdapter(this, config,
+    public void setPickerAdapter(@NonNull PickerConfig config,
+                                 @NonNull ArrayList<MediaMeta> metas,
+                                 @NonNull ArrayList<MediaMeta> userPickedMetas) {
+        mRvPicker.setAdapter(new PictureAdapter(this, config,
                 metas, userPickedMetas));
     }
 
     @Override
-    public void setFolderAdapter(@NonNull ArrayList<FolderModel> allFolders) {
-        mRecycleFolders.setAdapter(new FolderAdapter(this, allFolders));
+    public void setFolderAdapter(@NonNull ArrayList<FolderModel> folders) {
+        mRvFolders.setAdapter(new FolderAdapter(this, folders));
     }
 
     @Override
@@ -159,6 +159,9 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     @Override
     public void setProgressBarVisible(boolean visible) {
+        if (ActivityStateUtil.isIllegalState(this)) {
+            return;
+        }
         mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
@@ -191,7 +194,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     public void notifyPickedPathsChanged() {
         RecyclerView.Adapter adapter;
-        if ((adapter = mRecyclePictures.getAdapter()) != null) {
+        if ((adapter = mRvPicker.getAdapter()) != null) {
             adapter.notifyDataSetChanged();
         }
     }
@@ -199,7 +202,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     public void notifyDisplayPathsChanged() {
         RecyclerView.Adapter adapter;
-        if ((adapter = mRecyclePictures.getAdapter()) != null) {
+        if ((adapter = mRvPicker.getAdapter()) != null) {
             adapter.notifyDataSetChanged();
         }
     }
@@ -207,7 +210,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     public void notifyNewMetaInsertToFirst() {
         RecyclerView.Adapter adapter;
-        if ((adapter = mRecyclePictures.getAdapter()) != null) {
+        if ((adapter = mRvPicker.getAdapter()) != null) {
             adapter.notifyItemInserted(1);
         }
     }
@@ -215,7 +218,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     public void notifyFolderDataSetChanged() {
         RecyclerView.Adapter adapter;
-        if ((adapter = mRecycleFolders.getAdapter()) != null) {
+        if ((adapter = mRvFolders.getAdapter()) != null) {
             adapter.notifyDataSetChanged();
         }
     }
@@ -300,18 +303,18 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     protected void initViews() {
         // Pictures recycler view.
-        mRecyclePictures = findViewById(R.id.recycle_pictures);
+        mRvPicker = findViewById(R.id.recycle_pictures);
 
         // Bottom navigation menu.
         mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);
         mIvNavIndicator = findViewById(R.id.iv_nav_indicator);
         mTvFolderName = findViewById(R.id.tv_folder_name);
         mTvPreview = findViewById(R.id.tv_preview);
-        mRecycleFolders = findViewById(R.id.recycle_folders);
+        mRvFolders = findViewById(R.id.recycle_folders);
         mTvFolderName.setOnClickListener(this);
         mTvPreview.setOnClickListener(this);
-        mRecycleFolders.setLayoutManager(new LinearLayoutManager(this));
-        mRecycleFolders.setHasFixedSize(true);
+        mRvFolders.setLayoutManager(new LinearLayoutManager(this));
+        mRvFolders.setHasFixedSize(true);
         mBottomMenuBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottom_menu));
         mBottomMenuBehavior.setBottomSheetCallback(new BottomMenuNavigationCallback());
 
