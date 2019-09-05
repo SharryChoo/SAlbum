@@ -159,7 +159,7 @@ class PickerPresenter implements PickerContract.IPresenter,
 
     @Override
     public void handleFolderChecked(int position) {
-        performDisplayCheckedFolder(position);
+        performFolderChecked(position);
     }
 
     //////////////////////////////////////////////WatcherCallback/////////////////////////////////////////////////
@@ -177,7 +177,7 @@ class PickerPresenter implements PickerContract.IPresenter,
             handleEnsureClicked();
         } else {
             // 通知更新
-            mView.notifyPickedPathsChanged();
+            mView.notifyPickedSetChanged();
         }
     }
 
@@ -252,7 +252,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                             public void run() {
                                 mView.setProgressBarVisible(false);
                                 mView.setFolderAdapter(mFolderModels);
-                                performDisplayCheckedFolder(0);
+                                performFolderChecked(0);
                             }
                         });
                     }
@@ -275,19 +275,19 @@ class PickerPresenter implements PickerContract.IPresenter,
     /**
      * 执行展示文件夹的操作
      */
-    private void performDisplayCheckedFolder(int position) {
+    private void performFolderChecked(int position) {
         // Upgrade checked folder.
         mCheckedFolder = mFolderModels.get(position);
         mDisplaySet.clear();
         mDisplaySet.addAll(mCheckedFolder.getMetas());
+        // Notify view displays paths changed.
+        mView.notifyDisplaySetChanged();
         // Set folder text associated with view.
         mView.setPictureFolderText(mCheckedFolder.getName());
         // Set ensure text associated with view toolbar.
         mView.setToolbarEnsureText(buildEnsureText());
         // Set preview text associated with view.
         mView.setPreviewText(buildPreviewText());
-        // Notify view displays paths changed.
-        mView.notifyDisplayPathsChanged();
     }
 
     /**

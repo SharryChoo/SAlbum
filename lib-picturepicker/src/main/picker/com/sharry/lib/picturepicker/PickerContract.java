@@ -87,12 +87,12 @@ interface PickerContract {
         /**
          * 通知选中的图片集合变更了
          */
-        void notifyPickedPathsChanged();
+        void notifyPickedSetChanged();
 
         /**
          * 通知需要展示的集合变更了
          */
-        void notifyDisplayPathsChanged();
+        void notifyDisplaySetChanged();
 
         /**
          * 通知文件夹菜单数据变更了

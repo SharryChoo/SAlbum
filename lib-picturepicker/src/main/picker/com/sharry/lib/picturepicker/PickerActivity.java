@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * @since 2018/9/1 10:17
  */
 public class PickerActivity extends AppCompatActivity implements PickerContract.IView,
-        PictureAdapter.Interaction,
+        PickerAdapter.Interaction,
         FolderAdapter.AdapterInteraction,
         View.OnClickListener {
 
@@ -143,7 +143,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     public void setPickerAdapter(@NonNull PickerConfig config,
                                  @NonNull ArrayList<MediaMeta> metas,
                                  @NonNull ArrayList<MediaMeta> userPickedMetas) {
-        mRvPicker.setAdapter(new PictureAdapter(this, config,
+        mRvPicker.setAdapter(new PickerAdapter(this, config,
                 metas, userPickedMetas));
     }
 
@@ -192,7 +192,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void notifyPickedPathsChanged() {
+    public void notifyPickedSetChanged() {
         RecyclerView.Adapter adapter;
         if ((adapter = mRvPicker.getAdapter()) != null) {
             adapter.notifyDataSetChanged();
@@ -200,7 +200,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void notifyDisplayPathsChanged() {
+    public void notifyDisplaySetChanged() {
         RecyclerView.Adapter adapter;
         if ((adapter = mRvPicker.getAdapter()) != null) {
             adapter.notifyDataSetChanged();
@@ -236,7 +236,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         finish();
     }
 
-    //////////////////////////////////////////////PictureAdapter.Interaction/////////////////////////////////////////////////
+    //////////////////////////////////////////////PickerAdapter.Interaction/////////////////////////////////////////////////
 
     @Override
     public void onCameraClicked() {

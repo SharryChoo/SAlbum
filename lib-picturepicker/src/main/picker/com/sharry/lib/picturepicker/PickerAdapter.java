@@ -23,7 +23,7 @@ import java.util.List;
  * @version 1.3
  * @since 2018/9/1 10:19
  */
-class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int ITEM_TYPE_PICTURE = 838;
     private static final int ITEM_TYPE_CAMERA_HEADER = 347;
@@ -42,15 +42,15 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     };
 
-    PictureAdapter(Context context,
-                   PickerConfig config,
-                   ArrayList<MediaMeta> dataSet,
-                   ArrayList<MediaMeta> pickedSet) {
+    PickerAdapter(Context context,
+                  PickerConfig config,
+                  ArrayList<MediaMeta> dataSet,
+                  ArrayList<MediaMeta> pickedSet) {
         if (context instanceof Interaction) {
             this.mInteraction = (Interaction) context;
         } else {
             throw new IllegalArgumentException(context + "must implements " +
-                    PictureAdapter.class.getSimpleName() + ".Interaction");
+                    PickerAdapter.class.getSimpleName() + ".Interaction");
         }
         this.mContext = context;
         this.mConfig = config;
@@ -124,7 +124,7 @@ class PictureAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mDataSet.size() + (mConfig.isCropSupport() ? 1 : 0);
+        return mDataSet.size() + (mConfig.isCameraSupport() ? 1 : 0);
     }
 
     /**
