@@ -47,7 +47,7 @@ dependencies {
     // 需要去 root project 解决依赖冲突
     def stoolbarVersion = "1.0.4-x"
     api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-    def smediaVersion = "0.0.7-alpha"
+    def smediaVersion = "0.0.8-alpha"
     api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
     api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
     api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
