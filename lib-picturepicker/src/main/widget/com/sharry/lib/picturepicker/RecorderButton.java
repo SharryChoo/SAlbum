@@ -128,7 +128,6 @@ public class RecorderButton extends View implements View.OnTouchListener, View.O
                 case MotionEvent.ACTION_DOWN:
                     handleRecordStart();
                     break;
-                case MotionEvent.ACTION_CANCEL:
                 case MotionEvent.ACTION_UP:
                     handleRecordFinish();
                     break;
