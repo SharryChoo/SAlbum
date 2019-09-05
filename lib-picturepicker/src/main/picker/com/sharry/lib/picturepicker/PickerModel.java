@@ -11,16 +11,25 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.sharry.lib.media.recorder.AVPoolExecutor;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import static com.sharry.lib.picturepicker.Constants.*;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_3GP;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_AIV;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_FLV;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_GIF;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_JPEG;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_MKV;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_MOV;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_MP4;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_MPG;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_PNG;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_RMVB;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_VOB;
+import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_WEBP;
 
 /**
  * MVP frame model associated with PicturePicker.
@@ -31,58 +40,19 @@ import static com.sharry.lib.picturepicker.Constants.*;
  */
 class PickerModel implements PickerContract.IModel {
 
-    private static final ExecutorService PICKER_THREAD_POOL = new ThreadPoolExecutor(
-            1, 1,
-            30, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(),
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, PickerModel.class.getSimpleName()
-                            + "_ExecutorService");
-                    thread.setDaemon(false);
-                    return thread;
-                }
-            }
-    );
 
-    /**
-     * 用户已选中的图片地址集合(默认构造为空)
-     */
-    private final ArrayList<MediaMeta> mPickedMetas;
-    /**
-     * 当前需要展示的集合
-     */
-    private final ArrayList<MediaMeta> mDisplayMetas = new ArrayList<>();
-    /**
-     * 所有包含图片数据的集合
-     */
-    private ArrayList<FolderModel> mFolderModels;
-    /**
-     * 当前正在展示的文件夹
-     */
-    private FolderModel mCheckedFolder;
-
-    PickerModel(ArrayList<MediaMeta> pickedPaths, int threshold) {
-        mPickedMetas = pickedPaths;
-        // 验证一下阈值是否异常
-        if (getPickedMetas().size() > threshold) {
-            throw new RuntimeException("Your picked picture count is over your set threshold!");
-        }
+    PickerModel() {
     }
 
     @Override
     public void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback callback) {
-        PICKER_THREAD_POOL.execute(
+        AVPoolExecutor.getInstance().execute(
                 new CursorRunnable(
-                        context,
-                        supportGif,
-                        supportVideo,
+                        context, supportGif, supportVideo,
                         new CursorRunnable.RunnableInteraction() {
                             @Override
-                            public void onComplete(ArrayList<FolderModel> folderModels) {
-                                mFolderModels = folderModels;
-                                callback.onComplete();
+                            public void onCompleted(@NonNull ArrayList<FolderModel> folderModels) {
+                                callback.onCompleted(folderModels);
                             }
 
                             @Override
@@ -95,71 +65,12 @@ class PickerModel implements PickerContract.IModel {
     }
 
     /**
-     * 获取当前需要显示的文件模型
-     */
-    @Override
-    public FolderModel getPictureFolderAt(int index) {
-        return mFolderModels.get(index);
-    }
-
-    /**
-     * 获取所有的图片文件夹
-     */
-    @Override
-    public ArrayList<FolderModel> getAllFolders() {
-        return mFolderModels;
-    }
-
-    /**
-     * 设置当前选中的图片
-     */
-    @Override
-    public FolderModel getCurrentFolder() {
-        return mCheckedFolder;
-    }
-
-    /**
-     * 设置当前选中的文件夹
-     */
-    @Override
-    public void setCheckedFolder(FolderModel checkedFolder) {
-        this.mCheckedFolder = checkedFolder;
-        mDisplayMetas.clear();
-        mDisplayMetas.addAll(checkedFolder.getMetas());
-    }
-
-    /**
-     * 获取用户选中的图片
-     */
-    @Override
-    public ArrayList<MediaMeta> getPickedMetas() {
-        return mPickedMetas;
-    }
-
-    @Override
-    public void addPicked(@NonNull MediaMeta checkedMeta) {
-        if (!mPickedMetas.contains(checkedMeta)) {
-            mPickedMetas.add(checkedMeta);
-        }
-    }
-
-    @Override
-    public void removePicked(@NonNull MediaMeta removedMeta) {
-        mPickedMetas.remove(removedMeta);
-    }
-
-    @Override
-    public ArrayList<MediaMeta> getCurrentMetas() {
-        return mDisplayMetas;
-    }
-
-    /**
      * 遍历加载系统图片和视频
      */
     private static class CursorRunnable implements Runnable {
 
         interface RunnableInteraction {
-            void onComplete(ArrayList<FolderModel> folderModels);
+            void onCompleted(@NonNull ArrayList<FolderModel> folderModels);
 
             void onFailed(Throwable throwable);
         }
@@ -193,7 +104,7 @@ class PickerModel implements PickerContract.IModel {
             } catch (Throwable e) {
                 mListener.onFailed(e);
             }
-            mListener.onComplete(folderModels);
+            mListener.onCompleted(folderModels);
         }
 
         /**

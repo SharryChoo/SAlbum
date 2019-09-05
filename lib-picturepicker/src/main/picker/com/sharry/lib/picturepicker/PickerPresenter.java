@@ -30,24 +30,39 @@ class PickerPresenter implements PickerContract.IPresenter,
      * View associated with this presenter.
      */
     private final PickerContract.IView mView;
+
     /**
      * Model associated with this presenter.
      */
     private final PickerContract.IModel mModel;
+
     /**
      * Config associated with the PicturePicker.
      */
     private final PickerConfig mPickerConfig;
+
     /**
      * Config associated with the PictureWatcher.
      */
     private final WatcherConfig mWatcherConfig;
 
+    /**
+     * Data Source.
+     */
+    private ArrayList<FolderModel> mFolderModels;
+    private final ArrayList<MediaMeta> mPickedSet;
+
+    /**
+     * Current checked set.
+     */
+    private final ArrayList<MediaMeta> mDisplaySet = new ArrayList<>();
+    private FolderModel mCheckedFolder;
+
     PickerPresenter(@NonNull PickerContract.IView view,
                     @NonNull Context context, @NonNull PickerConfig config) {
         this.mView = view;
         this.mPickerConfig = config;
-        this.mModel = new PickerModel(mPickerConfig.getUserPickedSet(), mPickerConfig.getThreshold());
+        this.mPickedSet = mPickerConfig.getUserPickedSet();
         this.mWatcherConfig = WatcherConfig.Builder()
                 .setThreshold(mPickerConfig.getThreshold())
                 .setIndicatorTextColor(mPickerConfig.getIndicatorTextColor())
@@ -56,8 +71,9 @@ class PickerPresenter implements PickerContract.IPresenter,
                         mPickerConfig.getIndicatorBorderCheckedColor(),
                         mPickerConfig.getIndicatorBorderUncheckedColor()
                 )
-                .setUserPickedSet(mModel.getPickedMetas())
+                .setUserPickedSet(mPickedSet)
                 .build();
+        this.mModel = new PickerModel();
         setupView();
         fetchData(context);
     }
@@ -65,26 +81,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     //////////////////////////////////////////////PickerContract.IPresenter/////////////////////////////////////////////////
 
     @Override
-    public boolean handlePictureChecked(MediaMeta checkedMeta) {
-        boolean result = isCanPickedPicture(true);
-        if (result) {
-            mModel.addPicked(checkedMeta);
-            mView.setToolbarEnsureText(buildEnsureText());
-            mView.setPreviewText(buildPreviewText());
-        }
-        return result;
-    }
-
-    @Override
-    public void handlePictureRemoved(MediaMeta removedMeta) {
-        mModel.removePicked(removedMeta);
-        mView.setToolbarEnsureText(buildEnsureText());
-        mView.setPreviewText(buildPreviewText());
-    }
-
-    @Override
     public void handleCameraClicked() {
-        // 这里可以确保 TakerConfig 不为 null
         if (mPickerConfig.getTakerConfig() != null) {
             TakerManager.with((Context) mView)
                     .setConfig(
@@ -102,12 +99,26 @@ class PickerPresenter implements PickerContract.IPresenter,
         WatcherManager.with((Context) mView)
                 .setSharedElement(sharedElement)
                 .setPictureLoader(PictureLoader.getPictureLoader())
-                .setConfig(
-                        mWatcherConfig.rebuild()
-                                .setPictureUris(mModel.getCurrentMetas(), position)
-                                .build()
-                )
+                .setConfig(mWatcherConfig.rebuild().setDisplayDataSet(mDisplaySet, position).build())
                 .startForResult(this);
+    }
+
+    @Override
+    public boolean handlePictureChecked(MediaMeta checkedMeta) {
+        boolean result = isCanPickedPicture(true);
+        if (result && mPickedSet.add(checkedMeta)) {
+            mView.setToolbarEnsureText(buildEnsureText());
+            mView.setPreviewText(buildPreviewText());
+        }
+        return result;
+    }
+
+    @Override
+    public void handlePictureRemoved(MediaMeta removedMeta) {
+        if (mPickedSet.remove(removedMeta)) {
+            mView.setToolbarEnsureText(buildEnsureText());
+            mView.setPreviewText(buildPreviewText());
+        }
     }
 
     @Override
@@ -119,7 +130,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                 .setPictureLoader(PictureLoader.getPictureLoader())
                 .setConfig(
                         mWatcherConfig.rebuild()
-                                .setPictureUris(mModel.getPickedMetas(), 0)
+                                .setDisplayDataSet(mPickedSet, 0)
                                 .build()
                 )
                 .startForResult(this);
@@ -137,12 +148,12 @@ class PickerPresenter implements PickerContract.IPresenter,
             CropperManager.with((Context) mView)
                     .setConfig(
                             mPickerConfig.getCropperConfig().rebuild()
-                                    .setOriginFile(mModel.getPickedMetas().get(0).path)
+                                    .setOriginFile(mPickedSet.get(0).path)
                                     .build()
                     )
                     .crop(this);
         } else {
-            mView.setResult(mModel.getPickedMetas());
+            mView.setResult(mPickedSet);
         }
     }
 
@@ -156,8 +167,8 @@ class PickerPresenter implements PickerContract.IPresenter,
     @Override
     public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas) {
         // 刷新用户选中的集合
-        mModel.getPickedMetas().clear();
-        mModel.getPickedMetas().addAll(pickedMetas);
+        mPickedSet.clear();
+        mPickedSet.addAll(pickedMetas);
         // 展示标题和预览文本
         mView.setToolbarEnsureText(buildEnsureText());
         mView.setPreviewText(buildPreviewText());
@@ -175,18 +186,17 @@ class PickerPresenter implements PickerContract.IPresenter,
     @Override
     public void onCameraTakeComplete(@NonNull MediaMeta newMeta) {
         // 1. 添加到 <当前展示> 的文件夹下
-        FolderModel checkedFolder = mModel.getCurrentFolder();
-        checkedFolder.getMetas().add(0, newMeta);
+        mCheckedFolder.addMeta(newMeta);
         // 2. 添加到 <所有文件> 的文件夹下
-        FolderModel allFolderModel = mModel.getPictureFolderAt(0);
-        if (allFolderModel != checkedFolder) {
-            allFolderModel.getMetas().add(0, newMeta);
+        FolderModel folderAll = mFolderModels.get(0);
+        if (folderAll != mCheckedFolder) {
+            folderAll.addMeta(newMeta);
         }
         // 3. 更新展示的图片集合
-        mModel.getCurrentMetas().add(0, newMeta);
+        mDisplaySet.add(0, newMeta);
         // 3.1 判断是否可以继续选择
         if (isCanPickedPicture(false)) {
-            mModel.addPicked(newMeta);
+            mPickedSet.add(0, newMeta);
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
         }
@@ -199,9 +209,9 @@ class PickerPresenter implements PickerContract.IPresenter,
 
     @Override
     public void onCropComplete(@NonNull String path) {
-        mModel.getPickedMetas().clear();
-        mModel.getPickedMetas().add(MediaMeta.create(path, true));
-        mView.setResult(mModel.getPickedMetas());
+        mPickedSet.clear();
+        mPickedSet.add(MediaMeta.create(path, true));
+        mView.setResult(mPickedSet);
     }
 
     private void setupView() {
@@ -221,7 +231,7 @@ class PickerPresenter implements PickerContract.IPresenter,
         // 设置图片的列数
         mView.setPicturesSpanCount(mPickerConfig.getSpanCount());
         // 设置 RecyclerView 的 Adapter
-        mView.setPicturesAdapter(mPickerConfig, mModel.getCurrentMetas(), mModel.getPickedMetas());
+        mView.setPicturesAdapter(mPickerConfig, mDisplaySet, mPickedSet);
     }
 
     private void fetchData(Context context) {
@@ -235,13 +245,14 @@ class PickerPresenter implements PickerContract.IPresenter,
                     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
                     @Override
-                    public void onComplete() {
+                    public void onCompleted(@NonNull final ArrayList<FolderModel> folderModels) {
+                        mFolderModels = folderModels;
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 mView.setProgressBarVisible(false);
-                                mView.setFolderAdapter(mModel.getAllFolders());
-                                handleFolderChecked(0);
+                                mView.setFolderAdapter(mFolderModels);
+                                performDisplayCheckedFolder(0);
                             }
                         });
                     }
@@ -265,11 +276,12 @@ class PickerPresenter implements PickerContract.IPresenter,
      * 执行展示文件夹的操作
      */
     private void performDisplayCheckedFolder(int position) {
-        // Get display folder at position.
-        FolderModel curDisplayFolder = mModel.getPictureFolderAt(position);
-        mModel.setCheckedFolder(curDisplayFolder);
+        // Upgrade checked folder.
+        mCheckedFolder = mFolderModels.get(position);
+        mDisplaySet.clear();
+        mDisplaySet.addAll(mCheckedFolder.getMetas());
         // Set folder text associated with view.
-        mView.setPictureFolderText(curDisplayFolder.getFolderName());
+        mView.setPictureFolderText(mCheckedFolder.getName());
         // Set ensure text associated with view toolbar.
         mView.setToolbarEnsureText(buildEnsureText());
         // Set preview text associated with view.
@@ -285,7 +297,7 @@ class PickerPresenter implements PickerContract.IPresenter,
      * @return true is can picked, false is cannot picked.
      */
     private boolean isCanPickedPicture(boolean isShowFailedMsg) {
-        if (mModel.getPickedMetas().size() == mPickerConfig.getThreshold() && mView != null) {
+        if (mPickedSet.size() == mPickerConfig.getThreshold()) {
             if (isShowFailedMsg) {
                 mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_over_threshold_prefix)
                         + mPickerConfig.getThreshold()
@@ -303,7 +315,7 @@ class PickerPresenter implements PickerContract.IPresenter,
      * @return true is can launch, false is cannot launch.
      */
     private boolean isCanPreview() {
-        if (mModel.getPickedMetas().size() == 0 && mView != null) {
+        if (mPickedSet.isEmpty()) {
             mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_preview_failed));
             return false;
         }
@@ -316,7 +328,7 @@ class PickerPresenter implements PickerContract.IPresenter,
      * @return true is can ensure, false is cannot ensure.
      */
     private boolean isCanEnsure() {
-        if (mModel.getPickedMetas().size() == 0 && mView != null) {
+        if (mPickedSet.isEmpty()) {
             mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_ensure_failed));
             return false;
         }
@@ -330,7 +342,7 @@ class PickerPresenter implements PickerContract.IPresenter,
         return MessageFormat.format(
                 "{0} ({1}/{2})",
                 mView.getString(R.string.picture_picker_picker_ensure),
-                mModel.getPickedMetas().size(),
+                mPickedSet.size(),
                 mPickerConfig.getThreshold()
         );
     }
@@ -342,7 +354,7 @@ class PickerPresenter implements PickerContract.IPresenter,
         return MessageFormat.format(
                 "{0} ({1})",
                 mView.getString(R.string.picture_picker_picker_preview),
-                mModel.getPickedMetas().size()
+                mPickedSet.size()
         );
     }
 }

@@ -171,56 +171,14 @@ interface PickerContract {
 
         interface Callback {
 
-            void onComplete();
+            void onCompleted(@NonNull ArrayList<FolderModel> folderModels);
 
             void onFailed(Throwable throwable);
 
         }
 
-        /**
-         * 获取系统图片
-         */
         void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback listener);
 
-        /**
-         * 获取当前需要显示的文件模型
-         */
-        FolderModel getPictureFolderAt(int index);
-
-        /**
-         * 获取所有的图片文件夹
-         */
-        ArrayList<FolderModel> getAllFolders();
-
-        /**
-         * 获取当前正在展示的图片集合
-         */
-        FolderModel getCurrentFolder();
-
-        /**
-         * 获取用户选中的图片
-         */
-        ArrayList<MediaMeta> getPickedMetas();
-
-        /**
-         * 设置当前选中的文件夹
-         */
-        void setCheckedFolder(FolderModel curDisplayFolder);
-
-        /**
-         * 获取当前文件夹下所有的图片
-         */
-        ArrayList<MediaMeta> getCurrentMetas();
-
-        /**
-         * 添加用户选中的图片
-         */
-        void addPicked(@NonNull MediaMeta checkedMeta);
-
-        /**
-         * 移除用户选中的图片
-         */
-        void removePicked(@NonNull MediaMeta removedMeta);
     }
 
 }

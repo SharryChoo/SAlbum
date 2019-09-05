@@ -173,7 +173,7 @@ public class WatcherConfig implements Parcelable {
          * @param metas    数据集合
          * @param position 展示的位置
          */
-        public Builder setPictureUris(@NonNull ArrayList<MediaMeta> metas, int position) {
+        public Builder setDisplayDataSet(@NonNull ArrayList<MediaMeta> metas, int position) {
             Preconditions.checkNotNull(metas);
             mConfig.mediaMetas = metas;
             mConfig.position = position;

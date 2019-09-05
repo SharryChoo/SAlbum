@@ -14,15 +14,15 @@ import java.util.List;
  */
 class FolderModel {
 
-    private final String folderName;
+    private final String name;
     private final List<MediaMeta> metas = new ArrayList<>();
 
-    FolderModel(String folderName) {
-        this.folderName = folderName;
+    FolderModel(String name) {
+        this.name = name;
     }
 
-    String getFolderName() {
-        return folderName;
+    String getName() {
+        return name;
     }
 
     List<MediaMeta> getMetas() {
