@@ -1,5 +1,6 @@
 package com.sharry.lib.picturepicker;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
@@ -16,9 +17,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.sharry.lib.camera.AspectRatio;
+import com.sharry.lib.camera.IPreviewer;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.libtoolbar.ImageViewOptions;
 import com.sharry.libtoolbar.SToolbar;
+
+import java.lang.reflect.Constructor;
 
 /**
  * 图片/视频拍摄页面
@@ -121,6 +125,20 @@ public class TakerActivity extends AppCompatActivity implements
         params.topToTop = fullScreen ? ConstraintSet.PARENT_ID : ConstraintSet.UNSET;
         params.topToBottom = fullScreen ? ConstraintSet.UNSET : R.id.toolbar;
         mCameraView.setLayoutParams(params);
+    }
+
+    @Override
+    public void setPreviewRenderer(@NonNull String rendererClassName) {
+        try {
+            Class<? extends IPreviewer.Renderer> rendererClass = (Class<? extends IPreviewer.Renderer>)
+                    Class.forName(rendererClassName);
+            Constructor constructor = rendererClass.getDeclaredConstructor(Context.class);
+            IPreviewer.Renderer renderer = (IPreviewer.Renderer) constructor.newInstance(this);
+            constructor.setAccessible(true);
+            mCameraView.getPreviewer().setRenderer(renderer);
+        } catch (Throwable e) {
+            // ignore.
+        }
     }
 
     @Override

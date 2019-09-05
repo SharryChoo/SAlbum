@@ -1,12 +1,15 @@
 package com.sharry.lib.picturepicker;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.sharry.lib.camera.AspectRatio;
+import com.sharry.lib.camera.IPreviewer;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.media.recorder.AudioOptions;
 import com.sharry.lib.media.recorder.EncodeType;
@@ -17,6 +20,7 @@ import com.sharry.lib.media.recorder.VideoOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 
 /**
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
@@ -148,6 +152,9 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mView.setPreviewAspect(mConfig.getPreviewAspect() == null ?
                 AspectRatio.DEFAULT : mConfig.getPreviewAspect());
         mView.setPreviewFullScreen(mConfig.isFullScreen());
+        if (!TextUtils.isEmpty(mConfig.getRendererClassName())) {
+            mView.setPreviewRenderer(mConfig.getRendererClassName());
+        }
         // 配置 RecorderView
         mView.setMaxRecordDuration(mConfig.getMaximumDuration());
         mView.setSupportVideoRecord(mConfig.isSupportVideoRecord());
@@ -155,6 +162,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         // 设置 View 为预览状态
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
     }
+
 
     /**
      * 处理录制进度变更

@@ -1,5 +1,6 @@
 package com.sharry.lib.picturepicker;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.sharry.lib.camera.AspectRatio;
+import com.sharry.lib.camera.IPreviewer;
 
 /**
  * 相机拍照的相关参数
@@ -28,6 +30,8 @@ public class TakerConfig implements Parcelable {
         isSupportVideoRecord = in.readByte() != 0;
         maximumDuration = in.readLong();
         minimumDuration = in.readLong();
+        recordProgressColor = in.readInt();
+        rendererClsName = in.readString();
     }
 
     @Override
@@ -40,6 +44,8 @@ public class TakerConfig implements Parcelable {
         dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
         dest.writeLong(maximumDuration);
         dest.writeLong(minimumDuration);
+        dest.writeInt(recordProgressColor);
+        dest.writeString(rendererClsName);
     }
 
     @Override
@@ -118,6 +124,11 @@ public class TakerConfig implements Parcelable {
      */
     private int recordProgressColor = Color.parseColor("#ff00b0ff");
 
+    /**
+     * 用户自定义 Renderer 的类名
+     */
+    private String rendererClsName;
+
     private TakerConfig() {
     }
 
@@ -165,6 +176,9 @@ public class TakerConfig implements Parcelable {
         return recordProgressColor;
     }
 
+    public String getRendererClassName() {
+        return rendererClsName;
+    }
 
     public static class Builder {
 
@@ -254,6 +268,20 @@ public class TakerConfig implements Parcelable {
          */
         public Builder setRecordProgressColor(@ColorInt int colorRecordProgress) {
             mConfig.recordProgressColor = colorRecordProgress;
+            return this;
+        }
+
+        /**
+         * 设置用户自定义 Renderer
+         */
+        public Builder setRenderer(@NonNull Class<? extends IPreviewer.Renderer> rendererClass) {
+            try {
+                rendererClass.getDeclaredConstructor(Context.class);
+            } catch (NoSuchMethodException e) {
+                throw new UnsupportedOperationException("Please ensure " + rendererClass.getSimpleName()
+                        + " have a constructor like: " + rendererClass.getSimpleName() + "(Context context)");
+            }
+            this.mConfig.rendererClsName = rendererClass.getName();
             return this;
         }
 

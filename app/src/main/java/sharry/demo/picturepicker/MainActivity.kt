@@ -75,6 +75,8 @@ class MainActivity : AppCompatActivity() {
                 .setFullScreen(false)
                 // 设置是否支持视频录制
                 .setVideoRecord(true)
+                // 设置自定义 Renderer 的路径
+                .setRenderer(WatermarkPreviewerRenderer::class.java)
                 // 设置录制最大时长
                 .setMaxRecordDuration(15 * 1000)
                 .build()

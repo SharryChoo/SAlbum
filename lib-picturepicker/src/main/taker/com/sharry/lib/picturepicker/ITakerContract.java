@@ -21,6 +21,8 @@ public interface ITakerContract {
 
         void setPreviewFullScreen(boolean fullScreen);
 
+        void setPreviewRenderer(@NonNull String rendererClassName);
+
         void setRecordButtonVisible(boolean visible);
 
         void setSupportVideoRecord(boolean isVideoRecord);
