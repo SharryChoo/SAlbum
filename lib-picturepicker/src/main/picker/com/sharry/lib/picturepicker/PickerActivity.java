@@ -159,9 +159,6 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     @Override
     public void setProgressBarVisible(boolean visible) {
-        if (ActivityStateUtil.isIllegalState(this)) {
-            return;
-        }
         mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 

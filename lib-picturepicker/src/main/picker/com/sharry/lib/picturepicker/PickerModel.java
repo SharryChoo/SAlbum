@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.sharry.lib.media.recorder.AVPoolExecutor;
@@ -45,23 +44,8 @@ class PickerModel implements PickerContract.IModel {
     }
 
     @Override
-    public void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback callback) {
-        AVPoolExecutor.getInstance().execute(
-                new CursorRunnable(
-                        context, supportGif, supportVideo,
-                        new CursorRunnable.RunnableInteraction() {
-                            @Override
-                            public void onCompleted(@NonNull ArrayList<FolderModel> folderModels) {
-                                callback.onCompleted(folderModels);
-                            }
-
-                            @Override
-                            public void onFailed(Throwable throwable) {
-                                callback.onFailed(throwable);
-                            }
-                        }
-                )
-        );
+    public void fetchData(Context context, boolean supportGif, boolean supportVideo, Callback callback) {
+        AVPoolExecutor.getInstance().execute(new CursorRunnable(context, supportGif, supportVideo, callback));
     }
 
     /**
@@ -69,21 +53,15 @@ class PickerModel implements PickerContract.IModel {
      */
     private static class CursorRunnable implements Runnable {
 
-        interface RunnableInteraction {
-            void onCompleted(@NonNull ArrayList<FolderModel> folderModels);
-
-            void onFailed(Throwable throwable);
-        }
-
         private final boolean mSupportGif, mSupportVideo;
         private final Context mContext;
-        private final RunnableInteraction mListener;
+        private final Callback mCallback;
 
-        CursorRunnable(Context context, boolean supportGif, boolean supportVideo, RunnableInteraction listener) {
+        CursorRunnable(Context context, boolean supportGif, boolean supportVideo, Callback callback) {
             this.mContext = context;
-            this.mListener = listener;
             this.mSupportGif = supportGif;
             this.mSupportVideo = supportVideo;
+            this.mCallback = callback;
         }
 
         @Override
@@ -102,9 +80,9 @@ class PickerModel implements PickerContract.IModel {
                 }
                 folderModels.addAll(caches.values());
             } catch (Throwable e) {
-                mListener.onFailed(e);
+                mCallback.onFailed(e);
             }
-            mListener.onCompleted(folderModels);
+            mCallback.onCompleted(folderModels);
         }
 
         /**
