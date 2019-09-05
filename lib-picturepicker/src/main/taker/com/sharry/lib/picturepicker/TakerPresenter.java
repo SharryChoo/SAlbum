@@ -2,6 +2,7 @@ package com.sharry.lib.picturepicker;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -24,7 +25,8 @@ import java.io.IOException;
  */
 class TakerPresenter implements ITakerContract.IPresenter {
 
-    private static final int COUNT_PLAY_TRY_AGAIN = 3;
+    private static final String TAG = TakerPresenter.class.getSimpleName();
+    private static final int MAXIMUM_TRY_AGAIN_THRESHOLD = 3;
 
     private final ITakerContract.IView mView;
     private final TakerConfig mConfig;
@@ -33,7 +35,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private Bitmap mFetchedBitmap;
     private File mVideoFile;
     private long mRecordDuration;
-    private int mTryAgainCount = 0;
+    private int mCountTryAgain = 0;
 
     TakerPresenter(TakerActivity view, TakerConfig config) {
         this.mView = view;
@@ -69,6 +71,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
     @Override
     public void handleGranted() {
+        // 重置为预览, 防止销毁时文件的误删
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
         if (mVideoFile != null) {
             performVideoEnsure();
@@ -79,14 +82,14 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
     @Override
     public void handleDenied() {
-        recycleSource();
-        // 置为相机预览
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
+        recycle();
     }
 
     @Override
     public void handleVideoPlayFailed() {
-        if (mTryAgainCount++ < COUNT_PLAY_TRY_AGAIN) {
+        if (mCountTryAgain++ < MAXIMUM_TRY_AGAIN_THRESHOLD) {
+            Log.w(TAG, "Occurred an error, try again " + mCountTryAgain + " time");
             mView.startVideoPlayer(mVideoFile.getAbsolutePath());
         } else {
             // 重新尝试了 3 次仍然没有播放成功, 说明录制的视频有问题, 当做录制失败处理
@@ -129,7 +132,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mRecorder.cancel();
         if (mView.getStatus() != ITakerContract.IView.STATUS_CAMERA_PREVIEW) {
             mFetchedBitmap = null;
-            mTryAgainCount = 0;
+            mCountTryAgain = 0;
             if (mVideoFile != null) {
                 mView.stopVideoPlayer();
                 if (mVideoFile.delete()) {
@@ -165,7 +168,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
      * 处理录制失败
      */
     private void performRecordFiled() {
-        recycleSource();
+        recycle();
         mView.toast("录制失败, 请稍后重试...");
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
     }
@@ -191,7 +194,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
             mediaMeta.date = System.currentTimeMillis();
             mView.setResult(mediaMeta);
         } catch (IOException e) {
-            // ignore.
             mView.toast("图片保存失败");
         }
     }
@@ -210,9 +212,9 @@ class TakerPresenter implements ITakerContract.IPresenter {
     /**
      * 重置资源
      */
-    private void recycleSource() {
+    private void recycle() {
         mFetchedBitmap = null;
-        mTryAgainCount = 0;
+        mCountTryAgain = 0;
         if (mVideoFile != null) {
             mView.stopVideoPlayer();
             if (mVideoFile.delete()) {

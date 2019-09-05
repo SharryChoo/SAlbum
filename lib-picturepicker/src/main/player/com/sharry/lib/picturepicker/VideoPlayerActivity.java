@@ -11,12 +11,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,8 +35,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         View.OnClickListener {
 
     private static final String EXTRA_MEDIA_META = "extra_media_meta";
-    private ObjectAnimator mPanelHindAnimator;
-    private ObjectAnimator mPanelShowAnimator;
 
     public static void launch(Context context, MediaMeta mediaMeta) {
         Intent intent = new Intent(context, VideoPlayerActivity.class);
@@ -48,7 +45,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         }
     }
 
+    private static final String TAG = VideoPlayerActivity.class.getSimpleName();
     private static final int MSG_WHAT_UPDATE_PROGRESS = 0;
+    private static final int MAXIMUM_TRY_AGAIN_THRESHOLD = 3;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -61,18 +60,30 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         }
     };
 
+    /**
+     * 播放数据源
+     */
     private MediaMeta mDataSource;
 
     /**
-     * Widget.
+     * Widgets.
      */
-    private FrameLayout mFlContainer;
     private VideoView mVideoView;
     private TextView mTvCurrent;
     private AppCompatSeekBar mSeekBar;
     private TextView mTvTotal;
     private ConstraintLayout mClControl;
     private ImageView mIvControl;
+    private ObjectAnimator mPanelHindAnimator;
+    private ObjectAnimator mPanelShowAnimator;
+
+    /**
+     * 条件控制变量
+     */
+    private boolean mIsPrepared = false;
+    private boolean mIsPaused = false;
+    private int mCountTryAgain = 0;
+    private int mCurrentDuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,25 +91,24 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         setContentView(R.layout.picture_picker_widget_video_player);
         parseIntent();
         initViews();
-        initData();
+        prepare();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mVideoView.start();
+        showControlPanel();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mVideoView.stopPlayback();
-        mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
+        pause();
     }
 
     @Override
     public void onBackPressed() {
-        mVideoView.stopPlayback();
+        stop();
         super.onBackPressed();
     }
 
@@ -110,35 +120,51 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
 
     ////////////////////////////////////MediaPlayer.OnCompletionListener///////////////////////////////////////
 
+    /**
+     * Callback when SetVideoPath / onResume
+     */
     @Override
     public void onPrepared(MediaPlayer mp) {
+        // 标记为准备完成
+        mIsPrepared = true;
+        // 清空重试次数
+        mCountTryAgain = 0;
         // 为 View 注入数据
-        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_pasue);
-        mTvCurrent.setText(DateUtil.format(0));
         mTvTotal.setText(DateUtil.format(mp.getDuration()));
         mSeekBar.setMax(mp.getDuration());
-        // 播放
-        mVideoView.start();
-        // 更新进度
-        updateProgress();
-        // 隐藏控制面板
-        hindControlPanel();
+        // 若之前是暂停, 则显示控制面板
+        if (mIsPaused) {
+            showControlPanel();
+        }
+        // 若之前非暂停, 则直接播放
+        else {
+            play();
+        }
     }
 
     ////////////////////////////////////MediaPlayer.OnErrorListener///////////////////////////////////////
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        resetViews();
-        Toast.makeText(this, "该视频无法播放", Toast.LENGTH_SHORT).show();
-        return true;
+        if (mCountTryAgain++ < MAXIMUM_TRY_AGAIN_THRESHOLD) {
+            Log.w(TAG, "Occurred an error, try again " + mCountTryAgain + " time");
+            prepare();
+            return true;
+        } else {
+            // 重置视图
+            reset();
+            // 标记为准备失败
+            mIsPrepared = false;
+            return false;
+        }
     }
 
     ////////////////////////////////////MediaPlayer.OnCompletionListener///////////////////////////////////////
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        resetViews();
+        reset();
+        mIsPrepared = false;
     }
 
     ////////////////////////////////////View.OnClickListener///////////////////////////////////////
@@ -147,24 +173,24 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     public void onClick(View v) {
         if (v.getId() == R.id.video_view || v.getId() == R.id.fl_container) {
             showControlPanel();
-        } else if (v.getId() == R.id.iv_control) {
-            // 切换为暂停态
-            if (mVideoView.isPlaying()) {
-                mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
-                mVideoView.pause();
-            }
-            // 切换为播放态
-            else {
-                mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_pasue);
-                mVideoView.start();
-                updateProgress();
-            }
         } else if (v.getId() == R.id.cl_control) {
             hindControlPanel();
+        } else if (v.getId() == R.id.iv_control) {
+            if (mIsPrepared) {
+                if (mVideoView.isPlaying()) {
+                    pause();
+                } else {
+                    play();
+                }
+            } else {
+                prepare();
+            }
         } else {
             // ignore.
         }
     }
+
+    //////////////////////////////////// Private methods ///////////////////////////////////////
 
     private void parseIntent() {
         mDataSource = getIntent().getParcelableExtra(EXTRA_MEDIA_META);
@@ -172,8 +198,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
 
     private void initViews() {
         // 设置外层窗体, 让其可响应事件
-        mFlContainer = findViewById(R.id.fl_container);
-        mFlContainer.setOnClickListener(this);
+        findViewById(R.id.fl_container).setOnClickListener(this);
         // 配置 Video View
         mVideoView = findViewById(R.id.video_view);
         mVideoView.setOnPreparedListener(this);
@@ -184,12 +209,10 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         mSeekBar = findViewById(R.id.seek_bar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-            int currentDuration;
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                currentDuration = progress;
-                mTvCurrent.setText(DateUtil.format(progress));
+                mCurrentDuration = progress;
+                mTvCurrent.setText(DateUtil.format(mCurrentDuration));
             }
 
             @Override
@@ -198,10 +221,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mVideoView.seekTo(currentDuration);
+                mVideoView.seekTo(mCurrentDuration);
             }
         });
-
         // 控制中心
         mClControl = findViewById(R.id.cl_control);
         mClControl.setOnClickListener(this);
@@ -211,19 +233,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
         // 播放进度
         mTvCurrent = findViewById(R.id.tv_current);
         mTvTotal = findViewById(R.id.tv_total);
-    }
-
-    private void initData() {
-        mVideoView.setVideoPath(mDataSource.path);
-        resetViews();
-    }
-
-    private void resetViews() {
-        mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
-        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
-        mTvCurrent.setText(DateUtil.format(0));
-        mSeekBar.setProgress(0);
-        showControlPanel();
     }
 
     private void updateProgress() {
@@ -278,6 +287,40 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
             return;
         }
         mPanelHindAnimator.start();
+    }
+
+    //////////////////////////////////// VideoPlay Control ///////////////////////////////////////
+
+    private void prepare() {
+        mVideoView.setVideoPath(mDataSource.path);
+        reset();
+    }
+
+    private void play() {
+        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_pasue);
+        mVideoView.start();
+        mVideoView.seekTo(mCurrentDuration);
+        updateProgress();
+        mIsPaused = false;
+    }
+
+    private void pause() {
+        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
+        mVideoView.pause();
+        mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
+        mIsPaused = true;
+    }
+
+    private void stop() {
+        mVideoView.stopPlayback();
+    }
+
+    private void reset() {
+        mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
+        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
+        mTvCurrent.setText(DateUtil.format(0));
+        mSeekBar.setProgress(0);
+        showControlPanel();
     }
 
 }
