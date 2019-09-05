@@ -84,8 +84,8 @@ class SharedElementUtils {
                 ObjectAnimator.ofFloat(target, "translationX", data.startX - locations[0], 0),
                 ObjectAnimator.ofFloat(target, "translationY", data.startY - locations[1], 0)
         );
-        enterAnimators.setInterpolator(new OvershootInterpolator(2f));
-        enterAnimators.setDuration(500);
+        enterAnimators.setInterpolator(new OvershootInterpolator(1f));
+        enterAnimators.setDuration(400);
         return enterAnimators;
     }
 
