@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="sharry.demo.picturepicker">
 
+    <!--解决 minSdkVersion 在 21 以下, CameraX 编译报错的问题-->
+    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
+
     <!-- sd卡写权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

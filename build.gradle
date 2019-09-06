@@ -17,12 +17,6 @@ buildscript {
         gradleVersion = '3.2.0'
         kotlinVersion = '1.2.51'
         mavenVersion = '1.5'
-
-        // App dependencies
-        supportLibraryVersion = '1.1.0'
-        recycleViewVersion = '1.0.0'
-        materialVersion = '1.0.0'
-        glideVersion = '4.6.1'
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradleVersion"
@@ -39,6 +33,7 @@ tasks.withType(JavaCompile) {
 subprojects {
     configurations.all {
         resolutionStrategy {
+            def supportLibraryVersion = '1.1.0'
             force "androidx.core:core:${supportLibraryVersion}"
         }
     }

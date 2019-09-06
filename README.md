@@ -24,7 +24,7 @@ dependencies {
     // SPicturePicker dependencies
     implementation 'com.github.SharryChoo:SPicturePicker:+'
     
-    // Android dependencies
+    // Needed Android dependencies
     def constraintlayoutVersion = "1.1.3"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
     def supportLibraryVersion = '1.1.0'
@@ -37,7 +37,7 @@ dependencies {
     implementation "androidx.camera:camera-core:$cameraxVersion"
     implementation "androidx.camera:camera-camera2:$cameraxVersion"
     
-    // My dependencies.
+    // Needed core dependencies.
     def stoolbarVersion = "1.0.5-x"
     api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
     def smediaVersion = "0.0.9-alpha"
