@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.sharry.lib.picturepicker">
 
+    <!--解决 CameraX 无法在 5.0 以下使用的问题-->
     <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
     <!-- 相机权限 -->
     <uses-permission android:name="android.permission.CAMERA" /> <!-- SD 卡读写权限 -->
