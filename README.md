@@ -73,7 +73,7 @@ Add it in your **module AndroidManifest.xml**
     xmlns:tools="http://schemas.android.com/tools"
     package="......">
     
-    <!--解决 minSdkVersion 在 21 以下, CameraX 编译无法通过的问题-->
+    <!--解决 minSdkVersion 在 21 以下, CameraX 编译报错的问题-->
     <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
   
 </manifest>
