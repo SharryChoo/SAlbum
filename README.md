@@ -33,9 +33,38 @@ Add it in your **module build.gradle** at the end of repositories
 dependencies {
     ...
     implementation 'com.github.SharryChoo:PicturePicker:+'
-    implementation "androidx.appcompat:appcompat:1.0.0"
-    implementation "androidx.recyclerview:recyclerview:1.0.0"
-    implementation "com.google.android.material:material:1.0.0"
+        // Android dependencies
+        def constraintlayoutVersion = "1.1.3"
+        implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
+        def supportLibraryVersion = '1.1.0'
+        implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
+        def recycleViewVersion = '1.0.0'
+        implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
+        def materialVersion = '1.0.0'
+        implementation "com.google.android.material:material:$materialVersion"
+        /**
+         * 需要去 root project 解决依赖冲突
+         * <p>
+         *  subprojects {
+         *      configurations.all {
+         *          resolutionStrategy {
+         *             force "androidx.core:core:${supportLibraryVersion}"
+         *          }
+         *      }
+         *  }
+         * </p>
+         */
+        def cameraxVersion = "1.0.0-alpha04"
+        implementation "androidx.camera:camera-core:$cameraxVersion"
+        implementation "androidx.camera:camera-camera2:$cameraxVersion"
+    
+        // My dependencies.
+        def stoolbarVersion = "1.0.5-x"
+        api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
+        def smediaVersion = "0.0.9-alpha"
+        api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
+        api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
+        api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
 }
 ```
 

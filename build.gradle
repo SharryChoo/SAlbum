@@ -19,7 +19,7 @@ buildscript {
         mavenVersion = '1.5'
 
         // App dependencies
-        supportLibraryVersion = '1.0.0'
+        supportLibraryVersion = '1.1.0'
         recycleViewVersion = '1.0.0'
         materialVersion = '1.0.0'
         glideVersion = '4.6.1'
