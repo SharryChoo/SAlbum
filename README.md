@@ -8,11 +8,18 @@
 - 相机的拍摄
   - 5.0 以下使用 Camera1
   - 5.0 以上使用 CameraX
-  - 可通过自定义 Renderer, 实现水印滤镜等效果
+  - 通过自定义 Renderer, 可拓展水印滤镜等效果
 - 视频的录制
-  - 支持 1080p, 720p, 480p 的录制分辨率
+  - 视频
+    - **使用共享 EGLContext 的方式配合 MediaCodec 实现 H.264 的硬编, 支持滤镜水印效果**
+    - 支持 1080p, 720p, 480p 的录制分辨率
+  - 音频
+    - **PCM 数据获取使用 OpenSL ES, 支持 v7a**
+    - 使用 MediaCodec 硬编为 AAC
+  - 使用 MediaMuxer 合并为 mp4 文件
 - 视频的播放
-
+  - 考虑到依赖体积, 使用系统提供的 VideoView 实现
+  
 ## 功能集成
 [![](https://jitpack.io/v/SharryChoo/SPicturePicker.svg)](https://jitpack.io/#SharryChoo/SPicturePicker)
 
