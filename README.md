@@ -7,8 +7,8 @@
 - 图像的裁剪
 - **相机的拍摄**
   - **5.0 以下使用 Camera1, 5.0 以上使用 CameraX**
-  - **提供 1:1、4:3、16:9、2:1 的比例选择**
-    - 每种比例均支持 CenterCrop 全屏预览
+  - **提供 1:1、4:3、16:9 的比例选择**
+     - 支持 CenterCrop 全屏预览
   - **通过自定义 Renderer, 可拓展水印滤镜等效果**
 - **视频的录制**
   - 视频
@@ -20,7 +20,7 @@
   - 使用 MediaMuxer 合并为 mp4 文件
 - 视频的播放
   - 考虑到依赖体积, 使用系统提供的 VideoView 实现
-  
+
 ## 功能集成
 [![](https://jitpack.io/v/SharryChoo/SPicturePicker.svg)](https://jitpack.io/#SharryChoo/SPicturePicker)
 

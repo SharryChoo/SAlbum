@@ -6,10 +6,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.IPreviewer;
 import com.sharry.lib.media.recorder.Options;
 
@@ -26,12 +26,13 @@ public class TakerConfig implements Parcelable {
         pictureQuality = in.readInt();
         directoryPath = in.readString();
         cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
-        previewAspect = in.readParcelable(AspectRatio.class.getClassLoader());
+        previewAspect = in.readInt();
         isFullScreen = in.readByte() != 0;
         isSupportVideoRecord = in.readByte() != 0;
         maximumDuration = in.readLong();
         minimumDuration = in.readLong();
         recordProgressColor = in.readInt();
+        recordResolution = in.readInt();
         rendererClsName = in.readString();
     }
 
@@ -40,12 +41,13 @@ public class TakerConfig implements Parcelable {
         dest.writeInt(pictureQuality);
         dest.writeString(directoryPath);
         dest.writeParcelable(cropperConfig, flags);
-        dest.writeParcelable(previewAspect, flags);
+        dest.writeInt(previewAspect);
         dest.writeByte((byte) (isFullScreen ? 1 : 0));
         dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
         dest.writeLong(maximumDuration);
         dest.writeLong(minimumDuration);
         dest.writeInt(recordProgressColor);
+        dest.writeInt(recordResolution);
         dest.writeString(rendererClsName);
     }
 
@@ -89,10 +91,23 @@ public class TakerConfig implements Parcelable {
      */
     private CropperConfig cropperConfig;
 
+    public static final int ASPECT_1_1 = 758;
+    public static final int ASPECT_4_3 = 917;
+    public static final int ASPECT_16_9 = 995;
+
+    @IntDef(value = {
+            ASPECT_1_1,
+            ASPECT_4_3,
+            ASPECT_16_9
+    })
+    @interface Aspect {
+
+    }
+
     /**
      * 初始时相机的预览比例
      */
-    private AspectRatio previewAspect;
+    private int previewAspect = ASPECT_4_3;
 
     /**
      * 相机预览时是否缩放至全屏
@@ -160,7 +175,7 @@ public class TakerConfig implements Parcelable {
         return cropperConfig;
     }
 
-    public AspectRatio getPreviewAspect() {
+    public int getPreviewAspect() {
         return previewAspect;
     }
 
@@ -232,7 +247,7 @@ public class TakerConfig implements Parcelable {
         /**
          * 设置裁剪的配置
          */
-        public Builder setPreviewAspect(@Nullable AspectRatio aspect) {
+        public Builder setPreviewAspect(@Aspect int aspect) {
             mConfig.previewAspect = aspect;
             return this;
         }

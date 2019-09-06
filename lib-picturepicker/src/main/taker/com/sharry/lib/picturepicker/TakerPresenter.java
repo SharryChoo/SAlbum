@@ -18,6 +18,10 @@ import com.sharry.lib.media.recorder.SMediaRecorder;
 import java.io.File;
 import java.io.IOException;
 
+import static com.sharry.lib.picturepicker.TakerConfig.ASPECT_16_9;
+import static com.sharry.lib.picturepicker.TakerConfig.ASPECT_1_1;
+import static com.sharry.lib.picturepicker.TakerConfig.ASPECT_4_3;
+
 /**
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
@@ -146,8 +150,18 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
     private void setupViews() {
         // 配置 CameraView
-        mView.setPreviewAspect(mConfig.getPreviewAspect() == null ?
-                AspectRatio.DEFAULT : mConfig.getPreviewAspect());
+        switch (mConfig.getPreviewAspect()) {
+            case ASPECT_1_1:
+                mView.setPreviewAspect(AspectRatio.of(1, 1));
+                break;
+            case ASPECT_16_9:
+                mView.setPreviewAspect(AspectRatio.of(16, 9));
+                break;
+            case ASPECT_4_3:
+            default:
+                mView.setPreviewAspect(AspectRatio.of(4, 3));
+                break;
+        }
         mView.setPreviewFullScreen(mConfig.isFullScreen());
         if (!TextUtils.isEmpty(mConfig.getRendererClassName())) {
             mView.setPreviewRenderer(mConfig.getRendererClassName());

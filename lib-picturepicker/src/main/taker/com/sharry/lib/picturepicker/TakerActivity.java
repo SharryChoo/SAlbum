@@ -50,8 +50,7 @@ public class TakerActivity extends AppCompatActivity implements
     private static final AspectRatio[] ASPECT_RATIOS = {
             AspectRatio.of(1, 1),
             AspectRatio.of(4, 3),
-            AspectRatio.of(16, 9),
-            AspectRatio.of(2, 1)
+            AspectRatio.of(16, 9)
     };
 
     /**

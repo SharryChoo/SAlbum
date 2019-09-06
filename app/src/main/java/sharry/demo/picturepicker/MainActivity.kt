@@ -9,9 +9,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.sharry.lib.camera.AspectRatio
 import com.sharry.lib.media.recorder.Options
 import com.sharry.lib.picturepicker.*
+import com.sharry.lib.picturepicker.TakerConfig.ASPECT_1_1
 import com.sharry.lib.widget.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     private fun initData() {
         takerConfig = TakerConfig.Builder()
                 // 预览画面比例
-                .setPreviewAspect(AspectRatio.DEFAULT)
+                .setPreviewAspect(ASPECT_1_1)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
                 .setFullScreen(false)
                 // 设置自定义 Renderer 的路径
