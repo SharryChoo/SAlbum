@@ -41,14 +41,14 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
     def materialVersion = '1.0.0'
     implementation "com.google.android.material:material:$materialVersion"
-    def cameraxVersion = "1.0.0-alpha04"
+    def cameraxVersion = "1.0.0-alpha03"// alpha04 在尺寸选取上存在非常大的问题, 这里可以先使用 03
     implementation "androidx.camera:camera-core:$cameraxVersion"
     implementation "androidx.camera:camera-camera2:$cameraxVersion"
     
     // Needed core dependencies.
     def stoolbarVersion = "1.0.5-x"
     api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-    def smediaVersion = "0.0.9-alpha"
+    def smediaVersion = "1.0.0-alpha01"
     api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
     api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
     api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"     
