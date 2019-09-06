@@ -3,12 +3,12 @@
   - 支持 JPEG/PNG/WEBP/GIF 的选取
   - 图片加载引擎由用户自定义实现
 - 图片的查看
+  - 共享元素跳转动画
 - 图像的裁剪
 - 相机的拍摄
   - 可通过自定义 Renderer, 实现水印滤镜等效果
 - 视频的录制
   - 支持 1080p, 720p, 480p 的录制分辨率
-  - 默认为 720p
 - 视频的播放
 
 ## 功能集成
@@ -44,7 +44,6 @@ dependencies {
     api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"     
 }
 ```
-
 
 ### Step 2
 Add it in your **root build.gradle** at the end of repositories
