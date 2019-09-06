@@ -21,7 +21,9 @@ Add it in your **module build.gradle** at the end of repositories
 ```
 dependencies {
     ...
-    implementation 'com.github.SharryChoo:PicturePicker:+'
+    // SPicturePicker dependencies
+    implementation 'com.github.SharryChoo:SPicturePicker:+'
+    
     // Android dependencies
     def constraintlayoutVersion = "1.1.3"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
