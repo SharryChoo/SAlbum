@@ -7,11 +7,11 @@
     android:background="@color/picture_picker_player_bg_color"
     android:orientation="vertical">
 
-    <com.sharry.libtoolbar.SToolbar
+    <com.sharry.lib.widget.toolbar.SToolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:statusBarStyle="Transparent"
-        android:visibility="invisible"/>
+        android:visibility="invisible"
+        app:statusBarStyle="Transparent" />
 
     <VideoView
         android:id="@+id/video_view"

@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import com.sharry.lib.camera.AspectRatio
 import com.sharry.lib.media.recorder.Options
 import com.sharry.lib.picturepicker.*
-import com.sharry.libtoolbar.SToolbar
+import com.sharry.lib.widget.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
 

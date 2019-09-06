@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.sharry.libtoolbar.SToolbar
+        <com.sharry.lib.widget.toolbar.SToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

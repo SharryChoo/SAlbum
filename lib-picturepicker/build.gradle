@@ -45,7 +45,7 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     // My dependencies.
     // 需要去 root project 解决依赖冲突
-    def stoolbarVersion = "1.0.4-x"
+    def stoolbarVersion = "1.0.5-x"
     api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
     def smediaVersion = "0.0.9-alpha"
     api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"

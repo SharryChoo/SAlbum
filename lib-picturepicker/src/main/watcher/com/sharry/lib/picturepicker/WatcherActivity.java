@@ -24,8 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.sharry.lib.picturepicker.photoview.PhotoView;
-import com.sharry.libtoolbar.SToolbar;
-import com.sharry.libtoolbar.ViewOptions;
+import com.sharry.lib.widget.toolbar.SToolbar;
+import com.sharry.lib.widget.toolbar.ViewOptions;
 
 import java.util.ArrayList;
 
@@ -319,6 +319,7 @@ public class WatcherActivity extends AppCompatActivity implements
 
 
     ////////////////////////////////////////// OnPagerChangedListener /////////////////////////////////////////////
+
     @Override
     public void onPagerChanged(int position) {
         if (mPresenter != null) {
@@ -327,6 +328,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     ////////////////////////////////////////// PickedAdapter.Interaction /////////////////////////////////////////////
+
     @Override
     public void onPreviewItemClicked(ImageView imageView, MediaMeta meta, int position) {
         mPresenter.handlePickedItemClicked(meta);
