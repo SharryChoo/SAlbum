@@ -133,8 +133,8 @@ public class TakerActivity extends AppCompatActivity implements
             Class<? extends IPreviewer.Renderer> rendererClass = (Class<? extends IPreviewer.Renderer>)
                     Class.forName(rendererClassName);
             Constructor constructor = rendererClass.getDeclaredConstructor(Context.class);
-            IPreviewer.Renderer renderer = (IPreviewer.Renderer) constructor.newInstance(this);
             constructor.setAccessible(true);
+            IPreviewer.Renderer renderer = (IPreviewer.Renderer) constructor.newInstance(this);
             mCameraView.getPreviewer().setRenderer(renderer);
         } catch (Throwable e) {
             // ignore.

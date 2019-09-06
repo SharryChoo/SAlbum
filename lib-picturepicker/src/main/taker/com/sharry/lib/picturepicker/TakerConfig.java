@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.IPreviewer;
+import com.sharry.lib.media.recorder.Options;
 
 /**
  * 相机拍照的相关参数
@@ -125,6 +126,13 @@ public class TakerConfig implements Parcelable {
     private int recordProgressColor = Color.parseColor("#ff00b0ff");
 
     /**
+     * 视频录制的最大分辨率
+     * <p>
+     * 默认为 720p
+     */
+    private int recordResolution = Options.Video.RESOLUTION_720P;
+
+    /**
      * 用户自定义 Renderer 的类名
      */
     private String rendererClsName;
@@ -178,6 +186,10 @@ public class TakerConfig implements Parcelable {
 
     public String getRendererClassName() {
         return rendererClsName;
+    }
+
+    public int getRecordResolution() {
+        return recordResolution;
     }
 
     public static class Builder {
@@ -258,7 +270,7 @@ public class TakerConfig implements Parcelable {
          *
          * @param minimumDuration unit ms
          */
-        public Builder seMinRecordDuration(long minimumDuration) {
+        public Builder setMinRecordDuration(long minimumDuration) {
             mConfig.minimumDuration = minimumDuration;
             return this;
         }
@@ -272,7 +284,7 @@ public class TakerConfig implements Parcelable {
         }
 
         /**
-         * 设置用户自定义 Renderer
+         * 设置用户的自定义 Renderer
          */
         public Builder setRenderer(@NonNull Class<? extends IPreviewer.Renderer> rendererClass) {
             try {
@@ -281,7 +293,15 @@ public class TakerConfig implements Parcelable {
                 throw new UnsupportedOperationException("Please ensure " + rendererClass.getSimpleName()
                         + " have a constructor like: " + rendererClass.getSimpleName() + "(Context context)");
             }
-            this.mConfig.rendererClsName = rendererClass.getName();
+            mConfig.rendererClsName = rendererClass.getName();
+            return this;
+        }
+
+        /**
+         * 设置视频录制时的分辨率
+         */
+        public Builder setRecordResolution(@Options.Video.Resolution int recordResolution) {
+            mConfig.recordResolution = recordResolution;
             return this;
         }
 

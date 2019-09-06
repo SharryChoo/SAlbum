@@ -63,6 +63,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
                 .setOutputDir(mConfig.getDirectoryPath())
                 .setEncodeType(EncodeType.Video.H264)
                 .setMuxerType(MuxerType.MP4)
+                .setResolution(Options.Video.RESOLUTION_720P)
                 .setAudioOptions(Options.Audio.DEFAULT)
                 .build();
         // 配置视图

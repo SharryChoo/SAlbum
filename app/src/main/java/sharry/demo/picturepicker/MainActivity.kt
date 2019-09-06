@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.sharry.lib.camera.AspectRatio
+import com.sharry.lib.media.recorder.Options
 import com.sharry.lib.picturepicker.*
 import com.sharry.libtoolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
@@ -65,20 +66,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun initData() {
         takerConfig = TakerConfig.Builder()
-                // 相机文件存储路径
-                .setDirectoryPath(APP_DIRECTORY)
-                // 拍摄后质量压缩
-                .setPictureQuality(80)
                 // 预览画面比例
                 .setPreviewAspect(AspectRatio.DEFAULT)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
                 .setFullScreen(false)
-                // 设置是否支持视频录制
-                .setVideoRecord(true)
                 // 设置自定义 Renderer 的路径
                 .setRenderer(WatermarkPreviewerRenderer::class.java)
+                // 设置是否支持视频录制
+                .setVideoRecord(true)
                 // 设置录制最大时长
                 .setMaxRecordDuration(15 * 1000)
+                // 设置录制最短时长
+                .setMinRecordDuration(1 * 1000)
+                // 设置录制的分辨率
+                .setRecordResolution(Options.Video.RESOLUTION_720P)
+                // 设置文件存储路径
+                .setDirectoryPath(APP_DIRECTORY)
+                // 拍摄后质量压缩
+                .setPictureQuality(80)
                 .build()
 
         cropperConfig = CropperConfig.Builder()
