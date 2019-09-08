@@ -10,11 +10,12 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import com.sharry.lib.media.recorder.AVPoolExecutor;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_3GP;
 import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_AIV;
@@ -39,13 +40,18 @@ import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_WEBP;
  */
 class PickerModel implements PickerContract.IModel {
 
+    private static final ThreadPoolExecutor PICKER_EXECUTOR = new ThreadPoolExecutor(
+            1, 1,
+            0, TimeUnit.SECONDS,
+            new LinkedBlockingDeque<Runnable>()
+    );
 
     PickerModel() {
     }
 
     @Override
     public void fetchData(Context context, boolean supportGif, boolean supportVideo, Callback callback) {
-        AVPoolExecutor.getInstance().execute(new CursorRunnable(context, supportGif, supportVideo, callback));
+        PICKER_EXECUTOR.execute(new CursorRunnable(context, supportGif, supportVideo, callback));
     }
 
     /**
