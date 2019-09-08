@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PicturePicker</string>
+    <string name="app_name">SPicturePicker</string>
 
     <string name="app_activity_main_et_threshold_hint">Threshold</string>
     <string name="app_activity_main_et_span_count_hint">Span Count</string>
