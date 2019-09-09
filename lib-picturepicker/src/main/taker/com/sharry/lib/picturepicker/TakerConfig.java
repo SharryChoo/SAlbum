@@ -323,6 +323,7 @@ public class TakerConfig implements Parcelable {
         public TakerConfig build() {
             return mConfig;
         }
+
     }
 
 }

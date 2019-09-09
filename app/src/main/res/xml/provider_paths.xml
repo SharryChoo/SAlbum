@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <!-- path 中的 . 代表去当前属性文件下所有的文件 -->
     <external-path
         name="external_files"
         path="." />
