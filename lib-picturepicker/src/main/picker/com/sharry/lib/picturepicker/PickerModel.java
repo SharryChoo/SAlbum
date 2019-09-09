@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -41,9 +42,20 @@ import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_WEBP;
 class PickerModel implements PickerContract.IModel {
 
     private static final ThreadPoolExecutor PICKER_EXECUTOR = new ThreadPoolExecutor(
-            1, 1,
-            0, TimeUnit.SECONDS,
-            new LinkedBlockingDeque<Runnable>()
+            // 无需核心线程数, 防止占用资源不释放
+            0,
+            // 最大数量为 1 即可, 只需要异步, 无需多线程并发
+            1,
+            30, TimeUnit.SECONDS,
+            new LinkedBlockingDeque<Runnable>(),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = new Thread(r, PickerModel.class.getSimpleName());
+                    thread.setDaemon(false);
+                    return thread;
+                }
+            }
     );
 
     PickerModel() {
