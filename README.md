@@ -48,7 +48,7 @@ dependencies {
     // Needed core dependencies.
     def stoolbarVersion = "1.0.5-x"
     api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-    def smediaVersion = "1.0.0-alpha01"
+    def smediaVersion = "1.0.0-alpha02"
     api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
     api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
     api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"     
