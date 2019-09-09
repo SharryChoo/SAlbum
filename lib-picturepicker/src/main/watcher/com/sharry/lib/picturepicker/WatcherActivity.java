@@ -176,7 +176,7 @@ public class WatcherActivity extends AppCompatActivity implements
         mWatcherPager.setIgnoreDismissAnimPosition(data.sharedPosition);
         // 加载共享元素占位图
         mIvPlaceHolder.setVisibility(View.VISIBLE);
-        PictureLoader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
+        Loader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
         // 执行共享元素
         mIvPlaceHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override

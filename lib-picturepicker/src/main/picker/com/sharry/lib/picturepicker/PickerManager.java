@@ -45,9 +45,9 @@ public class PickerManager {
     /**
      * 设置图片加载方案
      */
-    public PickerManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
-        Preconditions.checkNotNull(loader, "Please ensure IPictureLoaderEngine not null!");
-        PictureLoader.setPictureLoader(loader);
+    public PickerManager setLoaderEngine(@NonNull ILoaderEngine loader) {
+        Preconditions.checkNotNull(loader, "Please ensure ILoaderEngine not null!");
+        Loader.setLoaderEngine(loader);
         return this;
     }
 

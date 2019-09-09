@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.TextUtils
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
@@ -30,8 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pickerConfig: PickerConfig
     private lateinit var takerConfig: TakerConfig
     private lateinit var cropperConfig: CropperConfig
-    private val pictureLoader = object : IPictureLoaderEngine {
-
+    private val pictureLoader = object : ILoaderEngine {
         override fun loadPicture(context: Context, uri: String, imageView: ImageView) {
             // 保证为静态图
             Glide.with(context).asBitmap().load(uri).into(imageView)
@@ -42,11 +40,10 @@ class MainActivity : AppCompatActivity() {
             Glide.with(context).asGif().load(uri).into(imageView)
         }
 
-        override fun loadVideo(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {
+        override fun loadVideoThumbnails(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {
             // Glide 可直接加载视频 uri 获取第一帧
             Glide.with(context).asBitmap().load(uri).into(imageView)
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,9 +148,9 @@ class MainActivity : AppCompatActivity() {
                                     .build()
                     )
                     // 图片加载框架注入
-                    .setPictureLoader(pictureLoader)
+                    .setLoaderEngine(pictureLoader)
                     .start {
-                        Toast.makeText(this, it[0].toString(), Toast.LENGTH_SHORT).show()
+                        // TODO 选中的资源, 通过 ArrayList<MediaMeta> 返回
                     }
         }
     }

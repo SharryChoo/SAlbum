@@ -62,8 +62,8 @@ public class WatcherManager {
     /**
      * 设置图片加载方案
      */
-    public WatcherManager setPictureLoader(@NonNull IPictureLoaderEngine loader) {
-        PictureLoader.setPictureLoader(loader);
+    public WatcherManager setLoaderEngine(@NonNull ILoaderEngine loader) {
+        Loader.setLoaderEngine(loader);
         return this;
     }
 

@@ -14,24 +14,24 @@ import androidx.annotation.Nullable;
  * @version 1.0
  * @since 2018/6/21 16:19
  */
-class PictureLoader {
+final class Loader {
 
-    private static final String TAG = PictureLoader.class.getSimpleName();
-    private static IPictureLoaderEngine sEngine;
+    private static final String TAG = Loader.class.getSimpleName();
+    private static ILoaderEngine sEngine;
 
-    static void setPictureLoader(@Nullable IPictureLoaderEngine engine) {
+    static void setLoaderEngine(@Nullable ILoaderEngine engine) {
         if (engine != null) {
             sEngine = engine;
         }
     }
 
-    static IPictureLoaderEngine getPictureLoader() {
+    static ILoaderEngine getPictureLoader() {
         return sEngine;
     }
 
     static void loadPicture(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
         if (sEngine == null) {
-            Log.e(TAG, "PictureLoader.loadPicture -> please invoke PictureLoader.setPictureLoader first");
+            Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
         }
         sEngine.loadPicture(context, uri, imageView);
@@ -39,7 +39,7 @@ class PictureLoader {
 
     static void loadGif(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
         if (sEngine == null) {
-            Log.e(TAG, "PictureLoader.loadPicture -> please invoke PictureLoader.setPictureLoader first");
+            Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
         }
         sEngine.loadGif(context, uri, imageView);
@@ -47,10 +47,10 @@ class PictureLoader {
 
     static void loadVideo(@NonNull Context context, @NonNull String uri, @Nullable String thumbnailPath, @NonNull ImageView imageView) {
         if (sEngine == null) {
-            Log.e(TAG, "PictureLoader.loadPicture -> please invoke PictureLoader.setPictureLoader first");
+            Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
         }
-        sEngine.loadVideo(context, uri, thumbnailPath, imageView);
+        sEngine.loadVideoThumbnails(context, uri, thumbnailPath, imageView);
     }
 
 }

@@ -1,8 +1,5 @@
 package com.sharry.lib.picturepicker;
 
-import android.util.SparseArray;
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;

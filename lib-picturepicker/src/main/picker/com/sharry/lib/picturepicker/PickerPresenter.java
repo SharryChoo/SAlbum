@@ -98,8 +98,12 @@ class PickerPresenter implements PickerContract.IPresenter,
     public void handlePictureClicked(int position, ImageView sharedElement) {
         WatcherManager.with((Context) mView)
                 .setSharedElement(sharedElement)
-                .setPictureLoader(PictureLoader.getPictureLoader())
-                .setConfig(mWatcherConfig.rebuild().setDisplayDataSet(mDisplaySet, position).build())
+                .setLoaderEngine(Loader.getPictureLoader())
+                .setConfig(
+                        mWatcherConfig.rebuild()
+                                .setDisplayDataSet(mDisplaySet, position)
+                                .build()
+                )
                 .startForResult(this);
     }
 
@@ -127,7 +131,7 @@ class PickerPresenter implements PickerContract.IPresenter,
             return;
         }
         WatcherManager.with((Context) mView)
-                .setPictureLoader(PictureLoader.getPictureLoader())
+                .setLoaderEngine(Loader.getPictureLoader())
                 .setConfig(
                         mWatcherConfig.rebuild()
                                 .setDisplayDataSet(mPickedSet, 0)

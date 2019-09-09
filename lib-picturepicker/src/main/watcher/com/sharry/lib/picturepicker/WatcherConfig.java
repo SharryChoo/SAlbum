@@ -63,19 +63,26 @@ public class WatcherConfig implements Parcelable {
         return new Builder();
     }
 
+    private static final int INVALIDATE = -1;
+
     /**
      * 需要展示的集合
      */
     private ArrayList<MediaMeta> mediaMetas;
-    /**
-     * 图片选中的集合: 根据这个判断是否提供图片选择功能
-     */
-    private ArrayList<MediaMeta> userPickedSet;
 
     /**
      * 阈值
+     * <p>
+     * 若为 {@link #INVALIDATE}, 则不提供图片选取功能
      */
-    private int threshold;
+    private int threshold = INVALIDATE;
+
+    /**
+     * 用户已图片选中的集合
+     * <p>
+     * 在 {@code threshold != INVALIDATE} 时生效
+     */
+    private ArrayList<MediaMeta> userPickedSet;
 
     /**
      * 指示器背景色
@@ -140,7 +147,7 @@ public class WatcherConfig implements Parcelable {
     }
 
     public boolean isPickerSupport() {
-        return userPickedSet != null;
+        return threshold != INVALIDATE;
     }
 
     public Builder rebuild() {
@@ -224,6 +231,9 @@ public class WatcherConfig implements Parcelable {
         }
 
         public WatcherConfig build() {
+            if (mConfig.threshold > 0 && mConfig.userPickedSet == null) {
+                mConfig.userPickedSet = new ArrayList<>(mConfig.threshold);
+            }
             return mConfig;
         }
 

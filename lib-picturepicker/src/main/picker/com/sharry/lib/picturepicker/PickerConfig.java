@@ -89,7 +89,7 @@ public class PickerConfig implements Parcelable {
     /**
      * 用户已经选中的集合
      */
-    private ArrayList<MediaMeta> userPickedSet = new ArrayList<>();
+    private ArrayList<MediaMeta> userPickedSet;
 
     /**
      * 最大选取阈值
@@ -390,6 +390,9 @@ public class PickerConfig implements Parcelable {
         }
 
         public PickerConfig build() {
+            if (mConfig.threshold > 0 && mConfig.userPickedSet == null) {
+                mConfig.userPickedSet = new ArrayList<>(mConfig.threshold);
+            }
             return mConfig;
         }
 
