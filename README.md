@@ -100,7 +100,7 @@ Add it in your **module AndroidManifest.xml**
 ![视频录制](https://i.loli.net/2019/09/09/Jd2YUBoCVzZKAcP.png) ![录制待确定](https://i.loli.net/2019/09/09/WOZcrB4sCuzUIpg.png)
 
 ### 视频播放
-![image](https://i.loli.net/2019/09/09/iRGJmNpeAjuBCQ5.png) ![视频播放](https://i.loli.net/2019/09/09/m9kHEDYBwoOx7MN.png)
+![视频资源的展示](https://i.loli.net/2019/09/09/iRGJmNpeAjuBCQ5.png) ![视频播放](https://i.loli.net/2019/09/09/m9kHEDYBwoOx7MN.png)
 
 ## 功能使用
 SPicturePicker 的所有功能提供, 均通过 **Manager** 对外提供, 其具体的功能选项通过 **Config** 来配置
