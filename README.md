@@ -90,17 +90,16 @@ Add it in your **module AndroidManifest.xml**
 
 ## 效果展示
 ### 资源选取
-![资源选取](https://i.loli.net/2019/09/09/OipgAjtCFLMlhfW.png) ![资源文件夹](https://i.loli.net/2019/09/09/9n6MzNKIJcCibes.png) ![图片浏览](https://i.loli.net/2019/09/09/3h5BcqAGCvXTOfM.png)
+![资源选取](https://i.loli.net/2019/09/10/7kpcTdWfuwQYAhr.jpg)
 
 ### 图像拍摄
-![1:1](https://i.loli.net/2019/09/09/dR4fQwY9cEBMXzC.png) ![4:3](https://i.loli.net/2019/09/09/6wh84EZpL7UlVYI.png)  
-![16:9](https://i.loli.net/2019/09/09/UEi1cR39pgfWXYG.png) ![拍摄待确定](https://i.loli.net/2019/09/09/WOZcrB4sCuzUIpg.png)
+
 
 ### 视频录制
-![视频录制](https://i.loli.net/2019/09/09/Jd2YUBoCVzZKAcP.png) ![录制待确定](https://i.loli.net/2019/09/09/WOZcrB4sCuzUIpg.png)
+
 
 ### 视频播放
-![视频资源的展示](https://i.loli.net/2019/09/09/iRGJmNpeAjuBCQ5.png) ![视频播放](https://i.loli.net/2019/09/09/m9kHEDYBwoOx7MN.png)
+![视频的播放](https://i.loli.net/2019/09/10/2jmuTL3bO5Ks8cf.jpg)
 
 ## 功能使用
 SPicturePicker 的所有功能提供, 均通过 **Manager** 对外提供, 其具体的功能选项通过 **Config** 来配置

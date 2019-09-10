@@ -48,28 +48,39 @@
         app:layout_constraintTop_toTopOf="parent"
         tool:visibility="visible" />
 
-    <ImageView
-        android:id="@+id/iv_denied"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_ensure_panel"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@color/picture_picker_taker_selector_bg_color"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@id/btn_record"
-        app:layout_constraintEnd_toStartOf="@id/btn_record"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_record"
-        app:srcCompat="@drawable/ic_activity_taker_denied"
-        tool:visibility="visible" />
+        tool:visibility="visible">
 
-    <ImageView
-        android:id="@+id/iv_granted"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@id/btn_record"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_record"
-        app:layout_constraintTop_toTopOf="@id/btn_record"
-        app:srcCompat="@drawable/ic_activity_taker_granted"
-        tool:visibility="visible" />
+        <ImageView
+            android:id="@+id/iv_denied"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginRight="30dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/iv_granted"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_activity_taker_denied" />
+
+        <ImageView
+            android:id="@+id/iv_granted"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginLeft="30dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/iv_denied"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_activity_taker_granted" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -68,6 +68,7 @@ public class TakerActivity extends AppCompatActivity implements
     private RecorderButton mBtnRecord;
     private ImageView mIvPicturePreview;
     private VideoView mVideoPlayer;
+    private ConstraintLayout mClEnsurePanel;
     private ImageView mIvDenied;
     private ImageView mIvGranted;
     private int mStatus;
@@ -193,8 +194,7 @@ public class TakerActivity extends AppCompatActivity implements
                 mBtnRecord.setVisibility(View.INVISIBLE);
                 mIvPicturePreview.setVisibility(View.INVISIBLE);
                 mVideoPlayer.setVisibility(View.VISIBLE);
-                mIvGranted.setVisibility(View.VISIBLE);
-                mIvDenied.setVisibility(View.VISIBLE);
+                mClEnsurePanel.setVisibility(View.VISIBLE);
                 break;
             case STATUS_PICTURE_PREVIEW:
                 // 停止预览
@@ -205,8 +205,7 @@ public class TakerActivity extends AppCompatActivity implements
                 mBtnRecord.setVisibility(View.INVISIBLE);
                 mVideoPlayer.setVisibility(View.INVISIBLE);
                 mIvPicturePreview.setVisibility(View.VISIBLE);
-                mIvGranted.setVisibility(View.VISIBLE);
-                mIvDenied.setVisibility(View.VISIBLE);
+                mClEnsurePanel.setVisibility(View.VISIBLE);
                 break;
             case STATUS_CAMERA_PREVIEW:
             default:
@@ -218,8 +217,7 @@ public class TakerActivity extends AppCompatActivity implements
                 mBtnRecord.setVisibility(View.VISIBLE);
                 mVideoPlayer.setVisibility(View.INVISIBLE);
                 mIvPicturePreview.setVisibility(View.INVISIBLE);
-                mIvGranted.setVisibility(View.INVISIBLE);
-                mIvDenied.setVisibility(View.INVISIBLE);
+                mClEnsurePanel.setVisibility(View.INVISIBLE);
                 // 开始预览
                 mCameraView.startPreview();
                 break;
@@ -357,6 +355,9 @@ public class TakerActivity extends AppCompatActivity implements
                 return true;
             }
         });
+
+        // Selector Panel
+        mClEnsurePanel = findViewById(R.id.cl_ensure_panel);
 
         // Denied
         mIvDenied = findViewById(R.id.iv_denied);

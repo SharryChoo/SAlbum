@@ -50,7 +50,7 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     /**
      * 需要去 root project 解决依赖冲突
-     * <p>
+     * <pre> {@code
      *  subprojects {
      *      configurations.all {
      *          resolutionStrategy {
@@ -58,7 +58,7 @@ dependencies {
      *          }
      *      }
      *  }
-     * </p>
+     * } </pre>
      */
     def cameraxVersion = "1.0.0-alpha03"
     implementation "androidx.camera:camera-core:$cameraxVersion"
