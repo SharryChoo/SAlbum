@@ -52,7 +52,7 @@
         android:id="@+id/cl_ensure_panel"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:background="@color/picture_picker_taker_selector_bg_color"
+        android:background="@color/picture_picker_taker_ensure_panel_bg_color"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="parent"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="picture_picker_taker_selector_bg_color">#5E000000</color>
+    <color name="picture_picker_taker_ensure_panel_bg_color">#5E000000</color>
 
 </resources>
