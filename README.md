@@ -87,7 +87,7 @@ SPicturePicker 的所有功能提供, 均通过 **Manager** 对外提供, 其具
 
 ### 选取
 ```
-PickerManager.with(this)
+PickerManager.with(context)
         // 设置选择配置文件
         .setPickerConfig(
                 PickerConfig.Builder()
@@ -171,7 +171,7 @@ PickerManager.with(this)
 ### 浏览
 浏览的功能与选取类似, 打开图片选择器时, 会根据 PickerConfig 自动生成浏览的配置, 若想在外界单独使用图片浏览的功能, 可以通过以下方式
 ```
-WatcherManager.with((Context) mView)
+WatcherManager.with(context)
         .setConfig(
             WatcherConfig.Builder()
                 // 配置 Indicator 的展示效果
@@ -204,7 +204,7 @@ WatcherManager.with((Context) mView)
 ### 拍摄
 相机的使用与浏览类似, 可以集成在 Picker 中使用, 也可以单独使用
 ```
-TakerManager.with((Context) mView)
+TakerManager.with(context)
         .setConfig(
             TakerConfig.Builder()
                 // 预览画面比例, 支持 1:1, 4:3, 16:9
@@ -250,7 +250,7 @@ public Builder setRenderer(@NonNull Class<? extends IPreviewer.Renderer> rendere
 
 ### 裁剪
 ```
-CropperManager.with((Context) mView)
+CropperManager.with(context)
         .setConfig(
             CropperConfig.Builder()
                 // 要裁剪的图片路径
