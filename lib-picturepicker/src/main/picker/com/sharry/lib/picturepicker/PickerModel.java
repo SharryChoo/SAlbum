@@ -150,7 +150,7 @@ class PickerModel implements PickerContract.IModel {
                     if (TextUtils.isEmpty(folderPath)) {
                         continue;
                     }
-                    // 添加图片到缓存
+                    // 添加资源到缓存
                     FolderModel folder = folders.get(folderPath);
                     if (folder == null) {
                         String folderName = getLastFileName(folderPath);
@@ -265,12 +265,12 @@ class PickerModel implements PickerContract.IModel {
                     meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
                     // 添加到 <所有> 目录下
                     folderAll.addMeta(meta);
-                    // 获取图片父文件夹路径
+                    // 获取资源所在文件夹
                     String folderPath = getParentFolderPath(path);
                     if (TextUtils.isEmpty(folderPath)) {
                         continue;
                     }
-                    // 添加图片到缓存
+                    // 添加资源到缓存
                     FolderModel folder = folders.get(folderPath);
                     if (folder == null) {
                         String folderName = getLastFileName(folderPath);
