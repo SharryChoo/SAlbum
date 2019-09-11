@@ -146,7 +146,7 @@ class PickerPresenter implements PickerContract.IPresenter,
             return;
         }
         // 不需要裁剪, 直接返回
-        if (mPickerConfig.isCropSupport()) {
+        if (mPickerConfig.isCropSupport() && mPickedSet.get(0).isPicture()) {
             // 启动裁剪
             assert mPickerConfig.getCropperConfig() != null;
             CropperManager.with((Context) mView)
