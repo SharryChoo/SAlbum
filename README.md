@@ -93,10 +93,10 @@ Add it in your **module AndroidManifest.xml**
 ![资源选取](https://i.loli.net/2019/09/10/7kpcTdWfuwQYAhr.jpg)
 
 ### 图像拍摄
-
+![图像拍摄](https://i.loli.net/2019/09/11/9YpaQvxD4iVhLkS.png)
 
 ### 视频录制
-
+![视频录制](https://i.loli.net/2019/09/11/F4aVWkY3hebldoX.png)
 
 ### 视频播放
 ![视频的播放](https://i.loli.net/2019/09/10/2jmuTL3bO5Ks8cf.jpg)
