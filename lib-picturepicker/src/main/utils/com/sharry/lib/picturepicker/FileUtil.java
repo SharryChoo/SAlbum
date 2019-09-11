@@ -29,6 +29,27 @@ class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
 
     /**
+     * Get parent folder associated with this file.
+     */
+    static String getParentFolderPath(String filePath) {
+        String parentFolderPath = new File(filePath).getParentFile().getAbsolutePath();
+        if (TextUtils.isEmpty(parentFolderPath)) {
+            int end = filePath.lastIndexOf(File.separator);
+            if (end != -1) {
+                parentFolderPath = filePath.substring(0, end);
+            }
+        }
+        return parentFolderPath;
+    }
+
+    /**
+     * Get last file name associated with this filePath.
+     */
+    static String getLastFileName(String filePath) {
+        return filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+    }
+
+    /**
      * 获取 URI
      */
     static Uri getUriFromFile(Context context, String authority, File file) {
@@ -153,6 +174,7 @@ class FileUtil {
         }
         return null;
     }
+
 
     /**
      * 通知 MediaStore 文件删除了

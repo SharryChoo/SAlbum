@@ -3,7 +3,6 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -241,7 +240,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     private void fetchData(Context context) {
         mView.setProgressBarVisible(true);
         mModel.fetchData(
-                context,
+                context.getApplicationContext(),
                 mPickerConfig.isPickGif(),
                 mPickerConfig.isPickVideo(),
                 new PickerContract.IModel.Callback() {
@@ -249,7 +248,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
                     @Override
-                    public void onCompleted(@NonNull final ArrayList<FolderModel> folderModels) {
+                    public void onFetched(@NonNull final ArrayList<FolderModel> folderModels) {
                         mFolderModels = folderModels;
                         mainHandler.post(new Runnable() {
                             @Override
@@ -261,17 +260,6 @@ class PickerPresenter implements PickerContract.IPresenter,
                         });
                     }
 
-                    @Override
-                    public void onFailed(Throwable throwable) {
-                        Log.e(TAG, throwable.getMessage(), throwable);
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mView.setProgressBarVisible(false);
-                                mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_fetch_album_failed));
-                            }
-                        });
-                    }
                 }
         );
     }

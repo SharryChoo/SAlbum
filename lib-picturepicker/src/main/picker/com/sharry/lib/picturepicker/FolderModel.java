@@ -29,7 +29,7 @@ class FolderModel {
         return metas;
     }
 
-    void addMeta(@NonNull MediaMeta meta) {
+    synchronized void addMeta(@NonNull MediaMeta meta) {
         int insertIndex = 0;
         for (; insertIndex < metas.size(); insertIndex++) {
             if (metas.get(insertIndex).date < meta.date) {

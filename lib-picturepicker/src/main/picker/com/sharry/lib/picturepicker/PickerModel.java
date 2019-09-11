@@ -12,7 +12,8 @@ import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,6 +32,8 @@ import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_PNG;
 import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_RMVB;
 import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_VOB;
 import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_WEBP;
+import static com.sharry.lib.picturepicker.FileUtil.getLastFileName;
+import static com.sharry.lib.picturepicker.FileUtil.getParentFolderPath;
 
 /**
  * MVP frame model associated with PicturePicker.
@@ -42,10 +45,9 @@ import static com.sharry.lib.picturepicker.Constants.MIME_TYPE_WEBP;
 class PickerModel implements PickerContract.IModel {
 
     private static final ThreadPoolExecutor PICKER_EXECUTOR = new ThreadPoolExecutor(
-            // 无需核心线程数, 防止占用资源不释放
-            0,
-            // 最大数量为 1 即可, 只需要异步, 无需多线程并发
-            1,
+            // 最大支持 3 个线程并发
+            3,
+            3,
             30, TimeUnit.SECONDS,
             new LinkedBlockingDeque<Runnable>(),
             new ThreadFactory() {
@@ -62,143 +64,112 @@ class PickerModel implements PickerContract.IModel {
     }
 
     @Override
-    public void fetchData(Context context, boolean supportGif, boolean supportVideo, Callback callback) {
-        PICKER_EXECUTOR.execute(new CursorRunnable(context, supportGif, supportVideo, callback));
+    public void fetchData(final Context context, final boolean supportGif,
+                          final boolean supportVideo, final Callback callback) {
+        PICKER_EXECUTOR.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                // 用于存储遍历到的所有图片文件夹集合
+                ArrayList<FolderModel> folderModels = new ArrayList<>();
+                // 创建一个图片文件夹, 用于保存所有图片
+                FolderModel folderAll = new FolderModel(
+                        context.getString(R.string.picture_picker_picker_all_picture)
+                );
+                folderModels.add(folderAll);
+                // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
+                ConcurrentHashMap<String, FolderModel> folders = new ConcurrentHashMap<>(16);
+                // 创建计数器
+                CountDownLatch latch = new CountDownLatch(supportVideo ? 2 : 1);
+                // 获取图片数据
+                PICKER_EXECUTOR.execute(new PictureFetchRunnable(context, supportGif, folders, folderAll, latch));
+                // 获取视频数据
+                if (supportVideo) {
+                    PICKER_EXECUTOR.execute(new VideoFetchRunnable(context, folders, folderAll, latch));
+                }
+                // 等待执行结束
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    // ignore.
+                } finally {
+                    // 注入数据
+                    folderModels.addAll(folders.values());
+                    // 回调完成
+                    callback.onFetched(folderModels);
+                }
+            }
+
+        });
     }
 
     /**
-     * 遍历加载系统图片和视频
+     * 获取 图片 资源
      */
-    private static class CursorRunnable implements Runnable {
+    private static class PictureFetchRunnable implements Runnable {
 
-        private final boolean mSupportGif, mSupportVideo;
-        private final Context mContext;
-        private final Callback mCallback;
+        private final Context context;
+        private final boolean supportGif;
+        private final ConcurrentHashMap<String, FolderModel> folders;
+        private final FolderModel folderAll;
+        private final CountDownLatch latch;
 
-        CursorRunnable(Context context, boolean supportGif, boolean supportVideo, Callback callback) {
-            this.mContext = context;
-            this.mSupportGif = supportGif;
-            this.mSupportVideo = supportVideo;
-            this.mCallback = callback;
+        PictureFetchRunnable(Context context,
+                             boolean supportGif,
+                             ConcurrentHashMap<String, FolderModel> folders,
+                             FolderModel folderAll,
+                             CountDownLatch latch) {
+            this.context = context;
+            this.supportGif = supportGif;
+            this.folderAll = folderAll;
+            this.folders = folders;
+            this.latch = latch;
         }
 
         @Override
         public void run() {
-            // 用于存储遍历到的所有图片文件夹集合
-            ArrayList<FolderModel> folderModels = new ArrayList<>();
-            // 创建一个图片文件夹, 用于保存所有图片
-            FolderModel allFolderModel = new FolderModel(mContext.getString(R.string.picture_picker_picker_all_picture));
-            folderModels.add(allFolderModel);
-            // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
-            HashMap<String, FolderModel> caches = new HashMap<>();
+            Cursor cursor = supportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif();
             try {
-                fetchPictures(allFolderModel, caches);
-                if (mSupportVideo) {
-                    fetchVideos(allFolderModel, caches);
+                if (cursor == null) {
+                    return;
                 }
-                folderModels.addAll(caches.values());
-            } catch (Throwable e) {
-                mCallback.onFailed(e);
-            }
-            mCallback.onCompleted(folderModels);
-        }
-
-        /**
-         * 获取所有图片资源信息
-         */
-        private void fetchPictures(FolderModel allFolderModel, HashMap<String, FolderModel> caches) {
-            Cursor cursor = mSupportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif();
-            if (cursor == null || cursor.getCount() == 0) {
-                return;
-            }
-            // 是否是第一个遍历到的图片目录
-            while (cursor.moveToNext()) {
-                // 验证路径是否有效
-                String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                if (TextUtils.isEmpty(picturePath)) {
-                    continue;
-                }
-                MediaMeta meta = MediaMeta.create(picturePath, true);
-                meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
-                meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
-                // 添加到所有图片的目录下
-                allFolderModel.addMeta(meta);
-                // 获取图片父文件夹路径
-                String folderPath = getParentFolderPath(picturePath);
-                if (TextUtils.isEmpty(folderPath)) {
-                    continue;
-                }
-                // 添加图片到缓存
-                FolderModel folder = caches.get(folderPath);
-                if (folder == null) {
-                    String folderName = getLastFileName(folderPath);
-                    folder = new FolderModel(folderName);
-                    caches.put(folderPath, folder);
-                }
-                folder.addMeta(meta);
-            }
-            cursor.close();
-        }
-
-        /**
-         * 获取所有视频资源信息
-         */
-        private void fetchVideos(FolderModel allFolderModel, HashMap<String, FolderModel> caches) throws Exception {
-            Cursor cursor = createVideoCursor();
-            if (cursor == null || cursor.getCount() == 0) {
-                return;
-            }
-            while (cursor.moveToNext()) {
-                // 验证路径是否有效
-                String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
-                if (TextUtils.isEmpty(path)) {
-                    continue;
-                }
-                MediaMeta meta = MediaMeta.create(path, false);
-                meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-                meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-                meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
-                meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
-                // 获取缩略图
-                long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
-                // 添加到所有图片的目录下
-                allFolderModel.addMeta(meta);
-                // 获取图片父文件夹路径
-                String folderPath = getParentFolderPath(path);
-                if (TextUtils.isEmpty(folderPath)) {
-                    continue;
-                }
-                // 添加图片到缓存
-                FolderModel folder = caches.get(folderPath);
-                if (folder == null) {
-                    String folderName = getLastFileName(folderPath);
-                    folder = new FolderModel(folderName);
-                    caches.put(folderPath, folder);
-                }
-                folder.addMeta(meta);
-            }
-            cursor.close();
-        }
-
-        /**
-         * 获取视频缩略图地址
-         */
-        @Nullable
-        private String fetchVideoThumbNail(long id, String path, long date) throws Exception {
-            String thumbNailPath = null;
-            Cursor cursor = createThumbnailCursor(id);
-            if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    thumbNailPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
+                    // 验证路径是否有效
+                    String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                    if (TextUtils.isEmpty(picturePath)) {
+                        continue;
+                    }
+                    // 构建数据源
+                    MediaMeta meta = MediaMeta.create(picturePath, true);
+                    meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
+                    meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
+                    // 1. 添加到 <所有> 目录下
+                    folderAll.addMeta(meta);
+                    // 2. 添加到文件所在目录
+                    String folderPath = getParentFolderPath(picturePath);
+                    if (TextUtils.isEmpty(folderPath)) {
+                        continue;
+                    }
+                    // 添加图片到缓存
+                    FolderModel folder = folders.get(folderPath);
+                    if (folder == null) {
+                        String folderName = getLastFileName(folderPath);
+                        if (TextUtils.isEmpty(folderName)) {
+                            folderName = context.getString(R.string.picture_picker_picker_root_folder);
+                        }
+                        folder = new FolderModel(folderName);
+                        folders.put(folderPath, folder);
+                    }
+                    folder.addMeta(meta);
                 }
-                cursor.close();
+            } catch (Throwable throwable) {
+                // ignore.
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+                latch.countDown();
             }
-            // 若没有视频缩略图, 则获取视频第一帧
-            if (TextUtils.isEmpty(thumbNailPath)) {
-                thumbNailPath = generateThumbnail(path, date);
-            }
-            return thumbNailPath;
         }
 
         /**
@@ -222,7 +193,7 @@ class PickerModel implements PickerContract.IModel {
                     MIME_TYPE_GIF
             };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            return mContext.getContentResolver().query(uri, projection,
+            return context.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
         }
 
@@ -245,8 +216,80 @@ class PickerModel implements PickerContract.IModel {
                     MIME_TYPE_WEBP
             };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            return mContext.getContentResolver().query(uri, projection,
+            return context.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
+        }
+
+    }
+
+    /**
+     * 获取 Video 资源
+     */
+    private static class VideoFetchRunnable implements Runnable {
+
+        private final Context context;
+        private final ConcurrentHashMap<String, FolderModel> folders;
+        private final FolderModel folderAll;
+        private final CountDownLatch latch;
+
+        VideoFetchRunnable(Context context,
+                           ConcurrentHashMap<String, FolderModel> folders,
+                           FolderModel folderAll,
+                           CountDownLatch latch) {
+            this.context = context;
+            this.folderAll = folderAll;
+            this.folders = folders;
+            this.latch = latch;
+        }
+
+        @Override
+        public void run() {
+            Cursor cursor = createVideoCursor();
+            try {
+                if (cursor == null) {
+                    return;
+                }
+                while (cursor.moveToNext()) {
+                    // 验证路径是否有效
+                    String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                    if (TextUtils.isEmpty(path)) {
+                        continue;
+                    }
+                    MediaMeta meta = MediaMeta.create(path, false);
+                    meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+                    meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
+                    meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                    meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
+                    // 获取缩略图
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                    meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
+                    // 添加到 <所有> 目录下
+                    folderAll.addMeta(meta);
+                    // 获取图片父文件夹路径
+                    String folderPath = getParentFolderPath(path);
+                    if (TextUtils.isEmpty(folderPath)) {
+                        continue;
+                    }
+                    // 添加图片到缓存
+                    FolderModel folder = folders.get(folderPath);
+                    if (folder == null) {
+                        String folderName = getLastFileName(folderPath);
+                        if (TextUtils.isEmpty(folderName)) {
+                            folderName = context.getString(R.string.picture_picker_picker_root_folder);
+                        }
+                        folder = new FolderModel(folderName);
+                        folders.put(folderPath, folder);
+                    }
+                    folder.addMeta(meta);
+                }
+            } catch (Throwable throwable) {
+                // ignore.
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+                latch.countDown();
+            }
         }
 
         /**
@@ -283,8 +326,32 @@ class PickerModel implements PickerContract.IModel {
                     MIME_TYPE_MPG,
             };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            return mContext.getContentResolver().query(uri, projection,
+            return context.getContentResolver().query(uri, projection,
                     selection, selectionArgs, sortOrder);
+        }
+
+        /**
+         * 获取视频缩略图地址
+         */
+        @Nullable
+        private String fetchVideoThumbNail(long id, String path, long date) {
+            String thumbNailPath = null;
+            Cursor cursor = createThumbnailCursor(id);
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    thumbNailPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
+                }
+                cursor.close();
+            }
+            // 若没有视频缩略图, 则获取视频第一帧
+            if (TextUtils.isEmpty(thumbNailPath)) {
+                try {
+                    thumbNailPath = generateThumbnail(path, date);
+                } catch (Exception e) {
+                    // ignore.
+                }
+            }
+            return thumbNailPath;
         }
 
         private Cursor createThumbnailCursor(long id) {
@@ -295,13 +362,13 @@ class PickerModel implements PickerContract.IModel {
             };
             String selection = MediaStore.Video.Thumbnails.VIDEO_ID + "=?";
             String[] selectionArgs = new String[]{String.valueOf(id)};
-            return mContext.getContentResolver().query(uri, projection, selection,
+            return context.getContentResolver().query(uri, projection, selection,
                     selectionArgs, null);
         }
 
         private String generateThumbnail(String videoPath, long videoCreateDate) throws Exception {
             // 将第一帧缓存到本地
-            File videoThumbnailFile = FileUtil.createVideoThumbnailFile(mContext, videoCreateDate);
+            File videoThumbnailFile = FileUtil.createVideoThumbnailFile(context, videoCreateDate);
             if (videoThumbnailFile.exists()) {
                 return videoThumbnailFile.getAbsolutePath();
             } else {
@@ -326,31 +393,6 @@ class PickerModel implements PickerContract.IModel {
             return videoThumbnailFile.getAbsolutePath();
         }
 
-        /**
-         * Get parent folder associated with this file.
-         */
-        private String getParentFolderPath(String filePath) {
-            String parentFolderPath = new File(filePath).getParentFile().getAbsolutePath();
-            if (TextUtils.isEmpty(parentFolderPath)) {
-                int end = filePath.lastIndexOf(File.separator);
-                if (end != -1) {
-                    parentFolderPath = filePath.substring(0, end);
-                }
-            }
-            return parentFolderPath;
-        }
-
-        /**
-         * Get last file name associated with this filePath.
-         */
-        private String getLastFileName(String filePath) {
-            String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
-            // 为空说明直接在 StorageCard 的根目录
-            if (TextUtils.isEmpty(fileName)) {
-                fileName = mContext.getString(R.string.picture_picker_picker_root_folder);
-            }
-            return fileName;
-        }
     }
 
 }

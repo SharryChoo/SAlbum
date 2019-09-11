@@ -171,9 +171,7 @@ interface PickerContract {
 
         interface Callback {
 
-            void onCompleted(@NonNull ArrayList<FolderModel> folderModels);
-
-            void onFailed(Throwable throwable);
+            void onFetched(@NonNull ArrayList<FolderModel> folderModels);
 
         }
 
