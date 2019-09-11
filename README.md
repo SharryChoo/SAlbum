@@ -25,7 +25,9 @@
 dependency | version
 ---|---
 SPicturePicker | [![](https://jitpack.io/v/SharryChoo/SPicturePicker.svg)](https://jitpack.io/#SharryChoo/SPicturePicker) 
-SMedia | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
+SMedia:lib-media-recorder | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
+SMedia:lib-media-scamera | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
+SMedia:lib-media-opengles | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
 
 ### Step 1
 Add it in your **module build.gradle** at the end of repositories
