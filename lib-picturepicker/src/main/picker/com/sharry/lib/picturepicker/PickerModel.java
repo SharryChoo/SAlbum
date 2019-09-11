@@ -7,6 +7,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -44,6 +45,7 @@ import static com.sharry.lib.picturepicker.FileUtil.getParentFolderPath;
  */
 class PickerModel implements PickerContract.IModel {
 
+    private static final String TAG = PickerModel.class.getSimpleName();
     private static final ThreadPoolExecutor PICKER_EXECUTOR = new ThreadPoolExecutor(
             // 最多需要 3 个线程并发
             3,
@@ -78,7 +80,10 @@ class PickerModel implements PickerContract.IModel {
                         context.getString(R.string.picture_picker_picker_all_picture)
                 );
                 folderModels.add(folderAll);
-                // key 为图片的文件夹的绝对路径, values 为 FolderModel 的对象
+                /*
+                   key 为图片所在文件夹的绝对路径
+                   values 为 FolderModel 的对象
+                 */
                 ConcurrentHashMap<String, FolderModel> folders = new ConcurrentHashMap<>(16);
                 // 创建计数器
                 CountDownLatch latch = new CountDownLatch(supportVideo ? 2 : 1);
@@ -105,7 +110,7 @@ class PickerModel implements PickerContract.IModel {
     }
 
     /**
-     * 获取 图片 资源
+     * The runnable for fetch picture resources.
      */
     private static class PictureFetchRunnable implements Runnable {
 
@@ -129,11 +134,7 @@ class PickerModel implements PickerContract.IModel {
 
         @Override
         public void run() {
-            Cursor cursor = supportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif();
-            try {
-                if (cursor == null) {
-                    return;
-                }
+            try (Cursor cursor = supportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif()) {
                 while (cursor.moveToNext()) {
                     // 验证路径是否有效
                     String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
@@ -163,12 +164,11 @@ class PickerModel implements PickerContract.IModel {
                     }
                     folder.addMeta(meta);
                 }
+                cursor.close();
+                Log.i(TAG, "Fetch picture resource completed.");
             } catch (Throwable throwable) {
                 // ignore.
             } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
                 latch.countDown();
             }
         }
@@ -224,7 +224,7 @@ class PickerModel implements PickerContract.IModel {
     }
 
     /**
-     * 获取 Video 资源
+     * The runnable for fetch video resources.
      */
     private static class VideoFetchRunnable implements Runnable {
 
@@ -245,11 +245,7 @@ class PickerModel implements PickerContract.IModel {
 
         @Override
         public void run() {
-            Cursor cursor = createVideoCursor();
-            try {
-                if (cursor == null) {
-                    return;
-                }
+            try (Cursor cursor = createVideoCursor()) {
                 while (cursor.moveToNext()) {
                     // 验证路径是否有效
                     String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
@@ -283,12 +279,11 @@ class PickerModel implements PickerContract.IModel {
                     }
                     folder.addMeta(meta);
                 }
+                cursor.close();
+                Log.i(TAG, "Fetch video resource completed.");
             } catch (Throwable throwable) {
                 // ignore.
             } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
                 latch.countDown();
             }
         }
