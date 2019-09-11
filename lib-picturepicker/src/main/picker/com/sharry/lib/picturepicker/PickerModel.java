@@ -45,10 +45,11 @@ import static com.sharry.lib.picturepicker.FileUtil.getParentFolderPath;
 class PickerModel implements PickerContract.IModel {
 
     private static final ThreadPoolExecutor PICKER_EXECUTOR = new ThreadPoolExecutor(
-            // 最大支持 3 个线程并发
+            // 最多需要 3 个线程并发
             3,
             3,
-            30, TimeUnit.SECONDS,
+            0, TimeUnit.SECONDS,
+            // 执行一个 Runnable 就创建一个线程
             new LinkedBlockingDeque<Runnable>(),
             new ThreadFactory() {
                 @Override
