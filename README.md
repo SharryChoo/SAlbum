@@ -246,7 +246,7 @@ public Builder setRenderer(@NonNull Class<? extends IPreviewer.Renderer> rendere
     return this;
 }
 ```
-传入渲染器实现的 class 文件, 需要保证提供一个 Context context 的构造方法, 否则在构建 TakerConfig 时会排除异常
+传入渲染器实现的 class 文件, 需要保证提供一个参数为 Context 的构造方法, 否则在构建 TakerConfig 时会出现异常
 
 ### 裁剪
 ```
