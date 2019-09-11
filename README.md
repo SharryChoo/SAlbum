@@ -22,7 +22,7 @@
   - 考虑到依赖体积, 使用系统提供的 VideoView 实现
 
 ## 功能集成
-dependency | version
+Dependency | Version
 ---|---
 SPicturePicker | [![](https://jitpack.io/v/SharryChoo/SPicturePicker.svg)](https://jitpack.io/#SharryChoo/SPicturePicker) 
 SMedia:lib-media-recorder | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
