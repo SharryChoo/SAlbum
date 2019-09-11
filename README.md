@@ -32,7 +32,7 @@ dependencies {
     // SPicturePicker dependencies
     implementation 'com.github.SharryChoo:SPicturePicker:+'
     
-    // Needed Android dependencies
+    // Android dependencies
     def constraintlayoutVersion = "1.1.3"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
     def supportLibraryVersion = '1.1.0'
@@ -41,17 +41,13 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
     def materialVersion = '1.0.0'
     implementation "com.google.android.material:material:$materialVersion"
-    def cameraxVersion = "1.0.0-alpha03"// alpha04 在尺寸选取上存在非常大的问题, 这里可以先使用 03
-    implementation "androidx.camera:camera-core:$cameraxVersion"
-    implementation "androidx.camera:camera-camera2:$cameraxVersion"
-    
-    // Needed core dependencies.
+    // Core dependencies.
     def stoolbarVersion = "1.0.5-x"
     api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-    def smediaVersion = "1.0.0-alpha02"
+    def smediaVersion = "1.0.0"
     api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
-    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
-    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"     
+    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
+    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion" 
 }
 ```
 
@@ -64,28 +60,6 @@ allprojects {
 	maven { url 'https://jitpack.io' }
     }
 }
-
-// CameraX 处于 alpha 版本, 需要解决 androidx 的冲突问题
-subprojects {
-    configurations.all {
-        resolutionStrategy {
-            force "androidx.core:core:${supportLibraryVersion}"
-        }
-    }
-}
-```
-
-### Step 3
-Add it in your **module AndroidManifest.xml**
-```
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="......">
-    
-    <!--解决 minSdkVersion 在 21 以下, CameraX 编译报错的问题-->
-    <uses-sdk tools:overrideLibrary="androidx.camera.camera2, androidx.camera.core" />
-  
-</manifest>
 ```
 
 ## 效果展示

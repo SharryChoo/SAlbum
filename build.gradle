@@ -29,16 +29,6 @@ tasks.withType(JavaCompile) {
     options.encodin g = 'UTF-8'
 }
 
-// 解决 CameraX 依赖与 androidx 的冲突问题
-subprojects {
-    configurations.all {
-        resolutionStrategy {
-            def supportLibraryVersion = '1.1.0'
-            force "androidx.core:core:${supportLibraryVersion}"
-        }
-    }
-}
-
 allprojects {
     repositories {
         google()
