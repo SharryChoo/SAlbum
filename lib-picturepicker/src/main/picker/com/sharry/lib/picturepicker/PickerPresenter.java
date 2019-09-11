@@ -23,8 +23,6 @@ class PickerPresenter implements PickerContract.IPresenter,
         TakerCallback,
         CropperCallback {
 
-    private static final String TAG = PickerPresenter.class.getSimpleName();
-
     /**
      * View associated with this presenter.
      */
