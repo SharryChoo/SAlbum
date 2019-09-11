@@ -31,23 +31,17 @@ dependencies {
     ...
     // SPicturePicker dependencies
     implementation 'com.github.SharryChoo:SPicturePicker:+'
-    
+    // Core dependencies
+    api "com.github.SharryChoo:SToolbar:+"
+    api "com.github.SharryChoo.SMedia:lib-media-recorder:+"
+    api "com.github.SharryChoo.SMedia:lib-scamera:+"
+    api "com.github.SharryChoo.SMedia:lib-opengles:+"
+     
     // Android dependencies
-    def constraintlayoutVersion = "1.1.3"
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
-    def supportLibraryVersion = '1.1.0'
-    implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
-    def recycleViewVersion = '1.0.0'
-    implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
-    def materialVersion = '1.0.0'
-    implementation "com.google.android.material:material:$materialVersion"
-    // Core dependencies.
-    def stoolbarVersion = "1.0.5-x"
-    api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-    def smediaVersion = "1.0.0"
-    api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
-    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
-    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion" 
+    implementation "androidx.constraintlayout:constraintlayout:+"
+    implementation "androidx.appcompat:appcompat:+"
+    implementation "androidx.recyclerview:recyclerview:+"
+    implementation "com.google.android.material:material:+"
 }
 ```
 
