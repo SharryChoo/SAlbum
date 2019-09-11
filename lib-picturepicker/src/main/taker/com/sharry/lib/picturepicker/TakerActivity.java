@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -230,8 +231,8 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void toast(@NonNull String content) {
-        Toast.makeText(this, content, Toast.LENGTH_SHORT).show();
+    public void toast(@IntegerRes @NonNull int resId) {
+        Toast.makeText(this, resId, Toast.LENGTH_SHORT).show();
     }
 
     @Override

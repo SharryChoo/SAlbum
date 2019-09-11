@@ -3,7 +3,9 @@ package com.sharry.lib.picturepicker;
 import android.graphics.Bitmap;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.IntegerRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.SCameraView;
@@ -56,7 +58,7 @@ public interface ITakerContract {
         @Status
         int getStatus();
 
-        void toast(@NonNull String content);
+        void toast(@StringRes int resId);
 
         void notifyFileDeleted(String filePath);
 

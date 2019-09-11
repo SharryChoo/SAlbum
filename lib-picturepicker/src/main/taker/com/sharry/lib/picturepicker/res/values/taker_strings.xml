@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="picture_picker_taker_take_picture_failed">Take picture failed</string>
+    <string name="picture_picker_taker_record_time_too_short">Record time too short</string>
+    <string name="picture_picker_taker_record_failed">Record failed, please try again</string>
+    <string name="picture_picker_taker_picture_saved_failed">Picture saved failed</string>
+
+</resources>
