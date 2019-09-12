@@ -41,6 +41,7 @@ import static com.sharry.lib.picturepicker.ActivityStateUtil.fixRequestOrientati
 public class WatcherActivity extends AppCompatActivity implements
         WatcherContract.IView,
         DraggableViewPager.OnPagerChangedListener,
+        DraggableViewPager.OnDragDismissListener,
         WatcherFragment.Interaction,
         PickedAdapter.Interaction {
 
@@ -132,7 +133,7 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void finish() {
-        mPresenter.handleSetResultBeforeFinish();
+        mPresenter.handleFinish();
         super.finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
@@ -147,33 +148,31 @@ public class WatcherActivity extends AppCompatActivity implements
     //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
 
     @Override
-    public void setToolbarCheckedIndicatorVisibility(boolean isShowCheckedIndicator) {
+    public void setIndicatorVisible(boolean isShowCheckedIndicator) {
         mCheckIndicator.setVisibility(isShowCheckedIndicator ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void setToolbarCheckedIndicatorColors(int indicatorBorderCheckedColor, int indicatorBorderUncheckedColor,
-                                                 int indicatorSolidColor, int indicatorTextColor) {
+    public void setIndicatorColors(int indicatorBorderCheckedColor, int indicatorBorderUncheckedColor,
+                                   int indicatorSolidColor, int indicatorTextColor) {
         mCheckIndicator.setBorderColor(indicatorBorderCheckedColor, indicatorBorderUncheckedColor);
         mCheckIndicator.setSolidColor(indicatorSolidColor);
         mCheckIndicator.setTextColor(indicatorTextColor);
     }
 
     @Override
-    public void setPreviewAdapter(ArrayList<MediaMeta> pickedSet) {
+    public void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet) {
         mBottomPreviewPictures.setAdapter(new PickedAdapter(pickedSet, this));
     }
 
     @Override
-    public void setDisplayAdapter(ArrayList<MediaMeta> items) {
+    public void setDisplayAdapter(@NonNull ArrayList<MediaMeta> items) {
         mWatcherAdapter = new WatcherPagerAdapter(getSupportFragmentManager(), items);
         mWatcherPager.setAdapter(mWatcherAdapter);
     }
 
     @Override
-    public void showSharedElementEnter(MediaMeta mediaMeta, final SharedElementModel data) {
-        // 若设置了共享元素, 则这个位置不需要执行 ViewPager 默认的退出动画
-        mWatcherPager.setIgnoreDismissAnimPosition(data.sharedPosition);
+    public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementModel data) {
         // 加载共享元素占位图
         mIvPlaceHolder.setVisibility(View.VISIBLE);
         Loader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
@@ -183,7 +182,7 @@ public class WatcherActivity extends AppCompatActivity implements
             public boolean onPreDraw() {
                 mIvPlaceHolder.getViewTreeObserver().removeOnPreDrawListener(this);
                 // Execute enter animator.
-                Animator startAnim = SharedElementUtils.createSharedElementEnterAnimator(mIvPlaceHolder, data);
+                Animator startAnim = SharedElementHelper.createSharedElementEnterAnimator(mIvPlaceHolder, data);
                 startAnim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -197,10 +196,10 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void showSharedElementExitAndFinish(SharedElementModel data) {
+    public void showSharedElementExitAndFinish(@NonNull SharedElementModel data) {
         final WatcherFragment watcherFragment = mWatcherAdapter.getItem(data.sharedPosition);
         final PhotoView target = watcherFragment.getPhotoView();
-        Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
+        Animator exitAnim = SharedElementHelper.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
             finish();
             return;
@@ -221,7 +220,12 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void notifyBottomPicturesRemoved(MediaMeta removedMeta, int removedIndex) {
+    public void setDisallowViewPagerDismissAnim(boolean isDisallowDismissAnim) {
+        mWatcherPager.setDisallowDismissAnimator(isDisallowDismissAnim);
+    }
+
+    @Override
+    public void notifyItemRemoved(@NonNull MediaMeta removedMeta, int removedIndex) {
         RecyclerView.Adapter adapter;
         if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
             adapter.notifyItemRemoved(removedIndex);
@@ -229,7 +233,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void notifyBottomPictureAdded(MediaMeta addedMeta, int addedIndex) {
+    public void notifyItemPicked(@NonNull MediaMeta addedMeta, int addedIndex) {
         RecyclerView.Adapter adapter;
         if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
             adapter.notifyItemInserted(addedIndex);
@@ -242,27 +246,27 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setToolbarIndicatorChecked(boolean isChecked) {
+    public void setIndicatorChecked(boolean isChecked) {
         mCheckIndicator.setChecked(isChecked);
     }
 
     @Override
-    public void displayToolbarIndicatorText(CharSequence indicatorText) {
+    public void setIndicatorText(@NonNull CharSequence indicatorText) {
         mCheckIndicator.setText(indicatorText);
     }
 
     @Override
-    public void displayPreviewEnsureText(CharSequence content) {
+    public void setEnsureText(@NonNull CharSequence content) {
         mTvEnsure.setText(content);
     }
 
     @Override
-    public void displayToolbarLeftText(CharSequence content) {
+    public void setLeftTitleText(@NonNull CharSequence content) {
         mTvTitle.setText(content);
     }
 
     @Override
-    public void showBottomPreview() {
+    public void showPickedPanel() {
         if (mLlBottomPreviewContainer.getVisibility() == View.VISIBLE) {
             return;
         }
@@ -281,7 +285,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void dismissBottomPreview() {
+    public void dismissPickedPanel() {
         if (mLlBottomPreviewContainer.getVisibility() == View.INVISIBLE) {
             return;
         }
@@ -300,17 +304,17 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void previewPicturesSmoothScrollToPosition(int position) {
+    public void smoothScrollToPosition(int position) {
         mBottomPreviewPictures.smoothScrollToPosition(position);
     }
 
     @Override
-    public void showMsg(String msg) {
+    public void showMsg(@NonNull String msg) {
         Snackbar.make(mBottomPreviewPictures, msg, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
-    public void setResultBeforeFinish(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed) {
+    public void setResult(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
         intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, isEnsurePressed);
@@ -318,13 +322,25 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
 
-    ////////////////////////////////////////// OnPagerChangedListener /////////////////////////////////////////////
+    ////////////////////////////////////////// DraggableViewPager.OnPagerChangedListener /////////////////////////////////////////////
 
     @Override
     public void onPagerChanged(int position) {
         if (mPresenter != null) {
             mPresenter.handlePagerChanged(position);
         }
+    }
+
+    ////////////////////////////////////////// DraggableViewPager.OnDismissListener /////////////////////////////////////////////
+
+    @Override
+    public void onDismissDirectly() {
+        onBackPressed();
+    }
+
+    @Override
+    public void onDismissed() {
+        finish();
     }
 
     ////////////////////////////////////////// PickedAdapter.Interaction /////////////////////////////////////////////
@@ -347,7 +363,7 @@ public class WatcherActivity extends AppCompatActivity implements
                 .setListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mPresenter.handleToolbarCheckedIndicatorClick(mCheckIndicator.isChecked());
+                        mPresenter.handleIndicatorClick(mCheckIndicator.isChecked());
                     }
                 })
                 .build());
@@ -359,6 +375,7 @@ public class WatcherActivity extends AppCompatActivity implements
         // 1. 初始化 ViewPager
         mWatcherPager = findViewById(R.id.view_pager);
         mWatcherPager.setOnPagerChangedListener(this);
+        mWatcherPager.setOnDragDismissListener(this);
         mWatcherPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
         // 2. 初始化底部菜单
         mLlBottomPreviewContainer = findViewById(R.id.ll_bottom_container);
@@ -369,7 +386,7 @@ public class WatcherActivity extends AppCompatActivity implements
         mTvEnsure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.handleEnsureClick();
+                mPresenter.handleEnsureClicked();
             }
         });
     }

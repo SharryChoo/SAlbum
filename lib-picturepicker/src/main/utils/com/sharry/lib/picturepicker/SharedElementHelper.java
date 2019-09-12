@@ -8,14 +8,14 @@ import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
-
-import com.sharry.lib.picturepicker.photoview.PhotoView;
 
 /**
  * Picture watcher shared elements jump helper.
@@ -27,17 +27,17 @@ import com.sharry.lib.picturepicker.photoview.PhotoView;
  * @version 1.0
  * @since 3/18/2019 11:13 AM
  */
-class SharedElementUtils {
+class SharedElementHelper {
 
-    private static Property<PhotoView, Matrix> ANIMATED_TRANSFORM_PROPERTY
-            = new Property<PhotoView, Matrix>(Matrix.class, "animatedTransform") {
+    private static Property<ImageView, Matrix> ANIMATED_IMAGE_MATRIX_PROPERTY
+            = new Property<ImageView, Matrix>(Matrix.class, "setImageMatrix") {
         @Override
-        public void set(PhotoView photoView, Matrix matrix) {
-            photoView.animateTransform(matrix);
+        public void set(ImageView imageView, Matrix matrix) {
+            imageView.setImageMatrix(matrix);
         }
 
         @Override
-        public Matrix get(PhotoView object) {
+        public Matrix get(ImageView object) {
             return null;
         }
     };
@@ -74,7 +74,7 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementEnterAnimator(PhotoView target, SharedElementModel data) {
+    static Animator createSharedElementEnterAnimator(View target, SharedElementModel data) {
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
         target.setPivotX(0);
@@ -87,7 +87,7 @@ class SharedElementUtils {
                 ObjectAnimator.ofFloat(target, "translationY", data.startY - locations[1], 0)
         );
         enterAnimators.setInterpolator(new OvershootInterpolator(1f));
-        enterAnimators.setDuration(400);
+        enterAnimators.setDuration(300);
         return enterAnimators;
     }
 
@@ -97,23 +97,23 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementExitAnimator(@Nullable PhotoView target, SharedElementModel data) {
-        if (target == null || target.getDrawable() == null) {
+    static Animator createSharedElementExitAnimator(@Nullable ImageView target, SharedElementModel data) {
+        if (target == null) {
+            return null;
+        }
+        Drawable drawable = target.getDrawable();
+        if (drawable == null) {
             return null;
         }
         AnimatorSet exitAnimators = new AnimatorSet();
         // 设置尺寸动画 ChangeBounds
         AnimatorSet boundsAnim = getBoundsChangedAnim(target, data);
         // 设置缩放动画
-        final ObjectAnimator matrixAnim = ObjectAnimator.ofObject(target, ANIMATED_TRANSFORM_PROPERTY,
+        final ObjectAnimator matrixAnim = ObjectAnimator.ofObject(target, ANIMATED_IMAGE_MATRIX_PROPERTY,
                 new MatrixEvaluator(),
                 target.getImageMatrix(),
-                centerCropMatrix(
-                        target.getDrawable().getIntrinsicWidth(),
-                        target.getDrawable().getIntrinsicHeight(),
-                        data.width,
-                        data.height
-                )
+                centerCropMatrix(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(),
+                        data.width, data.height)
         );
         exitAnimators.playTogether(boundsAnim, matrixAnim);
         exitAnimators.setDuration(400);
@@ -127,7 +127,7 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    private static AnimatorSet getBoundsChangedAnim(PhotoView target, SharedElementModel data) {
+    private static AnimatorSet getBoundsChangedAnim(View target, SharedElementModel data) {
         final ViewBounds viewBounds = new ViewBounds(target);
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);

@@ -49,18 +49,23 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         mCurPosition = position;
         mCurDisplay = mDisplayMetas.get(position);
         // 展示 Toolbar 左边的指示文本
-        mView.displayToolbarLeftText(buildToolbarLeftText());
+        mView.setLeftTitleText(buildToolbarLeftText());
         // 展示图片
         mView.displayAt(mCurPosition);
         if (mConfig.isPickerSupport()) {
-            mView.setToolbarIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
-            mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
-            mView.displayPreviewEnsureText(buildEnsureText());
+            mView.setIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
+            mView.setIndicatorText(buildToolbarCheckedIndicatorText());
+            mView.setEnsureText(buildEnsureText());
+        }
+        // 判断是否允许 ViewPager 执行退出动画
+        if (mSharedElementModel != null) {
+            // 若当前位置可以执行共享元素返回, 则不允许 ViewPager 执行自己的退出动画
+            mView.setDisallowViewPagerDismissAnim(mCurPosition == mSharedElementModel.sharedPosition);
         }
     }
 
     @Override
-    public void handleToolbarCheckedIndicatorClick(boolean isChecked) {
+    public void handleIndicatorClick(boolean isChecked) {
         if (isChecked) {
             // 移除选中数据与状态
             int removedIndex = mPickedMetas.indexOf(mCurDisplay);
@@ -69,15 +74,15 @@ class WatcherPresenter implements WatcherContract.IPresenter {
             }
             mPickedMetas.remove(removedIndex);
             // 通知 RecyclerView 数据变更
-            mView.notifyBottomPicturesRemoved(mCurDisplay, removedIndex);
+            mView.notifyItemRemoved(mCurDisplay, removedIndex);
         } else {
             // 判断是否达到选择上限
             if (mPickedMetas.size() < mConfig.getThreshold()) {
                 mPickedMetas.add(mCurDisplay);
                 int addedIndex = mPickedMetas.indexOf(mCurDisplay);
                 // 通知 RecyclerView 数据变更
-                mView.notifyBottomPictureAdded(mCurDisplay, addedIndex);
-                mView.previewPicturesSmoothScrollToPosition(addedIndex);
+                mView.notifyItemPicked(mCurDisplay, addedIndex);
+                mView.smoothScrollToPosition(addedIndex);
             } else {
                 mView.showMsg(
                         mView.getString(R.string.picture_picker_watcher_tips_over_threshold_prefix) +
@@ -86,14 +91,14 @@ class WatcherPresenter implements WatcherContract.IPresenter {
                 );
             }
         }
-        mView.setToolbarIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
-        mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
-        mView.displayPreviewEnsureText(buildEnsureText());
+        mView.setIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
+        mView.setIndicatorText(buildToolbarCheckedIndicatorText());
+        mView.setEnsureText(buildEnsureText());
         // 控制底部导航栏的展示
         if (mPickedMetas.isEmpty()) {
-            mView.dismissBottomPreview();
+            mView.dismissPickedPanel();
         } else {
-            mView.showBottomPreview();
+            mView.showPickedPanel();
         }
     }
 
@@ -106,7 +111,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     }
 
     @Override
-    public void handleEnsureClick() {
+    public void handleEnsureClicked() {
         if (mPickedMetas.isEmpty()) {
             mView.showMsg(mView.getString(R.string.picture_picker_watcher_tips_ensure_failed));
             return;
@@ -119,21 +124,21 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     public void handleBackPressed() {
         if (mSharedElementModel != null && mCurPosition == mSharedElementModel.sharedPosition) {
             mView.showSharedElementExitAndFinish(mSharedElementModel);
-            mView.dismissBottomPreview();
+            mView.dismissPickedPanel();
         } else {
             mView.finish();
         }
     }
 
     @Override
-    public void handleSetResultBeforeFinish() {
-        mView.setResultBeforeFinish(mPickedMetas, mIsEnsurePressed);
+    public void handleFinish() {
+        mView.setResult(mPickedMetas, mIsEnsurePressed);
     }
 
     private void setupViews() {
         // 1. 设置 Toolbar 数据
-        mView.displayToolbarLeftText(buildToolbarLeftText());
-        mView.setToolbarCheckedIndicatorVisibility(mConfig.isPickerSupport());
+        mView.setLeftTitleText(buildToolbarLeftText());
+        mView.setIndicatorVisible(mConfig.isPickerSupport());
 
         // 2. 设置 Pictures 数据
         mView.setDisplayAdapter(mDisplayMetas);
@@ -141,23 +146,23 @@ class WatcherPresenter implements WatcherContract.IPresenter {
 
         // 3. 设置底部菜单和按钮选中的状态
         if (mConfig.isPickerSupport()) {
-            mView.setToolbarCheckedIndicatorColors(
+            mView.setIndicatorColors(
                     mConfig.getIndicatorBorderCheckedColor(),
                     mConfig.getIndicatorBorderUncheckedColor(),
                     mConfig.getIndicatorSolidColor(),
                     mConfig.getIndicatorTextColor()
             );
-            mView.setToolbarIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
-            mView.displayToolbarIndicatorText(buildToolbarCheckedIndicatorText());
+            mView.setIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
+            mView.setIndicatorText(buildToolbarCheckedIndicatorText());
             // 底部菜单
-            mView.setPreviewAdapter(mPickedMetas);
-            mView.displayPreviewEnsureText(buildEnsureText());
+            mView.setPickedAdapter(mPickedMetas);
+            mView.setEnsureText(buildEnsureText());
             // 底部菜单延时弹出
             if (!mPickedMetas.isEmpty()) {
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mView.showBottomPreview();
+                        mView.showPickedPanel();
                     }
                 }, mSharedElementModel != null ? 500 : 0);
             }
@@ -165,6 +170,8 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         // 4. 执行共享元素入场动画
         if (mSharedElementModel != null) {
             mView.showSharedElementEnter(mDisplayMetas.get(mCurPosition), mSharedElementModel);
+            // 判断是否允许 ViewPager 执行退出动画
+            mView.setDisallowViewPagerDismissAnim(true);
         }
     }
 

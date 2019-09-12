@@ -3,7 +3,6 @@ package com.sharry.lib.picturepicker;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Color;
@@ -29,27 +28,29 @@ import androidx.viewpager.widget.ViewPager;
  * 可拖拽返回的 ViewPager, 这里用作图片查看器
  *
  * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
- * @version 1.0
+ * @version 1.1
  * @since 2017/12/28 16:25
  */
 public class DraggableViewPager extends ViewPager {
 
     private static final int INVALIDATE_VALUE = -1;
 
-    private int mIgnoreDismissAnimPosition = INVALIDATE_VALUE;
     private int mBaseColor = Color.BLACK;
 
     private float mDownX = 0f;
     private float mDownY = 0f;
-    private float mCapturedOriginY = 0f;                 // 被捕获的 View 的 Y 的起始点
-    private float mDragThresholdHeight = 0f;             // 拖动到可以返回的阈值
-    private float mVerticalVelocityThreshold = 1000f;    // 竖直方向上速度的阈值
-    private float mFingerUpBackgroundAlpha = 1f;         // 手指松开时, 当前 ViewPager 背景的透明度
+    private float mCapturedOriginY = 0f;
+    private float mDragThresholdHeight = 0f;
+    private float mVerticalVelocityThreshold = 1000f;
+    private float mFingerUpBackgroundAlpha = 1f;
 
     private boolean mIsDragging = false;
     private boolean mIsAnimRunning = false;
+    private boolean mIsDisallowDismissAnim = false;
 
     private VelocityTracker mVelocityTracker;
+    OnDragDismissListener mOnDragDismissListener;
+    OnPagerChangedListener mOnPageChangeListener;
 
     public DraggableViewPager(Context context) {
         this(context, null);
@@ -65,20 +66,12 @@ public class DraggableViewPager extends ViewPager {
         mVelocityTracker = VelocityTracker.obtain();
         // 规定拖拽到消失的阈值
         mDragThresholdHeight = getResources().getDisplayMetrics().heightPixels / 4;
-    }
-
-    public interface OnPagerChangedListener {
-
-        void onPagerChanged(int position);
-
-    }
-
-    public void setOnPagerChangedListener(final OnPagerChangedListener listener) {
+        // set page change listener
         addOnPageChangeListener(new OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                if (listener != null) {
-                    listener.onPagerChanged(position);
+                if (mOnPageChangeListener != null) {
+                    mOnPageChangeListener.onPagerChanged(position);
                 }
             }
 
@@ -95,10 +88,26 @@ public class DraggableViewPager extends ViewPager {
     }
 
     /**
-     * 设置不执行退出动画的位置
+     * 设置页面变更监听
      */
-    public void setIgnoreDismissAnimPosition(int position) {
-        this.mIgnoreDismissAnimPosition = position;
+    public void setOnPagerChangedListener(@Nullable final OnPagerChangedListener listener) {
+        mOnPageChangeListener = listener;
+    }
+
+    /**
+     * 设置拖拽消失监听
+     */
+    public void setOnDragDismissListener(@Nullable OnDragDismissListener listener) {
+        this.mOnDragDismissListener = listener;
+    }
+
+    /**
+     * 设置不执行退出动画的位置
+     *
+     * @param isDisallowDismissAnim true is not allow exec dismiss anim, false will running.
+     */
+    public void setDisallowDismissAnimator(boolean isDisallowDismissAnim) {
+        this.mIsDisallowDismissAnim = isDisallowDismissAnim;
     }
 
     /**
@@ -150,7 +159,7 @@ public class DraggableViewPager extends ViewPager {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (!mIsDragging || isInvalidateCurrentView()) {
+        if (!mIsDragging || getCurrentView() == null || mIsAnimRunning) {
             return super.onTouchEvent(ev);
         }
         mVelocityTracker.addMovement(ev);
@@ -174,7 +183,11 @@ public class DraggableViewPager extends ViewPager {
                 } else {
                     recover();
                 }
-                mVelocityTracker.recycle();
+                try {
+                    mVelocityTracker.recycle();
+                } catch (Throwable e) {
+                    // ......
+                }
                 mIsDragging = false;
                 break;
             default:
@@ -188,35 +201,22 @@ public class DraggableViewPager extends ViewPager {
         super.setAdapter(new PagerAdapterProxy(adapter));
     }
 
-    /**
-     * 获取当前正在展示的 View
-     */
     @Nullable
     private View getCurrentView() {
         PagerAdapter adapter = getAdapter();
-        if (adapter instanceof IViewProvider) {
-            return ((IViewProvider) adapter).getCurrentView();
+        if (adapter instanceof PagerAdapterProxy) {
+            return ((PagerAdapterProxy) adapter).getCurrentView();
         }
         return null;
     }
 
-    /**
-     * 判断展示的 View 是否可用
-     */
-    private boolean isInvalidateCurrentView() {
-        return getCurrentView() == null;
-    }
-
-    /**
-     * 恢复到原位
-     */
     private void recover() {
-        if (isInvalidateCurrentView()) {
+        if (mIsAnimRunning || getCurrentView() == null) {
             return;
         }
-        ValueAnimator recoverAnim = ValueAnimator.ofFloat(getCurrentView().getY(), mCapturedOriginY).setDuration(300);
-        recoverAnim.setInterpolator(new OvershootInterpolator(3f));
-        recoverAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        ValueAnimator animRecover = ValueAnimator.ofFloat(getCurrentView().getY(), mCapturedOriginY).setDuration(300);
+        animRecover.setInterpolator(new OvershootInterpolator(3f));
+        animRecover.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 getCurrentView().setY((float) animation.getAnimatedValue());
@@ -228,7 +228,7 @@ public class DraggableViewPager extends ViewPager {
                 );
             }
         });
-        recoverAnim.addListener(new AnimatorListenerAdapter() {
+        animRecover.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimRunning = true;
@@ -239,25 +239,24 @@ public class DraggableViewPager extends ViewPager {
                 mIsAnimRunning = false;
             }
         });
-        recoverAnim.start();
+        animRecover.start();
     }
 
-    /**
-     * 滑动超过阈值时消失
-     */
     private void dismiss() {
-        if (isInvalidateCurrentView()) {
+        if (mIsAnimRunning) {
             return;
         }
-        if (getCurrentItem() == mIgnoreDismissAnimPosition) {
-            ((Activity) getContext()).onBackPressed();
+        if (getCurrentView() == null || mIsDisallowDismissAnim) {
+            if (mOnDragDismissListener != null) {
+                mOnDragDismissListener.onDismissDirectly();
+            }
             return;
         }
         float destY = (getCurrentView().getY() - mCapturedOriginY > 0 ? 1 : -1)
                 * getResources().getDisplayMetrics().heightPixels;
-        ValueAnimator dismissAnim = ValueAnimator.ofFloat(getCurrentView().getY(), destY).setDuration(400);
-        dismissAnim.setInterpolator(new AnticipateInterpolator(1f));
-        dismissAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        ValueAnimator animDismiss = ValueAnimator.ofFloat(getCurrentView().getY(), destY).setDuration(400);
+        animDismiss.setInterpolator(new AnticipateInterpolator(1f));
+        animDismiss.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 getCurrentView().setY((float) animation.getAnimatedValue());
@@ -269,7 +268,7 @@ public class DraggableViewPager extends ViewPager {
                 );
             }
         });
-        dismissAnim.addListener(new AnimatorListenerAdapter() {
+        animDismiss.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimRunning = true;
@@ -278,24 +277,34 @@ public class DraggableViewPager extends ViewPager {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mIsAnimRunning = false;
-                ((Activity) getContext()).onBackPressed();
+                setVisibility(View.INVISIBLE);
+                if (mOnDragDismissListener != null) {
+                    mOnDragDismissListener.onDismissed();
+                }
             }
+
         });
-        dismissAnim.start();
+        animDismiss.start();
     }
 
-    /**
-     * 获取用于背景色
-     */
     private int getBackgroundColor() {
         return mBaseColor;
     }
 
+    public interface OnPagerChangedListener {
 
-    /**
-     * 静态代理的 Adapter 对象
-     */
-    private static final class PagerAdapterProxy extends PagerAdapter implements IViewProvider {
+        void onPagerChanged(int position);
+
+    }
+
+    public interface OnDragDismissListener {
+
+        void onDismissed();
+
+        void onDismissDirectly();
+    }
+
+    private static final class PagerAdapterProxy extends PagerAdapter {
 
         private View mCurrentView;
         private PagerAdapter mOriginAdapter;
@@ -304,7 +313,6 @@ public class DraggableViewPager extends ViewPager {
             mOriginAdapter = originAdapter;
         }
 
-        @Override
         public View getCurrentView() {
             return mCurrentView;
         }
@@ -421,13 +429,6 @@ public class DraggableViewPager extends ViewPager {
         public void unregisterDataSetObserver(@NonNull DataSetObserver observer) {
             mOriginAdapter.unregisterDataSetObserver(observer);
         }
-
-    }
-
-
-    interface IViewProvider {
-
-        View getCurrentView();
 
     }
 
