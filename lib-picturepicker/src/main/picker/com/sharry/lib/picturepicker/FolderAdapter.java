@@ -54,7 +54,7 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
         if (firstMeta.isPicture) {
             Loader.loadPicture(context, firstMeta.path, holder.ivPreview);
         } else {
-            Loader.loadVideo(context, firstMeta.path, firstMeta.thumbnailPath, holder.ivPreview);
+            Loader.loadVideoThumbnails(context, firstMeta.path, firstMeta.thumbnailPath, holder.ivPreview);
         }
         holder.tvFolderName.setText(folder.getName());
     }

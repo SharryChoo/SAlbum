@@ -12,8 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.sharry.lib.picturepicker.photoview.OnPhotoTapListener;
 import com.sharry.lib.picturepicker.photoview.PhotoView;
+import com.sharry.lib.picturepicker.subscaleview.ImageSource;
+import com.sharry.lib.picturepicker.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -44,9 +45,11 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     /**
      * Widget.
      */
-    private Interaction mInteraction;
-    private PhotoView mIvPicture;
+    private SubsamplingScaleImageView mIvHighQuality;
+    private PhotoView mIvNormalQuality;
     private ImageView mIvPlayIcon;
+
+    private Interaction mInteraction;
 
     private boolean mViewInitialized = false;
 
@@ -76,7 +79,7 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mIvPicture = null;
+        mIvHighQuality = null;
         mViewInitialized = false;
         // Recycle Instance
         int indexOfValue = ACTIVES.indexOfValue(this);
@@ -91,6 +94,12 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.iv_play_icon) {
             VideoPlayerActivity.launch(v.getContext(), mDataSource);
+        } else if (v.getId() == R.id.iv_picture) {
+            mInteraction.onBackPressed();
+        } else if (v.getId() == R.id.iv_gif) {
+            mInteraction.onBackPressed();
+        } else {
+            // nothing.
         }
     }
 
@@ -100,13 +109,13 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     }
 
     private void initView(View view) {
-        mIvPicture = view.findViewById(R.id.iv_picture);
-        mIvPicture.setOnPhotoTapListener(new OnPhotoTapListener() {
-            @Override
-            public void onPhotoTap(ImageView view, float x, float y) {
-                mInteraction.onBackPressed();
-            }
-        });
+        // 图像加载
+        mIvHighQuality = view.findViewById(R.id.iv_picture);
+        mIvHighQuality.setOnClickListener(this);
+        // gif 加载
+        mIvNormalQuality = view.findViewById(R.id.iv_gif);
+        mIvNormalQuality.setOnClickListener(this);
+        // 播放按钮
         mIvPlayIcon = view.findViewById(R.id.iv_play_icon);
         mIvPlayIcon.setOnClickListener(this);
         mViewInitialized = true;
@@ -117,34 +126,30 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
         if (mDataSource == null || !mViewInitialized) {
             return;
         }
-        mIvPicture.setVisibility(View.VISIBLE);
+        // 加载图片
         if (mDataSource.isPicture) {
             mIvPlayIcon.setVisibility(View.GONE);
+            // 加载 GIF
             if (Constants.MIME_TYPE_GIF.equals(mDataSource.mimeType)) {
-                Loader.loadGif(mIvPicture.getContext(), mDataSource.path, mIvPicture);
-            } else {
-                Loader.loadPicture(mIvPicture.getContext(), mDataSource.path, mIvPicture);
+                mIvHighQuality.setVisibility(View.GONE);
+                mIvNormalQuality.setVisibility(View.VISIBLE);
+                mIvNormalQuality.setEnabled(true);
+                Loader.loadGif(mIvNormalQuality.getContext(), mDataSource.path, mIvNormalQuality);
             }
-        } else {
-            mIvPlayIcon.setVisibility(View.VISIBLE);
-            Loader.loadVideo(mIvPicture.getContext(), mDataSource.path, mDataSource.thumbnailPath, mIvPicture);
+            // 加载高清图
+            else {
+                mIvNormalQuality.setVisibility(View.GONE);
+                mIvHighQuality.setVisibility(View.VISIBLE);
+                mIvHighQuality.setImage(ImageSource.uri(mDataSource.path));
+            }
         }
-    }
-
-    /**
-     * 获取 PhotoView
-     */
-    PhotoView getPhotoView() {
-        return mIvPicture;
-    }
-
-    /**
-     * 执行退出前的准备
-     */
-    void dismissOtherView() {
-        if (mViewInitialized) {
-            mIvPlayIcon.setVisibility(View.GONE);
-            mIvPicture.setVisibility(View.VISIBLE);
+        // 加载视频缩略图
+        else {
+            mIvPlayIcon.setVisibility(View.VISIBLE);
+            mIvNormalQuality.setVisibility(View.VISIBLE);
+            mIvHighQuality.setVisibility(View.GONE);
+            mIvNormalQuality.setEnabled(false);
+            Loader.loadVideoThumbnails(mIvNormalQuality.getContext(), mDataSource.path, mDataSource.thumbnailPath, mIvNormalQuality);
         }
     }
 

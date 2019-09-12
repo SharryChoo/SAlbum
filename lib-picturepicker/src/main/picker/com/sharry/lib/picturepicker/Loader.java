@@ -45,7 +45,8 @@ final class Loader {
         sEngine.loadGif(context, uri, imageView);
     }
 
-    static void loadVideo(@NonNull Context context, @NonNull String uri, @Nullable String thumbnailPath, @NonNull ImageView imageView) {
+    static void loadVideoThumbnails(@NonNull Context context, @NonNull String uri,
+                                    @Nullable String thumbnailPath, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;

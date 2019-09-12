@@ -193,6 +193,8 @@ class CustomGestureDetector {
                     mLastTouchY = ev.getY(newPointerIndex);
                 }
                 break;
+            default:
+                break;
         }
 
         mActivePointerIndex = ev

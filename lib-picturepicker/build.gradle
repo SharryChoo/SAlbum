@@ -8,6 +8,7 @@ def resDirs = [
         "picker/com/sharry/lib/picturepicker",
         "taker/com/sharry/lib/picturepicker",
         "player/com/sharry/lib/picturepicker",
+        "widget/com/sharry/lib/picturepicker/subscaleview"
 ]
 
 android {

@@ -150,7 +150,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         // 加载视频第一帧
-        Loader.loadVideo(mContext, meta.path, meta.thumbnailPath, holder.ivPicture);
+        Loader.loadVideoThumbnails(mContext, meta.path, meta.thumbnailPath, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mPickedSet.indexOf(meta);
         // 设置点击监听

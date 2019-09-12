@@ -124,12 +124,6 @@ interface WatcherContract {
          */
         void showSharedElementEnter(MediaMeta mediaMeta, SharedElementModel elementData);
 
-        /**
-         * 展示共享元素退场动画
-         *
-         * @param elementData shared element data.
-         */
-        void showSharedElementExitAndFinish(SharedElementModel elementData);
     }
 
 

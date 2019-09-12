@@ -4,8 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.sharry.lib.picturepicker.photoview.PhotoView
+    <com.sharry.lib.picturepicker.subscaleview.SubsamplingScaleImageView
         android:id="@+id/iv_picture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.sharry.lib.picturepicker.photoview.PhotoView
+        android:id="@+id/iv_gif"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

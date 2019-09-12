@@ -41,10 +41,10 @@ public class DraggableViewPager extends ViewPager {
 
     private float mDownX = 0f;
     private float mDownY = 0f;
-    private float mCapturedOriginY = 0f;                 // 被捕获的 View 的 Y 的起始点
-    private float mDragThresholdHeight = 0f;             // 拖动到可以返回的阈值
-    private float mVerticalVelocityThreshold = 1000f;    // 竖直方向上速度的阈值
-    private float mFingerUpBackgroundAlpha = 1f;         // 手指松开时, 当前 ViewPager 背景的透明度
+    private float mCapturedOriginY = 0f;
+    private float mDragThresholdHeight = 0f;
+    private float mVerticalVelocityThreshold = 1000f;
+    private float mFingerUpBackgroundAlpha = 1f;
 
     private boolean mIsDragging = false;
     private boolean mIsAnimRunning = false;
@@ -150,7 +150,7 @@ public class DraggableViewPager extends ViewPager {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (!mIsDragging || isInvalidateCurrentView()) {
+        if (!mIsDragging || getCurrentView() == null || mIsAnimRunning) {
             return super.onTouchEvent(ev);
         }
         mVelocityTracker.addMovement(ev);
@@ -174,7 +174,11 @@ public class DraggableViewPager extends ViewPager {
                 } else {
                     recover();
                 }
-                mVelocityTracker.recycle();
+                try {
+                    mVelocityTracker.recycle();
+                } catch (Throwable e) {
+                    // ......
+                }
                 mIsDragging = false;
                 break;
             default:
@@ -201,22 +205,18 @@ public class DraggableViewPager extends ViewPager {
     }
 
     /**
-     * 判断展示的 View 是否可用
-     */
-    private boolean isInvalidateCurrentView() {
-        return getCurrentView() == null;
-    }
-
-    /**
      * 恢复到原位
      */
     private void recover() {
-        if (isInvalidateCurrentView()) {
+        if (getCurrentView() == null) {
             return;
         }
-        ValueAnimator recoverAnim = ValueAnimator.ofFloat(getCurrentView().getY(), mCapturedOriginY).setDuration(300);
-        recoverAnim.setInterpolator(new OvershootInterpolator(3f));
-        recoverAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        if (mIsAnimRunning) {
+            return;
+        }
+        ValueAnimator mAnimRecover = ValueAnimator.ofFloat(getCurrentView().getY(), mCapturedOriginY).setDuration(300);
+        mAnimRecover.setInterpolator(new OvershootInterpolator(3f));
+        mAnimRecover.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 getCurrentView().setY((float) animation.getAnimatedValue());
@@ -228,7 +228,7 @@ public class DraggableViewPager extends ViewPager {
                 );
             }
         });
-        recoverAnim.addListener(new AnimatorListenerAdapter() {
+        mAnimRecover.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimRunning = true;
@@ -239,25 +239,28 @@ public class DraggableViewPager extends ViewPager {
                 mIsAnimRunning = false;
             }
         });
-        recoverAnim.start();
+        mAnimRecover.start();
     }
 
     /**
      * 滑动超过阈值时消失
      */
     private void dismiss() {
-        if (isInvalidateCurrentView()) {
+        if (getCurrentView() == null) {
             return;
         }
         if (getCurrentItem() == mIgnoreDismissAnimPosition) {
             ((Activity) getContext()).onBackPressed();
             return;
         }
+        if (mIsAnimRunning) {
+            return;
+        }
         float destY = (getCurrentView().getY() - mCapturedOriginY > 0 ? 1 : -1)
                 * getResources().getDisplayMetrics().heightPixels;
-        ValueAnimator dismissAnim = ValueAnimator.ofFloat(getCurrentView().getY(), destY).setDuration(400);
-        dismissAnim.setInterpolator(new AnticipateInterpolator(1f));
-        dismissAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        ValueAnimator mAnimDismiss = ValueAnimator.ofFloat(getCurrentView().getY(), destY).setDuration(400);
+        mAnimDismiss.setInterpolator(new AnticipateInterpolator(1f));
+        mAnimDismiss.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 getCurrentView().setY((float) animation.getAnimatedValue());
@@ -269,7 +272,7 @@ public class DraggableViewPager extends ViewPager {
                 );
             }
         });
-        dismissAnim.addListener(new AnimatorListenerAdapter() {
+        mAnimDismiss.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimRunning = true;
@@ -281,7 +284,7 @@ public class DraggableViewPager extends ViewPager {
                 ((Activity) getContext()).onBackPressed();
             }
         });
-        dismissAnim.start();
+        mAnimDismiss.start();
     }
 
     /**

@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
@@ -172,8 +171,6 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void showSharedElementEnter(MediaMeta mediaMeta, final SharedElementModel data) {
-        // 若设置了共享元素, 则这个位置不需要执行 ViewPager 默认的退出动画
-        mWatcherPager.setIgnoreDismissAnimPosition(data.sharedPosition);
         // 加载共享元素占位图
         mIvPlaceHolder.setVisibility(View.VISIBLE);
         Loader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
@@ -194,30 +191,6 @@ public class WatcherActivity extends AppCompatActivity implements
                 return true;
             }
         });
-    }
-
-    @Override
-    public void showSharedElementExitAndFinish(SharedElementModel data) {
-        final WatcherFragment watcherFragment = mWatcherAdapter.getItem(data.sharedPosition);
-        final PhotoView target = watcherFragment.getPhotoView();
-        Animator exitAnim = SharedElementUtils.createSharedElementExitAnimator(target, data);
-        if (exitAnim == null) {
-            finish();
-            return;
-        }
-        exitAnim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                watcherFragment.dismissOtherView();
-                mWatcherPager.setBackgroundColor(Color.TRANSPARENT);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                finish();
-            }
-        });
-        exitAnim.start();
     }
 
     @Override
