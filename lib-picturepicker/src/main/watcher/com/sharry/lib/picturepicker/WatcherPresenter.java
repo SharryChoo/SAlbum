@@ -117,7 +117,12 @@ class WatcherPresenter implements WatcherContract.IPresenter {
 
     @Override
     public void handleBackPressed() {
-        mView.finish();
+        if (mSharedElementModel != null && mCurPosition == mSharedElementModel.sharedPosition) {
+            mView.showSharedElementExitAndFinish(mSharedElementModel);
+            mView.dismissBottomPreview();
+        } else {
+            mView.finish();
+        }
     }
 
     @Override

@@ -17,8 +17,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
-import com.sharry.lib.picturepicker.photoview.PhotoView;
-
 /**
  * Picture watcher shared elements jump helper.
  * <p>
@@ -29,7 +27,7 @@ import com.sharry.lib.picturepicker.photoview.PhotoView;
  * @version 1.0
  * @since 3/18/2019 11:13 AM
  */
-class SharedElementUtils {
+class SharedElementHelper {
 
     private static Property<ImageView, Matrix> ANIMATED_IMAGE_MATRIX_PROPERTY
             = new Property<ImageView, Matrix>(Matrix.class, "setImageMatrix") {
@@ -76,7 +74,7 @@ class SharedElementUtils {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementEnterAnimator(PhotoView target, SharedElementModel data) {
+    static Animator createSharedElementEnterAnimator(View target, SharedElementModel data) {
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
         target.setPivotX(0);
@@ -89,7 +87,7 @@ class SharedElementUtils {
                 ObjectAnimator.ofFloat(target, "translationY", data.startY - locations[1], 0)
         );
         enterAnimators.setInterpolator(new OvershootInterpolator(1f));
-        enterAnimators.setDuration(400);
+        enterAnimators.setDuration(300);
         return enterAnimators;
     }
 
@@ -118,7 +116,7 @@ class SharedElementUtils {
                         data.width, data.height)
         );
         exitAnimators.playTogether(boundsAnim, matrixAnim);
-        exitAnimators.setDuration(400);
+        exitAnimators.setDuration(300);
         exitAnimators.setInterpolator(new DecelerateInterpolator());
         return exitAnimators;
     }

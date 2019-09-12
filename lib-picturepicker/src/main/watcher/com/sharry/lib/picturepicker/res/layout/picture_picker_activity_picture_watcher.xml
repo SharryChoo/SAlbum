@@ -49,7 +49,7 @@
     </LinearLayout>
 
     <com.sharry.lib.picturepicker.photoview.PhotoView
-        android:id="@+id/iv_place_holder"
+        android:id="@+id/iv_se_place_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />

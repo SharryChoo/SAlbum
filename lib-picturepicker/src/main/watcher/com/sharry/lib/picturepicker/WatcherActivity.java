@@ -6,6 +6,8 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
@@ -22,7 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.sharry.lib.picturepicker.photoview.PhotoView;
 import com.sharry.lib.widget.toolbar.SToolbar;
 import com.sharry.lib.widget.toolbar.ViewOptions;
 
@@ -100,7 +101,7 @@ public class WatcherActivity extends AppCompatActivity implements
      * Widgets for this Activity.
      */
     private TextView mTvTitle;
-    private PhotoView mIvPlaceHolder;
+    private ImageView mIvSePlaceHolder;
     private CheckedIndicatorView mCheckIndicator;
     private DraggableViewPager mWatcherPager;
     private WatcherPagerAdapter mWatcherAdapter;
@@ -171,23 +172,57 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void showSharedElementEnter(MediaMeta mediaMeta, final SharedElementModel data) {
+        mWatcherPager.setIgnoreDismissAnimPosition(data.sharedPosition);
         // 加载共享元素占位图
-        mIvPlaceHolder.setVisibility(View.VISIBLE);
-        Loader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
+        mIvSePlaceHolder.setVisibility(View.VISIBLE);
+        Loader.loadPicture(this, mediaMeta.path, mIvSePlaceHolder);
         // 执行共享元素
-        mIvPlaceHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        mIvSePlaceHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                mIvPlaceHolder.getViewTreeObserver().removeOnPreDrawListener(this);
+                mIvSePlaceHolder.getViewTreeObserver().removeOnPreDrawListener(this);
                 // Execute enter animator.
-                Animator startAnim = SharedElementUtils.createSharedElementEnterAnimator(mIvPlaceHolder, data);
+                Animator startAnim = SharedElementHelper.createSharedElementEnterAnimator(mIvSePlaceHolder, data);
                 startAnim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mIvPlaceHolder.setVisibility(View.GONE);
+                        mIvSePlaceHolder.setVisibility(View.GONE);
                     }
                 });
                 startAnim.start();
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void showSharedElementExitAndFinish(@NonNull final SharedElementModel data) {
+        // 获取当前视图的遮罩
+        mIvSePlaceHolder.setVisibility(View.VISIBLE);
+        mIvSePlaceHolder.setImageBitmap(getBitmapFromView(mWatcherPager));
+        // 执行共享元素
+        mIvSePlaceHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mIvSePlaceHolder.getViewTreeObserver().removeOnPreDrawListener(this);
+                // Execute exit animator.
+                Animator exitAnim = SharedElementHelper.createSharedElementExitAnimator(mIvSePlaceHolder, data);
+                if (exitAnim == null) {
+                    finish();
+                    return true;
+                }
+                exitAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        mWatcherPager.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        finish();
+                    }
+                });
+                exitAnim.start();
                 return true;
             }
         });
@@ -327,8 +362,8 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     private void initViews() {
-        // 占位图
-        mIvPlaceHolder = findViewById(R.id.iv_place_holder);
+        // 共享元素占位图
+        mIvSePlaceHolder = findViewById(R.id.iv_se_place_holder);
         // 1. 初始化 ViewPager
         mWatcherPager = findViewById(R.id.view_pager);
         mWatcherPager.setOnPagerChangedListener(this);
@@ -353,6 +388,19 @@ public class WatcherActivity extends AppCompatActivity implements
                 (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
                 ((SharedElementModel) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
+    }
+
+    /**
+     * 从获取 View 的Bitmap
+     *
+     * @param view 需要获取的 Bitmap 的 View
+     */
+    public Bitmap getBitmapFromView(View view) {
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        return bitmap;
     }
 
 }

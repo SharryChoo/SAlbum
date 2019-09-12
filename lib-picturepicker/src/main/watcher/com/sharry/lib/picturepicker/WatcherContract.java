@@ -1,5 +1,6 @@
 package com.sharry.lib.picturepicker;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
@@ -124,6 +125,7 @@ interface WatcherContract {
          */
         void showSharedElementEnter(MediaMeta mediaMeta, SharedElementModel elementData);
 
+        void showSharedElementExitAndFinish(@NonNull SharedElementModel sharedElementModel);
     }
 
 
