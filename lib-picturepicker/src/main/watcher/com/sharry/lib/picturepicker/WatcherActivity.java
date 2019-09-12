@@ -42,7 +42,7 @@ public class WatcherActivity extends AppCompatActivity implements
         WatcherContract.IView,
         DraggableViewPager.OnPagerChangedListener,
         WatcherFragment.Interaction,
-        PickedAdapter.Interaction {
+        PickedAdapter.Interaction, DraggableViewPager.OnDismissListener {
 
     public static final int REQUEST_CODE = 508;
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
@@ -335,6 +335,19 @@ public class WatcherActivity extends AppCompatActivity implements
         }
     }
 
+    ////////////////////////////////////////// OnDismissListener /////////////////////////////////////////////
+
+
+    @Override
+    public void onDismissIgnore() {
+        onBackPressed();
+    }
+
+    @Override
+    public void onDismissed() {
+        finish();
+    }
+
     ////////////////////////////////////////// PickedAdapter.Interaction /////////////////////////////////////////////
 
     @Override
@@ -368,6 +381,7 @@ public class WatcherActivity extends AppCompatActivity implements
         mWatcherPager = findViewById(R.id.view_pager);
         mWatcherPager.setOnPagerChangedListener(this);
         mWatcherPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
+        mWatcherPager.setOnDismissListener(this);
         // 2. 初始化底部菜单
         mLlBottomPreviewContainer = findViewById(R.id.ll_bottom_container);
         mBottomPreviewPictures = findViewById(R.id.recycle_pictures);
@@ -396,6 +410,9 @@ public class WatcherActivity extends AppCompatActivity implements
      * @param view 需要获取的 Bitmap 的 View
      */
     public Bitmap getBitmapFromView(View view) {
+        if (view == null) {
+            return null;
+        }
         Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);

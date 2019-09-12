@@ -116,7 +116,7 @@ class SharedElementHelper {
                         data.width, data.height)
         );
         exitAnimators.playTogether(boundsAnim, matrixAnim);
-        exitAnimators.setDuration(300);
+        exitAnimators.setDuration(400);
         exitAnimators.setInterpolator(new DecelerateInterpolator());
         return exitAnimators;
     }
