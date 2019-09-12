@@ -82,7 +82,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
                 int addedIndex = mPickedMetas.indexOf(mCurDisplay);
                 // 通知 RecyclerView 数据变更
                 mView.notifyItemPicked(mCurDisplay, addedIndex);
-                mView.smoothScrollToPosition(addedIndex);
+                mView.pickedPanelSmoothScrollToPosition(addedIndex);
             } else {
                 mView.showMsg(
                         mView.getString(R.string.picture_picker_watcher_tips_over_threshold_prefix) +
@@ -131,7 +131,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     }
 
     @Override
-    public void handleFinish() {
+    public void handleBeforeFinish() {
         mView.setResult(mPickedMetas, mIsEnsurePressed);
     }
 

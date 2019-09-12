@@ -248,7 +248,7 @@ public class DraggableViewPager extends ViewPager {
         }
         if (getCurrentView() == null || mIsDisallowDismissAnim) {
             if (mOnDragDismissListener != null) {
-                mOnDragDismissListener.onDismissDirectly();
+                mOnDragDismissListener.onDismissWithoutAnim();
             }
             return;
         }
@@ -277,7 +277,6 @@ public class DraggableViewPager extends ViewPager {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mIsAnimRunning = false;
-                setVisibility(View.INVISIBLE);
                 if (mOnDragDismissListener != null) {
                     mOnDragDismissListener.onDismissed();
                 }
@@ -301,7 +300,7 @@ public class DraggableViewPager extends ViewPager {
 
         void onDismissed();
 
-        void onDismissDirectly();
+        void onDismissWithoutAnim();
     }
 
     private static final class PagerAdapterProxy extends PagerAdapter {

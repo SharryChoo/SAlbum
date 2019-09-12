@@ -36,13 +36,13 @@ interface WatcherContract {
 
         void setDisplayAdapter(@NonNull ArrayList<MediaMeta> mediaMetas);
 
-        void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet);
-
         void setDisallowViewPagerDismissAnim(boolean isDisallowDismissAnim);
 
         void displayAt(int position);
 
-        void smoothScrollToPosition(int position);
+        void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet);
+
+        void pickedPanelSmoothScrollToPosition(int position);
 
         void showPickedPanel();
 
@@ -52,9 +52,9 @@ interface WatcherContract {
 
         void notifyItemPicked(@NonNull MediaMeta addedMeta, int addedIndex);
 
-        void finish();
-
         void setResult(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed);
+
+        void finish();
 
         String getString(@StringRes int resId);
 
@@ -74,7 +74,7 @@ interface WatcherContract {
 
         void handleBackPressed();
 
-        void handleFinish();
+        void handleBeforeFinish();
 
     }
 

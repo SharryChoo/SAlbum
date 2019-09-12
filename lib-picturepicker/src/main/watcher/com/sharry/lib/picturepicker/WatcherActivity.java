@@ -133,7 +133,7 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void finish() {
-        mPresenter.handleFinish();
+        mPresenter.handleBeforeFinish();
         super.finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
@@ -146,30 +146,6 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
-
-    @Override
-    public void setIndicatorVisible(boolean isShowCheckedIndicator) {
-        mCheckIndicator.setVisibility(isShowCheckedIndicator ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void setIndicatorColors(int indicatorBorderCheckedColor, int indicatorBorderUncheckedColor,
-                                   int indicatorSolidColor, int indicatorTextColor) {
-        mCheckIndicator.setBorderColor(indicatorBorderCheckedColor, indicatorBorderUncheckedColor);
-        mCheckIndicator.setSolidColor(indicatorSolidColor);
-        mCheckIndicator.setTextColor(indicatorTextColor);
-    }
-
-    @Override
-    public void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet) {
-        mBottomPreviewPictures.setAdapter(new PickedAdapter(pickedSet, this));
-    }
-
-    @Override
-    public void setDisplayAdapter(@NonNull ArrayList<MediaMeta> items) {
-        mWatcherAdapter = new WatcherPagerAdapter(getSupportFragmentManager(), items);
-        mWatcherPager.setAdapter(mWatcherAdapter);
-    }
 
     @Override
     public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementModel data) {
@@ -201,7 +177,7 @@ public class WatcherActivity extends AppCompatActivity implements
         final PhotoView target = watcherFragment.getPhotoView();
         Animator exitAnim = SharedElementHelper.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
-            finish();
+            this.finish();
             return;
         }
         exitAnim.addListener(new AnimatorListenerAdapter() {
@@ -213,15 +189,64 @@ public class WatcherActivity extends AppCompatActivity implements
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                finish();
+                WatcherActivity.this.finish();
             }
         });
         exitAnim.start();
     }
 
     @Override
+    public void setLeftTitleText(@NonNull CharSequence content) {
+        mTvTitle.setText(content);
+    }
+
+    @Override
+    public void setIndicatorText(@NonNull CharSequence indicatorText) {
+        mCheckIndicator.setText(indicatorText);
+    }
+
+    @Override
+    public void setIndicatorColors(int indicatorBorderCheckedColor, int indicatorBorderUncheckedColor,
+                                   int indicatorSolidColor, int indicatorTextColor) {
+        mCheckIndicator.setBorderColor(indicatorBorderCheckedColor, indicatorBorderUncheckedColor);
+        mCheckIndicator.setSolidColor(indicatorSolidColor);
+        mCheckIndicator.setTextColor(indicatorTextColor);
+    }
+
+    @Override
+    public void setIndicatorVisible(boolean isShowCheckedIndicator) {
+        mCheckIndicator.setVisibility(isShowCheckedIndicator ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setIndicatorChecked(boolean isChecked) {
+        mCheckIndicator.setChecked(isChecked);
+    }
+
+    @Override
+    public void setEnsureText(@NonNull CharSequence content) {
+        mTvEnsure.setText(content);
+    }
+
+    @Override
+    public void setDisplayAdapter(@NonNull ArrayList<MediaMeta> items) {
+        mWatcherAdapter = new WatcherPagerAdapter(getSupportFragmentManager(), items);
+        mWatcherPager.setAdapter(mWatcherAdapter);
+    }
+
+    @Override
+    public void displayAt(int position) {
+        mWatcherPager.setCurrentItem(position);
+    }
+
+    @Override
     public void setDisallowViewPagerDismissAnim(boolean isDisallowDismissAnim) {
         mWatcherPager.setDisallowDismissAnimator(isDisallowDismissAnim);
+    }
+
+    @Override
+    public void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet) {
+        mBottomPreviewPictures.setAdapter(new PickedAdapter(pickedSet, this));
     }
 
     @Override
@@ -238,31 +263,6 @@ public class WatcherActivity extends AppCompatActivity implements
         if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
             adapter.notifyItemInserted(addedIndex);
         }
-    }
-
-    @Override
-    public void displayAt(int position) {
-        mWatcherPager.setCurrentItem(position);
-    }
-
-    @Override
-    public void setIndicatorChecked(boolean isChecked) {
-        mCheckIndicator.setChecked(isChecked);
-    }
-
-    @Override
-    public void setIndicatorText(@NonNull CharSequence indicatorText) {
-        mCheckIndicator.setText(indicatorText);
-    }
-
-    @Override
-    public void setEnsureText(@NonNull CharSequence content) {
-        mTvEnsure.setText(content);
-    }
-
-    @Override
-    public void setLeftTitleText(@NonNull CharSequence content) {
-        mTvTitle.setText(content);
     }
 
     @Override
@@ -304,7 +304,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void smoothScrollToPosition(int position) {
+    public void pickedPanelSmoothScrollToPosition(int position) {
         mBottomPreviewPictures.smoothScrollToPosition(position);
     }
 
@@ -334,7 +334,7 @@ public class WatcherActivity extends AppCompatActivity implements
     ////////////////////////////////////////// DraggableViewPager.OnDismissListener /////////////////////////////////////////////
 
     @Override
-    public void onDismissDirectly() {
+    public void onDismissWithoutAnim() {
         onBackPressed();
     }
 
@@ -349,6 +349,8 @@ public class WatcherActivity extends AppCompatActivity implements
     public void onPreviewItemClicked(ImageView imageView, MediaMeta meta, int position) {
         mPresenter.handlePickedItemClicked(meta);
     }
+
+    ////////////////////////////////////////// Internal methods /////////////////////////////////////////////
 
     private void initTitle() {
         SToolbar toolbar = findViewById(R.id.toolbar);
