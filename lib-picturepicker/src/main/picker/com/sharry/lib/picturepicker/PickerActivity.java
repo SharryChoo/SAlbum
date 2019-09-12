@@ -300,7 +300,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     protected void initViews() {
         // Pictures recycler view.
-        mRvPicker = findViewById(R.id.recycle_pictures);
+        mRvPicker = findViewById(R.id.rv_picked_panel);
 
         // Bottom navigation menu.
         mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);

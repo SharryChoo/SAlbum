@@ -46,11 +46,9 @@ public class DraggableViewPager extends ViewPager {
 
     private boolean mIsDragging = false;
     private boolean mIsAnimRunning = false;
-    private boolean mIsDisallowDismissAnim = false;
 
     private VelocityTracker mVelocityTracker;
-    OnDragDismissListener mOnDragDismissListener;
-    OnPagerChangedListener mOnPageChangeListener;
+    private Callback mCallback;
 
     public DraggableViewPager(Context context) {
         this(context, null);
@@ -70,8 +68,8 @@ public class DraggableViewPager extends ViewPager {
         addOnPageChangeListener(new OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                if (mOnPageChangeListener != null) {
-                    mOnPageChangeListener.onPagerChanged(position);
+                if (mCallback != null) {
+                    mCallback.onPagerChanged(position);
                 }
             }
 
@@ -88,26 +86,10 @@ public class DraggableViewPager extends ViewPager {
     }
 
     /**
-     * 设置页面变更监听
-     */
-    public void setOnPagerChangedListener(@Nullable final OnPagerChangedListener listener) {
-        mOnPageChangeListener = listener;
-    }
-
-    /**
      * 设置拖拽消失监听
      */
-    public void setOnDragDismissListener(@Nullable OnDragDismissListener listener) {
-        this.mOnDragDismissListener = listener;
-    }
-
-    /**
-     * 设置不执行退出动画的位置
-     *
-     * @param isDisallowDismissAnim true is not allow exec dismiss anim, false will running.
-     */
-    public void setDisallowDismissAnimator(boolean isDisallowDismissAnim) {
-        this.mIsDisallowDismissAnim = isDisallowDismissAnim;
+    public void setCallback(@Nullable Callback listener) {
+        this.mCallback = listener;
     }
 
     /**
@@ -243,13 +225,10 @@ public class DraggableViewPager extends ViewPager {
     }
 
     private void dismiss() {
-        if (mIsAnimRunning) {
+        if (mCallback != null && mCallback.handleDismissAction()) {
             return;
         }
-        if (getCurrentView() == null || mIsDisallowDismissAnim) {
-            if (mOnDragDismissListener != null) {
-                mOnDragDismissListener.onDismissWithoutAnim();
-            }
+        if (mIsAnimRunning || getCurrentView() == null) {
             return;
         }
         float destY = (getCurrentView().getY() - mCapturedOriginY > 0 ? 1 : -1)
@@ -269,6 +248,7 @@ public class DraggableViewPager extends ViewPager {
             }
         });
         animDismiss.addListener(new AnimatorListenerAdapter() {
+
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimRunning = true;
@@ -277,8 +257,8 @@ public class DraggableViewPager extends ViewPager {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mIsAnimRunning = false;
-                if (mOnDragDismissListener != null) {
-                    mOnDragDismissListener.onDismissed();
+                if (mCallback != null) {
+                    mCallback.onDismissed();
                 }
             }
 
@@ -290,17 +270,17 @@ public class DraggableViewPager extends ViewPager {
         return mBaseColor;
     }
 
-    public interface OnPagerChangedListener {
+    public interface Callback {
 
         void onPagerChanged(int position);
 
-    }
-
-    public interface OnDragDismissListener {
+        /**
+         * @return if true mean dismiss action has been consumed, false will consume by self.
+         */
+        boolean handleDismissAction();
 
         void onDismissed();
 
-        void onDismissWithoutAnim();
     }
 
     private static final class PagerAdapterProxy extends PagerAdapter {

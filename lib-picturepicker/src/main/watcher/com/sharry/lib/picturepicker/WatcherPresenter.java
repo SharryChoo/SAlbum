@@ -57,11 +57,6 @@ class WatcherPresenter implements WatcherContract.IPresenter {
             mView.setIndicatorText(buildToolbarCheckedIndicatorText());
             mView.setEnsureText(buildEnsureText());
         }
-        // 判断是否允许 ViewPager 执行退出动画
-        if (mSharedElementModel != null) {
-            // 若当前位置可以执行共享元素返回, 则不允许 ViewPager 执行自己的退出动画
-            mView.setDisallowViewPagerDismissAnim(mCurPosition == mSharedElementModel.sharedPosition);
-        }
     }
 
     @Override
@@ -121,6 +116,18 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     }
 
     @Override
+    public boolean handleDisplayPagerDismiss() {
+        // 若共享元素可执行, 则消费这个 dismiss 事件
+        boolean consumeDismiss = mSharedElementModel != null
+                && mCurPosition == mSharedElementModel.sharedPosition;
+        if (consumeDismiss) {
+            mView.showSharedElementExitAndFinish(mSharedElementModel);
+            mView.dismissPickedPanel();
+        }
+        return consumeDismiss;
+    }
+
+    @Override
     public void handleBackPressed() {
         if (mSharedElementModel != null && mCurPosition == mSharedElementModel.sharedPosition) {
             mView.showSharedElementExitAndFinish(mSharedElementModel);
@@ -170,8 +177,6 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         // 4. 执行共享元素入场动画
         if (mSharedElementModel != null) {
             mView.showSharedElementEnter(mDisplayMetas.get(mCurPosition), mSharedElementModel);
-            // 判断是否允许 ViewPager 执行退出动画
-            mView.setDisallowViewPagerDismissAnim(true);
         }
     }
 

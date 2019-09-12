@@ -21,7 +21,7 @@
         app:titleTextSize="18dp" />
 
     <LinearLayout
-        android:id="@+id/ll_bottom_container"
+        android:id="@+id/ll_picked_panel_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -31,7 +31,7 @@
         android:visibility="invisible">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycle_pictures"
+            android:id="@+id/rv_picked_panel"
             android:layout_width="match_parent"
             android:layout_height="100dp" />
 
@@ -49,7 +49,7 @@
     </LinearLayout>
 
     <com.sharry.lib.picturepicker.photoview.PhotoView
-        android:id="@+id/iv_place_holder"
+        android:id="@+id/iv_se_place_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />

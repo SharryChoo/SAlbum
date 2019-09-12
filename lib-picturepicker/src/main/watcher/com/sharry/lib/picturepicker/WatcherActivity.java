@@ -40,10 +40,9 @@ import static com.sharry.lib.picturepicker.ActivityStateUtil.fixRequestOrientati
  */
 public class WatcherActivity extends AppCompatActivity implements
         WatcherContract.IView,
-        DraggableViewPager.OnPagerChangedListener,
-        DraggableViewPager.OnDragDismissListener,
+        DraggableViewPager.Callback,
         WatcherFragment.Interaction,
-        PickedAdapter.Interaction {
+        PickedPanelAdapter.Interaction {
 
     public static final int REQUEST_CODE = 508;
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
@@ -104,10 +103,10 @@ public class WatcherActivity extends AppCompatActivity implements
     private TextView mTvTitle;
     private PhotoView mIvPlaceHolder;
     private CheckedIndicatorView mCheckIndicator;
-    private DraggableViewPager mWatcherPager;
-    private WatcherPagerAdapter mWatcherAdapter;
-    private LinearLayout mLlBottomPreviewContainer;
-    private RecyclerView mBottomPreviewPictures;
+    private DraggableViewPager mDisplayPager;
+    private DisplayAdapter mDisplayAdapter;
+    private LinearLayout mLlPickedPanelContainer;
+    private RecyclerView mRvPickedPanel;
     private TextView mTvEnsure;
 
     /**
@@ -173,7 +172,7 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void showSharedElementExitAndFinish(@NonNull SharedElementModel data) {
-        final WatcherFragment watcherFragment = mWatcherAdapter.getItem(data.sharedPosition);
+        final WatcherFragment watcherFragment = mDisplayAdapter.getItem(data.sharedPosition);
         final PhotoView target = watcherFragment.getPhotoView();
         Animator exitAnim = SharedElementHelper.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
@@ -184,7 +183,7 @@ public class WatcherActivity extends AppCompatActivity implements
             @Override
             public void onAnimationStart(Animator animation) {
                 watcherFragment.dismissOtherView();
-                mWatcherPager.setBackgroundColor(Color.TRANSPARENT);
+                mDisplayPager.setBackgroundColor(Color.TRANSPARENT);
             }
 
             @Override
@@ -230,29 +229,24 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void setDisplayAdapter(@NonNull ArrayList<MediaMeta> items) {
-        mWatcherAdapter = new WatcherPagerAdapter(getSupportFragmentManager(), items);
-        mWatcherPager.setAdapter(mWatcherAdapter);
+        mDisplayAdapter = new DisplayAdapter(getSupportFragmentManager(), items);
+        mDisplayPager.setAdapter(mDisplayAdapter);
     }
 
     @Override
     public void displayAt(int position) {
-        mWatcherPager.setCurrentItem(position);
-    }
-
-    @Override
-    public void setDisallowViewPagerDismissAnim(boolean isDisallowDismissAnim) {
-        mWatcherPager.setDisallowDismissAnimator(isDisallowDismissAnim);
+        mDisplayPager.setCurrentItem(position);
     }
 
     @Override
     public void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet) {
-        mBottomPreviewPictures.setAdapter(new PickedAdapter(pickedSet, this));
+        mRvPickedPanel.setAdapter(new PickedPanelAdapter(pickedSet, this));
     }
 
     @Override
     public void notifyItemRemoved(@NonNull MediaMeta removedMeta, int removedIndex) {
         RecyclerView.Adapter adapter;
-        if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
+        if ((adapter = mRvPickedPanel.getAdapter()) != null) {
             adapter.notifyItemRemoved(removedIndex);
         }
     }
@@ -260,24 +254,24 @@ public class WatcherActivity extends AppCompatActivity implements
     @Override
     public void notifyItemPicked(@NonNull MediaMeta addedMeta, int addedIndex) {
         RecyclerView.Adapter adapter;
-        if ((adapter = mBottomPreviewPictures.getAdapter()) != null) {
+        if ((adapter = mRvPickedPanel.getAdapter()) != null) {
             adapter.notifyItemInserted(addedIndex);
         }
     }
 
     @Override
     public void showPickedPanel() {
-        if (mLlBottomPreviewContainer.getVisibility() == View.VISIBLE) {
+        if (mLlPickedPanelContainer.getVisibility() == View.VISIBLE) {
             return;
         }
         if (mBottomPreviewShowAnimator == null) {
-            mBottomPreviewShowAnimator = ObjectAnimator.ofFloat(mLlBottomPreviewContainer,
-                    "translationY", mLlBottomPreviewContainer.getHeight(), 0);
+            mBottomPreviewShowAnimator = ObjectAnimator.ofFloat(mLlPickedPanelContainer,
+                    "translationY", mLlPickedPanelContainer.getHeight(), 0);
             mBottomPreviewShowAnimator.setDuration(200);
             mBottomPreviewShowAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    mLlBottomPreviewContainer.setVisibility(View.VISIBLE);
+                    mLlPickedPanelContainer.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -286,17 +280,17 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void dismissPickedPanel() {
-        if (mLlBottomPreviewContainer.getVisibility() == View.INVISIBLE) {
+        if (mLlPickedPanelContainer.getVisibility() == View.INVISIBLE) {
             return;
         }
         if (mBottomPreviewDismissAnimator == null) {
-            mBottomPreviewDismissAnimator = ObjectAnimator.ofFloat(mLlBottomPreviewContainer,
-                    "translationY", 0, mLlBottomPreviewContainer.getHeight());
+            mBottomPreviewDismissAnimator = ObjectAnimator.ofFloat(mLlPickedPanelContainer,
+                    "translationY", 0, mLlPickedPanelContainer.getHeight());
             mBottomPreviewDismissAnimator.setDuration(200);
             mBottomPreviewDismissAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLlBottomPreviewContainer.setVisibility(View.INVISIBLE);
+                    mLlPickedPanelContainer.setVisibility(View.INVISIBLE);
                 }
             });
         }
@@ -305,12 +299,12 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void pickedPanelSmoothScrollToPosition(int position) {
-        mBottomPreviewPictures.smoothScrollToPosition(position);
+        mRvPickedPanel.smoothScrollToPosition(position);
     }
 
     @Override
     public void showMsg(@NonNull String msg) {
-        Snackbar.make(mBottomPreviewPictures, msg, Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mRvPickedPanel, msg, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -321,8 +315,7 @@ public class WatcherActivity extends AppCompatActivity implements
         setResult(RESULT_OK, intent);
     }
 
-
-    ////////////////////////////////////////// DraggableViewPager.OnPagerChangedListener /////////////////////////////////////////////
+    ////////////////////////////////////////// DraggableViewPager.Callback /////////////////////////////////////////////
 
     @Override
     public void onPagerChanged(int position) {
@@ -331,11 +324,9 @@ public class WatcherActivity extends AppCompatActivity implements
         }
     }
 
-    ////////////////////////////////////////// DraggableViewPager.OnDismissListener /////////////////////////////////////////////
-
     @Override
-    public void onDismissWithoutAnim() {
-        onBackPressed();
+    public boolean handleDismissAction() {
+        return mPresenter.handleDisplayPagerDismiss();
     }
 
     @Override
@@ -373,16 +364,15 @@ public class WatcherActivity extends AppCompatActivity implements
 
     private void initViews() {
         // 占位图
-        mIvPlaceHolder = findViewById(R.id.iv_place_holder);
+        mIvPlaceHolder = findViewById(R.id.iv_se_place_holder);
         // 1. 初始化 ViewPager
-        mWatcherPager = findViewById(R.id.view_pager);
-        mWatcherPager.setOnPagerChangedListener(this);
-        mWatcherPager.setOnDragDismissListener(this);
-        mWatcherPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
+        mDisplayPager = findViewById(R.id.view_pager);
+        mDisplayPager.setCallback(this);
+        mDisplayPager.setBackgroundColorRes(R.color.picture_picker_watcher_bg_color);
         // 2. 初始化底部菜单
-        mLlBottomPreviewContainer = findViewById(R.id.ll_bottom_container);
-        mBottomPreviewPictures = findViewById(R.id.recycle_pictures);
-        mBottomPreviewPictures.setLayoutManager(new LinearLayoutManager(this,
+        mLlPickedPanelContainer = findViewById(R.id.ll_picked_panel_container);
+        mRvPickedPanel = findViewById(R.id.rv_picked_panel);
+        mRvPickedPanel.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
         mTvEnsure = findViewById(R.id.tv_ensure);
         mTvEnsure.setOnClickListener(new View.OnClickListener() {

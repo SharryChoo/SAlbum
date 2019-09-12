@@ -16,12 +16,12 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 2018/9/22 23:23
  */
-class PickedAdapter extends RecyclerView.Adapter<PickedAdapter.ViewHolder> {
+class PickedPanelAdapter extends RecyclerView.Adapter<PickedPanelAdapter.ViewHolder> {
 
     private final ArrayList<MediaMeta> userPickedSet;
     private final Interaction interaction;
 
-    PickedAdapter(ArrayList<MediaMeta> userPickedSet, Interaction interaction) {
+    PickedPanelAdapter(ArrayList<MediaMeta> userPickedSet, Interaction interaction) {
         this.userPickedSet = userPickedSet;
         this.interaction = interaction;
     }

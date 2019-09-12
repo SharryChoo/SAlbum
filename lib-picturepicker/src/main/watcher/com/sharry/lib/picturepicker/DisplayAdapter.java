@@ -13,11 +13,11 @@ import java.util.List;
  * @version 1.0
  * @since 2017/2/20 9:10
  */
-class WatcherPagerAdapter extends FragmentStatePagerAdapter {
+class DisplayAdapter extends FragmentStatePagerAdapter {
 
     private final List<? extends MediaMeta> mDataSet;
 
-    WatcherPagerAdapter(FragmentManager fragmentManager, List<? extends MediaMeta> dataSet) {
+    DisplayAdapter(FragmentManager fragmentManager, List<? extends MediaMeta> dataSet) {
         super(fragmentManager);
         this.mDataSet = dataSet;
     }

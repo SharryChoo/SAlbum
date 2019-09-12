@@ -36,8 +36,6 @@ interface WatcherContract {
 
         void setDisplayAdapter(@NonNull ArrayList<MediaMeta> mediaMetas);
 
-        void setDisallowViewPagerDismissAnim(boolean isDisallowDismissAnim);
-
         void displayAt(int position);
 
         void setPickedAdapter(@NonNull ArrayList<MediaMeta> pickedSet);
@@ -59,7 +57,6 @@ interface WatcherContract {
         String getString(@StringRes int resId);
 
         void showMsg(@NonNull String msg);
-
     }
 
     interface IPresenter {
@@ -76,6 +73,7 @@ interface WatcherContract {
 
         void handleBeforeFinish();
 
+        boolean handleDisplayPagerDismiss();
     }
 
 }
