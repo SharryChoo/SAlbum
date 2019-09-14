@@ -83,7 +83,8 @@ class PickerPresenter implements PickerContract.IPresenter,
             TakerManager.with((Context) mView)
                     .setConfig(
                             mPickerConfig.getTakerConfig().rebuild()
-                                    .setCropConfig(mPickerConfig.getCropperConfig())
+                                    // 取消相机拍摄后的裁剪动作, 由 Picker ensure 时触发
+                                    .setCropConfig(null)
                                     .setVideoRecord(mPickerConfig.isPickVideo())
                                     .build()
                     )
