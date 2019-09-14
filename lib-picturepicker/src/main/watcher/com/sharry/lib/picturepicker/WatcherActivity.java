@@ -41,7 +41,6 @@ import static com.sharry.lib.picturepicker.ActivityStateUtil.fixRequestOrientati
 public class WatcherActivity extends AppCompatActivity implements
         WatcherContract.IView,
         DraggableViewPager.Callback,
-        WatcherFragment.Interaction,
         PickedPanelAdapter.Interaction {
 
     public static final int REQUEST_CODE = 508;

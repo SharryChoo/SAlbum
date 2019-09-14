@@ -44,7 +44,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
     /**
      * Widget.
      */
-    private Interaction mInteraction;
     private PhotoView mIvPicture;
     private ImageView mIvPlayIcon;
 
@@ -54,12 +53,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
      * Display data source.
      */
     private MediaMeta mDataSource;
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        mInteraction = (Interaction) context;
-    }
 
     @Nullable
     @Override
@@ -101,12 +94,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
 
     private void initView(View view) {
         mIvPicture = view.findViewById(R.id.iv_picture);
-        mIvPicture.setOnPhotoTapListener(new OnPhotoTapListener() {
-            @Override
-            public void onPhotoTap(ImageView view, float x, float y) {
-                mInteraction.onBackPressed();
-            }
-        });
         mIvPlayIcon = view.findViewById(R.id.iv_play_icon);
         mIvPlayIcon.setOnClickListener(this);
         mViewInitialized = true;
@@ -146,12 +133,6 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
             mIvPlayIcon.setVisibility(View.GONE);
             mIvPicture.setVisibility(View.VISIBLE);
         }
-    }
-
-    interface Interaction {
-
-        void onBackPressed();
-
     }
 
 }
