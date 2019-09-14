@@ -67,7 +67,7 @@ public class PickerManager {
     public void start(@NonNull final PickerCallback pickerCallback) {
         Preconditions.checkNotNull(pickerCallback, "Please ensure PickerCallback not null!");
         Preconditions.checkNotNull(mConfig, "Please ensure U set PickerConfig correct!");
-        PermissionsUtil.with(mActivity)
+        PermissionsHelper.with(mActivity)
                 .request(sRequirePermissions)
                 .execute(new PermissionsCallback() {
                     @Override

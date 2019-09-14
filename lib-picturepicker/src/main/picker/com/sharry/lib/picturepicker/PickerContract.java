@@ -1,7 +1,7 @@
 package com.sharry.lib.picturepicker;
 
 import android.content.Context;
-import android.widget.ImageView;
+import android.view.View;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -72,7 +72,7 @@ interface PickerContract {
 
         void handlePictureRemoved(@Nullable MediaMeta removedMeta);
 
-        void handlePictureClicked(int position, @Nullable ImageView sharedElement);
+        void handlePictureClicked(int position, @Nullable View sharedElement);
 
         void handlePreviewClicked();
 

@@ -52,7 +52,7 @@ public class CropperManager {
     public void crop(@NonNull final CropperCallback callback) {
         Preconditions.checkNotNull(callback, "Please ensure callback not null!");
         Preconditions.checkNotNull(mConfig, "Please ensure setConfig correct!");
-        PermissionsUtil.with(mBind)
+        PermissionsHelper.with(mBind)
                 .request(sPermissions)
                 .execute(new PermissionsCallback() {
                     @Override

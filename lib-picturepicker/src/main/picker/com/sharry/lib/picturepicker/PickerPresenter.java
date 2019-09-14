@@ -3,7 +3,7 @@ package com.sharry.lib.picturepicker;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.ImageView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -92,7 +92,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     }
 
     @Override
-    public void handlePictureClicked(int position, ImageView sharedElement) {
+    public void handlePictureClicked(int position, View sharedElement) {
         WatcherManager.with((Context) mView)
                 .setSharedElement(sharedElement)
                 .setLoaderEngine(Loader.getPictureLoader())

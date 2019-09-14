@@ -106,6 +106,12 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedElementHelper.CACHES.clear();
+    }
+
     //////////////////////////////////////////////PickerContract.IView/////////////////////////////////////////////////
 
     @Override
@@ -246,8 +252,8 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position) {
-        mPresenter.handlePictureClicked(position, imageView);
+    public void onPictureClicked(@NonNull View itemView, @NonNull String uri, int position) {
+        mPresenter.handlePictureClicked(position, itemView);
     }
 
     @Override

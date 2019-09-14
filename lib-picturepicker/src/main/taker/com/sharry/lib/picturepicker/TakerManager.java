@@ -58,7 +58,7 @@ public class TakerManager {
     public void take(@NonNull final TakerCallback callback) {
         Preconditions.checkNotNull(callback, "Please ensure callback not null!");
         Preconditions.checkNotNull(mConfig, "Please ensure U set TakerConfig correct!");
-        PermissionsUtil.with(mBind)
+        PermissionsHelper.with(mBind)
                 .request(sRequirePermissions)
                 .execute(new PermissionsCallback() {
                     @Override

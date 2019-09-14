@@ -27,7 +27,7 @@ class PikerItemDecoration extends RecyclerView.ItemDecoration {
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
             int adapterPosition = parent.getChildAdapterPosition(child) + (cameraSupport ? -1 : 0);
-            SharedElementHelper.CACHES.put(adapterPosition, SharedElementHelper.Data.parseFrom(
+            SharedElementHelper.CACHES.put(adapterPosition, SharedElementHelper.Bounds.parseFrom(
                     child, adapterPosition));
         }
     }

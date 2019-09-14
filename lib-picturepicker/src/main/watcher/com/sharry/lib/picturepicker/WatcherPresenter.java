@@ -22,13 +22,13 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     private final WatcherConfig mConfig;
     private final ArrayList<MediaMeta> mDisplayMetas;
     private final ArrayList<MediaMeta> mPickedMetas;
-    private final SharedElementHelper.Data mSharedElementEnterData;
+    private final SharedElementHelper.Bounds mSharedElementEnterData;
 
     private int mCurPosition;
     private MediaMeta mCurDisplay;
     private boolean mIsEnsurePressed = false;
 
-    WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementHelper.Data sharedElementModel) {
+    WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementHelper.Bounds sharedElementModel) {
         this.mView = view;
         this.mConfig = config;
         this.mSharedElementEnterData = sharedElementModel;
@@ -121,9 +121,10 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         if (mSharedElementEnterData == null) {
             return false;
         }
-        // 若共享元素可执行, 则消费这个 dismiss 事件
-        SharedElementHelper.Data exitData = mSharedElementEnterData.sharedPosition == mCurPosition ?
+        // 尝试获取退出时共享元素的数据
+        SharedElementHelper.Bounds exitData = mSharedElementEnterData.position == mCurPosition ?
                 mSharedElementEnterData : SharedElementHelper.CACHES.get(mCurPosition);
+        // 若存在则消费这个 dismiss 事件
         if (exitData != null) {
             mView.showSharedElementExitAndFinish(exitData);
             mView.dismissPickedPanel();
@@ -139,8 +140,8 @@ class WatcherPresenter implements WatcherContract.IPresenter {
             mView.finish();
             return;
         }
-        // 若共享元素可执行, 则消费这个 dismiss 事件
-        SharedElementHelper.Data exitData = mSharedElementEnterData.sharedPosition == mCurPosition ?
+        // 尝试获取退出数据
+        SharedElementHelper.Bounds exitData = mSharedElementEnterData.position == mCurPosition ?
                 mSharedElementEnterData : SharedElementHelper.CACHES.get(mCurPosition);
         if (exitData != null) {
             mView.showSharedElementExitAndFinish(exitData);

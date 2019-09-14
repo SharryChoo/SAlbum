@@ -269,7 +269,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (relativePosition < 0) {
                 return;
             }
-            mInteraction.onPictureClicked(ivPicture, mDataSet.get(relativePosition).path, relativePosition);
+            mInteraction.onPictureClicked(itemView, mDataSet.get(relativePosition).path, relativePosition);
         }
 
         private void performCheckIndicatorClicked() {
@@ -376,7 +376,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (relativePosition < 0) {
                 return;
             }
-            mInteraction.onPictureClicked(ivPicture, mDataSet.get(relativePosition).path, relativePosition);
+            mInteraction.onPictureClicked(itemView, mDataSet.get(relativePosition).path, relativePosition);
         }
 
         private void performCheckIndicatorClicked() {
@@ -412,7 +412,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void onCameraClicked();
 
-        void onPictureClicked(@NonNull ImageView imageView, @NonNull String uri, int position);
+        void onPictureClicked(@NonNull View itemView, @NonNull String uri, int position);
 
         boolean onPictureChecked(@NonNull MediaMeta checkedMeta);
 

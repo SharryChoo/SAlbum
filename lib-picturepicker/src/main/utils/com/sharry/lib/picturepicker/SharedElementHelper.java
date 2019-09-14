@@ -11,7 +11,6 @@ import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -35,7 +34,12 @@ import java.util.HashMap;
  */
 class SharedElementHelper {
 
-    static HashMap<Integer, Data> CACHES = new HashMap<>();
+    /**
+     * Key is position in PictureLists
+     * <p>
+     * Value is view bounds.
+     */
+    static HashMap<Integer, Bounds> CACHES = new HashMap<>();
 
     private static Property<ImageView, Matrix> ANIMATED_IMAGE_MATRIX_PROPERTY
             = new Property<ImageView, Matrix>(Matrix.class, "setImageMatrix") {
@@ -82,7 +86,7 @@ class SharedElementHelper {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementEnterAnimator(View target, Data data) {
+    static Animator createSharedElementEnterAnimator(View target, Bounds data) {
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
         target.setPivotX(0);
@@ -105,7 +109,7 @@ class SharedElementHelper {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementExitAnimator(@Nullable ImageView target, Data data) {
+    static Animator createSharedElementExitAnimator(@Nullable ImageView target, Bounds data) {
         if (target == null) {
             return null;
         }
@@ -135,7 +139,7 @@ class SharedElementHelper {
      * @param target exchange target.
      * @param data   origin data.
      */
-    private static AnimatorSet getBoundsChangedAnim(View target, Data data) {
+    private static AnimatorSet getBoundsChangedAnim(View target, Bounds data) {
         final ViewBounds viewBounds = new ViewBounds(target);
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
@@ -283,18 +287,17 @@ class SharedElementHelper {
      * @version 1.0
      * @since 3/15/2019 3:27 PM
      */
-    static class Data implements Parcelable {
+    static class Bounds implements Parcelable {
 
-        static Data parseFrom(@NonNull View sharedElement, int sharedElementPosition) {
-            Data result = new Data();
+        static Bounds parseFrom(@NonNull View sharedElement, int positionInPictures) {
+            Bounds result = new Bounds();
             int[] locations = new int[2];
             sharedElement.getLocationOnScreen(locations);
             result.startX = locations[0];
             result.startY = locations[1];
             result.width = sharedElement.getWidth();
             result.height = sharedElement.getHeight();
-            result.sharedPosition = sharedElementPosition;
-            Log.e("TAG", result.toString());
+            result.position = positionInPictures;
             return result;
         }
 
@@ -302,18 +305,18 @@ class SharedElementHelper {
         int startY;
         int width;
         int height;
-        int sharedPosition;
+        int position;
 
-        private Data() {
+        private Bounds() {
 
         }
 
-        Data(Parcel in) {
+        Bounds(Parcel in) {
             startX = in.readInt();
             startY = in.readInt();
             width = in.readInt();
             height = in.readInt();
-            sharedPosition = in.readInt();
+            position = in.readInt();
         }
 
         @Override
@@ -322,7 +325,7 @@ class SharedElementHelper {
             dest.writeInt(startY);
             dest.writeInt(width);
             dest.writeInt(height);
-            dest.writeInt(sharedPosition);
+            dest.writeInt(position);
         }
 
         @Override
@@ -337,19 +340,19 @@ class SharedElementHelper {
                     ", startY=" + startY +
                     ", width=" + width +
                     ", height=" + height +
-                    ", sharedPosition='" + sharedPosition + '\'' +
+                    ", sharedPosition='" + position + '\'' +
                     '}';
         }
 
-        public static final Creator<Data> CREATOR = new Creator<Data>() {
+        public static final Creator<Bounds> CREATOR = new Creator<Bounds>() {
             @Override
-            public Data createFromParcel(Parcel in) {
-                return new Data(in);
+            public Bounds createFromParcel(Parcel in) {
+                return new Bounds(in);
             }
 
             @Override
-            public Data[] newArray(int size) {
-                return new Data[size];
+            public Bounds[] newArray(int size) {
+                return new Bounds[size];
             }
         };
 

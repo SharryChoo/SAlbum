@@ -17,9 +17,9 @@ interface WatcherContract {
 
     interface IView {
 
-        void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull SharedElementHelper.Data elementData);
+        void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull SharedElementHelper.Bounds elementData);
 
-        void showSharedElementExitAndFinish(@NonNull SharedElementHelper.Data elementData);
+        void showSharedElementExitAndFinish(@NonNull SharedElementHelper.Bounds elementData);
 
         void setLeftTitleText(@NonNull CharSequence content);
 

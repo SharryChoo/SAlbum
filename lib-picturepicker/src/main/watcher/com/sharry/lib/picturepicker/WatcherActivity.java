@@ -68,7 +68,7 @@ public class WatcherActivity extends AppCompatActivity implements
         if (sharedElement != null) {
             intent.putExtra(
                     WatcherActivity.EXTRA_SHARED_ELEMENT,
-                    SharedElementHelper.Data.parseFrom(sharedElement, config.getPosition())
+                    SharedElementHelper.Bounds.parseFrom(sharedElement, config.getPosition())
             );
         }
         Bundle bundle = intent.getExtras();
@@ -147,7 +147,7 @@ public class WatcherActivity extends AppCompatActivity implements
     //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
 
     @Override
-    public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementHelper.Data data) {
+    public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementHelper.Bounds data) {
         // 加载共享元素占位图
         mIvPlaceHolder.setVisibility(View.VISIBLE);
         Loader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
@@ -171,8 +171,8 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void showSharedElementExitAndFinish(@NonNull SharedElementHelper.Data data) {
-        final WatcherFragment watcherFragment = mDisplayAdapter.getItem(data.sharedPosition);
+    public void showSharedElementExitAndFinish(@NonNull SharedElementHelper.Bounds data) {
+        final WatcherFragment watcherFragment = mDisplayAdapter.getItem(data.position);
         final PhotoView target = watcherFragment.getPhotoView();
         Animator exitAnim = SharedElementHelper.createSharedElementExitAnimator(target, data);
         if (exitAnim == null) {
@@ -387,7 +387,7 @@ public class WatcherActivity extends AppCompatActivity implements
         mPresenter = new WatcherPresenter(
                 this,
                 (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
-                ((SharedElementHelper.Data) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
+                ((SharedElementHelper.Bounds) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
     }
 

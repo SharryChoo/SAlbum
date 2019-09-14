@@ -17,36 +17,36 @@ import java.util.List;
  * @version 1.0
  * @since 2018/1/5 16:23
  */
-class PermissionsUtil {
+class PermissionsHelper {
 
-    public static final String TAG = PermissionsUtil.class.getSimpleName();
+    public static final String TAG = PermissionsHelper.class.getSimpleName();
     private PermissionsFragment mPermissionsFragment;
     private String[] mPermissions;
 
-    public static PermissionsUtil with(Context context) {
+    public static PermissionsHelper with(Context context) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            return new PermissionsUtil(activity);
+            return new PermissionsHelper(activity);
         } else {
             throw new IllegalArgumentException("PermissionsUtil.with -> Context can not cast to Activity");
         }
     }
 
-    private PermissionsUtil(Activity activity) {
+    private PermissionsHelper(Activity activity) {
         mPermissionsFragment = getPermissionsFragment(activity);
     }
 
     /**
      * 添加需要请求的权限
      */
-    PermissionsUtil request(String... permissions) {
+    PermissionsHelper request(String... permissions) {
         return requestArray(permissions);
     }
 
     /**
      * 添加需要请求的权限(Kotlin 不支持从不定长参数转为 Array)
      */
-    PermissionsUtil requestArray(String[] permissions) {
+    PermissionsHelper requestArray(String[] permissions) {
         ensure(permissions);
         mPermissions = permissions;
         return this;

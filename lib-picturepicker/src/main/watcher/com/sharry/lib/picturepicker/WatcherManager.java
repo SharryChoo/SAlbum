@@ -80,7 +80,7 @@ public class WatcherManager {
     public void startForResult(@Nullable final WatcherCallback callback) {
         Preconditions.checkNotNull(callback, "Please ensure WatcherCall not null!");
         Preconditions.checkNotNull(mConfig, "Please ensure U set WatcherConfig correct.");
-        PermissionsUtil.with(mBind)
+        PermissionsHelper.with(mBind)
                 .request(sPermissions)
                 .execute(new PermissionsCallback() {
                     @Override
