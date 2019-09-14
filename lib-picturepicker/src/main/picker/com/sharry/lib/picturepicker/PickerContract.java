@@ -29,7 +29,7 @@ interface PickerContract {
 
         void setFabColor(int color);
 
-        void switchFabVisibility(boolean isVisible);
+        void setFabVisible(boolean isVisible);
 
         void setBackgroundColor(int color);
 

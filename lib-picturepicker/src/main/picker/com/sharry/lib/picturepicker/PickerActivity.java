@@ -163,7 +163,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void switchFabVisibility(boolean isVisible) {
+    public void setFabVisible(boolean isVisible) {
         if (isVisible) {
             mFab.show();
         } else {

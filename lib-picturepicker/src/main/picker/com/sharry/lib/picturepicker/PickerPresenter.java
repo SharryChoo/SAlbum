@@ -218,7 +218,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     private void setupView() {
         // 配置 UI 视图
         mView.setToolbarScrollable(mPickerConfig.isToolbarBehavior());
-        mView.switchFabVisibility(mPickerConfig.isFabBehavior());
+        mView.setFabVisible(mPickerConfig.isFabBehavior());
         if (mPickerConfig.getToolbarBkgColor() != PickerConfig.INVALIDATE_VALUE) {
             mView.setToolbarBackgroundColor(mPickerConfig.getToolbarBkgColor());
             mView.setFabColor(mPickerConfig.getToolbarBkgColor());
