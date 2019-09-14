@@ -23,7 +23,7 @@
 
     <!--中心容器-->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_picked_panel"
+        android:id="@+id/rv_picker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
@@ -104,7 +104,7 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="70dp"
-        app:layout_anchor="@+id/rv_picked_panel"
+        app:layout_anchor="@+id/rv_picker"
         app:layout_anchorGravity="bottom|right"
         app:layout_behavior="@string/picture_picker_picker_fab_behavior"
         app:srcCompat="@drawable/ic_picture_picker_picker_fab" />

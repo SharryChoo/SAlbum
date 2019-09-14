@@ -7,6 +7,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
@@ -37,6 +38,8 @@ interface PickerContract {
 
         void setPickerAdapter(@NonNull PickerConfig config, @NonNull ArrayList<MediaMeta> metas,
                               @NonNull ArrayList<MediaMeta> userPickedMetas);
+
+        void setPickerItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration);
 
         void setFolderAdapter(@NonNull ArrayList<FolderModel> allFolders);
 

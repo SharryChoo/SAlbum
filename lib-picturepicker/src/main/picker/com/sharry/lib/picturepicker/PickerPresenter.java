@@ -233,6 +233,8 @@ class PickerPresenter implements PickerContract.IPresenter,
         mView.setSpanCount(mPickerConfig.getSpanCount());
         // 设置 RecyclerView 的 Adapter
         mView.setPickerAdapter(mPickerConfig, mDisplaySet, mPickedSet);
+        // 设置 Picker 的装饰器
+        mView.setPickerItemDecoration(new PikerItemDecoration(mPickerConfig.isCameraSupport()));
     }
 
     private void fetchData(Context context) {

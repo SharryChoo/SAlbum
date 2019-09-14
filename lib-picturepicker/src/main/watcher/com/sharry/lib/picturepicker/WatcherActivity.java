@@ -68,7 +68,7 @@ public class WatcherActivity extends AppCompatActivity implements
         if (sharedElement != null) {
             intent.putExtra(
                     WatcherActivity.EXTRA_SHARED_ELEMENT,
-                    SharedElementModel.parseFrom(sharedElement, config.getPosition())
+                    SharedElementHelper.Data.parseFrom(sharedElement, config.getPosition())
             );
         }
         Bundle bundle = intent.getExtras();
@@ -147,7 +147,7 @@ public class WatcherActivity extends AppCompatActivity implements
     //////////////////////////////////////////////WatcherContract.IView/////////////////////////////////////////////////
 
     @Override
-    public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementModel data) {
+    public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementHelper.Data data) {
         // 加载共享元素占位图
         mIvPlaceHolder.setVisibility(View.VISIBLE);
         Loader.loadPicture(this, mediaMeta.path, mIvPlaceHolder);
@@ -171,7 +171,7 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void showSharedElementExitAndFinish(@NonNull SharedElementModel data) {
+    public void showSharedElementExitAndFinish(@NonNull SharedElementHelper.Data data) {
         final WatcherFragment watcherFragment = mDisplayAdapter.getItem(data.sharedPosition);
         final PhotoView target = watcherFragment.getPhotoView();
         Animator exitAnim = SharedElementHelper.createSharedElementExitAnimator(target, data);
@@ -387,7 +387,7 @@ public class WatcherActivity extends AppCompatActivity implements
         mPresenter = new WatcherPresenter(
                 this,
                 (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
-                ((SharedElementModel) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
+                ((SharedElementHelper.Data) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
     }
 

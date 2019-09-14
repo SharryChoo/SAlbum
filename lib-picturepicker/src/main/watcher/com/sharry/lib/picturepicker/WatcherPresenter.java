@@ -22,16 +22,16 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     private final WatcherConfig mConfig;
     private final ArrayList<MediaMeta> mDisplayMetas;
     private final ArrayList<MediaMeta> mPickedMetas;
-    private final SharedElementModel mSharedElementModel;
+    private final SharedElementHelper.Data mSharedElementEnterData;
 
     private int mCurPosition;
     private MediaMeta mCurDisplay;
     private boolean mIsEnsurePressed = false;
 
-    WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementModel sharedElementModel) {
+    WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementHelper.Data sharedElementModel) {
         this.mView = view;
         this.mConfig = config;
-        this.mSharedElementModel = sharedElementModel;
+        this.mSharedElementEnterData = sharedElementModel;
         // 获取需要展示图片的 URI 集合
         this.mDisplayMetas = config.getPictureUris();
         // 获取已经选中的图片
@@ -117,20 +117,33 @@ class WatcherPresenter implements WatcherContract.IPresenter {
 
     @Override
     public boolean handleDisplayPagerDismiss() {
-        // 若共享元素可执行, 则消费这个 dismiss 事件
-        boolean consumeDismiss = mSharedElementModel != null
-                && mCurPosition == mSharedElementModel.sharedPosition;
-        if (consumeDismiss) {
-            mView.showSharedElementExitAndFinish(mSharedElementModel);
-            mView.dismissPickedPanel();
+        // 若无共享元素入场动画, 则退出也不使用共享元素
+        if (mSharedElementEnterData == null) {
+            return false;
         }
-        return consumeDismiss;
+        // 若共享元素可执行, 则消费这个 dismiss 事件
+        SharedElementHelper.Data exitData = mSharedElementEnterData.sharedPosition == mCurPosition ?
+                mSharedElementEnterData : SharedElementHelper.CACHES.get(mCurPosition);
+        if (exitData != null) {
+            mView.showSharedElementExitAndFinish(exitData);
+            mView.dismissPickedPanel();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void handleBackPressed() {
-        if (mSharedElementModel != null && mCurPosition == mSharedElementModel.sharedPosition) {
-            mView.showSharedElementExitAndFinish(mSharedElementModel);
+        // 若无共享元素入场动画, 则退出也不使用共享元素
+        if (mSharedElementEnterData == null) {
+            mView.finish();
+            return;
+        }
+        // 若共享元素可执行, 则消费这个 dismiss 事件
+        SharedElementHelper.Data exitData = mSharedElementEnterData.sharedPosition == mCurPosition ?
+                mSharedElementEnterData : SharedElementHelper.CACHES.get(mCurPosition);
+        if (exitData != null) {
+            mView.showSharedElementExitAndFinish(exitData);
             mView.dismissPickedPanel();
         } else {
             mView.finish();
@@ -171,12 +184,12 @@ class WatcherPresenter implements WatcherContract.IPresenter {
                     public void run() {
                         mView.showPickedPanel();
                     }
-                }, mSharedElementModel != null ? 500 : 0);
+                }, mSharedElementEnterData != null ? 500 : 0);
             }
         }
         // 4. 执行共享元素入场动画
-        if (mSharedElementModel != null) {
-            mView.showSharedElementEnter(mDisplayMetas.get(mCurPosition), mSharedElementModel);
+        if (mSharedElementEnterData != null) {
+            mView.showSharedElementEnter(mDisplayMetas.get(mCurPosition), mSharedElementEnterData);
         }
     }
 

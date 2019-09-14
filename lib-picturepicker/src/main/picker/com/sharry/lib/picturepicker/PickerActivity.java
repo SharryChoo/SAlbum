@@ -148,6 +148,11 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
+    public void setPickerItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration) {
+        mRvPicker.addItemDecoration(itemDecoration);
+    }
+
+    @Override
     public void setFolderAdapter(@NonNull ArrayList<FolderModel> folders) {
         mRvFolders.setAdapter(new FolderAdapter(this, folders));
     }
@@ -300,7 +305,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     protected void initViews() {
         // Pictures recycler view.
-        mRvPicker = findViewById(R.id.rv_picked_panel);
+        mRvPicker = findViewById(R.id.rv_picker);
 
         // Bottom navigation menu.
         mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);

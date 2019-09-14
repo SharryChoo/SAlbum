@@ -9,13 +9,19 @@ import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.HashMap;
 
 /**
  * Picture watcher shared elements jump helper.
@@ -28,6 +34,8 @@ import androidx.annotation.Nullable;
  * @since 3/18/2019 11:13 AM
  */
 class SharedElementHelper {
+
+    static HashMap<Integer, Data> CACHES = new HashMap<>();
 
     private static Property<ImageView, Matrix> ANIMATED_IMAGE_MATRIX_PROPERTY
             = new Property<ImageView, Matrix>(Matrix.class, "setImageMatrix") {
@@ -74,7 +82,7 @@ class SharedElementHelper {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementEnterAnimator(View target, SharedElementModel data) {
+    static Animator createSharedElementEnterAnimator(View target, Data data) {
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
         target.setPivotX(0);
@@ -97,7 +105,7 @@ class SharedElementHelper {
      * @param target exchange target.
      * @param data   origin data.
      */
-    static Animator createSharedElementExitAnimator(@Nullable ImageView target, SharedElementModel data) {
+    static Animator createSharedElementExitAnimator(@Nullable ImageView target, Data data) {
         if (target == null) {
             return null;
         }
@@ -127,7 +135,7 @@ class SharedElementHelper {
      * @param target exchange target.
      * @param data   origin data.
      */
-    private static AnimatorSet getBoundsChangedAnim(View target, SharedElementModel data) {
+    private static AnimatorSet getBoundsChangedAnim(View target, Data data) {
         final ViewBounds viewBounds = new ViewBounds(target);
         int[] locations = new int[2];
         target.getLocationOnScreen(locations);
@@ -270,4 +278,80 @@ class SharedElementHelper {
         }
     }
 
+    /**
+     * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+     * @version 1.0
+     * @since 3/15/2019 3:27 PM
+     */
+    static class Data implements Parcelable {
+
+        static Data parseFrom(@NonNull View sharedElement, int sharedElementPosition) {
+            Data result = new Data();
+            int[] locations = new int[2];
+            sharedElement.getLocationOnScreen(locations);
+            result.startX = locations[0];
+            result.startY = locations[1];
+            result.width = sharedElement.getWidth();
+            result.height = sharedElement.getHeight();
+            result.sharedPosition = sharedElementPosition;
+            Log.e("TAG", result.toString());
+            return result;
+        }
+
+        int startX;
+        int startY;
+        int width;
+        int height;
+        int sharedPosition;
+
+        private Data() {
+
+        }
+
+        Data(Parcel in) {
+            startX = in.readInt();
+            startY = in.readInt();
+            width = in.readInt();
+            height = in.readInt();
+            sharedPosition = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(startX);
+            dest.writeInt(startY);
+            dest.writeInt(width);
+            dest.writeInt(height);
+            dest.writeInt(sharedPosition);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "SharedElementModel{" +
+                    "startX=" + startX +
+                    ", startY=" + startY +
+                    ", width=" + width +
+                    ", height=" + height +
+                    ", sharedPosition='" + sharedPosition + '\'' +
+                    '}';
+        }
+
+        public static final Creator<Data> CREATOR = new Creator<Data>() {
+            @Override
+            public Data createFromParcel(Parcel in) {
+                return new Data(in);
+            }
+
+            @Override
+            public Data[] newArray(int size) {
+                return new Data[size];
+            }
+        };
+
+    }
 }
