@@ -1,0 +1,58 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.SharryChoo'
+
+def resDirs = [
+        "watcher/com/sharry/lib/album",
+        "picker/com/sharry/lib/album",
+        "taker/com/sharry/lib/album",
+        "player/com/sharry/lib/album",
+]
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        vectorDrawables.useSupportLibrary true
+    }
+    sourceSets {
+        main {
+            java.srcDirs += 'src/main/picker'
+            java.srcDirs += 'src/main/watcher'
+            java.srcDirs += 'src/main/player'
+            java.srcDirs += 'src/main/copper'
+            java.srcDirs += 'src/main/taker'
+            java.srcDirs += 'src/main/widget'
+            java.srcDirs += 'src/main/utils'
+            resDirs.forEach {
+                res.srcDirs += 'src/main/' + it + '/res'
+            }
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // Android dependencies
+    def constraintlayoutVersion = "1.1.3"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
+    def supportLibraryVersion = '1.1.0'
+    implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
+    def recycleViewVersion = '1.0.0'
+    implementation "androidx.recyclerview:recyclerview:$recycleViewVersion"
+    def materialVersion = '1.0.0'
+    implementation "com.google.android.material:material:$materialVersion"
+    // Core dependencies.
+    def stoolbarVersion = "1.0.5-x"
+    api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
+    def smediaVersion = "1.0.0"
+    api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
+    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
+    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
+}

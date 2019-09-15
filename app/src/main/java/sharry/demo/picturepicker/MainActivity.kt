@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.sharry.lib.media.recorder.Options
-import com.sharry.lib.picturepicker.*
-import com.sharry.lib.picturepicker.TakerConfig.ASPECT_1_1
+import com.sharry.lib.album.*
+import com.sharry.lib.album.TakerConfig.ASPECT_1_1
 import com.sharry.lib.widget.toolbar.SToolbar
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File

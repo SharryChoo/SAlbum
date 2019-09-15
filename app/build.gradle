@@ -46,6 +46,6 @@ dependencies {
 //    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
 //    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
 
-    api project(':lib-picturepicker')
+    api project(':lib-album')
 
 }
