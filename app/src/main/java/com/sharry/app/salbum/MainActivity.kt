@@ -1,4 +1,4 @@
-package sharry.demo.picturepicker
+package com.sharry.app.salbum
 
 import android.content.Context
 import android.os.Bundle

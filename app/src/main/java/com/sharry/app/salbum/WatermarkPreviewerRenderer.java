@@ -1,4 +1,4 @@
-package sharry.demo.picturepicker;
+package com.sharry.app.salbum;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,6 +11,8 @@ import com.sharry.lib.camera.PreviewerRendererWrapper;
 import com.sharry.lib.opengles.GlUtil;
 
 import java.nio.FloatBuffer;
+
+import sharry.demo.picturepicker.R;
 
 /**
  * 带水印效果的渲染器
