@@ -91,7 +91,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.picture_picker_activity_picker);
+        setContentView(R.layout.lib_album_activity_picker);
         initTitle();
         initViews();
         initData();
@@ -296,12 +296,12 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         // 初始化视图
         mToolbar = findViewById(R.id.toolbar);
         // 设置标题文本
-        mToolbar.setTitleText(getString(R.string.picture_picker_picker_all_picture));
+        mToolbar.setTitleText(getString(R.string.lib_album_picker_all_picture));
         mTvToolbarFolderName = mToolbar.getTitleText();
         // 添加图片确认按钮
         mToolbar.addRightMenuText(
                 TextViewOptions.Builder()
-                        .setText(getString(R.string.picture_picker_picker_ensure))
+                        .setText(getString(R.string.lib_album_picker_ensure))
                         .setTextSize(15)
                         .setListener(this)
                         .build()
@@ -355,13 +355,13 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         BottomMenuNavigationCallback() {
             indicatorDrawable = mIvNavIndicator.getDrawable();
             bgCollapsedColor = ContextCompat.getColor(PickerActivity.this,
-                    R.color.picture_picker_picker_bottom_menu_nav_bg_collapsed_color);
+                    R.color.lib_album_picker_bottom_menu_nav_bg_collapsed_color);
             bgExpandColor = ContextCompat.getColor(PickerActivity.this,
-                    R.color.picture_picker_picker_bottom_menu_navi_bg_expand_color);
+                    R.color.lib_album_picker_bottom_menu_navi_bg_expand_color);
             textCollapsedColor = ContextCompat.getColor(PickerActivity.this,
-                    R.color.picture_picker_picker_bottom_menu_nav_text_collapsed_color);
+                    R.color.lib_album_picker_bottom_menu_nav_text_collapsed_color);
             textExpandColor = ContextCompat.getColor(PickerActivity.this,
-                    R.color.picture_picker_picker_bottom_menu_navi_text_expand_color);
+                    R.color.lib_album_picker_bottom_menu_navi_text_expand_color);
         }
 
         @Override

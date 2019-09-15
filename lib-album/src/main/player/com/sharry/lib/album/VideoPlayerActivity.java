@@ -88,7 +88,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.picture_picker_widget_video_player);
+        setContentView(R.layout.lib_album_activity_video_player);
         parseIntent();
         initViews();
         prepare();
@@ -297,7 +297,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     }
 
     private void play() {
-        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_pasue);
+        mIvControl.setImageResource(R.drawable.ic_album_player_video_pasue);
         mVideoView.start();
         mVideoView.seekTo(mCurrentDuration);
         updateProgress();
@@ -305,7 +305,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     }
 
     private void pause() {
-        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
+        mIvControl.setImageResource(R.drawable.ic_album_player_video_play);
         mVideoView.pause();
         mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
         mIsPaused = true;
@@ -317,7 +317,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
 
     private void reset() {
         mHandler.removeMessages(MSG_WHAT_UPDATE_PROGRESS);
-        mIvControl.setImageResource(R.drawable.ic_picture_picker_player_video_play);
+        mIvControl.setImageResource(R.drawable.ic_album_player_video_play);
         mTvCurrent.setText(DateUtil.format(0));
         mSeekBar.setProgress(0);
         showControlPanel();

@@ -8,4 +8,4 @@
     android:paddingLeft="30dp"
     android:paddingRight="30dp"
     android:scaleType="fitCenter"
-    app:srcCompat="@drawable/ic_picture_picker_picker_camera_header" />
+    app:srcCompat="@drawable/ic_album_picker_camera_header" />

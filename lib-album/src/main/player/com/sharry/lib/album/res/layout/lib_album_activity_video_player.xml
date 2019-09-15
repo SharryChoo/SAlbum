@@ -4,7 +4,7 @@
     android:id="@+id/fl_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/picture_picker_player_bg_color"
+    android:background="@color/lib_album_player_bg_color"
     android:orientation="vertical">
 
     <com.sharry.lib.widget.toolbar.SToolbar
@@ -23,7 +23,7 @@
         android:id="@+id/cl_control"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/picture_picker_picker_recycle_item_video_bg_color">
+        android:background="@color/lib_album_picker_recycle_item_video_bg_color">
 
         <ImageView
             android:id="@+id/iv_control"
@@ -33,7 +33,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_picture_picker_player_video_play" />
+            app:srcCompat="@drawable/ic_album_player_video_play" />
 
         <TextView
             android:id="@+id/tv_current"

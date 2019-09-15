@@ -2,9 +2,9 @@
 <resources>
 
     <!--WatcherActivity 需要用到的字符串-->
-    <string name="lib_album_watcher_tips_over_threshold_prefix">@string/picture_picker_picker_tips_over_threshold_prefix</string>
-    <string name="lib_album_watcher_tips_over_threshold_suffix">@string/picture_picker_picker_tips_over_threshold_suffix</string>
-    <string name="lib_album_watcher_ensure">@string/picture_picker_picker_ensure</string>
-    <string name="lib_album_watcher_tips_ensure_failed">@string/picture_picker_picker_tips_ensure_failed</string>
+    <string name="lib_album_watcher_tips_over_threshold_prefix">@string/lib_album_picker_tips_over_threshold_prefix</string>
+    <string name="lib_album_watcher_tips_over_threshold_suffix">@string/lib_album_picker_tips_over_threshold_suffix</string>
+    <string name="lib_album_watcher_ensure">@string/lib_album_picker_ensure</string>
+    <string name="lib_album_watcher_tips_ensure_failed">@string/lib_album_picker_tips_ensure_failed</string>
 
 </resources>

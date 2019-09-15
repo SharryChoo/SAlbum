@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 
 /**
  * FloatingActionButton 的 CoordinateLayout 的 Behavior 动画
- * Used in xml {@code #R.layout.picture_picker_activity_picker}
+ * Used in xml {@code #R.layout.lib_album_activity_picker}
  *
  * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
  * @version 1.1

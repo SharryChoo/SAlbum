@@ -175,7 +175,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         CameraHeaderHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.picture_picker_recycle_item_header_camera,
+                    R.layout.lib_album_recycle_item_header_camera,
                     parent,
                     false
             ));
@@ -213,7 +213,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         PictureViewHolder(ViewGroup parent) {
             super(
                     LayoutInflater.from(parent.getContext())
-                            .inflate(R.layout.picture_picker_recycle_item_picture, parent, false)
+                            .inflate(R.layout.lib_album_recycle_item_picture, parent, false)
             );
             // Initialize ivPicture.
             ivPicture = itemView.findViewById(R.id.iv_picture);
@@ -316,7 +316,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         VideoViewHolder(ViewGroup parent) {
             super(
                     LayoutInflater.from(parent.getContext()).inflate(
-                            R.layout.picture_picker_recycle_item_video,
+                            R.layout.lib_album_recycle_item_video,
                             parent,
                             false
                     )

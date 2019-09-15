@@ -292,9 +292,9 @@ class PickerPresenter implements PickerContract.IPresenter,
     private boolean isCanPickedPicture(boolean isShowFailedMsg) {
         if (mPickedSet.size() == mPickerConfig.getThreshold()) {
             if (isShowFailedMsg) {
-                mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_over_threshold_prefix)
+                mView.showMsg(mView.getString(R.string.lib_album_picker_tips_over_threshold_prefix)
                         + mPickerConfig.getThreshold()
-                        + mView.getString(R.string.picture_picker_picker_tips_over_threshold_suffix)
+                        + mView.getString(R.string.lib_album_picker_tips_over_threshold_suffix)
                 );
             }
             return false;
@@ -309,7 +309,7 @@ class PickerPresenter implements PickerContract.IPresenter,
      */
     private boolean isCanPreview() {
         if (mPickedSet.isEmpty()) {
-            mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_preview_failed));
+            mView.showMsg(mView.getString(R.string.lib_album_picker_tips_preview_failed));
             return false;
         }
         return true;
@@ -322,7 +322,7 @@ class PickerPresenter implements PickerContract.IPresenter,
      */
     private boolean isCanEnsure() {
         if (mPickedSet.isEmpty()) {
-            mView.showMsg(mView.getString(R.string.picture_picker_picker_tips_ensure_failed));
+            mView.showMsg(mView.getString(R.string.lib_album_picker_tips_ensure_failed));
             return false;
         }
         return true;
@@ -334,7 +334,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     private CharSequence buildEnsureText() {
         return MessageFormat.format(
                 "{0} ({1}/{2})",
-                mView.getString(R.string.picture_picker_picker_ensure),
+                mView.getString(R.string.lib_album_picker_ensure),
                 mPickedSet.size(),
                 mPickerConfig.getThreshold()
         );
@@ -346,7 +346,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     private CharSequence buildPreviewText() {
         return MessageFormat.format(
                 "{0} ({1})",
-                mView.getString(R.string.picture_picker_picker_preview),
+                mView.getString(R.string.lib_album_picker_preview),
                 mPickedSet.size()
         );
     }

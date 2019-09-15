@@ -77,7 +77,7 @@ public class TakerActivity extends AppCompatActivity implements
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.picture_picker_activity_taker);
+        setContentView(R.layout.lib_ablum_activity_taker);
         initTitle();
         initViews();
         initPresenter();
@@ -285,7 +285,7 @@ public class TakerActivity extends AppCompatActivity implements
         // switch
         mToolbar.addLeftMenuImage(
                 ImageViewOptions.Builder()
-                        .setDrawableResId(R.drawable.ic_activity_taker_camera_switch)
+                        .setDrawableResId(R.drawable.ic_album_taker_camera_switch)
                         .setPaddingLeft(paddingSize)
                         .setListener(new View.OnClickListener() {
                             @Override
@@ -300,7 +300,7 @@ public class TakerActivity extends AppCompatActivity implements
         // aspect
         mToolbar.addLeftMenuImage(
                 ImageViewOptions.Builder()
-                        .setDrawableResId(R.drawable.ic_activity_taker_aspect)
+                        .setDrawableResId(R.drawable.ic_album_taker_aspect)
                         .setPaddingLeft(paddingSize)
                         .setListener(new View.OnClickListener() {
                             @Override
@@ -314,7 +314,7 @@ public class TakerActivity extends AppCompatActivity implements
         // 全面屏
         mToolbar.addLeftMenuImage(
                 ImageViewOptions.Builder()
-                        .setDrawableResId(R.drawable.ic_activity_taker_full_screen)
+                        .setDrawableResId(R.drawable.ic_album_taker_full_screen)
                         .setPaddingLeft(paddingSize)
                         .setListener(new View.OnClickListener() {
                             @Override

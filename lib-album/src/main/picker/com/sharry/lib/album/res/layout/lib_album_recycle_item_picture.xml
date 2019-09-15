@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -11,15 +10,7 @@
         android:id="@+id/iv_picture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/ic_picture_picker_picker_video_default" />
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/picture_picker_picker_recycle_item_video_bg_color"
-        android:foreground="?attr/selectableItemBackgroundBorderless"
-        android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_picture_picker_picker_video_play" />
+        android:foreground="?attr/selectableItemBackgroundBorderless" />
 
     <com.sharry.lib.album.CheckedIndicatorView
         android:id="@+id/check_indicator"
@@ -28,14 +19,12 @@
         android:layout_gravity="end|top"
         android:textColor="@android:color/white" />
 
-    <TextView
-        android:id="@+id/tv_duration"
+    <ImageView
+        android:id="@+id/iv_gif_tag"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:padding="10dp"
-        android:textColor="@android:color/white"
-        android:textSize="13dp"
-        tool:text="15:00" />
+        android:layout_gravity="left|bottom"
+        android:layout_margin="5dp"
+        app:srcCompat="@drawable/ic_album_picker_gif" />
 
 </FrameLayout>

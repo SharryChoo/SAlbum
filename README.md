@@ -24,7 +24,7 @@
 ## 功能集成
 Dependency | Version
 ---|---
-SPicturePicker | [![](https://jitpack.io/v/SharryChoo/SPicturePicker.svg)](https://jitpack.io/#SharryChoo/SPicturePicker)
+SPicturePicker | [![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
 SToolbar | [![](https://jitpack.io/v/SharryChoo/SToolbar.svg)](https://jitpack.io/#SharryChoo/SToolbar)
 SMedia:lib-media-recorder | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
 SMedia:lib-media-scamera | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
@@ -35,8 +35,8 @@ Add it in your **module build.gradle** at the end of repositories
 ```
 dependencies {
     ...
-    // SPicturePicker dependencies
-    implementation 'com.github.SharryChoo:SPicturePicker:+'
+    // SAlbum dependencies
+    implementation 'com.github.SharryChoo:SAlbum:+'
     // Core dependencies
     api "com.github.SharryChoo:SToolbar:+"
     api "com.github.SharryChoo.SMedia:lib-media-recorder:+"

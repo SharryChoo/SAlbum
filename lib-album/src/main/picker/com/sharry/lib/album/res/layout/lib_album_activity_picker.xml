@@ -13,7 +13,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:backIcon="@drawable/ic_picture_picker_picker_right_arrow"
+            app:backIcon="@drawable/ic_album_picker_right_arrow"
             app:statusBarStyle="Transparent"
             app:subItemInterval="10dp"
             app:titleGravity="Left"
@@ -51,7 +51,7 @@
             android:id="@+id/rv_menu_nav_container"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@color/picture_picker_picker_bottom_menu_nav_bg_collapsed_color">
+            android:background="@color/lib_album_picker_bottom_menu_nav_bg_collapsed_color">
 
             <ImageView
                 android:id="@+id/iv_nav_indicator"
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:paddingLeft="20dp"
-                app:srcCompat="@drawable/ic_picture_picker_picker_bottom_indicator" />
+                app:srcCompat="@drawable/ic_album_picker_bottom_indicator" />
 
             <TextView
                 android:id="@+id/tv_folder_name"
@@ -70,8 +70,8 @@
                 android:gravity="center_vertical"
                 android:paddingStart="5dp"
                 android:paddingLeft="5dp"
-                android:text="@string/picture_picker_picker_all_picture"
-                android:textColor="@color/picture_picker_picker_bottom_menu_nav_text_collapsed_color"
+                android:text="@string/lib_album_picker_all_picture"
+                android:textColor="@color/lib_album_picker_bottom_menu_nav_text_collapsed_color"
                 android:textSize="15dp" />
 
             <TextView
@@ -83,8 +83,8 @@
                 android:gravity="center"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:text="@string/picture_picker_picker_preview"
-                android:textColor="@color/picture_picker_picker_bottom_menu_nav_text_collapsed_color"
+                android:text="@string/lib_album_picker_preview"
+                android:textColor="@color/lib_album_picker_bottom_menu_nav_text_collapsed_color"
                 android:textSize="14dp" />
 
         </RelativeLayout>
@@ -93,7 +93,7 @@
             android:id="@+id/recycle_folders"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/picture_picker_picker_bottom_menu_content_folders_bg_color" />
+            android:background="@color/lib_album_picker_bottom_menu_content_folders_bg_color" />
 
     </LinearLayout>
 
@@ -106,7 +106,7 @@
         android:layout_marginBottom="70dp"
         app:layout_anchor="@+id/rv_picker"
         app:layout_anchorGravity="bottom|right"
-        app:layout_behavior="@string/picture_picker_picker_fab_behavior"
-        app:srcCompat="@drawable/ic_picture_picker_picker_fab" />
+        app:layout_behavior="@string/lib_album_picker_fab_behavior"
+        app:srcCompat="@drawable/ic_album_picker_fab" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

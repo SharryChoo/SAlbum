@@ -105,7 +105,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     @Override
     public void handleTakePicture(Bitmap bitmap) {
         if (bitmap == null) {
-            mView.toast(R.string.picture_picker_taker_take_picture_failed);
+            mView.toast(R.string.lib_album_taker_take_picture_failed);
             return;
         }
         // 保存 bitmap
@@ -124,7 +124,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     public void handleRecordFinish(long duration) {
         if (duration < mConfig.getMinimumDuration()) {
             mRecorder.cancel();
-            mView.toast(R.string.picture_picker_taker_record_time_too_short);
+            mView.toast(R.string.lib_album_taker_record_time_too_short);
         } else {
             // Recorder 的 Complete 是异步操作, 这里先将录制按钮异常, 防止用户误触
             mView.setRecordButtonVisible(false);
@@ -188,7 +188,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performRecordFiled() {
         recycle();
-        mView.toast(R.string.picture_picker_taker_record_failed);
+        mView.toast(R.string.lib_album_taker_record_failed);
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
     }
 
@@ -213,7 +213,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
             mediaMeta.date = System.currentTimeMillis();
             mView.setResult(mediaMeta);
         } catch (IOException e) {
-            mView.toast(R.string.picture_picker_taker_picture_saved_failed);
+            mView.toast(R.string.lib_album_taker_picture_saved_failed);
         }
     }
 

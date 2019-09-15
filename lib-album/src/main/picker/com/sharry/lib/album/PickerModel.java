@@ -77,7 +77,7 @@ class PickerModel implements PickerContract.IModel {
                 ArrayList<FolderModel> folderModels = new ArrayList<>();
                 // 创建一个图片文件夹, 用于保存所有图片
                 FolderModel folderAll = new FolderModel(
-                        context.getString(R.string.picture_picker_picker_all_picture)
+                        context.getString(R.string.lib_album_picker_all_picture)
                 );
                 folderModels.add(folderAll);
                 /*
@@ -157,7 +157,7 @@ class PickerModel implements PickerContract.IModel {
                     if (folder == null) {
                         String folderName = getLastFileName(folderPath);
                         if (TextUtils.isEmpty(folderName)) {
-                            folderName = context.getString(R.string.picture_picker_picker_root_folder);
+                            folderName = context.getString(R.string.lib_album_picker_root_folder);
                         }
                         folder = new FolderModel(folderName);
                         folders.put(folderPath, folder);
@@ -272,7 +272,7 @@ class PickerModel implements PickerContract.IModel {
                     if (folder == null) {
                         String folderName = getLastFileName(folderPath);
                         if (TextUtils.isEmpty(folderName)) {
-                            folderName = context.getString(R.string.picture_picker_picker_root_folder);
+                            folderName = context.getString(R.string.lib_album_picker_root_folder);
                         }
                         folder = new FolderModel(folderName);
                         folders.put(folderPath, folder);

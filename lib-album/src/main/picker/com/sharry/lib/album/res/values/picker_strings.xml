@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="picture_picker_picker_ensure">Ensure</string>
-    <string name="picture_picker_picker_preview">Preview</string>
-    <string name="picture_picker_picker_all_picture">All</string>
-    <string name="picture_picker_picker_root_folder">Storage Card</string>
-    <string name="picture_picker_picker_tips_over_threshold_prefix">Pick a maximum of&#160;</string>
-    <string name="picture_picker_picker_tips_over_threshold_suffix">&#160;pictures.</string>
-    <string name="picture_picker_picker_tips_fetch_album_failed">Fetch album data failed.</string>
-    <string name="picture_picker_picker_tips_ensure_failed">Please pick at least one picture.</string>
-    <string name="picture_picker_picker_tips_preview_failed">@string/picture_picker_picker_tips_ensure_failed</string>
-    <string name="picture_picker_picker_fab_behavior" translatable="false">com.sharry.lib.album.PicturePickerFabBehavior</string>
+    <string name="lib_album_picker_ensure">Ensure</string>
+    <string name="lib_album_picker_preview">Preview</string>
+    <string name="lib_album_picker_all_picture">All</string>
+    <string name="lib_album_picker_root_folder">Storage Card</string>
+    <string name="lib_album_picker_tips_over_threshold_prefix">Pick a maximum of&#160;</string>
+    <string name="lib_album_picker_tips_over_threshold_suffix">&#160;pictures.</string>
+    <string name="lib_album_picker_tips_fetch_album_failed">Fetch album data failed.</string>
+    <string name="lib_album_picker_tips_ensure_failed">Please pick at least one picture.</string>
+    <string name="lib_album_picker_tips_preview_failed">@string/lib_album_picker_tips_ensure_failed</string>
+    <string name="lib_album_picker_fab_behavior" translatable="false">com.sharry.lib.album.PicturePickerFabBehavior</string>
 
 </resources>

@@ -2,9 +2,9 @@
 
     <style name="PicturePickerTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/picture_picker_picker_theme_primary_color</item>
-        <item name="colorPrimaryDark">@color/picture_picker_picker_theme_primary_dark_color</item>
-        <item name="colorAccent">@color/picture_picker_picker_theme_accent_color</item>
+        <item name="colorPrimary">@color/lib_album_picker_theme_primary_color</item>
+        <item name="colorPrimaryDark">@color/lib_album_picker_theme_primary_dark_color</item>
+        <item name="colorAccent">@color/lib_album_picker_theme_accent_color</item>
     </style>
 
 </resources>
