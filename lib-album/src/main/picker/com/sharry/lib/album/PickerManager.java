@@ -14,7 +14,7 @@ import static android.app.Activity.RESULT_OK;
 /**
  * 图片选择器的管理类
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 4/28/2019 5:03 PM
  */

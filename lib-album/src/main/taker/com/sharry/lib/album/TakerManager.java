@@ -14,7 +14,7 @@ import static android.app.Activity.RESULT_OK;
 /**
  * 从相机拍照获取图片的入口
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 4/28/2019 5:02 PM
  */

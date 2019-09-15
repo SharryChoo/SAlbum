@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * PicturePicture MVP 的约束
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2018/6/13.
  */

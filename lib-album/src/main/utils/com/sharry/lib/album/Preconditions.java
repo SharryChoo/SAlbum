@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * Contains common assertions.
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 3/29/2019 2:14 PM
  */

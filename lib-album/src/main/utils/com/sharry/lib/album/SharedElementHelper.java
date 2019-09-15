@@ -28,7 +28,7 @@ import java.util.HashMap;
  * Thanks for google framework sources, {@link android.transition.ChangeBounds}
  * and {@link android.transition.ChangeImageTransform}
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 3/18/2019 11:13 AM
  */
@@ -283,7 +283,7 @@ class SharedElementHelper {
     }
 
     /**
-     * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+     * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
      * @version 1.0
      * @since 3/15/2019 3:27 PM
      */
