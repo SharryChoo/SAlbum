@@ -118,7 +118,7 @@ public class WatcherActivity extends AppCompatActivity implements
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         fixRequestOrientation(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lib_album_activity_picture_watcher);
+        setContentView(R.layout.lib_album_activity_watcher);
         initTitle();
         initViews();
         initPresenter();

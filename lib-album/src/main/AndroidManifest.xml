@@ -13,12 +13,12 @@
             android:name="com.sharry.lib.album.PickerActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/PicturePickerTheme" />
+            android:theme="@style/PickerTheme" />
         <activity
             android:name="com.sharry.lib.album.WatcherActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/PictureWatcherTheme" />
+            android:theme="@style/WatcherTheme" />
         <activity
             android:name="com.sharry.lib.album.TakerActivity"
             android:launchMode="singleTop"

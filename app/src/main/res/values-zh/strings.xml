@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">SPicturePicker</string>
 
     <string name="app_activity_main_et_threshold_hint">选中数量</string>
     <string name="app_activity_main_et_span_count_hint">每行数量</string>
