@@ -30,9 +30,8 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     kapt "com.github.bumptech.glide:compiler:$glideVersion"
 
-
     // SPicturePicker dependencies
-//    implementation 'com.github.SharryChoo:SPicturePicker:1.0.0'
+//    implementation 'com.github.SharryChoo:SAlbum:1.0.0'
     api project(':lib-album')
 
 }
