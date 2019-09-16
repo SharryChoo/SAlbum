@@ -31,7 +31,7 @@ import java.util.ArrayList;
 /**
  * 图片选择器的 Activity
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.3
  * @since 2018/9/1 10:17
  */

@@ -26,7 +26,7 @@ import androidx.annotation.Nullable;
  * <p>
  * Please ensure u Activity implement {@link Interaction} correct when u use this widget.
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2019-09-04 09:15
  */

@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * 调用系统裁剪工具
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 4/28/2019 4:53 PM
  */

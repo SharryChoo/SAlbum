@@ -8,7 +8,7 @@ import android.util.Log;
 import java.lang.reflect.Field;
 
 /**
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 4/28/2019 2:43 PM
  */

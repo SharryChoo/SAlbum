@@ -1,3 +1,6 @@
+## SAlbum
+SAlbum 是一款对 Android 端提供 **图片的选取、裁剪、拍摄和短视频录制等功能的图库框架**
+
 ## 功能介绍
 - **图片的选取**
   - 支持 JPEG/PNG/WEBP/GIF 的选取
@@ -24,7 +27,7 @@
 ## 功能集成
 Dependency | Version
 ---|---
-SPicturePicker | [![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
+SAlbum | [![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
 SToolbar | [![](https://jitpack.io/v/SharryChoo/SToolbar.svg)](https://jitpack.io/#SharryChoo/SToolbar)
 SMedia:lib-media-recorder | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
 SMedia:lib-media-scamera | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)

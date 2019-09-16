@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * ViewPager 嵌套 Fragment 组合的 Adapter
  *
- * @author Frank <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Frank <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2017/2/20 9:10
  */
