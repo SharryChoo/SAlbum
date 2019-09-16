@@ -25,28 +25,17 @@ SAlbum 是一款对 Android 端提供 **图片的选取、裁剪、拍摄和短�
   - 考虑到依赖体积, 使用系统提供的 VideoView 实现
 
 ## 功能集成
-Dependency | Version
----|---
-SAlbum | [![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
-SToolbar | [![](https://jitpack.io/v/SharryChoo/SToolbar.svg)](https://jitpack.io/#SharryChoo/SToolbar)
-SMedia:lib-media-recorder | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
-SMedia:lib-media-scamera | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
-SMedia:lib-media-opengles | [![](https://jitpack.io/v/SharryChoo/SMedia.svg)](https://jitpack.io/#SharryChoo/SMedia)
+[![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
 
 ### Step 1
 Add it in your **module build.gradle** at the end of repositories
 ```
 dependencies {
     ...
-    // SAlbum dependencies
+    // SAlbum dependency
     implementation 'com.github.SharryChoo:SAlbum:+'
-    // Core dependencies
-    api "com.github.SharryChoo:SToolbar:+"
-    api "com.github.SharryChoo.SMedia:lib-media-recorder:+"
-    api "com.github.SharryChoo.SMedia:lib-scamera:+"
-    api "com.github.SharryChoo.SMedia:lib-opengles:+"
      
-    // Android dependencies
+    // Need Android dependencies
     implementation "androidx.constraintlayout:constraintlayout:+"
     implementation "androidx.appcompat:appcompat:+"
     implementation "androidx.recyclerview:recyclerview:+"
