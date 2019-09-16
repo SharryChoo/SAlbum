@@ -31,21 +31,8 @@ dependencies {
     kapt "com.github.bumptech.glide:compiler:$glideVersion"
 
 
-//    // SPicturePicker dependencies
-//    implementation 'com.github.SharryChoo:SPicturePicker:1.0.0-alpha'
-//
-//    def cameraxVersion = "1.0.0-alpha04"
-//    implementation "androidx.camera:camera-core:$cameraxVersion"
-//    implementation "androidx.camera:camera-camera2:$cameraxVersion"
-//
-//    // My dependencies.
-//    def stoolbarVersion = "1.0.5-x"
-//    api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-//    def smediaVersion = "0.0.9-alpha"
-//    api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
-//    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
-//    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
-
+    // SPicturePicker dependencies
+//    implementation 'com.github.SharryChoo:SPicturePicker:1.0.0'
     api project(':lib-album')
 
 }
