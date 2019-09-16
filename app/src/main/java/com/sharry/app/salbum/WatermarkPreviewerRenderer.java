@@ -16,7 +16,7 @@ import java.nio.FloatBuffer;
  * 带水印效果的渲染器
  * <p>
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2019-08-01 16:04
  */

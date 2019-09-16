@@ -22,7 +22,7 @@ import androidx.appcompat.widget.AppCompatTextView;
 /**
  * 用于展示图片被选中的索引 View
  *
- * @author Sharry <a href="xiaoyu.zhu@1hai.cn">Contact me.</a>
+ * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2018/6/14 16:24
  */
