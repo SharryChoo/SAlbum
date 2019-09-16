@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="SToolbar">
+        <!--Toolbar-->
+        <attr name="statusBarStyle" format="enum">
+            <enum name="Transparent" value="0" />
+            <enum name="Translucence" value="1" />
+            <enum name="Hide" value="2" />
+            <enum name="Default" value="3" />
+        </attr>
+        <attr name="minHeight" format="dimension" />
+        <attr name="subItemInterval" format="dimension" />
+        <attr name="dividingLineHeight" format="dimension" />
+        <attr name="dividingLineColor" format="color" />
+        <!--Title-->
+        <attr name="titleGravity" format="enum">
+            <enum name="Left" value="0" />
+            <enum name="Right" value="1" />
+            <enum name="Center" value="2" />
+        </attr>
+        <attr name="titleText" format="string" />
+        <attr name="titleTextColor" format="color" />
+        <attr name="titleTextSize" format="dimension" />
+        <attr name="titleImage" format="reference" />
+        <!--Menu-->
+        <attr name="backIcon" format="reference" />
+        <attr name="menuTextSize" format="dimension" />
+        <attr name="menuTextColor" format="color" />
+        <attr name="menuLeftText" format="string" />
+        <attr name="menuLeftIcon" format="reference" />
+        <attr name="menuRightText" format="string" />
+        <attr name="menuRightIcon" format="reference" />
+    </declare-styleable>
+
+</resources>

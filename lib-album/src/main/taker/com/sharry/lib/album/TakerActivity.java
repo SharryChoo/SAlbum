@@ -17,11 +17,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.sharry.lib.album.toolbar.ImageViewOptions;
+import com.sharry.lib.album.toolbar.SToolbar;
 import com.sharry.lib.camera.AspectRatio;
 import com.sharry.lib.camera.IPreviewer;
 import com.sharry.lib.camera.SCameraView;
-import com.sharry.lib.widget.toolbar.ImageViewOptions;
-import com.sharry.lib.widget.toolbar.SToolbar;
 
 import java.lang.reflect.Constructor;
 

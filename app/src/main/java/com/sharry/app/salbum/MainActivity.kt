@@ -8,10 +8,10 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.sharry.lib.media.recorder.Options
 import com.sharry.lib.album.*
 import com.sharry.lib.album.TakerConfig.ASPECT_1_1
-import com.sharry.lib.widget.toolbar.SToolbar
+import com.sharry.lib.album.toolbar.SToolbar
+import com.sharry.lib.media.recorder.Options
 import kotlinx.android.synthetic.main.app_activity_main.*
 import java.io.File
 
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 // 设置录制最短时长
                 .setMinRecordDuration(1 * 1000)
                 // 设置录制的分辨率
-                .setRecordResolution(Options.Video.RESOLUTION_720P)
+                .setRecordResolution(Options.Video.RESOLUTION_1080P)
                 // 设置文件存储路径
                 .setDirectoryPath(APP_DIRECTORY)
                 // 拍摄后质量压缩

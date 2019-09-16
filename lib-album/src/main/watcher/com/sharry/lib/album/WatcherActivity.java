@@ -24,8 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.sharry.lib.album.photoview.PhotoView;
-import com.sharry.lib.widget.toolbar.SToolbar;
-import com.sharry.lib.widget.toolbar.ViewOptions;
+import com.sharry.lib.album.toolbar.SToolbar;
+import com.sharry.lib.album.toolbar.ViewOptions;
 
 import java.util.ArrayList;
 

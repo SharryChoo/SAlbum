@@ -1,2 +1,5 @@
 include ':app'
 include ':lib-album'
+include ':lib-media-recorder'
+include ':lib-scamera'
+include ':lib-opengles'

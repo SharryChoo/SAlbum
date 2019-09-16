@@ -8,6 +8,7 @@ def resDirs = [
         "picker/com/sharry/lib/album",
         "taker/com/sharry/lib/album",
         "player/com/sharry/lib/album",
+        "widget/com/sharry/lib/album/toolbar"
 ]
 
 android {
@@ -49,10 +50,5 @@ dependencies {
     def materialVersion = '1.0.0'
     implementation "com.google.android.material:material:$materialVersion"
     // Core dependencies.
-    def stoolbarVersion = "1.0.5-x"
-    api "com.github.SharryChoo:SToolbar:$stoolbarVersion"
-    def smediaVersion = "1.0.0"
-    api "com.github.SharryChoo.SMedia:lib-media-recorder:$smediaVersion"
-    api "com.github.SharryChoo.SMedia:lib-scamera:$smediaVersion"
-    api "com.github.SharryChoo.SMedia:lib-opengles:$smediaVersion"
+    api project(':lib-media-recorder')
 }

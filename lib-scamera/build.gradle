@@ -1,0 +1,28 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.SharryChoo'
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+    }
+    sourceSets {
+        main {
+            java.srcDirs += 'src/main/api'
+            java.srcDirs += 'src/main/device'
+            java.srcDirs += 'src/main/previewer'
+            java.srcDirs += 'src/main/orientation'
+            java.srcDirs += 'src/main/common'
+            java.srcDirs += 'src/main/utils'
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
+    api project(':lib-opengles')
+}

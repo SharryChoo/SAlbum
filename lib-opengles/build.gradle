@@ -1,0 +1,24 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.SharryChoo'
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+    }
+    sourceSets {
+        main {
+            java.srcDirs += 'src/main/gltextureview'
+            java.srcDirs += 'src/main/glsurfaceview'
+            java.srcDirs += 'src/main/utils'
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:$supportLibraryVersion"
+}

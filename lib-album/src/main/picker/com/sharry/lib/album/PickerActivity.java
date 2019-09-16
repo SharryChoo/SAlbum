@@ -23,8 +23,8 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.sharry.lib.widget.toolbar.SToolbar;
-import com.sharry.lib.widget.toolbar.TextViewOptions;
+import com.sharry.lib.album.toolbar.SToolbar;
+import com.sharry.lib.album.toolbar.TextViewOptions;
 
 import java.util.ArrayList;
 
