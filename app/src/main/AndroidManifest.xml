@@ -18,7 +18,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="sharry.demo.picturepicker.FileProvider"
+            android:authorities="com.sharry.app.salbum.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
