@@ -67,16 +67,16 @@ allprojects {
 
 ## 效果展示
 ### 资源选取
-![资源选取](https://i.loli.net/2019/09/10/7kpcTdWfuwQYAhr.jpg)
+![资源选取](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/PicturePicker.jpg)
 
 ### 图像拍摄
-![图像拍摄](https://i.loli.net/2019/09/11/9YpaQvxD4iVhLkS.png)
+![图像拍摄](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/PictureTaker.png)
 
 ### 视频录制
-![视频录制](https://i.loli.net/2019/09/11/F4aVWkY3hebldoX.png)
+![视频录制](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/VideoRecord.png)
 
 ### 视频播放
-![视频的播放](https://i.loli.net/2019/09/10/2jmuTL3bO5Ks8cf.jpg)
+![视频的播放](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/VideoPlay.jpg)
 
 ## 功能使用
 SPicturePicker 的所有功能提供, 均通过 **Manager** 对外提供, 其具体的功能选项通过 **Config** 来配置
