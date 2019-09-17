@@ -93,6 +93,11 @@ class PickerPresenter implements PickerContract.IPresenter,
     }
 
     @Override
+    public void handleViewDestroy() {
+        mModel.stopIfFetching();
+    }
+
+    @Override
     public void handlePictureClicked(int position, View sharedElement) {
         WatcherManager.with((Context) mView)
                 .setSharedElement(sharedElement)
@@ -155,7 +160,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                     )
                     .crop(this);
         } else {
-            mView.setResult(mPickedSet);
+            mView.setResultAndFinish(mPickedSet);
         }
     }
 
@@ -213,7 +218,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     public void onCropComplete(@NonNull String path) {
         mPickedSet.clear();
         mPickedSet.add(MediaMeta.create(path, true));
-        mView.setResult(mPickedSet);
+        mView.setResultAndFinish(mPickedSet);
     }
 
     private void setupView() {

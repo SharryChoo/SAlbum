@@ -63,7 +63,7 @@ interface PickerContract {
 
         void setProgressBarVisible(boolean visible);
 
-        void setResult(@NonNull ArrayList<MediaMeta> pickedPaths);
+        void setResultAndFinish(@NonNull ArrayList<MediaMeta> pickedPaths);
     }
 
     interface IPresenter {
@@ -81,6 +81,9 @@ interface PickerContract {
         void handleEnsureClicked();
 
         void handleCameraClicked();
+
+        void handleViewDestroy();
+
     }
 
     interface IModel {
@@ -92,6 +95,8 @@ interface PickerContract {
         }
 
         void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback listener);
+
+        void stopIfFetching();
 
     }
 

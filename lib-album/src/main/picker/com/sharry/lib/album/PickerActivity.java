@@ -109,6 +109,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mPresenter.handleViewDestroy();
         SharedElementHelper.CACHES.clear();
     }
 
@@ -237,7 +238,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void setResult(@NonNull ArrayList<MediaMeta> pickedPaths) {
+    public void setResultAndFinish(@NonNull ArrayList<MediaMeta> pickedPaths) {
         Intent intent = new Intent();
         intent.putExtra(PickerActivity.RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
         setResult(Activity.RESULT_OK, intent);

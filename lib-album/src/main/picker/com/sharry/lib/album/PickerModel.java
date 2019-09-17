@@ -15,7 +15,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -46,22 +47,32 @@ import static com.sharry.lib.album.FileUtil.getParentFolderPath;
 class PickerModel implements PickerContract.IModel {
 
     private static final String TAG = PickerModel.class.getSimpleName();
-    private static final ThreadPoolExecutor PICKER_EXECUTOR = new ThreadPoolExecutor(
-            // 最多需要 3 个线程并发
-            3,
-            3,
-            0, TimeUnit.SECONDS,
-            // 执行一个 Runnable 就创建一个线程
-            new LinkedBlockingDeque<Runnable>(),
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r, PickerModel.class.getSimpleName());
-                    thread.setDaemon(false);
-                    return thread;
+    private static final ThreadPoolExecutor FETCH_EXECUTOR;
+
+    static {
+        FETCH_EXECUTOR = new ThreadPoolExecutor(
+                // 最多支持 3 线程并发
+                3,
+                3,
+                30,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactory() {
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = new Thread(r, PickerModel.class.getSimpleName());
+                        thread.setDaemon(false);
+                        return thread;
+                    }
                 }
-            }
-    );
+        );
+        // 允许核心线程销毁, 相册为低频组件, 无需持有核心线程, 防止占用过多资源
+        FETCH_EXECUTOR.allowCoreThreadTimeOut(true);
+    }
+
+    private Future mFetchDataFuture;
+    private Future mFetchPictureFuture;
+    private Future mFetchVideoFuture;
 
     PickerModel() {
     }
@@ -69,7 +80,7 @@ class PickerModel implements PickerContract.IModel {
     @Override
     public void fetchData(final Context context, final boolean supportGif,
                           final boolean supportVideo, final Callback callback) {
-        PICKER_EXECUTOR.execute(new Runnable() {
+        mFetchDataFuture = FETCH_EXECUTOR.submit(new Runnable() {
 
             @Override
             public void run() {
@@ -85,16 +96,16 @@ class PickerModel implements PickerContract.IModel {
                    values 为 FolderModel 的对象
                  */
                 ConcurrentHashMap<String, FolderModel> folders = new ConcurrentHashMap<>(16);
-                // 创建计数器
-                CountDownLatch latch = new CountDownLatch(supportVideo ? 2 : 1);
-                // 获取图片数据
-                PICKER_EXECUTOR.execute(new PictureFetchRunnable(context, supportGif, folders, folderAll, latch));
-                // 获取视频数据
-                if (supportVideo) {
-                    PICKER_EXECUTOR.execute(new VideoFetchRunnable(context, folders, folderAll, latch));
-                }
                 // 等待执行结束
                 try {
+                    // 创建计数器
+                    CountDownLatch latch = new CountDownLatch(supportVideo ? 2 : 1);
+                    // 获取图片数据
+                    mFetchPictureFuture = FETCH_EXECUTOR.submit(new PictureFetchRunnable(context, supportGif, folders, folderAll, latch));
+                    // 获取视频数据
+                    if (supportVideo) {
+                        mFetchVideoFuture = FETCH_EXECUTOR.submit(new VideoFetchRunnable(context, folders, folderAll, latch));
+                    }
                     latch.await();
                 } catch (InterruptedException e) {
                     // ignore.
@@ -107,6 +118,19 @@ class PickerModel implements PickerContract.IModel {
             }
 
         });
+    }
+
+    @Override
+    public void stopIfFetching() {
+        if (mFetchDataFuture != null) {
+            mFetchDataFuture.cancel(true);
+        }
+        if (mFetchPictureFuture != null) {
+            mFetchPictureFuture.cancel(true);
+        }
+        if (mFetchVideoFuture != null) {
+            mFetchVideoFuture.cancel(true);
+        }
     }
 
     /**
