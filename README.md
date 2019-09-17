@@ -55,7 +55,7 @@ allprojects {
 ```
 
 ## 效果展示
-![Demo](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/SAlbum-1.0.0.apk)
+下载体验 [Demo](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/SAlbum-1.0.0.apk)
 
 ### 资源选取
 ![资源选取](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/PicturePicker.jpg)
