@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -110,7 +111,6 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     protected void onDestroy() {
         super.onDestroy();
         mPresenter.handleViewDestroy();
-        SharedElementHelper.CACHES.clear();
     }
 
     //////////////////////////////////////////////PickerContract.IView/////////////////////////////////////////////////
@@ -152,11 +152,6 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
                                  @NonNull ArrayList<MediaMeta> userPickedMetas) {
         mRvPicker.setAdapter(new PickerAdapter(this, config,
                 metas, userPickedMetas));
-    }
-
-    @Override
-    public void setPickerItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration) {
-        mRvPicker.addItemDecoration(itemDecoration);
     }
 
     @Override
@@ -264,7 +259,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     @Override
     public void onPictureRemoved(@NonNull MediaMeta removedMeta) {
-        mPresenter.handlePictureRemoved(removedMeta);
+        mPresenter.handlePictureUnchecked(removedMeta);
     }
 
     //////////////////////////////////////////////FolderAdapter.Interaction/////////////////////////////////////////////////
@@ -313,6 +308,13 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     protected void initViews() {
         // Pictures recycler view.
         mRvPicker = findViewById(R.id.rv_picker);
+        mRvPicker.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                super.onDraw(c, parent, state);
+                mPresenter.handleRecycleViewDraw(parent);
+            }
+        });
 
         // Bottom navigation menu.
         mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);

@@ -39,8 +39,6 @@ interface PickerContract {
         void setPickerAdapter(@NonNull PickerConfig config, @NonNull ArrayList<MediaMeta> metas,
                               @NonNull ArrayList<MediaMeta> userPickedMetas);
 
-        void setPickerItemDecoration(@NonNull RecyclerView.ItemDecoration itemDecoration);
-
         void setFolderAdapter(@NonNull ArrayList<FolderModel> allFolders);
 
         void setPictureFolderText(@NonNull String folderName);
@@ -70,20 +68,21 @@ interface PickerContract {
 
         boolean handlePictureChecked(@Nullable MediaMeta checkedMeta);
 
-        void handlePictureRemoved(@Nullable MediaMeta removedMeta);
-
-        void handlePictureClicked(int position, @Nullable View sharedElement);
-
-        void handlePreviewClicked();
-
-        void handleFolderChecked(int position);
-
-        void handleEnsureClicked();
+        void handlePictureUnchecked(@Nullable MediaMeta removedMeta);
 
         void handleCameraClicked();
 
-        void handleViewDestroy();
+        void handlePictureClicked(int position, @Nullable View sharedElement);
 
+        void handleFolderChecked(int position);
+
+        void handlePreviewClicked();
+
+        void handleEnsureClicked();
+
+        void handleRecycleViewDraw(RecyclerView parent);
+
+        void handleViewDestroy();
     }
 
     interface IModel {

@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -78,6 +79,24 @@ class PickerPresenter implements PickerContract.IPresenter,
     //////////////////////////////////////////////PickerContract.IPresenter/////////////////////////////////////////////////
 
     @Override
+    public boolean handlePictureChecked(MediaMeta checkedMeta) {
+        boolean result = isCanPickedPicture(true);
+        if (result && mPickedSet.add(checkedMeta)) {
+            mView.setToolbarEnsureText(buildEnsureText());
+            mView.setPreviewText(buildPreviewText());
+        }
+        return result;
+    }
+
+    @Override
+    public void handlePictureUnchecked(MediaMeta removedMeta) {
+        if (mPickedSet.remove(removedMeta)) {
+            mView.setToolbarEnsureText(buildEnsureText());
+            mView.setPreviewText(buildPreviewText());
+        }
+    }
+
+    @Override
     public void handleCameraClicked() {
         if (mPickerConfig.getTakerConfig() != null) {
             TakerManager.with((Context) mView)
@@ -90,11 +109,6 @@ class PickerPresenter implements PickerContract.IPresenter,
                     )
                     .take(this);
         }
-    }
-
-    @Override
-    public void handleViewDestroy() {
-        mModel.stopIfFetching();
     }
 
     @Override
@@ -111,24 +125,6 @@ class PickerPresenter implements PickerContract.IPresenter,
     }
 
     @Override
-    public boolean handlePictureChecked(MediaMeta checkedMeta) {
-        boolean result = isCanPickedPicture(true);
-        if (result && mPickedSet.add(checkedMeta)) {
-            mView.setToolbarEnsureText(buildEnsureText());
-            mView.setPreviewText(buildPreviewText());
-        }
-        return result;
-    }
-
-    @Override
-    public void handlePictureRemoved(MediaMeta removedMeta) {
-        if (mPickedSet.remove(removedMeta)) {
-            mView.setToolbarEnsureText(buildEnsureText());
-            mView.setPreviewText(buildPreviewText());
-        }
-    }
-
-    @Override
     public void handlePreviewClicked() {
         if (!isCanPreview()) {
             return;
@@ -141,6 +137,11 @@ class PickerPresenter implements PickerContract.IPresenter,
                                 .build()
                 )
                 .startForResult(this);
+    }
+
+    @Override
+    public void handleFolderChecked(int position) {
+        performFolderChecked(position);
     }
 
     @Override
@@ -165,8 +166,24 @@ class PickerPresenter implements PickerContract.IPresenter,
     }
 
     @Override
-    public void handleFolderChecked(int position) {
-        performFolderChecked(position);
+    public void handleRecycleViewDraw(RecyclerView parent) {
+        // Cache view bounds.
+        SharedElementHelper.CACHES.clear();
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+            int adapterPosition = parent.getChildAdapterPosition(child) +
+                    (mPickerConfig.isCameraSupport() ? -1 : 0);
+            SharedElementHelper.CACHES.put(adapterPosition, SharedElementHelper.Bounds.parseFrom(
+                    child, adapterPosition));
+        }
+    }
+
+    @Override
+    public void handleViewDestroy() {
+        // 终止 mModel 获取数据
+        mModel.stopIfFetching();
+        // 清空共享元素缓存的数据
+        SharedElementHelper.CACHES.clear();
     }
 
     //////////////////////////////////////////////WatcherCallback/////////////////////////////////////////////////
@@ -239,8 +256,6 @@ class PickerPresenter implements PickerContract.IPresenter,
         mView.setSpanCount(mPickerConfig.getSpanCount());
         // 设置 RecyclerView 的 Adapter
         mView.setPickerAdapter(mPickerConfig, mDisplaySet, mPickedSet);
-        // 设置 Picker 的装饰器
-        mView.setPickerItemDecoration(new PikerItemDecoration(mPickerConfig.isCameraSupport()));
     }
 
     private void fetchData(Context context) {
