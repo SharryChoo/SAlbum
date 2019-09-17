@@ -18,7 +18,7 @@ import java.io.File
 private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolutePath}${File.separator}PicturePicker"
 
 /**
- * PicturePicker 示例 Activity.
+ * SAlbum 示例 Activity.
  *
  * @author Sharry <a href="SharryChooCHN@Gmail.com">Contact me.</a>
  * @version 1.0
