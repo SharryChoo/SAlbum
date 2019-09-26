@@ -51,11 +51,10 @@ class PickerModel implements PickerContract.IModel {
 
     static {
         FETCH_EXECUTOR = new ThreadPoolExecutor(
-                // 最多支持 3 线程并发
-                3,
-                3,
-                30,
-                TimeUnit.SECONDS,
+                // 3 个线程并发即可满足需求
+                // 使用 4 个, 是为了预防因其中一个线程意外阻塞而导致任务无法正常执行的问题
+                4, 4,
+                30, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new ThreadFactory() {
                     @Override
@@ -66,7 +65,7 @@ class PickerModel implements PickerContract.IModel {
                     }
                 }
         );
-        // 允许核心线程销毁, 相册为低频组件, 无需持有核心线程, 防止占用过多资源
+        // 允许核心线程销毁, 相册为低频组件, 无需持有核心线程, 防止占用过多系统资源
         FETCH_EXECUTOR.allowCoreThreadTimeOut(true);
     }
 
@@ -158,7 +157,8 @@ class PickerModel implements PickerContract.IModel {
 
         @Override
         public void run() {
-            try (Cursor cursor = supportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif()) {
+            Cursor cursor = supportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif();
+            try {
                 while (cursor.moveToNext()) {
                     // 验证路径是否有效
                     String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
@@ -188,11 +188,13 @@ class PickerModel implements PickerContract.IModel {
                     }
                     folder.addMeta(meta);
                 }
-                cursor.close();
                 Log.i(TAG, "Fetch picture resource completed.");
             } catch (Throwable throwable) {
                 // ignore.
             } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
                 latch.countDown();
             }
         }
@@ -269,7 +271,8 @@ class PickerModel implements PickerContract.IModel {
 
         @Override
         public void run() {
-            try (Cursor cursor = createVideoCursor()) {
+            Cursor cursor = createVideoCursor();
+            try {
                 while (cursor.moveToNext()) {
                     // 验证路径是否有效
                     String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
@@ -303,11 +306,13 @@ class PickerModel implements PickerContract.IModel {
                     }
                     folder.addMeta(meta);
                 }
-                cursor.close();
                 Log.i(TAG, "Fetch video resource completed.");
             } catch (Throwable throwable) {
                 // ignore.
             } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
                 latch.countDown();
             }
         }
