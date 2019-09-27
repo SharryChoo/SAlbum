@@ -15,38 +15,35 @@ class ColorUtil {
     /**
      * Get ARGB color range in [primitiveColor, destColor]
      *
-     * @param fraction       range[0, 1]
-     * @param primitiveColor color associated with primitive changed
-     * @param destColor      color associated with dest changed
+     * @param fraction   range[0, 1]
+     * @param colorStart color associated with primitive changed
+     * @param colorDest  color associated with dest changed
      */
-    static int gradualChanged(float fraction, @ColorInt int primitiveColor, @ColorInt int destColor) {
-        int startInt = (Integer) primitiveColor;
-        float startA = ((startInt >> 24) & 0xff) / 255.0f;
-        float startR = ((startInt >> 16) & 0xff) / 255.0f;
-        float startG = ((startInt >> 8) & 0xff) / 255.0f;
-        float startB = (startInt & 0xff) / 255.0f;
-
-        int endInt = (Integer) destColor;
-        float endA = ((endInt >> 24) & 0xff) / 255.0f;
-        float endR = ((endInt >> 16) & 0xff) / 255.0f;
-        float endG = ((endInt >> 8) & 0xff) / 255.0f;
-        float endB = (endInt & 0xff) / 255.0f;
-
+    static int gradualChanged(float fraction, @ColorInt int colorStart, @ColorInt int colorDest) {
+        // split start color.
+        float startChannelA = ((colorStart >> 24) & 0xff) / 255.0f;
+        float startChannelR = ((colorStart >> 16) & 0xff) / 255.0f;
+        float startChannelG = ((colorStart >> 8) & 0xff) / 255.0f;
+        float startChannelB = (colorStart & 0xff) / 255.0f;
         // convert from sRGB to linear
-        startR = (float) Math.pow(startR, 2.2);
-        startG = (float) Math.pow(startG, 2.2);
-        startB = (float) Math.pow(startB, 2.2);
+        startChannelR = (float) Math.pow(startChannelR, 2.2);
+        startChannelG = (float) Math.pow(startChannelG, 2.2);
+        startChannelB = (float) Math.pow(startChannelB, 2.2);
 
-        endR = (float) Math.pow(endR, 2.2);
-        endG = (float) Math.pow(endG, 2.2);
-        endB = (float) Math.pow(endB, 2.2);
+        // split dest color.
+        float destChannelA = ((colorDest >> 24) & 0xff) / 255.0f;
+        float destChannelR = ((colorDest >> 16) & 0xff) / 255.0f;
+        float destChannelG = ((colorDest >> 8) & 0xff) / 255.0f;
+        float destChannelB = (colorDest & 0xff) / 255.0f;
+        destChannelR = (float) Math.pow(destChannelR, 2.2);
+        destChannelG = (float) Math.pow(destChannelG, 2.2);
+        destChannelB = (float) Math.pow(destChannelB, 2.2);
 
         // compute the interpolated color in linear space
-        float a = startA + fraction * (endA - startA);
-        float r = startR + fraction * (endR - startR);
-        float g = startG + fraction * (endG - startG);
-        float b = startB + fraction * (endB - startB);
-
+        float a = startChannelA + fraction * (destChannelA - startChannelA);
+        float r = startChannelR + fraction * (destChannelR - startChannelR);
+        float g = startChannelG + fraction * (destChannelG - startChannelG);
+        float b = startChannelB + fraction * (destChannelB - startChannelB);
         // convert back to sRGB in the [0..255] range
         a = a * 255.0f;
         r = (float) Math.pow(r, 1.0 / 2.2) * 255.0f;
