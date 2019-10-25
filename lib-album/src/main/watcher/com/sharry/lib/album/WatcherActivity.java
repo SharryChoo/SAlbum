@@ -8,8 +8,6 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -47,10 +45,14 @@ public class WatcherActivity extends AppCompatActivity implements
     public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
     public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
 
-    private static final String TAG = WatcherActivity.class.getSimpleName();
-    private static final String EXTRA_CONFIG = "start_intent_extra_config";
     private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
-    private static final int THRESHOLD_TRANSACTION_DATA_SIZE = 150 * 1024;
+
+    /**
+     * 图片浏览器的配置, 使用静态变量暂存数据
+     * <p>
+     * 防止图片资源超过 4MB, 导致 Binder 驱动无法传值
+     */
+    private static WatcherConfig sConfig;
 
     /**
      * U can launch this activity from here.
@@ -60,34 +62,20 @@ public class WatcherActivity extends AppCompatActivity implements
      * @param config        WatcherActivity 的配置
      * @param sharedElement 共享元素
      */
-    public static void launchActivityForResult(@NonNull Activity request, @NonNull Fragment resultTo,
-                                               @NonNull WatcherConfig config, @Nullable View sharedElement) {
+    static void launchActivityForResult(@NonNull Activity request, @NonNull Fragment resultTo,
+                                        @NonNull WatcherConfig config, @Nullable View sharedElement) {
+        // 暂存 Config
+        sConfig = config;
         Intent intent = new Intent(request, WatcherActivity.class);
-        intent.putExtra(WatcherActivity.EXTRA_CONFIG, config);
         if (sharedElement != null) {
             intent.putExtra(
                     WatcherActivity.EXTRA_SHARED_ELEMENT,
                     SharedElementHelper.Bounds.parseFrom(sharedElement, config.getPosition())
             );
         }
-        Bundle bundle = intent.getExtras();
-        if (bundle == null) {
-            return;
-        }
-        Parcel parcel = Parcel.obtain();
-        bundle.writeToParcel(parcel, 0);
-        Log.i(TAG, "Transaction data size is: " + parcel.dataSize() + " bytes");
-        if (parcel.dataSize() < THRESHOLD_TRANSACTION_DATA_SIZE) {
-            resultTo.startActivityForResult(intent, REQUEST_CODE);
-            // 使用淡入淡出的效果
-            if (sharedElement != null) {
-                request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            }
-        } else {
-            Log.e(TAG, "Transaction is to large!!! data size is: " + parcel.dataSize() + " bytes");
-            intent = new Intent(request, WatcherActivity.class);
-            intent.putExtra(WatcherActivity.EXTRA_CONFIG, config);
-            resultTo.startActivityForResult(intent, REQUEST_CODE);
+        resultTo.startActivityForResult(intent, REQUEST_CODE);
+        if (sharedElement != null) {
+            request.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         }
     }
 
@@ -139,6 +127,7 @@ public class WatcherActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        sConfig = null;
         WatcherFragment.ACTIVES.clear();
         WatcherFragment.IDLES.clear();
     }
@@ -385,7 +374,7 @@ public class WatcherActivity extends AppCompatActivity implements
     private void initPresenter() {
         mPresenter = new WatcherPresenter(
                 this,
-                (WatcherConfig) getIntent().getParcelableExtra(EXTRA_CONFIG),
+                sConfig,
                 ((SharedElementHelper.Bounds) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
         );
     }
