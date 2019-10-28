@@ -114,7 +114,7 @@ public class CropperFragment extends Fragment {
             case REQUEST_CODE_CROP:
                 try {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
-                    File destFile = FileUtil.createCropDestFile(mConfig.getCropDirectoryPath());
+                    File destFile = FileUtil.createCropDestFile(mContext, mConfig.getCropDirectoryPath());
                     CompressUtil.doCompress(mTempFile.getAbsolutePath(), destFile.getAbsolutePath(), mConfig.getDestQuality());
                     Uri destUri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), destFile);
                     // 回调

@@ -11,12 +11,16 @@ import android.os.Build;
  */
 class VersionUtil {
 
+    static boolean isJellyBeanMr1() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+    }
+
     static boolean isLollipop() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 
-    static boolean isJellyBeanMr1() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+    static boolean isQ() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
     }
 
 }

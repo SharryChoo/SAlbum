@@ -3,9 +3,10 @@ package com.sharry.lib.album;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 /**
  * 图片裁剪的入口
@@ -73,13 +74,9 @@ public class CropperManager {
             throw new UnsupportedOperationException(TAG + ".takeActual -> Please ensure crop " +
                     "target uri is valuable.");
         }
-        // 指定默认的裁剪路径
-        if (TextUtils.isEmpty(mConfig.getCropDirectoryPath())) {
-            mConfig.rebuild().setCropDirectory(FileUtil.createDefaultDirectory(mBind).getAbsolutePath());
-        }
         // 指定默认, FileProvider 的 authority
         if (TextUtils.isEmpty(mConfig.getAuthority())) {
-            mConfig.rebuild().setAuthority(FileUtil.getDefaultFileProviderAuthority(mBind));
+            throw new UnsupportedOperationException(TAG + "Please ensure u set FileProvider authority correct!.");
         }
         // 执行回调
         CropperFragment callbackFragment = CropperFragment.getInstance(mBind);

@@ -207,15 +207,25 @@ class TakerPresenter implements ITakerContract.IPresenter {
      * 处理图像确认
      */
     private void performPictureEnsure() {
-        File file = FileUtil.createCameraDestFile(mConfig.getDirectoryPath());
+        File file = FileUtil.createCameraDestFile((Context) mView, mConfig.getDirectoryPath());
         try {
             CompressUtil.doCompress(mFetchedBitmap, file.getAbsolutePath(),
                     mConfig.getPictureQuality(), mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
-            Uri uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), file);
-            MediaMeta mediaMeta = MediaMeta.create(uri, true);
-            mediaMeta.date = System.currentTimeMillis();
-            mView.setResult(mediaMeta);
-        } catch (IOException e) {
+            // 判断是否需要拷贝到共用目录
+            Uri uri;
+            if (file.getParent().equals(mConfig.getDirectoryPath())) {
+                uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), file);
+            } else {
+                uri = FileUtil.copyPictureToPublic((Context) mView, file, mConfig.getDirectoryPath());
+            }
+            if (uri != null) {
+                MediaMeta mediaMeta = MediaMeta.create(uri, true);
+                mediaMeta.date = System.currentTimeMillis();
+                mView.setResult(mediaMeta);
+            } else {
+                mView.toast(R.string.lib_album_taker_picture_saved_failed);
+            }
+        } catch (Throwable e) {
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
         }
     }
@@ -225,11 +235,20 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
-        Uri uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), mVideoFile);
-        MediaMeta mediaMeta = MediaMeta.create(uri, false);
-        mediaMeta.date = currentTime;
-        mediaMeta.duration = mRecordDuration;
-        mView.setResult(mediaMeta);
+        Uri uri;
+        if (mVideoFile.getParent().equals(mConfig.getDirectoryPath())) {
+            uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), mVideoFile);
+        } else {
+            uri = FileUtil.copyMp4ToPublic((Context) mView, mVideoFile, mConfig.getDirectoryPath());
+        }
+        if (uri != null) {
+            MediaMeta mediaMeta = MediaMeta.create(uri, false);
+            mediaMeta.date = currentTime;
+            mediaMeta.duration = mRecordDuration;
+            mView.setResult(mediaMeta);
+        } else {
+            mView.toast(R.string.lib_album_taker_video_saved_failed);
+        }
     }
 
     /**

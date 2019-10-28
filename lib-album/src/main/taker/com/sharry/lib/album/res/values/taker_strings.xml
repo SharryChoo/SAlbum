@@ -4,6 +4,7 @@
     <string name="lib_album_taker_take_picture_failed">Take picture failed</string>
     <string name="lib_album_taker_record_time_too_short">Record time too short</string>
     <string name="lib_album_taker_record_failed">Record failed, please try again</string>
-    <string name="lib_album_taker_picture_saved_failed">Picture saved failed</string>
+    <string name="lib_album_taker_picture_saved_failed">Picture save failed</string>
+    <string name="lib_album_taker_video_saved_failed">Video save failed</string>
 
 </resources>

@@ -57,7 +57,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         // Step2. Create an instance of video muxer and prepare.
         this.mMuxer = MuxerFactory.createEncoder(options.getMuxerType());
         try {
-            this.mOutputFile = FileUtil.createFile(options.getOutputDir(), RECORD_PREFIX,
+            this.mOutputFile = FileUtil.createFile(context, options.getOutputDir(), RECORD_PREFIX,
                     options.getMuxerType().getFileSuffix());
         } catch (IOException e) {
             throw new UnsupportedOperationException("Please ensure file can create correct.");

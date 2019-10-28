@@ -46,7 +46,7 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         // 创建编码上下文
         try {
             if (!options.isJustEncode()) {
-                mOutputFile = FileUtil.createFile(mOptions.getOutputDir(), FILE_PREFIX,
+                mOutputFile = FileUtil.createFile(context, mOptions.getOutputDir(), FILE_PREFIX,
                         mOptions.getAudioEncodeType().getFileSuffix());
             } else {
                 mOutputFile = null;

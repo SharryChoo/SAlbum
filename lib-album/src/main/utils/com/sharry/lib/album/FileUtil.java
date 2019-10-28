@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -14,12 +13,15 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -110,27 +112,14 @@ class FileUtil {
     }
 
     /**
-     * 创建图片地址uri,用于保存拍照后的照片 Android 10以后使用这种方法
-     */
-    private Uri createImageUri(Context context) {
-        String status = Environment.getExternalStorageState();
-        // 判断是否有SD卡, 优先使用SD卡存储, 当没有SD卡时使用手机存储
-        if (status.equals(Environment.MEDIA_MOUNTED)) {
-            return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new ContentValues());
-        } else {
-            return context.getContentResolver().insert(MediaStore.Images.Media.INTERNAL_CONTENT_URI, new ContentValues());
-        }
-    }
-
-    /**
      * 创建拍照文件
      *
      * @param directoryPath 文件目录路径
      */
-    static File createCameraDestFile(String directoryPath) {
-        Log.e(TAG, "isExternalStorageWritable = " + isExternalStorageWritable());
+    static File createCameraDestFile(Context context, String directoryPath) {
         // 获取默认路径
-        File dir = new File(directoryPath);
+        File dir = VersionUtil.isQ() || TextUtils.isEmpty(directoryPath) ?
+                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) : new File(directoryPath);
         if (!dir.exists()) {
             boolean res = dir.mkdirs();
             if (!res) {
@@ -142,7 +131,9 @@ class FileUtil {
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File cameraFile = new File(dir, fileName);
         try {
-            if (cameraFile.exists()) cameraFile.delete();
+            if (cameraFile.exists()) {
+                cameraFile.delete();
+            }
             cameraFile.createNewFile();
             Log.i(TAG, "create camera file success -> " + cameraFile.getAbsolutePath());
         } catch (IOException e) {
@@ -156,9 +147,10 @@ class FileUtil {
      *
      * @param directoryPath 文件目录路径
      */
-    static File createCropDestFile(String directoryPath) {
+    static File createCropDestFile(Context context, String directoryPath) {
         // 获取默认路径
-        File dir = new File(directoryPath);
+        File dir = VersionUtil.isQ() || TextUtils.isEmpty(directoryPath) ?
+                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) : new File(directoryPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -179,13 +171,6 @@ class FileUtil {
     }
 
     /**
-     * 创建默认的 FileProvider 的 Authority
-     */
-    static String getDefaultFileProviderAuthority(Context context) {
-        return context.getPackageName() + ".FileProvider";
-    }
-
-    /**
      * 获取默认文件名(包名的最后一个字段)
      */
     private static String getDefaultName(Context context) {
@@ -198,7 +183,6 @@ class FileUtil {
         }
         return null;
     }
-
 
     /**
      * 通知 MediaStore 文件删除了
@@ -214,37 +198,79 @@ class FileUtil {
         }
     }
 
-    static boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
+    /**
+     * 通过 MediaStore 保存，兼容AndroidQ，保存成功自动添加到相册数据库，无需再发送广告告诉系统插入相册
+     *
+     * @param context       context
+     * @param sourceFile    源文件
+     * @param destDirectory 目标目录
+     * @return 拷贝成功之后的 URI
+     */
+    @Nullable
+    static Uri copyPictureToPublic(Context context, File sourceFile, String destDirectory) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DESCRIPTION, "This is a picture");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + getLastFileName(destDirectory));
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, sourceFile.getName());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
+        values.put(MediaStore.Images.Media.TITLE, "image.jpg");
+        ContentResolver resolver = context.getContentResolver();
+        Uri destUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        if (writeToUri(sourceFile, destUri, resolver)) {
+            return destUri;
         }
-        return false;
+        return null;
     }
 
-    static boolean isAndroidQFileExists(Context context, String path) {
-        if (context == null) {
-            return false;
+    /**
+     * 通过 MediaStore 保存，兼容AndroidQ，保存成功自动添加到相册数据库，无需再发送广告告诉系统插入相册
+     *
+     * @param context       context
+     * @param sourceFile    源文件
+     * @param destDirectory 目标目录
+     * @return 拷贝成功之后的 URI
+     */
+    @Nullable
+    static Uri copyMp4ToPublic(Context context, File sourceFile, String destDirectory) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DESCRIPTION, "This is a video");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Videos/" + getLastFileName(destDirectory));
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, sourceFile.getName());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "video/mp4");
+        values.put(MediaStore.Images.Media.TITLE, "video.mp4");
+        ContentResolver resolver = context.getContentResolver();
+        Uri destUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+        if (writeToUri(sourceFile, destUri, resolver)) {
+            return destUri;
         }
-        AssetFileDescriptor afd = null;
-        ContentResolver cr = context.getContentResolver();
+        return null;
+    }
+
+    private static boolean writeToUri(File sourceFile, Uri destUri, ContentResolver resolver) {
+        BufferedInputStream inputStream = null;
+        OutputStream os = null;
         try {
-            Uri uri = Uri.parse(path);
-            afd = cr.openAssetFileDescriptor(Uri.parse(path), "r");
-            if (afd == null) {
-                return false;
-            } else {
-                close(afd);
+            inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
+            if (destUri != null) {
+                os = resolver.openOutputStream(destUri);
             }
-        } catch (FileNotFoundException e) {
+            if (os != null) {
+                byte[] buffer = new byte[1024 * 4];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    os.write(buffer, 0, len);
+                }
+                os.flush();
+            }
+            return true;
+        } catch (IOException e) {
             return false;
         } finally {
-            close(afd);
+            close(os, inputStream);
         }
-        return true;
     }
 
-    static void close(Closeable... closeables) {
+    private static void close(Closeable... closeables) {
         if (closeables == null) {
             return;
         }

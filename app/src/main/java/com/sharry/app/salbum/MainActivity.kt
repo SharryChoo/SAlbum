@@ -64,7 +64,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initData() {
-//        outputDir = "${getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath}"
         takerConfig = TakerConfig.Builder()
                 // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
                 .setAuthority("$packageName.FileProvider")

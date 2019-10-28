@@ -27,9 +27,10 @@ class FileUtil {
      * 创建音频文件
      */
     @NonNull
-    static File createFile(String dirPath, String prefix, String suffix) throws IOException {
+    static File createFile(Context context, String dirPath, String prefix, String suffix) throws IOException {
         // 1. 生成指定目录
-        File dir = new File(dirPath);
+        File dir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || TextUtils.isEmpty(dirPath) ?
+                context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) : new File(dirPath);
         if (!dir.exists() || !dir.isDirectory()) {
             dir.mkdirs();
         }

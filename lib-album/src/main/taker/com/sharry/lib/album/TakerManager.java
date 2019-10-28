@@ -107,16 +107,11 @@ public class TakerManager {
     }
 
     private void completionConfig() {
-        // 1. 若为指定照片默认输出路径, 给予指定默认的拍照路径
-        if (TextUtils.isEmpty(mConfig.getDirectoryPath())) {
-            mConfig.rebuild().setDirectoryPath(FileUtil.createDefaultDirectory(mBind).getAbsolutePath());
-        }
-        // 3. 处理图片裁剪的缺省值
+        // 处理图片裁剪的缺省值
         if (mConfig.isCropSupport()) {
             // 给图片裁剪添加缺省的输出文件夹
             if (TextUtils.isEmpty(mConfig.getCropperConfig().getCropDirectoryPath())) {
-                mConfig.getCropperConfig().rebuild()
-                        .setCropDirectory(mConfig.getDirectoryPath());
+                mConfig.getCropperConfig().rebuild().setCropDirectory(mConfig.getDirectoryPath());
             }
         }
     }
