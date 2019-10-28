@@ -8,7 +8,6 @@ import android.os.Parcelable;
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.sharry.lib.camera.IPreviewer;
 import com.sharry.lib.media.recorder.Options;
@@ -25,8 +24,7 @@ public class TakerConfig implements Parcelable {
     protected TakerConfig(Parcel in) {
         authority = in.readString();
         pictureQuality = in.readInt();
-        directoryPath = in.readString();
-        cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
+        ouputDir = in.readString();
         previewAspect = in.readInt();
         isFullScreen = in.readByte() != 0;
         isSupportVideoRecord = in.readByte() != 0;
@@ -41,8 +39,7 @@ public class TakerConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(authority);
         dest.writeInt(pictureQuality);
-        dest.writeString(directoryPath);
-        dest.writeParcelable(cropperConfig, flags);
+        dest.writeString(ouputDir);
         dest.writeInt(previewAspect);
         dest.writeByte((byte) (isFullScreen ? 1 : 0));
         dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
@@ -91,12 +88,7 @@ public class TakerConfig implements Parcelable {
     /**
      * 文件输出路径
      */
-    private String directoryPath;
-
-    /**
-     * 裁剪配置
-     */
-    private CropperConfig cropperConfig;
+    private String ouputDir;
 
     public static final int ASPECT_1_1 = 758;
     public static final int ASPECT_4_3 = 917;
@@ -167,20 +159,12 @@ public class TakerConfig implements Parcelable {
         return new Builder(this);
     }
 
-    public boolean isCropSupport() {
-        return cropperConfig != null;
-    }
-
     public int getPictureQuality() {
         return pictureQuality;
     }
 
-    public String getDirectoryPath() {
-        return directoryPath;
-    }
-
-    public CropperConfig getCropperConfig() {
-        return cropperConfig;
+    public String getOuputDir() {
+        return ouputDir;
     }
 
     public int getPreviewAspect() {
@@ -234,9 +218,9 @@ public class TakerConfig implements Parcelable {
         /**
          * 设置文件输出的目录, 拍摄后的图片会生成在目录下
          */
-        public Builder setDirectoryPath(@NonNull String dirPath) {
+        public Builder setOutputDir(@NonNull String dirPath) {
             Preconditions.checkNotEmpty(dirPath);
-            this.mConfig.directoryPath = dirPath;
+            this.mConfig.ouputDir = dirPath;
             return this;
         }
 
@@ -254,14 +238,6 @@ public class TakerConfig implements Parcelable {
          */
         public Builder setPictureQuality(int quality) {
             mConfig.pictureQuality = quality;
-            return this;
-        }
-
-        /**
-         * 设置裁剪的配置
-         */
-        public Builder setCropConfig(@Nullable CropperConfig cropperConfig) {
-            mConfig.cropperConfig = cropperConfig;
             return this;
         }
 

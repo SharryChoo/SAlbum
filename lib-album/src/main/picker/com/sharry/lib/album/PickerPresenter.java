@@ -1,7 +1,6 @@
 package com.sharry.lib.album;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -104,7 +103,6 @@ class PickerPresenter implements PickerContract.IPresenter,
                     .setConfig(
                             mPickerConfig.getTakerConfig().rebuild()
                                     // 取消相机拍摄后的裁剪动作, 由 Picker ensure 时触发
-                                    .setCropConfig(null)
                                     .setVideoRecord(mPickerConfig.isPickVideo())
                                     .build()
                     )
@@ -233,9 +231,9 @@ class PickerPresenter implements PickerContract.IPresenter,
     //////////////////////////////////////////////CropperCallback/////////////////////////////////////////////////
 
     @Override
-    public void onCropComplete(@NonNull Uri path) {
+    public void onCropComplete(@NonNull MediaMeta mediaMeta) {
         mPickedSet.clear();
-        mPickedSet.add(MediaMeta.create(path, true));
+        mPickedSet.add(mediaMeta);
         mView.setResultAndFinish(mPickedSet);
     }
 

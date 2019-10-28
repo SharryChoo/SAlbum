@@ -135,7 +135,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         holder.ivGifTag.setVisibility(Constants.MIME_TYPE_GIF.equals(meta.mimeType) ? View.VISIBLE : View.GONE);
-        Loader.loadPicture(mContext, meta.contentUri, holder.ivPicture);
+        Loader.loadPicture(mContext, meta, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mPickedSet.indexOf(meta);
         // 设置点击监听
@@ -151,7 +151,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         // 加载视频第一帧
-        Loader.loadVideo(mContext, meta.contentUri, meta.thumbnailPath, holder.ivPicture);
+        Loader.loadVideo(mContext, meta, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mPickedSet.indexOf(meta);
         // 设置点击监听

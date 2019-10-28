@@ -18,7 +18,6 @@ import com.sharry.lib.media.recorder.Options;
 import com.sharry.lib.media.recorder.SMediaRecorder;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.sharry.lib.album.TakerConfig.ASPECT_16_9;
 import static com.sharry.lib.album.TakerConfig.ASPECT_1_1;
@@ -66,7 +65,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
         });
         this.mRecordOptions = new Options.Video.Builder()
-                .setOutputDir(mConfig.getDirectoryPath())
+                .setOutputDir(mConfig.getOuputDir())
                 .setEncodeType(EncodeType.Video.H264)
                 .setMuxerType(MuxerType.MP4)
                 .setResolution(Options.Video.RESOLUTION_720P)
@@ -207,19 +206,23 @@ class TakerPresenter implements ITakerContract.IPresenter {
      * 处理图像确认
      */
     private void performPictureEnsure() {
-        File file = FileUtil.createCameraDestFile((Context) mView, mConfig.getDirectoryPath());
+        File file = FileUtil.createJpegFile((Context) mView, mConfig.getOuputDir());
         try {
             CompressUtil.doCompress(mFetchedBitmap, file.getAbsolutePath(),
                     mConfig.getPictureQuality(), mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
             // 判断是否需要拷贝到共用目录
             Uri uri;
-            if (file.getParent().equals(mConfig.getDirectoryPath())) {
+            // 判断父文件路径是否与目标相同, 则说明满足要求
+            if (!TextUtils.isEmpty(mConfig.getOuputDir()) && file.getParent().equals(mConfig.getOuputDir())) {
                 uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), file);
             } else {
-                uri = FileUtil.copyPictureToPublic((Context) mView, file, mConfig.getDirectoryPath());
+                // 拷贝到公共存储
+                uri = FileUtil.copyToPictures((Context) mView, file);
+                // 删除之前的内部文件
+                file.delete();
             }
             if (uri != null) {
-                MediaMeta mediaMeta = MediaMeta.create(uri, true);
+                MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
                 mediaMeta.date = System.currentTimeMillis();
                 mView.setResult(mediaMeta);
             } else {
@@ -236,13 +239,16 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
         Uri uri;
-        if (mVideoFile.getParent().equals(mConfig.getDirectoryPath())) {
+        if (!TextUtils.isEmpty(mConfig.getOuputDir()) && mVideoFile.getParent().equals(mConfig.getOuputDir())) {
             uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), mVideoFile);
         } else {
-            uri = FileUtil.copyMp4ToPublic((Context) mView, mVideoFile, mConfig.getDirectoryPath());
+            // 拷贝到公共存储区域
+            uri = FileUtil.copyToMovies((Context) mView, mVideoFile);
+            // 删除内部文件
+            mVideoFile.delete();
         }
         if (uri != null) {
-            MediaMeta mediaMeta = MediaMeta.create(uri, false);
+            MediaMeta mediaMeta = MediaMeta.create(uri, mVideoFile.getAbsolutePath(), false);
             mediaMeta.date = currentTime;
             mediaMeta.duration = mRecordDuration;
             mView.setResult(mediaMeta);

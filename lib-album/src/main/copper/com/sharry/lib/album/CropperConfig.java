@@ -17,7 +17,7 @@ public class CropperConfig implements Parcelable {
 
     protected CropperConfig(Parcel in) {
         originUri = in.readParcelable(Uri.class.getClassLoader());
-        cropDirectoryPath = in.readString();
+        outputDir = in.readString();
         isCropCircle = in.readByte() != 0;
         authority = in.readString();
         aspectX = in.readInt();
@@ -30,7 +30,7 @@ public class CropperConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(originUri, flags);
-        dest.writeString(cropDirectoryPath);
+        dest.writeString(outputDir);
         dest.writeByte((byte) (isCropCircle ? 1 : 0));
         dest.writeString(authority);
         dest.writeInt(aspectX);
@@ -62,7 +62,7 @@ public class CropperConfig implements Parcelable {
     }
 
     private Uri originUri;              // 需要裁剪的图片路径
-    private String cropDirectoryPath;   // 可用的输出目录
+    private String outputDir;   // 可用的输出目录
     private boolean isCropCircle;       // 是否为圆形裁剪
     private String authority;           // fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
     private int aspectX = 1;            // 方形 X 的比率
@@ -78,8 +78,8 @@ public class CropperConfig implements Parcelable {
         return originUri;
     }
 
-    public String getCropDirectoryPath() {
-        return cropDirectoryPath;
+    public String getOutputDir() {
+        return outputDir;
     }
 
     public boolean isCropCircle() {
@@ -175,9 +175,9 @@ public class CropperConfig implements Parcelable {
         /**
          * 设置需要裁剪的文件地址
          */
-        public Builder setCropDirectory(@NonNull String filePath) {
+        public Builder setOutputDir(@NonNull String filePath) {
             Preconditions.checkNotEmpty(filePath);
-            this.mConfig.cropDirectoryPath = filePath;
+            this.mConfig.outputDir = filePath;
             return this;
         }
 

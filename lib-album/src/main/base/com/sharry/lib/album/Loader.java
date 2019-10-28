@@ -1,7 +1,6 @@
 package com.sharry.lib.album;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -30,28 +29,28 @@ final class Loader {
         return sEngine;
     }
 
-    static void loadPicture(@NonNull Context context, @NonNull Uri uri, @NonNull ImageView imageView) {
+    static void loadPicture(@NonNull Context context, @NonNull MediaMeta mediaMeta, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
         }
-        sEngine.loadPicture(context, uri, imageView);
+        sEngine.loadPicture(context, mediaMeta, imageView);
     }
 
-    static void loadGif(@NonNull Context context, @NonNull Uri uri, @NonNull ImageView imageView) {
+    static void loadGif(@NonNull Context context, @NonNull MediaMeta mediaMeta, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
         }
-        sEngine.loadGif(context, uri, imageView);
+        sEngine.loadGif(context, mediaMeta, imageView);
     }
 
-    static void loadVideo(@NonNull Context context, @NonNull Uri uri, @Nullable String thumbnailPath, @NonNull ImageView imageView) {
+    static void loadVideo(@NonNull Context context, @NonNull MediaMeta mediaMeta, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
         }
-        sEngine.loadVideoThumbnails(context, uri, thumbnailPath, imageView);
+        sEngine.loadVideoThumbnails(context, mediaMeta, imageView);
     }
 
 }

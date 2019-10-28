@@ -20,6 +20,7 @@ android {
     }
     sourceSets {
         main {
+            java.srcDirs += 'src/main/base'
             java.srcDirs += 'src/main/picker'
             java.srcDirs += 'src/main/watcher'
             java.srcDirs += 'src/main/player'

@@ -161,8 +161,8 @@ class PickerModel implements PickerContract.IModel {
             try {
                 while (cursor.moveToNext()) {
                     // 验证路径是否有效
-                    String picturePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                    if (TextUtils.isEmpty(picturePath)) {
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                    if (TextUtils.isEmpty(path)) {
                         continue;
                     }
                     // 构建数据源
@@ -171,6 +171,7 @@ class PickerModel implements PickerContract.IModel {
                             Uri.withAppendedPath(
                                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                                     String.valueOf(id)),
+                            path,
                             true
                     );
                     meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
@@ -179,7 +180,7 @@ class PickerModel implements PickerContract.IModel {
                     // 1. 添加到 <所有> 目录下
                     folderAll.addMeta(meta);
                     // 2. 添加到文件所在目录
-                    String folderPath = getParentFolderPath(picturePath);
+                    String folderPath = getParentFolderPath(path);
                     if (TextUtils.isEmpty(folderPath)) {
                         continue;
                     }
@@ -291,15 +292,16 @@ class PickerModel implements PickerContract.IModel {
                     long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
                     MediaMeta meta = MediaMeta.create(
                             Uri.withAppendedPath(
-                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                                     String.valueOf(id)
                             ),
+                            path,
                             false
                     );
                     meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                     meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
                     meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
-                    meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
+                    meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE));
                     // 获取缩略图
                     meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
                     // 添加到 <所有> 目录下

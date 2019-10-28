@@ -39,7 +39,7 @@ class PickedPanelAdapter extends RecyclerView.Adapter<PickedPanelAdapter.ViewHol
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        Loader.loadPicture(holder.ivPicture.getContext(), userPickedSet.get(position).contentUri, holder.ivPicture);
+        Loader.loadPicture(holder.ivPicture.getContext(), userPickedSet.get(position), holder.ivPicture);
     }
 
     @Override

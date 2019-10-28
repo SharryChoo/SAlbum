@@ -17,6 +17,7 @@ public class MediaMeta implements Parcelable {
 
     protected MediaMeta(Parcel in) {
         contentUri = in.readParcelable(Uri.class.getClassLoader());
+        path = in.readString();
         isPicture = in.readByte() != 0;
         size = in.readLong();
         date = in.readLong();
@@ -28,6 +29,7 @@ public class MediaMeta implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(contentUri, flags);
+        dest.writeString(path);
         dest.writeByte((byte) (isPicture ? 1 : 0));
         dest.writeLong(size);
         dest.writeLong(date);
@@ -53,8 +55,8 @@ public class MediaMeta implements Parcelable {
         }
     };
 
-    static MediaMeta create(@NonNull Uri uri, boolean isPicture) {
-        return new MediaMeta(uri, isPicture);
+    static MediaMeta create(@NonNull Uri uri, @NonNull String filePath, boolean isPicture) {
+        return new MediaMeta(uri, filePath, isPicture);
     }
 
     /**
@@ -64,6 +66,12 @@ public class MediaMeta implements Parcelable {
      */
     @NonNull
     Uri contentUri;
+
+    /**
+     * 文件路径
+     */
+    @NonNull
+    String path;
 
     /**
      * 判断是否是图片
@@ -99,8 +107,9 @@ public class MediaMeta implements Parcelable {
     String mimeType;
 
 
-    private MediaMeta(@NonNull Uri uri, boolean isPicture) {
+    private MediaMeta(@NonNull Uri uri, String filePath, boolean isPicture) {
         this.contentUri = uri;
+        this.path = filePath;
         this.isPicture = isPicture;
     }
 
@@ -113,7 +122,7 @@ public class MediaMeta implements Parcelable {
             return false;
         }
         MediaMeta mediaMeta = (MediaMeta) o;
-        return contentUri.equals(mediaMeta.contentUri);
+        return path.equals(mediaMeta.path);
     }
 
     @Override
@@ -125,6 +134,7 @@ public class MediaMeta implements Parcelable {
     public String toString() {
         return "MediaMeta{" +
                 "contentUri='" + contentUri + '\'' + ", \n" +
+                "path='" + path + '\'' + ", \n" +
                 "isPicture=" + isPicture + ", \n" +
                 "size=" + size + ", \n" +
                 "date=" + date + ", \n" +
@@ -161,5 +171,10 @@ public class MediaMeta implements Parcelable {
 
     public String getMimeType() {
         return mimeType;
+    }
+
+    @NonNull
+    public String getPath() {
+        return path;
     }
 }

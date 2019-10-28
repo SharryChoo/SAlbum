@@ -1,5 +1,6 @@
 package com.sharry.lib.album;
 
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -51,7 +52,7 @@ class FileUtil {
     }
 
     /**
-     * Get last file name associated with this filePath.
+     * Get last file name associated with this path.
      */
     static String getLastFileName(String filePath) {
         return filePath.substring(filePath.lastIndexOf(File.separator) + 1);
@@ -65,36 +66,19 @@ class FileUtil {
                 FileProvider.getUriForFile(context, authority, file) : Uri.fromFile(file);
     }
 
-    /**
-     * 创建默认文件目录(包名的最后一个字段/系统相册的目录)
-     */
-    static File createDefaultDirectory(Context context) {
-        // 获取默认路径
-        File defaultDir = TextUtils.isEmpty(getDefaultName(context)) ?
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) :
-                new File(Environment.getExternalStorageDirectory(), getDefaultName(context));
-        if (!defaultDir.exists()) {
-            defaultDir.mkdirs();
-        }
-        return defaultDir;
-    }
-
     static File createVideoThumbnailFile(Context context, long videoId) {
-        return new File(context.getCacheDir(), "VideoThumbnail_" + videoId + ".jpg");
+        return new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                "VideoThumbnail_" + videoId + ".jpg");
     }
 
     /**
-     * 根据目的文件路径, 创建临时文件
+     * 创建临时文件
      *
-     * @param directoryPath 目标文件路径
      * @return 创建的文件
      */
-    static File createTempFileByDestDirectory(String directoryPath) {
+    static File createTempJpegFile(Context context) {
         // 获取临时文件目录
-        File tempDirectory = new File(directoryPath);
-        if (!tempDirectory.exists()) {
-            tempDirectory.mkdirs();
-        }
+        File tempDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         // 创建临时文件
         String tempFileName = "temp_file_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
@@ -116,38 +100,7 @@ class FileUtil {
      *
      * @param directoryPath 文件目录路径
      */
-    static File createCameraDestFile(Context context, String directoryPath) {
-        // 获取默认路径
-        File dir = VersionUtil.isQ() || TextUtils.isEmpty(directoryPath) ?
-                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) : new File(directoryPath);
-        if (!dir.exists()) {
-            boolean res = dir.mkdirs();
-            if (!res) {
-                Log.e(TAG, "create dir failed -> " + directoryPath);
-            }
-        }
-        // 创建拍照目标文件
-        String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
-                Calendar.getInstance(Locale.CHINA)) + ".jpg";
-        File cameraFile = new File(dir, fileName);
-        try {
-            if (cameraFile.exists()) {
-                cameraFile.delete();
-            }
-            cameraFile.createNewFile();
-            Log.i(TAG, "create camera file success -> " + cameraFile.getAbsolutePath());
-        } catch (IOException e) {
-            Log.e(TAG, "create camera file failed -> " + cameraFile.getAbsolutePath(), e);
-        }
-        return cameraFile;
-    }
-
-    /**
-     * 创建拍照文件
-     *
-     * @param directoryPath 文件目录路径
-     */
-    static File createCropDestFile(Context context, String directoryPath) {
+    static File createJpegFile(Context context, String directoryPath) {
         // 获取默认路径
         File dir = VersionUtil.isQ() || TextUtils.isEmpty(directoryPath) ?
                 context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) : new File(directoryPath);
@@ -155,37 +108,23 @@ class FileUtil {
             dir.mkdirs();
         }
         // 创建拍照目标文件
-        String fileName = "crop_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
+        String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
-        File cropFile = new File(dir, fileName);
+        File jpegFile = new File(dir, fileName);
         try {
-            if (cropFile.exists()) {
-                cropFile.delete();
+            if (jpegFile.exists()) {
+                jpegFile.delete();
             }
-            cropFile.createNewFile();
-            Log.i(TAG, "create crop file success -> " + cropFile.getAbsolutePath());
+            jpegFile.createNewFile();
+            Log.i(TAG, "create jpeg file success -> " + jpegFile.getAbsolutePath());
         } catch (IOException e) {
-            Log.e(TAG, "create crop file failed -> " + cropFile.getAbsolutePath(), e);
+            Log.e(TAG, "create jpeg file failed -> " + jpegFile.getAbsolutePath(), e);
         }
-        return cropFile;
+        return jpegFile;
     }
 
     /**
-     * 获取默认文件名(包名的最后一个字段)
-     */
-    private static String getDefaultName(Context context) {
-        String packageName = context.getPackageName();
-        if (!TextUtils.isEmpty(packageName)) {
-            int indexLastDot = packageName.lastIndexOf(".");
-            if (indexLastDot != -1) {
-                return packageName.substring(indexLastDot + 1);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 通知 MediaStore 文件删除了
+     * 通知 MediaStore 文件更替
      */
     static void notifyMediaStore(Context context, String filePath) {
         if (context == null || TextUtils.isEmpty(filePath)) {
@@ -199,60 +138,56 @@ class FileUtil {
     }
 
     /**
-     * 通过 MediaStore 保存，兼容AndroidQ，保存成功自动添加到相册数据库，无需再发送广告告诉系统插入相册
+     * 通过 MediaStore 保存到 Pictures 中
      *
-     * @param context       context
-     * @param sourceFile    源文件
-     * @param destDirectory 目标目录
+     * @param context context
+     * @param source  源文件
      * @return 拷贝成功之后的 URI
      */
     @Nullable
-    static Uri copyPictureToPublic(Context context, File sourceFile, String destDirectory) {
+    @TargetApi(29)
+    static Uri copyToPictures(Context context, File source) {
         ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DESCRIPTION, "This is a picture");
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + getLastFileName(destDirectory));
-        values.put(MediaStore.Images.Media.DISPLAY_NAME, sourceFile.getName());
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
-        values.put(MediaStore.Images.Media.TITLE, "image.jpg");
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, source.getName());
         ContentResolver resolver = context.getContentResolver();
         Uri destUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        if (writeToUri(sourceFile, destUri, resolver)) {
+        if (writeToUri(resolver, source, destUri)) {
             return destUri;
         }
         return null;
     }
 
     /**
-     * 通过 MediaStore 保存，兼容AndroidQ，保存成功自动添加到相册数据库，无需再发送广告告诉系统插入相册
+     * 通过 MediaStore 保存到 Movies 中
      *
-     * @param context       context
-     * @param sourceFile    源文件
-     * @param destDirectory 目标目录
+     * @param context context
+     * @param src     源文件
      * @return 拷贝成功之后的 URI
      */
     @Nullable
-    static Uri copyMp4ToPublic(Context context, File sourceFile, String destDirectory) {
+    @TargetApi(29)
+    static Uri copyToMovies(Context context, File src) {
         ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DESCRIPTION, "This is a video");
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Videos/" + getLastFileName(destDirectory));
-        values.put(MediaStore.Images.Media.DISPLAY_NAME, sourceFile.getName());
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES);
         values.put(MediaStore.Images.Media.MIME_TYPE, "video/mp4");
-        values.put(MediaStore.Images.Media.TITLE, "video.mp4");
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, src.getName());
         ContentResolver resolver = context.getContentResolver();
-        Uri destUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
-        if (writeToUri(sourceFile, destUri, resolver)) {
-            return destUri;
+        Uri dstUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+        if (writeToUri(resolver, src, dstUri)) {
+            return dstUri;
         }
         return null;
     }
 
-    private static boolean writeToUri(File sourceFile, Uri destUri, ContentResolver resolver) {
+    private static boolean writeToUri(ContentResolver resolver, File src, Uri dstUri) {
         BufferedInputStream inputStream = null;
         OutputStream os = null;
         try {
-            inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            if (destUri != null) {
-                os = resolver.openOutputStream(destUri);
+            inputStream = new BufferedInputStream(new FileInputStream(src));
+            if (dstUri != null) {
+                os = resolver.openOutputStream(dstUri);
             }
             if (os != null) {
                 byte[] buffer = new byte[1024 * 4];
@@ -263,7 +198,8 @@ class FileUtil {
                 os.flush();
             }
             return true;
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            e.printStackTrace();
             return false;
         } finally {
             close(os, inputStream);

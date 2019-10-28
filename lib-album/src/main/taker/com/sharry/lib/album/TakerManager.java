@@ -4,8 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -72,7 +70,6 @@ public class TakerManager {
     }
 
     private void takeActual(final TakerCallback callback) {
-        completionConfig();
         // 获取回调的 Fragment
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mBind);
         if (callbackFragment == null) {
@@ -88,12 +85,7 @@ public class TakerManager {
                 switch (requestCode) {
                     case TakerActivity.REQUEST_CODE:
                         MediaMeta mediaMeta = data.getParcelableExtra(TakerActivity.RESULT_EXTRA_MEDIA_META);
-                        // 2. 处理图片裁剪
-                        if (mConfig.isCropSupport() && mediaMeta.isPicture) {
-                            // 进行裁剪
-                            performCropPicture(callback, mediaMeta);
-                        } else {
-                            // 3. 回调
+                        if (mediaMeta != null) {
                             callback.onCameraTakeComplete(mediaMeta);
                         }
                         break;
@@ -104,32 +96,6 @@ public class TakerManager {
         });
         // 启动拍照录像的页面
         TakerActivity.launchForResult(callbackFragment, mConfig);
-    }
-
-    private void completionConfig() {
-        // 处理图片裁剪的缺省值
-        if (mConfig.isCropSupport()) {
-            // 给图片裁剪添加缺省的输出文件夹
-            if (TextUtils.isEmpty(mConfig.getCropperConfig().getCropDirectoryPath())) {
-                mConfig.getCropperConfig().rebuild().setCropDirectory(mConfig.getDirectoryPath());
-            }
-        }
-    }
-
-    private void performCropPicture(final TakerCallback callback, MediaMeta mediaMeta) {
-        CropperManager.with(mBind)
-                .setConfig(
-                        mConfig.getCropperConfig().rebuild()
-                                // 需要裁剪的文件路径
-                                .setOriginFile(mediaMeta.contentUri)
-                                .build()
-                )
-                .crop(new CropperCallback() {
-                    @Override
-                    public void onCropComplete(@NonNull Uri path) {
-                        callback.onCameraTakeComplete(MediaMeta.create(path, true));
-                    }
-                });
     }
 
 }

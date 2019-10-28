@@ -52,9 +52,9 @@ class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.ViewHolder> {
         }
         MediaMeta firstMeta = folder.getMetas().get(0);
         if (firstMeta.isPicture) {
-            Loader.loadPicture(context, firstMeta.contentUri, holder.ivPreview);
+            Loader.loadPicture(context, firstMeta, holder.ivPreview);
         } else {
-            Loader.loadVideo(context, firstMeta.contentUri, firstMeta.thumbnailPath, holder.ivPreview);
+            Loader.loadVideo(context, firstMeta, holder.ivPreview);
         }
         holder.tvFolderName.setText(folder.getName());
     }

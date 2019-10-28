@@ -138,7 +138,7 @@ public class WatcherActivity extends AppCompatActivity implements
     public void showSharedElementEnter(@NonNull MediaMeta mediaMeta, @NonNull final SharedElementHelper.Bounds data) {
         // 加载共享元素占位图
         mIvPlaceHolder.setVisibility(View.VISIBLE);
-        Loader.loadPicture(this, mediaMeta.contentUri, mIvPlaceHolder);
+        Loader.loadPicture(this, mediaMeta, mIvPlaceHolder);
         // 执行共享元素
         mIvPlaceHolder.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override

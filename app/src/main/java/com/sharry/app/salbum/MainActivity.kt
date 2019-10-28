@@ -1,7 +1,6 @@
 package com.sharry.app.salbum
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextUtils
@@ -31,22 +30,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var takerConfig: TakerConfig
     private lateinit var cropperConfig: CropperConfig
     private val pictureLoader = object : ILoaderEngine {
-        override fun loadPicture(context: Context, uri: Uri, imageView: ImageView) {
-            // 保证为静态图
-            Glide.with(context).asBitmap().load(uri).into(imageView)
+        override fun loadPicture(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+            Glide.with(context).asBitmap().load(mediaMeta.contentUri).into(imageView)
         }
 
-        override fun loadGif(context: Context, uri: Uri, imageView: ImageView) {
-            // 保证为 GIF 图
-            Glide.with(context).asGif().load(uri).into(imageView)
+        override fun loadGif(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+            Glide.with(context).asGif().load(mediaMeta.contentUri).into(imageView)
         }
 
-        override fun loadVideoThumbnails(context: Context, uri: Uri, thumbnailPath: String?, imageView: ImageView) {
-            // Glide 可直接加载视频 uri 获取第一帧
-            Glide.with(context).asBitmap().load(uri).into(imageView)
+        override fun loadVideoThumbnails(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+            Glide.with(context).asBitmap().load(mediaMeta.contentUri).into(imageView)
         }
     }
-    private lateinit var outputDir:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                 // 设置录制的分辨率
                 .setRecordResolution(Options.Video.RESOLUTION_1080P)
                 // 设置文件存储路径
-                .setDirectoryPath(APP_DIRECTORY)
+                .setOutputDir(APP_DIRECTORY)
                 // 拍摄后质量压缩
                 .setPictureQuality(80)
                 .build()
@@ -90,8 +85,8 @@ class MainActivity : AppCompatActivity() {
         cropperConfig = CropperConfig.Builder()
                 // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
                 .setAuthority("$packageName.FileProvider")
-                // 裁剪后文件输出的路径
-                .setCropDirectory(APP_DIRECTORY)
+                // 设置文件输出的路径
+                .setOutputDir(APP_DIRECTORY)
                 // 裁剪期望的尺寸
                 .setCropSize(1000, 1000)
                 // 裁剪后的质量
