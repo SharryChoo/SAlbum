@@ -24,7 +24,7 @@ public class TakerConfig implements Parcelable {
     protected TakerConfig(Parcel in) {
         authority = in.readString();
         pictureQuality = in.readInt();
-        ouputDir = in.readString();
+        relativePath = in.readString();
         previewAspect = in.readInt();
         isFullScreen = in.readByte() != 0;
         isSupportVideoRecord = in.readByte() != 0;
@@ -39,7 +39,7 @@ public class TakerConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(authority);
         dest.writeInt(pictureQuality);
-        dest.writeString(ouputDir);
+        dest.writeString(relativePath);
         dest.writeInt(previewAspect);
         dest.writeByte((byte) (isFullScreen ? 1 : 0));
         dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
@@ -88,7 +88,7 @@ public class TakerConfig implements Parcelable {
     /**
      * 文件输出路径
      */
-    private String ouputDir;
+    private String relativePath;
 
     public static final int ASPECT_1_1 = 758;
     public static final int ASPECT_4_3 = 917;
@@ -163,8 +163,8 @@ public class TakerConfig implements Parcelable {
         return pictureQuality;
     }
 
-    public String getOuputDir() {
-        return ouputDir;
+    public String getRelativePath() {
+        return relativePath;
     }
 
     public int getPreviewAspect() {
@@ -218,9 +218,9 @@ public class TakerConfig implements Parcelable {
         /**
          * 设置文件输出的目录, 拍摄后的图片会生成在目录下
          */
-        public Builder setOutputDir(@NonNull String dirPath) {
+        public Builder setRelativePath(@NonNull String dirPath) {
             Preconditions.checkNotEmpty(dirPath);
-            this.mConfig.ouputDir = dirPath;
+            this.mConfig.relativePath = dirPath;
             return this;
         }
 

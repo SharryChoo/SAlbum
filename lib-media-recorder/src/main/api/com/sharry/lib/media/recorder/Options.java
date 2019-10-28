@@ -55,6 +55,8 @@ public final class Options {
          */
         private String outputDir;
 
+        private String authority;
+
         /**
          * 设置录制分辨率
          */
@@ -92,6 +94,10 @@ public final class Options {
 
         public MuxerType getMuxerType() {
             return muxerType;
+        }
+
+        public String getAuthority() {
+            return authority;
         }
 
         /**
@@ -148,6 +154,11 @@ public final class Options {
              */
             public Builder setOutputDir(@NonNull String outputDir) {
                 mOps.outputDir = outputDir;
+                return this;
+            }
+
+            public Builder setAuthority(@NonNull String authority) {
+                mOps.authority = authority;
                 return this;
             }
 
@@ -241,6 +252,8 @@ public final class Options {
          */
         private String outputDir;
 
+        private String authority;
+
         private Audio() {
         }
 
@@ -277,6 +290,10 @@ public final class Options {
 
         int getPerSampleSize() {
             return perSampleSize;
+        }
+
+        public String getAuthority() {
+            return authority;
         }
 
         IPCMProvider getPcmProvider() {
@@ -331,6 +348,11 @@ public final class Options {
              */
             public Builder setOutputDir(@NonNull String outputDir) {
                 mOps.outputDir = outputDir;
+                return this;
+            }
+
+            public Builder setAuthority(@NonNull String authority) {
+                mOps.authority = authority;
                 return this;
             }
 

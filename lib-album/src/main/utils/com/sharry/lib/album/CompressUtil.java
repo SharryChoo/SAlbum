@@ -6,7 +6,7 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.text.TextUtils;
 
-import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -22,12 +22,9 @@ class CompressUtil {
     /**
      * 图片压缩
      */
-    static void doCompress(String originPath, String destPath, int quality) throws IOException {
+    static void doCompress(String originPath, FileDescriptor fd, int quality) throws IOException {
         if (TextUtils.isEmpty(originPath)) {
             throw new IllegalArgumentException("CompressUtil.doCompress -> parameter originFilePath must not be null!");
-        }
-        if (TextUtils.isEmpty(destPath)) {
-            throw new IllegalArgumentException("CompressUtil.doCompress -> parameter destPath must not be null!");
         }
         // 1. 邻近采样压缩尺寸(Nearest Neighbour Resampling Compress)
         BitmapFactory.Options options = getBitmapOptions(originPath);
@@ -38,23 +35,20 @@ class CompressUtil {
         // 2. 旋转一下 Bitmap
         bitmap = rotateBitmap(bitmap, readPictureAngle(originPath));
         // 3. 质量压缩(Quality Compress)
-        qualityCompress(bitmap, quality, destPath);
+        qualityCompress(bitmap, quality, fd);
     }
 
     /**
      * 图片压缩
      */
-    static void doCompress(Bitmap originBitmap, String destPath, int quality, int desireWidth, int desireHeight) throws IOException {
+    static void doCompress(Bitmap originBitmap, FileDescriptor fd, int quality, int desireWidth, int desireHeight) throws IOException {
         int width = originBitmap.getWidth();
         int height = originBitmap.getHeight();
         float scale = Math.max(desireWidth, desireHeight) / (float) Math.max(width, height);
         int w = Math.round(scale * width);
         int h = Math.round(scale * height);
         Bitmap bitmap = Bitmap.createScaledBitmap(originBitmap, w, h, true);
-        // 2. 旋转一下 Bitmap
-        bitmap = rotateBitmap(bitmap, readPictureAngle(destPath));
-        // 3. 质量压缩(Quality Compress)
-        qualityCompress(bitmap, quality, destPath);
+        qualityCompress(bitmap, quality, fd);
     }
 
     /**
@@ -108,18 +102,13 @@ class CompressUtil {
     /**
      * Bitmap 质量压缩
      *
-     * @param srcBitmap    原始 Bitmap
-     * @param quality      压缩质量
-     * @param destFilePath 压缩后的文件
+     * @param srcBitmap 原始 Bitmap
+     * @param quality   压缩质量
+     * @param fd        压缩目标的文件描述符
      */
-    private static void qualityCompress(Bitmap srcBitmap, int quality, String destFilePath) throws IOException {
-        File file = new File(destFilePath);
-        if (file.exists()) {
-            file.delete();
-        }
-        file.createNewFile();
+    private static void qualityCompress(Bitmap srcBitmap, int quality, FileDescriptor fd) throws IOException {
         // 进行质量压缩
-        FileOutputStream out = new FileOutputStream(file);
+        FileOutputStream out = new FileOutputStream(fd);
         // 采用有损的 jpeg 图片压缩
         srcBitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
         out.flush();

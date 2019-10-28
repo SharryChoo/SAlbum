@@ -10,7 +10,6 @@ import androidx.annotation.WorkerThread;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.camera.Size;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static com.sharry.lib.media.recorder.IRecorderCallback.ERROR_MUXER_FAILED;
@@ -27,7 +26,6 @@ import static com.sharry.lib.media.recorder.Options.Video.RESOLUTION_720P;
  */
 final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Callback, IVideoEncoder.Callback {
 
-    private static final String RECORD_PREFIX = "Video_";
     private final AudioRecorder mAudio;
     private final IVideoEncoder mEncoder;
     private final IVideoEncoder.Context mEncodeContext;
@@ -56,12 +54,8 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         this.mEncoder = EncoderFactory.create(options.getVideoEncodeType());
         // Step2. Create an instance of video muxer and prepare.
         this.mMuxer = MuxerFactory.createEncoder(options.getMuxerType());
-        try {
-            this.mOutputFile = FileUtil.createFile(context, options.getOutputDir(), RECORD_PREFIX,
-                    options.getMuxerType().getFileSuffix());
-        } catch (IOException e) {
-            throw new UnsupportedOperationException("Please ensure file can create correct.");
-        }
+        this.mOutputUri = FileUtil.createVideoUri(context, options.getAuthority(), options.getOutputDir(),
+                options.getMuxerType().getFileSuffix());
     }
 
     // //////////////////////////////////// IAudioEncoder.Callback ////////////////////////////////////
@@ -127,7 +121,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 }
                 // prepare muxer.
                 try {
-                    mMuxer.prepare(mOutputFile);
+                    mMuxer.prepare(mContext.getContentResolver().openFileDescriptor(mOutputUri, "w").getFileDescriptor());
                 } catch (Throwable e) {
                     performRecordFailed(IRecorderCallback.ERROR_MUXER_PREPARE_FAILED, e);
                     return;
@@ -193,9 +187,10 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 // 释放资源
                 stop();
                 // 在文件管理器中刷新生成的文件
-                FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
+                // TODO 通知媒体文件
+//                FileUtil.notifyMediaStore(mContext, mOutputUri.getAbsolutePath());
                 // 回调完成
-                mCallback.onComplete(mOutputFile);
+                mCallback.onComplete(mOutputUri);
             }
         });
     }

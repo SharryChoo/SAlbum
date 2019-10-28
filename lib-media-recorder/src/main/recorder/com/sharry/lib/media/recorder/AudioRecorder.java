@@ -8,7 +8,6 @@ import android.util.Log;
 
 import androidx.annotation.WorkerThread;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -33,7 +32,6 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
     private final IPCMProvider mProvider;
     private final IAudioEncoder mEncoder;
     private final IAudioEncoder.Context mEncodeContext;
-    private final File mOutputFile;
     private IAudioEncoder.Callback mEncodeCallback;
 
     AudioRecorder(Context context, Options.Audio options, IRecorderCallback callback) {
@@ -46,17 +44,17 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         // 创建编码上下文
         try {
             if (!options.isJustEncode()) {
-                mOutputFile = FileUtil.createFile(context, mOptions.getOutputDir(), FILE_PREFIX,
+                mOutputUri = FileUtil.createAudioUri(context, mOptions.getAuthority(), mOptions.getOutputDir(),
                         mOptions.getAudioEncodeType().getFileSuffix());
             } else {
-                mOutputFile = null;
+                mOutputUri = null;
             }
             mEncodeContext = new IAudioEncoder.Context(
                     options.getSampleRate(),
                     options.getChannelLayout(),
                     options.getPerSampleSize(),
                     options.isJustEncode(),
-                    mOutputFile == null ? null : mOutputFile.getAbsolutePath(),
+                    mOutputUri == null ? null : context.getContentResolver().openFileDescriptor(mOutputUri, "w").getFileDescriptor(),
                     this
             );
         } catch (IOException e) {
@@ -183,11 +181,9 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 // 停止录制
                 stop();
                 // 回调录制完成
-                if (mOutputFile != null) {
-                    // 在文件管理器中刷新生成的文件
-                    FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
+                if (mOutputUri != null) {
                     // 回调录制完成
-                    mCallback.onComplete(mOutputFile);
+                    mCallback.onComplete(mOutputUri);
                 }
             }
         });

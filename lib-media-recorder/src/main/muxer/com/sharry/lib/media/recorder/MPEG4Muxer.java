@@ -1,12 +1,13 @@
 package com.sharry.lib.media.recorder;
 
+import android.annotation.TargetApi;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
@@ -44,8 +45,15 @@ class MPEG4Muxer implements IMuxer {
     private volatile boolean isMixerStart;
 
     @Override
-    public void prepare(@NonNull File filePath) throws IOException {
-        mImpl = new MediaMuxer(filePath.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+    @TargetApi(26)
+    public void prepare(@NonNull FileDescriptor fd) throws IOException {
+        mImpl = new MediaMuxer(fd, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+    }
+
+    @Override
+    public void prepare(@NonNull String path) throws Throwable {
+        mImpl = new MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+
     }
 
     @Override

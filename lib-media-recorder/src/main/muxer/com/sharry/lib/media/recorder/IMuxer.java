@@ -1,5 +1,6 @@
 package com.sharry.lib.media.recorder;
 
+import android.annotation.TargetApi;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 
@@ -7,8 +8,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 
 /**
@@ -25,9 +25,16 @@ public interface IMuxer {
      * 编码前的准备工作
      * <p>
      * Subsequent calls to {@link #execute} only the encoder prepare invoked.
+     *
+     * @param fd
      */
     @MainThread
-    void prepare(@NonNull File filePath) throws Throwable;
+    @TargetApi(26)
+    void prepare(@NonNull FileDescriptor fd) throws Throwable;
+
+
+    void prepare(@NonNull String path) throws Throwable;
+
 
     /**
      * 添加视频轨
@@ -70,7 +77,7 @@ public interface IMuxer {
         }
 
         static Parcel newInstance(@TrackType int trackType, ByteBuffer byteBuf,
-                                         MediaCodec.BufferInfo bufferInfo) {
+                                  MediaCodec.BufferInfo bufferInfo) {
             return new Parcel(trackType, byteBuf, bufferInfo);
         }
 

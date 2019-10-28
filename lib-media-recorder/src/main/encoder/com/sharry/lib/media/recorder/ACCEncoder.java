@@ -52,7 +52,7 @@ public class ACCEncoder implements IAudioEncoder {
         audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, bitRate);
         // 根据参数判断是否需要写入到文件
         if (!mContext.isJustEncode) {
-            mFileOutputSteam = new FileOutputStream(context.outputFile);
+            mFileOutputSteam = new FileOutputStream(context.outputFd);
         }
         // 初始化编码器
         mImpl = MediaCodec.createEncoderByType(MIME_TYPE);

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -173,8 +174,8 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void startVideoPlayer(@NonNull String filePath) {
-        mVideoPlayer.setVideoPath(filePath);
+    public void startVideoPlayer(@NonNull Uri uri) {
+        mVideoPlayer.setVideoURI(uri);
     }
 
     @Override

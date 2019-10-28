@@ -3,11 +3,10 @@ package com.sharry.lib.media.recorder;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.io.IOException;
+import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 
 /**
@@ -58,16 +57,16 @@ public interface IAudioEncoder {
         final int channelCount;                         // 通道数
         final int perSampleSize;                        // 每个采样点的大小
         final boolean isJustEncode;                     // 只进行编码不写入文件
-        final String outputFile;                        // 音频输出的文件
+        final FileDescriptor outputFd;                        // 音频输出的文件
         final IAudioEncoder.Callback callback;          // 视频录制的回调
 
         public Context(int sampleRate, int channelCount, int perSampleSize, boolean isJustEncode,
-                       String outputFile, Callback callback) {
+                       FileDescriptor outputFd, Callback callback) {
             this.sampleRate = sampleRate;
             this.channelCount = channelCount;
             this.perSampleSize = perSampleSize;
             this.isJustEncode = isJustEncode;
-            this.outputFile = outputFile;
+            this.outputFd = outputFd;
             this.callback = callback;
         }
     }

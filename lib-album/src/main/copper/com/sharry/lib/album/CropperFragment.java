@@ -11,8 +11,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -115,31 +115,20 @@ public class CropperFragment extends Fragment {
             case REQUEST_CODE_CROP:
                 try {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
-                    File file = FileUtil.createJpegFile(mContext, mConfig.getOutputDir());
-                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), file.getAbsolutePath(), mConfig.getDestQuality());
-                    // 判断父文件路径是否与目标相同, 则说明满足要求
-                    Uri uri;
-                    if (!TextUtils.isEmpty(mConfig.getOutputDir()) && file.getParent().equals(mConfig.getOutputDir())) {
-                        uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
-                    } else {
-                        // 拷贝到公共存储位置
-                        uri = FileUtil.copyToPictures(mContext, file);
-                        // 删除之前的文件区域
-                        file.delete();
-                    }
-                    if (uri != null) {
-                        MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
+                    Uri uri = FileUtil.createJpegUri(mContext, mConfig.getAuthority(), mConfig.getRelativePath());
+                    ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                    if (pfd != null) {
+                        CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                        // TODO: 想办法解决 filePath 的问题
+                        MediaMeta mediaMeta = MediaMeta.create(uri, "", true);
                         // 回调
                         mCropperCallback.onCropComplete(mediaMeta);
-                        // 通知文件变更
-                        FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Picture compress failed after crop.", e);
                 } finally {
                     if (mTempFile != null) {
                         mTempFile.delete();
-                        FileUtil.notifyMediaStore(mContext, mTempFile.getAbsolutePath());
                     }
                 }
                 break;

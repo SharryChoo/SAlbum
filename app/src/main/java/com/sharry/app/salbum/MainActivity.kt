@@ -2,7 +2,6 @@ package com.sharry.app.salbum
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Environment
 import android.text.TextUtils
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,9 +12,7 @@ import com.sharry.lib.album.TakerConfig.ASPECT_1_1
 import com.sharry.lib.album.toolbar.SToolbar
 import com.sharry.lib.media.recorder.Options
 import kotlinx.android.synthetic.main.app_activity_main.*
-import java.io.File
 
-private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolutePath}${File.separator}SAlbum"
 
 /**
  * SAlbum 示例 Activity.
@@ -25,6 +22,8 @@ private val APP_DIRECTORY = "${Environment.getExternalStorageDirectory().absolut
  * @since 12/6/2018 10:49 AM
  */
 class MainActivity : AppCompatActivity() {
+
+    private val RELATIVE_PATH = "SAlbum"
 
     private lateinit var pickerConfig: PickerConfig
     private lateinit var takerConfig: TakerConfig
@@ -76,8 +75,8 @@ class MainActivity : AppCompatActivity() {
                 .setMinRecordDuration(1 * 1000)
                 // 设置录制的分辨率
                 .setRecordResolution(Options.Video.RESOLUTION_1080P)
-                // 设置文件存储路径
-                .setOutputDir(APP_DIRECTORY)
+                // 设置外部存储目录相对路径
+                .setRelativePath(RELATIVE_PATH)
                 // 拍摄后质量压缩
                 .setPictureQuality(80)
                 .build()
@@ -85,8 +84,8 @@ class MainActivity : AppCompatActivity() {
         cropperConfig = CropperConfig.Builder()
                 // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
                 .setAuthority("$packageName.FileProvider")
-                // 设置文件输出的路径
-                .setOutputDir(APP_DIRECTORY)
+                // 设置外部存储目录相对路径
+                .setRelativePath(RELATIVE_PATH)
                 // 裁剪期望的尺寸
                 .setCropSize(1000, 1000)
                 // 裁剪后的质量

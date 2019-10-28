@@ -1,6 +1,7 @@
 package com.sharry.lib.album;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -36,7 +37,7 @@ public interface ITakerContract {
 
         void setPreviewSource(@NonNull Bitmap bitmap);
 
-        void startVideoPlayer(@NonNull String filePath);
+        void startVideoPlayer(@NonNull Uri uri);
 
         void stopVideoPlayer();
 

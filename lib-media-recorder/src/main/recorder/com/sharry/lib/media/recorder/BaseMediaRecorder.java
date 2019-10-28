@@ -2,6 +2,7 @@ package com.sharry.lib.media.recorder;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -9,7 +10,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
-import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -25,7 +25,7 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
     protected final Context mContext;
     protected final IRecorderCallback mCallback;
     protected volatile boolean isRecording = false;
-    protected File mOutputFile;
+    protected Uri mOutputUri;
 
     BaseMediaRecorder(Context context, final IRecorderCallback callback) {
         this.mContext = context;
@@ -80,15 +80,10 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
      * 执行录制文件的删除
      */
     void deleteRecordFile() {
-        if (mOutputFile != null && mOutputFile.exists()) {
-            if (mOutputFile.delete()) {
-                Log.i(TAG, "Record file deleted.");
-            } else {
-                Log.i(TAG, "Record file delete failed.");
-            }
-            FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
+        if (mOutputUri != null) {
+            mContext.getContentResolver().delete(mOutputUri, null, null);
         }
-        mOutputFile = null;
+        mOutputUri = null;
     }
 
     @Override

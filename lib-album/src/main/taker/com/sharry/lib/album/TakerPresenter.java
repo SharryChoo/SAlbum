@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,8 +17,6 @@ import com.sharry.lib.media.recorder.IRecorderCallback;
 import com.sharry.lib.media.recorder.MuxerType;
 import com.sharry.lib.media.recorder.Options;
 import com.sharry.lib.media.recorder.SMediaRecorder;
-
-import java.io.File;
 
 import static com.sharry.lib.album.TakerConfig.ASPECT_16_9;
 import static com.sharry.lib.album.TakerConfig.ASPECT_1_1;
@@ -33,16 +32,18 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private static final String TAG = TakerPresenter.class.getSimpleName();
     private static final int MAXIMUM_TRY_AGAIN_THRESHOLD = 3;
 
+    private final Context mContext;
     private final ITakerContract.IView mView;
     private final TakerConfig mConfig;
     private final SMediaRecorder mRecorder;
     private final Options.Video mRecordOptions;
     private Bitmap mFetchedBitmap;
-    private File mVideoFile;
     private long mRecordDuration;
     private int mCountTryAgain = 0;
+    private Uri mVideoUri;
 
     TakerPresenter(TakerActivity view, TakerConfig config) {
+        this.mContext = view;
         this.mView = view;
         this.mConfig = config;
         this.mRecorder = SMediaRecorder.with(view);
@@ -54,8 +55,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
             }
 
             @Override
-            public void onComplete(@NonNull File file) {
-                performRecordComplete(file);
+            public void onComplete(@NonNull Uri uri) {
+                performRecordComplete(uri);
             }
 
             @Override
@@ -65,7 +66,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
         });
         this.mRecordOptions = new Options.Video.Builder()
-                .setOutputDir(mConfig.getOuputDir())
+                .setOutputDir(mConfig.getRelativePath())
                 .setEncodeType(EncodeType.Video.H264)
                 .setMuxerType(MuxerType.MP4)
                 .setResolution(Options.Video.RESOLUTION_720P)
@@ -79,7 +80,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     public void handleGranted() {
         // 重置为预览, 防止销毁时文件的误删
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
-        if (mVideoFile != null) {
+        if (mVideoUri != null) {
             performVideoEnsure();
         } else {
             performPictureEnsure();
@@ -96,7 +97,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     public void handleVideoPlayFailed() {
         if (mCountTryAgain++ < MAXIMUM_TRY_AGAIN_THRESHOLD) {
             Log.w(TAG, "Occurred an error, try again " + mCountTryAgain + " time");
-            mView.startVideoPlayer(mVideoFile.getAbsolutePath());
+            mView.startVideoPlayer(mVideoUri);
         } else {
             // 重新尝试了 3 次仍然没有播放成功, 说明录制的视频有问题, 当做录制失败处理
             performRecordFiled();
@@ -139,12 +140,10 @@ class TakerPresenter implements ITakerContract.IPresenter {
         if (mView.getStatus() != ITakerContract.IView.STATUS_CAMERA_PREVIEW) {
             mFetchedBitmap = null;
             mCountTryAgain = 0;
-            if (mVideoFile != null) {
+            if (mVideoUri != null) {
                 mView.stopVideoPlayer();
-                if (mVideoFile.delete()) {
-                    mView.notifyFileDeleted(mVideoFile.getAbsolutePath());
-                }
-                mVideoFile = null;
+                // TODO 删除媒体文件
+                mVideoUri = null;
             }
         }
     }
@@ -196,39 +195,27 @@ class TakerPresenter implements ITakerContract.IPresenter {
     /**
      * 处理录制成功
      */
-    private void performRecordComplete(File file) {
-        mVideoFile = file;
+    private void performRecordComplete(Uri uri) {
+        mVideoUri = uri;
         mView.setStatus(ITakerContract.IView.STATUS_VIDEO_PLAY);
-        mView.startVideoPlayer(mVideoFile.getAbsolutePath());
+        mView.startVideoPlayer(mVideoUri);
     }
 
     /**
      * 处理图像确认
      */
     private void performPictureEnsure() {
-        File file = FileUtil.createJpegFile((Context) mView, mConfig.getOuputDir());
         try {
-            CompressUtil.doCompress(mFetchedBitmap, file.getAbsolutePath(),
-                    mConfig.getPictureQuality(), mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
-            // 判断是否需要拷贝到共用目录
-            Uri uri;
-            // 判断父文件路径是否与目标相同, 则说明满足要求
-            if (!TextUtils.isEmpty(mConfig.getOuputDir()) && file.getParent().equals(mConfig.getOuputDir())) {
-                uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), file);
-            } else {
-                // 拷贝到公共存储
-                uri = FileUtil.copyToPictures((Context) mView, file);
-                // 删除之前的内部文件
-                file.delete();
-            }
-            if (uri != null) {
-                MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
-                mediaMeta.date = System.currentTimeMillis();
-                mView.setResult(mediaMeta);
-            } else {
-                mView.toast(R.string.lib_album_taker_picture_saved_failed);
-            }
+            Uri uri = FileUtil.createJpegUri((Context) mView, mConfig.getAuthority(), mConfig.getRelativePath());
+            ParcelFileDescriptor fd = ((Context) mView).getContentResolver().openFileDescriptor(uri, "w");
+            CompressUtil.doCompress(mFetchedBitmap, fd.getFileDescriptor(), mConfig.getPictureQuality(),
+                    mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
+            // TODO 获取文件路径
+            MediaMeta mediaMeta = MediaMeta.create(uri, "", true);
+            mediaMeta.date = System.currentTimeMillis();
+            mView.setResult(mediaMeta);
         } catch (Throwable e) {
+            e.printStackTrace();
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
         }
     }
@@ -238,23 +225,11 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
-        Uri uri;
-        if (!TextUtils.isEmpty(mConfig.getOuputDir()) && mVideoFile.getParent().equals(mConfig.getOuputDir())) {
-            uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), mVideoFile);
-        } else {
-            // 拷贝到公共存储区域
-            uri = FileUtil.copyToMovies((Context) mView, mVideoFile);
-            // 删除内部文件
-            mVideoFile.delete();
-        }
-        if (uri != null) {
-            MediaMeta mediaMeta = MediaMeta.create(uri, mVideoFile.getAbsolutePath(), false);
-            mediaMeta.date = currentTime;
-            mediaMeta.duration = mRecordDuration;
-            mView.setResult(mediaMeta);
-        } else {
-            mView.toast(R.string.lib_album_taker_video_saved_failed);
-        }
+        // TODO 获取文件路径
+        MediaMeta mediaMeta = MediaMeta.create(mVideoUri, "", false);
+        mediaMeta.date = currentTime;
+        mediaMeta.duration = mRecordDuration;
+        mView.setResult(mediaMeta);
     }
 
     /**
@@ -263,12 +238,10 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private void recycle() {
         mFetchedBitmap = null;
         mCountTryAgain = 0;
-        if (mVideoFile != null) {
+        if (mVideoUri != null) {
             mView.stopVideoPlayer();
-            if (mVideoFile.delete()) {
-                mView.notifyFileDeleted(mVideoFile.getAbsolutePath());
-            }
-            mVideoFile = null;
+            mContext.getContentResolver().delete(mVideoUri, null, null);
+            mVideoUri = null;
         }
     }
 

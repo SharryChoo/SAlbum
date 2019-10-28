@@ -2,8 +2,6 @@ package com.sharry.lib.album;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -11,7 +9,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -385,14 +382,6 @@ class PickerModel implements PickerContract.IModel {
                 }
                 cursor.close();
             }
-            // 若没有视频缩略图, 则获取视频第一帧
-            if (TextUtils.isEmpty(thumbNailPath)) {
-                try {
-                    thumbNailPath = generateThumbnail(path, date);
-                } catch (Exception e) {
-                    // ignore.
-                }
-            }
             return thumbNailPath;
         }
 
@@ -407,34 +396,6 @@ class PickerModel implements PickerContract.IModel {
             return context.getContentResolver().query(uri, projection, selection,
                     selectionArgs, null);
         }
-
-        private String generateThumbnail(String videoPath, long videoCreateDate) throws Exception {
-            // 将第一帧缓存到本地
-            File videoThumbnailFile = FileUtil.createVideoThumbnailFile(context, videoCreateDate);
-            if (videoThumbnailFile.exists()) {
-                return videoThumbnailFile.getAbsolutePath();
-            } else {
-                videoThumbnailFile.createNewFile();
-            }
-            // 获取 video 第一帧
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            try {
-                retriever.setDataSource(videoPath);
-                Bitmap bitmap = retriever.getFrameAtTime(0);
-                // 将图像压缩并写入 dstPath
-                if (bitmap != null) {
-                    CompressUtil.doCompress(bitmap, videoThumbnailFile.getAbsolutePath(),
-                            50, 512, 512);
-                }
-            } catch (Throwable e) {
-                // ignore.
-            } finally {
-                retriever.release();
-            }
-            // 返回路径
-            return videoThumbnailFile.getAbsolutePath();
-        }
-
     }
 
 }

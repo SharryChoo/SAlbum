@@ -1,10 +1,11 @@
 package com.sharry.lib.media.recorder;
 
+import android.net.Uri;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
-import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -45,7 +46,7 @@ public interface IRecorderCallback {
         }
 
         @Override
-        public void onComplete(@NonNull File file) {
+        public void onComplete(@NonNull Uri uri) {
 
         }
 
@@ -104,7 +105,7 @@ public interface IRecorderCallback {
     void onResume();
 
     @MainThread
-    void onComplete(@NonNull File file);
+    void onComplete(@NonNull Uri uri);
 
     @MainThread
     void onFailed(@ErrorCode int errorCode, @NonNull Throwable e);
