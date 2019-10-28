@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -125,12 +126,12 @@ public class TakerManager {
                 .setConfig(
                         mConfig.getCropperConfig().rebuild()
                                 // 需要裁剪的文件路径
-                                .setOriginFile(mediaMeta.path)
+                                .setOriginFile(mediaMeta.contentUri)
                                 .build()
                 )
                 .crop(new CropperCallback() {
                     @Override
-                    public void onCropComplete(@NonNull String path) {
+                    public void onCropComplete(@NonNull Uri path) {
                         callback.onCameraTakeComplete(MediaMeta.create(path, true));
                     }
                 });

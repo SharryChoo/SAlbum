@@ -93,11 +93,10 @@ public class CropperFragment extends Fragment {
         mTempFile = FileUtil.createTempFileByDestDirectory(config.getCropDirectoryPath());
         try {
             // Get URI associated with target file.
-            Uri originUri = FileUtil.getUriFromFile(mContext, config.getAuthority(), new File(config.getOriginFilePath()));
             Uri tempUri = FileUtil.getUriFromFile(mContext, config.getAuthority(), mTempFile);
             // Completion intent instance.
             Intent intent = new Intent(INTENT_ACTION_START_CROP);
-            completion(intent, config, originUri, tempUri);
+            completion(intent, config, config.getOriginUri(), tempUri);
             // launch crop Activity
             startActivityForResult(intent, REQUEST_CODE_CROP);
         } catch (Throwable e) {
@@ -117,8 +116,9 @@ public class CropperFragment extends Fragment {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
                     File destFile = FileUtil.createCropDestFile(mConfig.getCropDirectoryPath());
                     CompressUtil.doCompress(mTempFile.getAbsolutePath(), destFile.getAbsolutePath(), mConfig.getDestQuality());
+                    Uri destUri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), destFile);
                     // 回调
-                    mCropperCallback.onCropComplete(destFile.getAbsolutePath());
+                    mCropperCallback.onCropComplete(destUri);
                     // 通知文件变更
                     FileUtil.notifyMediaStore(mContext, destFile.getAbsolutePath());
                 } catch (Exception e) {

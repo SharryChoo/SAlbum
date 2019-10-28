@@ -106,13 +106,13 @@ public class WatcherFragment extends Fragment implements View.OnClickListener {
         if (mDataSource.isPicture) {
             mIvPlayIcon.setVisibility(View.GONE);
             if (Constants.MIME_TYPE_GIF.equals(mDataSource.mimeType)) {
-                Loader.loadGif(mIvPicture.getContext(), mDataSource.path, mIvPicture);
+                Loader.loadGif(mIvPicture.getContext(), mDataSource.contentUri, mIvPicture);
             } else {
-                Loader.loadPicture(mIvPicture.getContext(), mDataSource.path, mIvPicture);
+                Loader.loadPicture(mIvPicture.getContext(), mDataSource.contentUri, mIvPicture);
             }
         } else {
             mIvPlayIcon.setVisibility(View.VISIBLE);
-            Loader.loadVideo(mIvPicture.getContext(), mDataSource.path, mDataSource.thumbnailPath, mIvPicture);
+            Loader.loadVideo(mIvPicture.getContext(), mDataSource.contentUri, mDataSource.thumbnailPath, mIvPicture);
         }
     }
 

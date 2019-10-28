@@ -1,6 +1,7 @@
 package com.sharry.lib.album;
 
 import android.content.Context;
+import android.net.Uri;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -18,19 +19,18 @@ public interface ILoaderEngine {
     /**
      * 加载图片的实现
      */
-    void loadPicture(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView);
+    void loadPicture(@NonNull Context context, @NonNull Uri uri, @NonNull ImageView imageView);
 
     /**
      * 加载 Gif 图
      */
-    void loadGif(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView);
+    void loadGif(@NonNull Context context, @NonNull Uri uri, @NonNull ImageView imageView);
 
     /**
      * 加载视频缩略图
-     *
-     * @param uri           视频地址
+     *  @param uri           视频地址
      * @param thumbnailPath 视频缩略图
      */
-    void loadVideoThumbnails(@NonNull Context context, @NonNull String uri, @Nullable String thumbnailPath, @NonNull ImageView imageView);
+    void loadVideoThumbnails(@NonNull Context context, @NonNull Uri uri, @Nullable String thumbnailPath, @NonNull ImageView imageView);
 
 }

@@ -23,6 +23,7 @@ import com.sharry.lib.media.recorder.Options;
 public class TakerConfig implements Parcelable {
 
     protected TakerConfig(Parcel in) {
+        authority = in.readString();
         pictureQuality = in.readInt();
         directoryPath = in.readString();
         cropperConfig = in.readParcelable(CropperConfig.class.getClassLoader());
@@ -38,6 +39,7 @@ public class TakerConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(authority);
         dest.writeInt(pictureQuality);
         dest.writeString(directoryPath);
         dest.writeParcelable(cropperConfig, flags);
@@ -77,6 +79,11 @@ public class TakerConfig implements Parcelable {
     }
 
     /**
+     * fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
+     */
+    private String authority;
+
+    /**
      * 拍照后压缩的质量
      */
     private int pictureQuality = 80;
@@ -94,6 +101,7 @@ public class TakerConfig implements Parcelable {
     public static final int ASPECT_1_1 = 758;
     public static final int ASPECT_4_3 = 917;
     public static final int ASPECT_16_9 = 995;
+
 
     @IntDef(value = {
             ASPECT_1_1,
@@ -207,6 +215,10 @@ public class TakerConfig implements Parcelable {
         return recordResolution;
     }
 
+    public String getAuthority() {
+        return authority;
+    }
+
     public static class Builder {
 
         private TakerConfig mConfig;
@@ -225,6 +237,15 @@ public class TakerConfig implements Parcelable {
         public Builder setDirectoryPath(@NonNull String dirPath) {
             Preconditions.checkNotEmpty(dirPath);
             this.mConfig.directoryPath = dirPath;
+            return this;
+        }
+
+        /**
+         * 设置文件输出的目录, 拍摄后的图片会生成在目录下
+         */
+        public Builder setAuthority(@NonNull String authority) {
+            Preconditions.checkNotEmpty(authority);
+            this.mConfig.authority = authority;
             return this;
         }
 

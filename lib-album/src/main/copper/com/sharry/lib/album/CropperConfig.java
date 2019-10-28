@@ -1,7 +1,9 @@
 package com.sharry.lib.album;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
 /**
@@ -13,8 +15,34 @@ import androidx.annotation.NonNull;
  */
 public class CropperConfig implements Parcelable {
 
-    public static Builder Builder() {
-        return new Builder();
+    protected CropperConfig(Parcel in) {
+        originUri = in.readParcelable(Uri.class.getClassLoader());
+        cropDirectoryPath = in.readString();
+        isCropCircle = in.readByte() != 0;
+        authority = in.readString();
+        aspectX = in.readInt();
+        aspectY = in.readInt();
+        outputX = in.readInt();
+        outputY = in.readInt();
+        destQuality = in.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(originUri, flags);
+        dest.writeString(cropDirectoryPath);
+        dest.writeByte((byte) (isCropCircle ? 1 : 0));
+        dest.writeString(authority);
+        dest.writeInt(aspectX);
+        dest.writeInt(aspectY);
+        dest.writeInt(outputX);
+        dest.writeInt(outputY);
+        dest.writeInt(destQuality);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<CropperConfig> CREATOR = new Creator<CropperConfig>() {
@@ -29,7 +57,11 @@ public class CropperConfig implements Parcelable {
         }
     };
 
-    private String originFilePath;      // 需要裁剪的图片路径
+    public static Builder Builder() {
+        return new Builder();
+    }
+
+    private Uri originUri;              // 需要裁剪的图片路径
     private String cropDirectoryPath;   // 可用的输出目录
     private boolean isCropCircle;       // 是否为圆形裁剪
     private String authority;           // fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
@@ -42,8 +74,8 @@ public class CropperConfig implements Parcelable {
     private CropperConfig() {
     }
 
-    public String getOriginFilePath() {
-        return originFilePath;
+    public Uri getOriginUri() {
+        return originUri;
     }
 
     public String getCropDirectoryPath() {
@@ -78,38 +110,8 @@ public class CropperConfig implements Parcelable {
         return destQuality;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(originFilePath);
-        dest.writeString(cropDirectoryPath);
-        dest.writeByte((byte) (isCropCircle ? 1 : 0));
-        dest.writeString(authority);
-        dest.writeInt(aspectX);
-        dest.writeInt(aspectY);
-        dest.writeInt(outputX);
-        dest.writeInt(outputY);
-        dest.writeInt(destQuality);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     public Builder rebuild() {
         return new Builder(this);
-    }
-
-    protected CropperConfig(Parcel in) {
-        originFilePath = in.readString();
-        cropDirectoryPath = in.readString();
-        isCropCircle = in.readByte() != 0;
-        authority = in.readString();
-        aspectX = in.readInt();
-        aspectY = in.readInt();
-        outputX = in.readInt();
-        outputY = in.readInt();
-        destQuality = in.readInt();
     }
 
     /**
@@ -156,7 +158,7 @@ public class CropperConfig implements Parcelable {
         /**
          * 设置 FileProvider 的路径, 7.0 以后用于查找 URI
          */
-        public Builder setFileProviderAuthority(@NonNull String authorities) {
+        public Builder setAuthority(@NonNull String authorities) {
             Preconditions.checkNotEmpty(authorities);
             mConfig.authority = authorities;
             return this;
@@ -165,8 +167,8 @@ public class CropperConfig implements Parcelable {
         /**
          * 设置需要裁剪的文件地址
          */
-        public Builder setOriginFile(@NonNull String filePath) {
-            this.mConfig.originFilePath = filePath;
+        public Builder setOriginFile(@NonNull Uri filePath) {
+            this.mConfig.originUri = filePath;
             return this;
         }
 

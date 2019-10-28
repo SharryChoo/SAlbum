@@ -1,5 +1,6 @@
 package com.sharry.lib.album;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -13,8 +14,9 @@ import androidx.annotation.Nullable;
  */
 public class MediaMeta implements Parcelable {
 
+
     protected MediaMeta(Parcel in) {
-        path = in.readString();
+        contentUri = in.readParcelable(Uri.class.getClassLoader());
         isPicture = in.readByte() != 0;
         size = in.readLong();
         date = in.readLong();
@@ -25,7 +27,7 @@ public class MediaMeta implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(path);
+        dest.writeParcelable(contentUri, flags);
         dest.writeByte((byte) (isPicture ? 1 : 0));
         dest.writeLong(size);
         dest.writeLong(date);
@@ -51,16 +53,21 @@ public class MediaMeta implements Parcelable {
         }
     };
 
-    static MediaMeta create(@NonNull String path, boolean isPicture) {
-        return new MediaMeta(path, isPicture);
+    static MediaMeta create(@NonNull Uri uri, boolean isPicture) {
+        return new MediaMeta(uri, isPicture);
     }
 
     /**
-     * 文件路径
+     * 文件的 URI
+     * <p>
+     * Android 10 以上, 只能够使用 URI 进行文件读写
      */
     @NonNull
-    final String path;
+    Uri contentUri;
 
+    /**
+     * 判断是否是图片
+     */
     final boolean isPicture;
 
     /**
@@ -91,8 +98,9 @@ public class MediaMeta implements Parcelable {
      */
     String mimeType;
 
-    private MediaMeta(@NonNull String path, boolean isPicture) {
-        this.path = path;
+
+    private MediaMeta(@NonNull Uri uri, boolean isPicture) {
+        this.contentUri = uri;
         this.isPicture = isPicture;
     }
 
@@ -105,18 +113,18 @@ public class MediaMeta implements Parcelable {
             return false;
         }
         MediaMeta mediaMeta = (MediaMeta) o;
-        return path.equals(mediaMeta.path);
+        return contentUri.equals(mediaMeta.contentUri);
     }
 
     @Override
     public int hashCode() {
-        return path.hashCode();
+        return contentUri.hashCode();
     }
 
     @Override
     public String toString() {
         return "MediaMeta{" +
-                "path='" + path + '\'' + ", \n" +
+                "contentUri='" + contentUri + '\'' + ", \n" +
                 "isPicture=" + isPicture + ", \n" +
                 "size=" + size + ", \n" +
                 "date=" + date + ", \n" +
@@ -126,9 +134,8 @@ public class MediaMeta implements Parcelable {
                 '}';
     }
 
-    @NonNull
-    public String getPath() {
-        return path;
+    public Uri getContentUri() {
+        return contentUri;
     }
 
     public boolean isPicture() {

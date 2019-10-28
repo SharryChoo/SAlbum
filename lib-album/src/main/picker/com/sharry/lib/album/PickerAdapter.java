@@ -1,6 +1,7 @@
 package com.sharry.lib.album;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
@@ -134,7 +135,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         holder.ivGifTag.setVisibility(Constants.MIME_TYPE_GIF.equals(meta.mimeType) ? View.VISIBLE : View.GONE);
-        Loader.loadPicture(mContext, meta.path, holder.ivPicture);
+        Loader.loadPicture(mContext, meta.contentUri, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mPickedSet.indexOf(meta);
         // 设置点击监听
@@ -150,7 +151,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.ivPicture.setBackgroundColor(mConfig.getPickerItemBackgroundColor());
         holder.ivPicture.setScaleType(ImageView.ScaleType.CENTER_CROP);
         // 加载视频第一帧
-        Loader.loadVideo(mContext, meta.path, meta.thumbnailPath, holder.ivPicture);
+        Loader.loadVideo(mContext, meta.contentUri, meta.thumbnailPath, holder.ivPicture);
         // 判断当前 uri 是否被选中了
         final int index = mPickedSet.indexOf(meta);
         // 设置点击监听
@@ -269,7 +270,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (relativePosition < 0) {
                 return;
             }
-            mInteraction.onPictureClicked(itemView, mDataSet.get(relativePosition).path, relativePosition);
+            mInteraction.onPictureClicked(itemView, mDataSet.get(relativePosition).contentUri, relativePosition);
         }
 
         private void performCheckIndicatorClicked() {
@@ -376,7 +377,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (relativePosition < 0) {
                 return;
             }
-            mInteraction.onPictureClicked(itemView, mDataSet.get(relativePosition).path, relativePosition);
+            mInteraction.onPictureClicked(itemView, mDataSet.get(relativePosition).contentUri, relativePosition);
         }
 
         private void performCheckIndicatorClicked() {
@@ -412,7 +413,7 @@ class PickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void onCameraClicked();
 
-        void onPictureClicked(@NonNull View itemView, @NonNull String uri, int position);
+        void onPictureClicked(@NonNull View itemView, @NonNull Uri uri, int position);
 
         boolean onPictureChecked(@NonNull MediaMeta checkedMeta);
 

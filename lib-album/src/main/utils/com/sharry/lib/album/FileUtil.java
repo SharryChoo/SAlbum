@@ -1,18 +1,24 @@
 package com.sharry.lib.album;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Locale;
@@ -88,7 +94,8 @@ class FileUtil {
             tempDirectory.mkdirs();
         }
         // 创建临时文件
-        String tempFileName = "temp_file_" + DateFormat.format("yyyyMMdd_HHmmss", Calendar.getInstance(Locale.CHINA)) + ".jpg";
+        String tempFileName = "temp_file_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
+                Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File tempFile = new File(tempDirectory, tempFileName);
         try {
             if (tempFile.exists()) {
@@ -103,18 +110,35 @@ class FileUtil {
     }
 
     /**
+     * 创建图片地址uri,用于保存拍照后的照片 Android 10以后使用这种方法
+     */
+    private Uri createImageUri(Context context) {
+        String status = Environment.getExternalStorageState();
+        // 判断是否有SD卡, 优先使用SD卡存储, 当没有SD卡时使用手机存储
+        if (status.equals(Environment.MEDIA_MOUNTED)) {
+            return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new ContentValues());
+        } else {
+            return context.getContentResolver().insert(MediaStore.Images.Media.INTERNAL_CONTENT_URI, new ContentValues());
+        }
+    }
+
+    /**
      * 创建拍照文件
      *
      * @param directoryPath 文件目录路径
      */
     static File createCameraDestFile(String directoryPath) {
+        Log.e(TAG, "isExternalStorageWritable = " + isExternalStorageWritable());
         // 获取默认路径
         File dir = new File(directoryPath);
         if (!dir.exists()) {
-            dir.mkdirs();
+            boolean res = dir.mkdirs();
+            if (!res) {
+                Log.e(TAG, "create dir failed -> " + directoryPath);
+            }
         }
         // 创建拍照目标文件
-        String fileName = "camera_" + DateFormat.format("yyyyMMdd_HHmmss",
+        String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File cameraFile = new File(dir, fileName);
         try {
@@ -139,7 +163,7 @@ class FileUtil {
             dir.mkdirs();
         }
         // 创建拍照目标文件
-        String fileName = "crop_" + DateFormat.format("yyyyMMdd_HHmmss",
+        String fileName = "crop_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
         File cropFile = new File(dir, fileName);
         try {
@@ -187,6 +211,49 @@ class FileUtil {
             MediaScannerConnection.scanFile(context.getApplicationContext(), new String[]{filePath}, null, null);
         } else {
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+        }
+    }
+
+    static boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    static boolean isAndroidQFileExists(Context context, String path) {
+        if (context == null) {
+            return false;
+        }
+        AssetFileDescriptor afd = null;
+        ContentResolver cr = context.getContentResolver();
+        try {
+            Uri uri = Uri.parse(path);
+            afd = cr.openAssetFileDescriptor(Uri.parse(path), "r");
+            if (afd == null) {
+                return false;
+            } else {
+                close(afd);
+            }
+        } catch (FileNotFoundException e) {
+            return false;
+        } finally {
+            close(afd);
+        }
+        return true;
+    }
+
+    static void close(Closeable... closeables) {
+        if (closeables == null) {
+            return;
+        }
+        for (Closeable closeable : closeables) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

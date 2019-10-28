@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -248,7 +249,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void onPictureClicked(@NonNull View itemView, @NonNull String uri, int position) {
+    public void onPictureClicked(@NonNull View itemView, @NonNull Uri uri, int position) {
         mPresenter.handlePictureClicked(position, itemView);
     }
 

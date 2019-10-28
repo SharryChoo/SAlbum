@@ -166,9 +166,16 @@ class PickerModel implements PickerContract.IModel {
                         continue;
                     }
                     // 构建数据源
-                    MediaMeta meta = MediaMeta.create(picturePath, true);
+                    long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+                    MediaMeta meta = MediaMeta.create(
+                            Uri.withAppendedPath(
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    String.valueOf(id)),
+                            true
+                    );
                     meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
                     meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
+
                     // 1. 添加到 <所有> 目录下
                     folderAll.addMeta(meta);
                     // 2. 添加到文件所在目录
@@ -205,6 +212,7 @@ class PickerModel implements PickerContract.IModel {
         private Cursor createPictureCursorWithGif() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{
+                    MediaStore.Video.Media._ID,
                     MediaStore.Images.Media.DATA,
                     MediaStore.Images.Media.DATE_ADDED,
                     MediaStore.Video.Media.MIME_TYPE
@@ -230,6 +238,7 @@ class PickerModel implements PickerContract.IModel {
         private Cursor createPictureCursorWithoutGif() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{
+                    MediaStore.Video.Media._ID,
                     MediaStore.Images.Media.DATA,
                     MediaStore.Images.Media.DATE_ADDED,
                     MediaStore.Video.Media.MIME_TYPE
@@ -279,13 +288,19 @@ class PickerModel implements PickerContract.IModel {
                     if (TextUtils.isEmpty(path)) {
                         continue;
                     }
-                    MediaMeta meta = MediaMeta.create(path, false);
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                    MediaMeta meta = MediaMeta.create(
+                            Uri.withAppendedPath(
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    String.valueOf(id)
+                            ),
+                            false
+                    );
                     meta.duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                     meta.date = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
                     meta.size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
                     meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
                     // 获取缩略图
-                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
                     meta.thumbnailPath = fetchVideoThumbNail(id, path, meta.date);
                     // 添加到 <所有> 目录下
                     folderAll.addMeta(meta);

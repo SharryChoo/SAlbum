@@ -1,6 +1,7 @@
 package com.sharry.lib.album;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -29,7 +30,7 @@ final class Loader {
         return sEngine;
     }
 
-    static void loadPicture(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
+    static void loadPicture(@NonNull Context context, @NonNull Uri uri, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
@@ -37,7 +38,7 @@ final class Loader {
         sEngine.loadPicture(context, uri, imageView);
     }
 
-    static void loadGif(@NonNull Context context, @NonNull String uri, @NonNull ImageView imageView) {
+    static void loadGif(@NonNull Context context, @NonNull Uri uri, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;
@@ -45,7 +46,7 @@ final class Loader {
         sEngine.loadGif(context, uri, imageView);
     }
 
-    static void loadVideo(@NonNull Context context, @NonNull String uri, @Nullable String thumbnailPath, @NonNull ImageView imageView) {
+    static void loadVideo(@NonNull Context context, @NonNull Uri uri, @Nullable String thumbnailPath, @NonNull ImageView imageView) {
         if (sEngine == null) {
             Log.e(TAG, "Loader.loadPicture -> please invoke Loader.setLoaderEngine first");
             return;

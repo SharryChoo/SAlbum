@@ -1,7 +1,9 @@
 package com.sharry.lib.album;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -209,7 +211,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
         try {
             CompressUtil.doCompress(mFetchedBitmap, file.getAbsolutePath(),
                     mConfig.getPictureQuality(), mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
-            MediaMeta mediaMeta = MediaMeta.create(file.getAbsolutePath(), true);
+            Uri uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), file);
+            MediaMeta mediaMeta = MediaMeta.create(uri, true);
             mediaMeta.date = System.currentTimeMillis();
             mView.setResult(mediaMeta);
         } catch (IOException e) {
@@ -222,7 +225,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
-        MediaMeta mediaMeta = MediaMeta.create(mVideoFile.getAbsolutePath(), false);
+        Uri uri = FileUtil.getUriFromFile((Context) mView, mConfig.getAuthority(), mVideoFile);
+        MediaMeta mediaMeta = MediaMeta.create(uri, false);
         mediaMeta.date = currentTime;
         mediaMeta.duration = mRecordDuration;
         mView.setResult(mediaMeta);

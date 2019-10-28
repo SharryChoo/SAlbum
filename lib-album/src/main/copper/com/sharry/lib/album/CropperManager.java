@@ -69,9 +69,9 @@ public class CropperManager {
      */
     private void cropActual(@NonNull final CropperCallback callback) {
         // 若未指定目的路径, 则在系统相册的路径下创建图片文件
-        if (TextUtils.isEmpty(mConfig.getOriginFilePath())) {
+        if (mConfig.getOriginUri() == null) {
             throw new UnsupportedOperationException(TAG + ".takeActual -> Please ensure crop " +
-                    "target path is valuable.");
+                    "target uri is valuable.");
         }
         // 指定默认的裁剪路径
         if (TextUtils.isEmpty(mConfig.getCropDirectoryPath())) {
@@ -79,7 +79,7 @@ public class CropperManager {
         }
         // 指定默认, FileProvider 的 authority
         if (TextUtils.isEmpty(mConfig.getAuthority())) {
-            mConfig.rebuild().setFileProviderAuthority(FileUtil.getDefaultFileProviderAuthority(mBind));
+            mConfig.rebuild().setAuthority(FileUtil.getDefaultFileProviderAuthority(mBind));
         }
         // 执行回调
         CropperFragment callbackFragment = CropperFragment.getInstance(mBind);

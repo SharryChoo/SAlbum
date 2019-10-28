@@ -1,5 +1,7 @@
 package com.sharry.lib.album;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 /**
@@ -16,6 +18,6 @@ public interface CropperCallback {
      *
      * @param path 输出路径
      */
-    void onCropComplete(@NonNull String path);
+    void onCropComplete(@NonNull Uri path);
 
 }

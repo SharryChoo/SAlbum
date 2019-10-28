@@ -1,6 +1,7 @@
 package com.sharry.lib.album;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -156,7 +157,7 @@ class PickerPresenter implements PickerContract.IPresenter,
             CropperManager.with((Context) mView)
                     .setConfig(
                             mPickerConfig.getCropperConfig().rebuild()
-                                    .setOriginFile(mPickedSet.get(0).path)
+                                    .setOriginFile(mPickedSet.get(0).contentUri)
                                     .build()
                     )
                     .crop(this);
@@ -232,7 +233,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     //////////////////////////////////////////////CropperCallback/////////////////////////////////////////////////
 
     @Override
-    public void onCropComplete(@NonNull String path) {
+    public void onCropComplete(@NonNull Uri path) {
         mPickedSet.clear();
         mPickedSet.add(MediaMeta.create(path, true));
         mView.setResultAndFinish(mPickedSet);

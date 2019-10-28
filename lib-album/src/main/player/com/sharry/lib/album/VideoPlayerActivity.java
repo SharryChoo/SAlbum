@@ -292,7 +292,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements MediaPlaye
     //////////////////////////////////// VideoPlay Control ///////////////////////////////////////
 
     private void prepare() {
-        mVideoView.setVideoPath(mDataSource.path);
+        mVideoView.setVideoURI(mDataSource.contentUri);
         reset();
     }
 
