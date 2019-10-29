@@ -121,7 +121,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
         }
     }
 
-
     @Override
     public void handleGranted() {
         if (mVideoUri != null || mVideoFile != null) {
