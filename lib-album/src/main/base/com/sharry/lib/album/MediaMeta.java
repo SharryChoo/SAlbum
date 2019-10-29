@@ -70,7 +70,7 @@ public class MediaMeta implements Parcelable {
     /**
      * 文件路径
      */
-    @Nullable
+    @NonNull
     String path;
 
     /**
@@ -107,7 +107,7 @@ public class MediaMeta implements Parcelable {
     String mimeType;
 
 
-    private MediaMeta(@NonNull Uri uri, String filePath, boolean isPicture) {
+    private MediaMeta(@NonNull Uri uri, @NonNull String filePath, boolean isPicture) {
         this.contentUri = uri;
         this.path = filePath;
         this.isPicture = isPicture;
