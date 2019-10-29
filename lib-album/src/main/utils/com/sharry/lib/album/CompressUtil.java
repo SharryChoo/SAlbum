@@ -106,7 +106,7 @@ class CompressUtil {
      * @param quality   压缩质量
      * @param fd        压缩目标的文件描述符
      */
-    private static void qualityCompress(Bitmap srcBitmap, int quality, FileDescriptor fd) throws IOException {
+    static void qualityCompress(Bitmap srcBitmap, int quality, FileDescriptor fd) throws IOException {
         // 进行质量压缩
         FileOutputStream out = new FileOutputStream(fd);
         // 采用有损的 jpeg 图片压缩

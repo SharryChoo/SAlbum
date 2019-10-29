@@ -6,6 +6,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
+import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -46,7 +47,7 @@ public interface IRecorderCallback {
         }
 
         @Override
-        public void onComplete(@NonNull Uri uri) {
+        public void onComplete(@NonNull Uri uri, File file) {
 
         }
 
@@ -105,7 +106,7 @@ public interface IRecorderCallback {
     void onResume();
 
     @MainThread
-    void onComplete(@NonNull Uri uri);
+    void onComplete(@NonNull Uri uri, File file);
 
     @MainThread
     void onFailed(@ErrorCode int errorCode, @NonNull Throwable e);

@@ -11,9 +11,9 @@ import android.media.MediaMuxer;
  */
 public enum MuxerType {
 
-    MP4(MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4, ".mp4");
+    MP4("video/mp4", ".mp4");
 
-    private int outputFormat;
+    private String mime;
     private String suffix;
 
     /**
@@ -22,13 +22,13 @@ public enum MuxerType {
      * @param mime   编码格式
      * @param suffix 录音文件扩展名
      */
-    MuxerType(int mime, String suffix) {
-        this.outputFormat = mime;
+    MuxerType(String mime, String suffix) {
+        this.mime = mime;
         this.suffix = suffix;
     }
 
-    public int getMIME() {
-        return outputFormat;
+    public String getMIME() {
+        return mime;
     }
 
     public String getFileSuffix() {

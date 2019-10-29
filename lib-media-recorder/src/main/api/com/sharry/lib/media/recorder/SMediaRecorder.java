@@ -12,6 +12,7 @@ import androidx.annotation.RequiresPermission;
 
 import com.sharry.lib.camera.SCameraView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,11 +89,11 @@ public final class SMediaRecorder implements IRecorderCallback {
     }
 
     @Override
-    public void onComplete(@NonNull final Uri uri) {
+    public void onComplete(@NonNull final Uri uri, File file) {
         // 释放焦点
         mAudioManagerService.abandonAudioFocus(null);
         for (IRecorderCallback callback : mCallbacks) {
-            callback.onComplete(uri);
+            callback.onComplete(uri, file);
         }
     }
 
@@ -190,7 +191,7 @@ public final class SMediaRecorder implements IRecorderCallback {
     /**
      * 完成音频采集
      * <p>
-     * If complete success, it will be call method that {@link IRecorderCallback#onComplete(Uri)}
+     * If complete success, it will be call method that {@link IRecorderCallback#onComplete(Uri, File)}
      * If complete failed, it will be call method that {@link IRecorderCallback#onFailed(int, Throwable)}
      * </p>
      */

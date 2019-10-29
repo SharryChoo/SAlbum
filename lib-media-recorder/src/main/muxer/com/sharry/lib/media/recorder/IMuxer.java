@@ -1,5 +1,6 @@
 package com.sharry.lib.media.recorder;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
@@ -9,6 +10,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 
@@ -28,7 +30,16 @@ public interface IMuxer {
      * Subsequent calls to {@link #execute} only the encoder prepare invoked.
      */
     @MainThread
+    @TargetApi(29)
     void prepare(Context context, Uri uri) throws Throwable;
+
+    /**
+     * 编码前的准备工作
+     * <p>
+     * Subsequent calls to {@link #execute} only the encoder prepare invoked.
+     */
+    @MainThread
+    void prepare(Context context, File file) throws Throwable;
 
     /**
      * 添加视频轨

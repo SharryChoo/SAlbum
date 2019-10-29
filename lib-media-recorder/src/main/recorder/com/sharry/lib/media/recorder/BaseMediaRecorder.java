@@ -1,6 +1,7 @@
 package com.sharry.lib.media.recorder;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
+import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -25,7 +27,17 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
     protected final Context mContext;
     protected final IRecorderCallback mCallback;
     protected volatile boolean isRecording = false;
+
+    /**
+     * Android Q 使用 Uri 进行文件存储
+     */
+    @TargetApi(29)
     protected Uri mOutputUri;
+
+    /**
+     * Android Q 以下, 使用文件存储
+     */
+    protected File mOutputFile;
 
     BaseMediaRecorder(Context context, final IRecorderCallback callback) {
         this.mContext = context;
@@ -82,8 +94,12 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
     void deleteRecordFile() {
         if (mOutputUri != null) {
             FileUtil.delete(mContext, mOutputUri);
+            mOutputUri = null;
         }
-        mOutputUri = null;
+        if (mOutputFile != null) {
+            FileUtil.delete(mContext, mOutputFile);
+            mOutputFile = null;
+        }
     }
 
     @Override

@@ -29,7 +29,7 @@ public class EncodeType {
 
         AAC(MediaFormat.MIMETYPE_AUDIO_AAC, ".aac");
 
-        private String outputFormat;
+        private String mime;
         private String suffix;
 
         /**
@@ -39,12 +39,12 @@ public class EncodeType {
          * @param suffix 录音文件扩展名
          */
         Audio(String mime, String suffix) {
-            this.outputFormat = mime;
+            this.mime = mime;
             this.suffix = suffix;
         }
 
         public String getMIME() {
-            return outputFormat;
+            return mime;
         }
 
         public String getFileSuffix() {

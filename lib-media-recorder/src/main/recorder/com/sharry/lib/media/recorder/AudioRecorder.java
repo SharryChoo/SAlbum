@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.WorkerThread;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -43,18 +45,28 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         mProvider.setOnPCMChangedListener(this);
         // 创建编码上下文
         try {
+            FileDescriptor fd = null;
             if (!options.isJustEncode()) {
-                mOutputUri = FileUtil.createAudioUri(context, mOptions.getAuthority(), mOptions.getRelativePath(),
-                        mOptions.getAudioEncodeType().getFileSuffix());
-            } else {
-                mOutputUri = null;
+                if (VersionUtil.isQ()) {
+                    mOutputUri = FileUtil.createAudioUri(context, options.getRelativePath(),
+                            options.getAudioEncodeType().getMIME(),
+                            options.getAudioEncodeType().getFileSuffix());
+                    fd = context.getContentResolver().openFileDescriptor(mOutputUri, "w")
+                            .getFileDescriptor();
+                } else {
+                    mOutputFile = FileUtil.createAudioFile(context, options.getRelativePath(),
+                            options.getAudioEncodeType().getFileSuffix());
+                    Uri uri = FileUtil.getUriFromFile(context, options.getAuthority(), mOutputFile);
+                    fd = context.getContentResolver().openFileDescriptor(uri, "w")
+                            .getFileDescriptor();
+                }
             }
             mEncodeContext = new IAudioEncoder.Context(
                     options.getSampleRate(),
                     options.getChannelLayout(),
                     options.getPerSampleSize(),
                     options.isJustEncode(),
-                    mOutputUri == null ? null : context.getContentResolver().openFileDescriptor(mOutputUri, "w").getFileDescriptor(),
+                    fd,
                     this
             );
         } catch (IOException e) {
@@ -185,7 +197,7 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                     // 通知媒体库更新
                     FileUtil.notifyMediaStore(mContext, FileUtil.getPath(mContext, mOutputUri));
                     // 回调录制完成
-                    mCallback.onComplete(mOutputUri);
+                    mCallback.onComplete(mOutputUri, mOutputFile);
                 }
             }
         });

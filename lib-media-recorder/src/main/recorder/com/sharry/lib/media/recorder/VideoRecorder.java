@@ -54,8 +54,13 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         this.mEncoder = EncoderFactory.create(options.getVideoEncodeType());
         // Step2. Create an instance of video muxer and prepare.
         this.mMuxer = MuxerFactory.createEncoder(options.getMuxerType());
-        this.mOutputUri = FileUtil.createVideoUri(context, options.getAuthority(), options.getRelativePath(),
-                options.getMuxerType().getFileSuffix());
+        if (VersionUtil.isQ()) {
+            this.mOutputUri = FileUtil.createVideoUri(context, options.getRelativePath(),
+                    options.getMuxerType().getMIME(), options.getMuxerType().getFileSuffix());
+        } else {
+            this.mOutputFile = FileUtil.createVideoFile(context, options.getRelativePath(),
+                    options.getMuxerType().getFileSuffix());
+        }
     }
 
     // //////////////////////////////////// IAudioEncoder.Callback ////////////////////////////////////
@@ -121,7 +126,11 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 }
                 // prepare muxer.
                 try {
-                    mMuxer.prepare(mContext, mOutputUri);
+                    if (VersionUtil.isQ()) {
+                        mMuxer.prepare(mContext, mOutputUri);
+                    } else {
+                        mMuxer.prepare(mContext, mOutputFile);
+                    }
                 } catch (Throwable e) {
                     performRecordFailed(IRecorderCallback.ERROR_MUXER_PREPARE_FAILED, e);
                     return;
@@ -186,10 +195,13 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             public void run() {
                 // 释放资源
                 stop();
-                // 在文件管理器中刷新生成的文件
-                FileUtil.notifyMediaStore(mContext, FileUtil.getPath(mContext, mOutputUri));
+                // 处理成功回调
+                if (!VersionUtil.isQ()) {
+                    // 在文件管理器中刷新生成的文件
+                    FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
+                }
                 // 回调完成
-                mCallback.onComplete(mOutputUri);
+                mCallback.onComplete(mOutputUri, mOutputFile);
             }
         });
     }

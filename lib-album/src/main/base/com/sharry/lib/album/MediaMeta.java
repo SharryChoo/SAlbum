@@ -55,7 +55,7 @@ public class MediaMeta implements Parcelable {
         }
     };
 
-    static MediaMeta create(@NonNull Uri uri, @NonNull String filePath, boolean isPicture) {
+    static MediaMeta create(@NonNull Uri uri, @Nullable String filePath, boolean isPicture) {
         return new MediaMeta(uri, filePath, isPicture);
     }
 
@@ -70,7 +70,7 @@ public class MediaMeta implements Parcelable {
     /**
      * 文件路径
      */
-    @NonNull
+    @Nullable
     String path;
 
     /**
@@ -122,7 +122,7 @@ public class MediaMeta implements Parcelable {
             return false;
         }
         MediaMeta mediaMeta = (MediaMeta) o;
-        return path.equals(mediaMeta.path);
+        return contentUri.equals(mediaMeta.contentUri);
     }
 
     @Override

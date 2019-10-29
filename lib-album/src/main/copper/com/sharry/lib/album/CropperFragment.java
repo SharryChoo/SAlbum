@@ -115,14 +115,22 @@ public class CropperFragment extends Fragment {
             case REQUEST_CODE_CROP:
                 try {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
-                    Uri uri = FileUtil.createJpegUri(mContext, mConfig.getAuthority(), mConfig.getRelativePath());
-                    ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
-                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
-                    String path = FileUtil.getPath(mContext, uri);
-                    MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
-                    FileUtil.notifyMediaStore(mContext, path);
-                    // 回调
-                    mCropperCallback.onCropComplete(mediaMeta);
+                    if (VersionUtil.isQ()) {
+                        Uri uri = FileUtil.createJpegUri(mContext, mConfig.getRelativePath());
+                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                        CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                        MediaMeta mediaMeta = MediaMeta.create(uri, FileUtil.getPath(mContext, uri), true);
+                        mCropperCallback.onCropComplete(mediaMeta);
+                    } else {
+                        File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());
+                        Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
+                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                        CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                        MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
+                        // Android 10 一下需要手动更新媒体库
+                        FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
+                        mCropperCallback.onCropComplete(mediaMeta);
+                    }
                 } catch (Exception e) {
                     Log.e(TAG, "Picture compress failed after crop.", e);
                 } finally {

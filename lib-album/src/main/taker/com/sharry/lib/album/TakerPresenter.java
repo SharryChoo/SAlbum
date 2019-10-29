@@ -18,6 +18,8 @@ import com.sharry.lib.media.recorder.MuxerType;
 import com.sharry.lib.media.recorder.Options;
 import com.sharry.lib.media.recorder.SMediaRecorder;
 
+import java.io.File;
+
 import static com.sharry.lib.album.TakerConfig.ASPECT_16_9;
 import static com.sharry.lib.album.TakerConfig.ASPECT_1_1;
 import static com.sharry.lib.album.TakerConfig.ASPECT_4_3;
@@ -41,6 +43,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private long mRecordDuration;
     private int mCountTryAgain = 0;
     private Uri mVideoUri;
+    private File mVideoFile;
 
     TakerPresenter(TakerActivity view, TakerConfig config) {
         this.mContext = view;
@@ -55,8 +58,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
             }
 
             @Override
-            public void onComplete(@NonNull Uri uri) {
-                performRecordComplete(uri);
+            public void onComplete(@NonNull Uri uri, File file) {
+                performRecordComplete(uri, file);
             }
 
             @Override
@@ -81,7 +84,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     public void handleGranted() {
         // 重置为预览, 防止销毁时文件的误删
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
-        if (mVideoUri != null) {
+        if (mVideoUri != null || mVideoFile != null) {
             performVideoEnsure();
         } else {
             performPictureEnsure();
@@ -139,13 +142,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
     public void handleViewDestroy() {
         mRecorder.cancel();
         if (mView.getStatus() != ITakerContract.IView.STATUS_CAMERA_PREVIEW) {
-            mFetchedBitmap = null;
-            mCountTryAgain = 0;
-            if (mVideoUri != null) {
-                mView.stopVideoPlayer();
-                // TODO 删除媒体文件
-                mVideoUri = null;
-            }
+            recycle();
         }
     }
 
@@ -175,7 +172,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
     }
 
-
     /**
      * 处理录制进度变更
      */
@@ -196,10 +192,17 @@ class TakerPresenter implements ITakerContract.IPresenter {
     /**
      * 处理录制成功
      */
-    private void performRecordComplete(Uri uri) {
+    private void performRecordComplete(Uri uri, File file) {
         mVideoUri = uri;
+        mVideoFile = file;
         mView.setStatus(ITakerContract.IView.STATUS_VIDEO_PLAY);
-        mView.startVideoPlayer(mVideoUri);
+        if (mVideoUri != null) {
+            mView.startVideoPlayer(mVideoUri);
+        } else if (mVideoFile != null) {
+            mView.startVideoPlayer(
+                    FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mVideoFile)
+            );
+        }
     }
 
     /**
@@ -207,17 +210,27 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performPictureEnsure() {
         try {
-            Uri uri = FileUtil.createJpegUri((Context) mView, mConfig.getAuthority(), mConfig.getRelativePath());
-            ParcelFileDescriptor fd = ((Context) mView).getContentResolver().openFileDescriptor(uri, "w");
-            CompressUtil.doCompress(mFetchedBitmap, fd.getFileDescriptor(), mConfig.getPictureQuality(),
-                    mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
-            String path = FileUtil.getPath(mContext, uri);
-            MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
-            mediaMeta.date = System.currentTimeMillis();
-            // 通知媒体库数据插入
-            FileUtil.notifyMediaStore(mContext, path);
-            mView.setResult(mediaMeta);
+            if (VersionUtil.isQ()) {
+                Uri uri = FileUtil.createJpegUri(mContext, mConfig.getRelativePath());
+                ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getPictureQuality(),
+                        mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
+                String path = FileUtil.getPath(mContext, uri);
+                MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
+                mediaMeta.date = System.currentTimeMillis();
+            } else {
+                File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());
+                Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
+                ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getPictureQuality(),
+                        mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
+                MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
+                // Android 10 一下需要手动更新媒体库
+                FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
+                mView.setResult(mediaMeta);
+            }
         } catch (Throwable e) {
+            e.printStackTrace();
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
         }
     }
@@ -227,13 +240,24 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
-        String path = FileUtil.getPath(mContext, mVideoUri);
-        MediaMeta mediaMeta = MediaMeta.create(mVideoUri, path, false);
-        mediaMeta.date = currentTime;
-        mediaMeta.duration = mRecordDuration;
-        // 通知媒体库数据插入
-        FileUtil.notifyMediaStore(mContext, path);
-        mView.setResult(mediaMeta);
+        if (VersionUtil.isQ() && mVideoUri != null) {
+            MediaMeta mediaMeta = MediaMeta.create(mVideoUri, FileUtil.getPath(mContext, mVideoUri), false);
+            mediaMeta.date = currentTime;
+            mediaMeta.duration = mRecordDuration;
+            mView.setResult(mediaMeta);
+        } else if (mVideoFile != null) {
+            MediaMeta mediaMeta = MediaMeta.create(
+                    FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mVideoFile),
+                    mVideoFile.getAbsolutePath(),
+                    false
+            );
+            mediaMeta.date = currentTime;
+            mediaMeta.duration = mRecordDuration;
+            // 通知媒体库的操作, 在 Recorder 中完成
+            mView.setResult(mediaMeta);
+        } else {
+            mView.toast(R.string.lib_album_taker_video_saved_failed);
+        }
     }
 
     /**
@@ -243,10 +267,14 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mFetchedBitmap = null;
         mCountTryAgain = 0;
         if (mVideoUri != null) {
-            mView.stopVideoPlayer();
             FileUtil.delete(mContext, mVideoUri);
             mVideoUri = null;
         }
+        if (mVideoFile != null) {
+            FileUtil.delete(mContext, mVideoFile);
+            mVideoFile = null;
+        }
+        mView.stopVideoPlayer();
     }
 
 }
