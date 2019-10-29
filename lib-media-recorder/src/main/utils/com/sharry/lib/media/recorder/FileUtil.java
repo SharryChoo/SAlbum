@@ -111,6 +111,11 @@ class FileUtil {
                 FileProvider.getUriForFile(context, authority, file) : Uri.fromFile(file);
     }
 
+    public static String getPath(Uri uri) {
+        // TODO 实现获取 path
+        return null;
+    }
+
     /**
      * 通知 MediaStore 文件更替
      */
@@ -124,5 +129,4 @@ class FileUtil {
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
     }
-
 }

@@ -1,14 +1,15 @@
 package com.sharry.lib.media.recorder;
 
-import android.annotation.TargetApi;
+import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.net.Uri;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
-import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 
 /**
@@ -25,16 +26,9 @@ public interface IMuxer {
      * 编码前的准备工作
      * <p>
      * Subsequent calls to {@link #execute} only the encoder prepare invoked.
-     *
-     * @param fd
      */
     @MainThread
-    @TargetApi(26)
-    void prepare(@NonNull FileDescriptor fd) throws Throwable;
-
-
-    void prepare(@NonNull String path) throws Throwable;
-
+    void prepare(Context context, Uri uri) throws Throwable;
 
     /**
      * 添加视频轨
@@ -60,6 +54,7 @@ public interface IMuxer {
      * 释放资源
      */
     void stop();
+
 
     /**
      * 混音器的元数据

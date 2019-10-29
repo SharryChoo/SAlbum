@@ -121,7 +121,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 }
                 // prepare muxer.
                 try {
-                    mMuxer.prepare(mContext.getContentResolver().openFileDescriptor(mOutputUri, "w").getFileDescriptor());
+                    mMuxer.prepare(mContext, mOutputUri);
                 } catch (Throwable e) {
                     performRecordFailed(IRecorderCallback.ERROR_MUXER_PREPARE_FAILED, e);
                     return;
