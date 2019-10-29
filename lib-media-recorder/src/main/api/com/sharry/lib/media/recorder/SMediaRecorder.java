@@ -220,8 +220,8 @@ public final class SMediaRecorder implements IRecorderCallback {
      */
     private void completionOptions(@NonNull Options.Audio audioOptions) {
         // 若没有设置录音文件输出目录, 则指定为 App 的内部缓存目录
-        if (TextUtils.isEmpty(audioOptions.getOutputDir())) {
-            audioOptions.reBuilder().setOutputDir(mContext.getCacheDir().getAbsolutePath());
+        if (TextUtils.isEmpty(audioOptions.getRelativePath())) {
+            audioOptions.reBuilder().setRelativePath(mContext.getCacheDir().getAbsolutePath());
         }
     }
 

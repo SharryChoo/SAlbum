@@ -61,6 +61,8 @@ class MainActivity : AppCompatActivity() {
         takerConfig = TakerConfig.Builder()
                 // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
                 .setAuthority("$packageName.FileProvider")
+                // 设置外部存储目录相对路径
+                .setRelativePath(RELATIVE_PATH)
                 // 预览画面比例
                 .setPreviewAspect(ASPECT_4_3)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
@@ -75,8 +77,6 @@ class MainActivity : AppCompatActivity() {
                 .setMinRecordDuration(1 * 1000)
                 // 设置录制的分辨率
                 .setRecordResolution(Options.Video.RESOLUTION_1080P)
-                // 设置外部存储目录相对路径
-                .setRelativePath(RELATIVE_PATH)
                 // 拍摄后质量压缩
                 .setPictureQuality(80)
                 .build()
