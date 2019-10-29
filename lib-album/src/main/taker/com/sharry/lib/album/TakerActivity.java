@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -233,7 +232,7 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void toast(@IntegerRes @NonNull int resId) {
+    public void toast(@IntegerRes int resId) {
         Toast.makeText(this, resId, Toast.LENGTH_SHORT).show();
     }
 
@@ -242,6 +241,7 @@ public class TakerActivity extends AppCompatActivity implements
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_MEDIA_META, mediaMeta);
         setResult(RESULT_OK, intent);
+        setStatus(STATUS_PICKED);
         finish();
     }
 

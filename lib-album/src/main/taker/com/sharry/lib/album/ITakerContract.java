@@ -44,11 +44,13 @@ public interface ITakerContract {
         int STATUS_CAMERA_PREVIEW = 1;
         int STATUS_PICTURE_PREVIEW = 2;
         int STATUS_VIDEO_PLAY = 3;
+        int STATUS_PICKED = 4;
 
         @IntDef(value = {
                 STATUS_CAMERA_PREVIEW,
                 STATUS_PICTURE_PREVIEW,
-                STATUS_VIDEO_PLAY
+                STATUS_VIDEO_PLAY,
+                STATUS_PICKED
         })
         @interface Status {
         }

@@ -81,23 +81,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     @Override
-    public void handleGranted() {
-        // 重置为预览, 防止销毁时文件的误删
-        mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
-        if (mVideoUri != null || mVideoFile != null) {
-            performVideoEnsure();
-        } else {
-            performPictureEnsure();
-        }
-    }
-
-    @Override
-    public void handleDenied() {
-        mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
-        recycle();
-    }
-
-    @Override
     public void handleVideoPlayFailed() {
         if (mCountTryAgain++ < MAXIMUM_TRY_AGAIN_THRESHOLD) {
             Log.w(TAG, "Occurred an error, try again " + mCountTryAgain + " time");
@@ -138,10 +121,28 @@ class TakerPresenter implements ITakerContract.IPresenter {
         }
     }
 
+
+    @Override
+    public void handleGranted() {
+        if (mVideoUri != null || mVideoFile != null) {
+            performVideoEnsure();
+        } else {
+            performPictureEnsure();
+        }
+    }
+
+    @Override
+    public void handleDenied() {
+        // 重置为预览状态
+        mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
+        recycle();
+    }
+
     @Override
     public void handleViewDestroy() {
         mRecorder.cancel();
-        if (mView.getStatus() != ITakerContract.IView.STATUS_CAMERA_PREVIEW) {
+        // 若非选中状态, 则重置数据
+        if (mView.getStatus() != ITakerContract.IView.STATUS_PICKED) {
             recycle();
         }
     }
@@ -227,6 +228,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
             }
         } catch (Throwable e) {
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
+            mView.setStatus(ITakerContract.IView.STATUS_CAMERA_PREVIEW);
         }
     }
 
