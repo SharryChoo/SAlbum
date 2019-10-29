@@ -116,9 +116,10 @@ public class CropperFragment extends Fragment {
                 try {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
                     if (VersionUtil.isQ()) {
-                        Uri uri = FileUtil.createJpegUri(mContext, mConfig.getRelativePath());
+                        Uri uri = FileUtil.createJpegPendingItem(mContext, mConfig.getRelativePath());
                         ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
                         CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                        FileUtil.publishPendingItem(mContext, uri);
                         MediaMeta mediaMeta = MediaMeta.create(uri, FileUtil.getImagePath(mContext, uri), true);
                         mCropperCallback.onCropComplete(mediaMeta);
                     } else {
@@ -126,9 +127,8 @@ public class CropperFragment extends Fragment {
                         Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
                         ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
                         CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
-                        MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
-                        // Android 10 一下需要手动更新媒体库
                         FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
+                        MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
                         mCropperCallback.onCropComplete(mediaMeta);
                     }
                 } catch (Exception e) {

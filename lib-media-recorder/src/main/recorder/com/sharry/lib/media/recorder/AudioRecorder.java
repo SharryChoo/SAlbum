@@ -45,7 +45,7 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             if (!options.isJustEncode()) {
                 if (VersionUtil.isQ()) {
                     // Android Q 以上以 URI 为主
-                    mOutputUri = FileUtil.createAudioUri(context, options.getRelativePath(),
+                    mOutputUri = FileUtil.createAudioPendingItem(context, options.getRelativePath(),
                             options.getAudioEncodeType().getMIME(),
                             options.getAudioEncodeType().getFileSuffix());
                     mOutputFile = new File(FileUtil.getAudioPath(context, mOutputUri));
@@ -192,8 +192,9 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             public void run() {
                 // 停止录制
                 stop();
-                // 非 Android Q 则需要更新媒体库
-                if (!VersionUtil.isQ() && mOutputFile != null) {
+                if (VersionUtil.isQ()) {
+                    FileUtil.publishPendingItem(mContext, mOutputUri);
+                } else {
                     FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
                 }
                 // 回调录制完成

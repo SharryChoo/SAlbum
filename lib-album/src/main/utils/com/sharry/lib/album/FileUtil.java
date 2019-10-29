@@ -92,7 +92,7 @@ class FileUtil {
      * @param relativePath 文件目录路径
      */
     @TargetApi(29)
-    static Uri createJpegUri(Context context, String relativePath) {
+    static Uri createJpegPendingItem(Context context, String relativePath) {
         // 创建拍照目标文件
         String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
@@ -103,11 +103,35 @@ class FileUtil {
         }
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
         values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.IS_PENDING, 1);
         ContentResolver resolver = context.getContentResolver();
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         } else {
             return resolver.insert(MediaStore.Images.Media.INTERNAL_CONTENT_URI, values);
+        }
+    }
+
+    /**
+     * 通知 MediaStore 文件发布
+     */
+    @TargetApi(29)
+    static void publishPendingItem(Context context, Uri item) {
+        if (context == null || item == null) {
+            return;
+        }
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.IS_PENDING, 0);
+        context.getContentResolver().update(item, values, null, null);
+    }
+
+    /**
+     * 删除 Uri
+     */
+    @TargetApi(29)
+    static void delete(Context context, Uri uri) {
+        if (context != null && uri != null) {
+            context.getContentResolver().delete(uri, null, null);
         }
     }
 
@@ -152,18 +176,10 @@ class FileUtil {
     }
 
     /**
-     * 删除 Uri
-     */
-    @TargetApi(29)
-    static void delete(Context context, Uri uri) {
-        context.getContentResolver().delete(uri, null, null);
-    }
-
-    /**
      * 删除文件
      */
     static void delete(Context context, File file) {
-        if (file != null && file.exists() && file.isFile()) {
+        if (context != null && file != null && file.exists() && file.isFile()) {
             if (file.delete()) {
                 notifyMediaStore(context, file.getAbsolutePath());
             }

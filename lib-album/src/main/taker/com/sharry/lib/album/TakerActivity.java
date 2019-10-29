@@ -241,7 +241,6 @@ public class TakerActivity extends AppCompatActivity implements
     public void setResult(@NonNull MediaMeta mediaMeta) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_MEDIA_META, mediaMeta);
-        Log.e("TAG", mediaMeta.toString());
         setResult(RESULT_OK, intent);
         finish();
     }

@@ -205,10 +205,11 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private void performPictureEnsure() {
         try {
             if (VersionUtil.isQ()) {
-                Uri uri = FileUtil.createJpegUri(mContext, mConfig.getRelativePath());
+                Uri uri = FileUtil.createJpegPendingItem(mContext, mConfig.getRelativePath());
                 ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
-                CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getPictureQuality(),
+                CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getQuality(),
                         mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
+                FileUtil.publishPendingItem(mContext, uri);
                 String path = FileUtil.getImagePath(mContext, uri);
                 MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
                 mediaMeta.date = System.currentTimeMillis();
@@ -217,16 +218,14 @@ class TakerPresenter implements ITakerContract.IPresenter {
                 File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());
                 Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
                 ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
-                CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getPictureQuality(),
+                CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getQuality(),
                         mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
+                FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
                 MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
                 mediaMeta.date = System.currentTimeMillis();
-                // Android 10 以下需要手动更新媒体库
-                FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
                 mView.setResult(mediaMeta);
             }
         } catch (Throwable e) {
-            e.printStackTrace();
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
         }
     }

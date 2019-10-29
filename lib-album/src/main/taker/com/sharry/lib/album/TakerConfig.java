@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
@@ -24,7 +25,7 @@ public class TakerConfig implements Parcelable {
 
     protected TakerConfig(Parcel in) {
         authority = in.readString();
-        pictureQuality = in.readInt();
+        quality = in.readInt();
         relativePath = in.readString();
         previewAspect = in.readInt();
         isFullScreen = in.readByte() != 0;
@@ -39,7 +40,7 @@ public class TakerConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(authority);
-        dest.writeInt(pictureQuality);
+        dest.writeInt(quality);
         dest.writeString(relativePath);
         dest.writeInt(previewAspect);
         dest.writeByte((byte) (isFullScreen ? 1 : 0));
@@ -84,7 +85,7 @@ public class TakerConfig implements Parcelable {
     /**
      * 拍照后压缩的质量
      */
-    private int pictureQuality = 80;
+    private int quality = 80;
 
     /**
      * 文件输出路径
@@ -153,6 +154,12 @@ public class TakerConfig implements Parcelable {
      */
     private String rendererClsName;
 
+    /**
+     * 提供图片裁剪的支持
+     */
+    private CropperConfig cropConfig;
+
+
     private TakerConfig() {
     }
 
@@ -160,8 +167,8 @@ public class TakerConfig implements Parcelable {
         return new Builder(this);
     }
 
-    public int getPictureQuality() {
-        return pictureQuality;
+    public int getQuality() {
+        return quality;
     }
 
     public String getRelativePath() {
@@ -202,6 +209,14 @@ public class TakerConfig implements Parcelable {
 
     public String getAuthority() {
         return authority;
+    }
+
+    public CropperConfig getCropConfig() {
+        return cropConfig;
+    }
+
+    public String getRendererClsName() {
+        return rendererClsName;
     }
 
     public static class Builder {
@@ -247,7 +262,7 @@ public class TakerConfig implements Parcelable {
          * 设置拍照后的压缩质量
          */
         public Builder setPictureQuality(int quality) {
-            mConfig.pictureQuality = quality;
+            mConfig.quality = quality;
             return this;
         }
 
@@ -327,7 +342,18 @@ public class TakerConfig implements Parcelable {
             return this;
         }
 
+        /**
+         * 设置裁剪的配置
+         */
+        public Builder setCropConfig(@Nullable CropperConfig cropConfig) {
+            mConfig.cropConfig = cropConfig;
+            return this;
+        }
+
         public TakerConfig build() {
+            if (TextUtils.isEmpty(mConfig.authority)) {
+                throw new UnsupportedOperationException("Please invoke setAuthority correct");
+            }
             return mConfig;
         }
 

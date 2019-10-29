@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -202,6 +203,9 @@ public class CropperConfig implements Parcelable {
 
         @NonNull
         public CropperConfig build() {
+            if (TextUtils.isEmpty(mConfig.authority)) {
+                throw new UnsupportedOperationException("Please invoke setAuthority correct");
+            }
             return mConfig;
         }
     }

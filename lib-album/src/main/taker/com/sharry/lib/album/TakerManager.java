@@ -85,7 +85,14 @@ public class TakerManager {
                 switch (requestCode) {
                     case TakerActivity.REQUEST_CODE:
                         MediaMeta mediaMeta = data.getParcelableExtra(TakerActivity.RESULT_EXTRA_MEDIA_META);
-                        if (mediaMeta != null) {
+                        if (mediaMeta == null) {
+                            return;
+                        }
+                        // 2. 处理图片裁剪
+                        if (mConfig.getCropConfig() != null && mediaMeta.isPicture) {
+                            performCropPicture(mediaMeta, callback);
+                        } else {
+                            // 3. 回调
                             callback.onCameraTakeComplete(mediaMeta);
                         }
                         break;
@@ -97,5 +104,25 @@ public class TakerManager {
         // 启动拍照录像的页面
         TakerActivity.launchForResult(callbackFragment, mConfig);
     }
+
+    /**
+     * 处理裁剪
+     */
+    private void performCropPicture(MediaMeta mediaMeta, final TakerCallback callback) {
+        CropperManager.with(mBind)
+                .setConfig(
+                        mConfig.getCropConfig().rebuild()
+                                // 需要裁剪的文件路径
+                                .setOriginFile(mediaMeta.getContentUri())
+                                .build()
+                )
+                .crop(new CropperCallback() {
+                    @Override
+                    public void onCropComplete(@NonNull MediaMeta meta) {
+                        callback.onCameraTakeComplete(meta);
+                    }
+                });
+    }
+
 
 }

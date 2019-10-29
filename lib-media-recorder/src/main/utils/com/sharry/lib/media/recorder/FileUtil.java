@@ -2,7 +2,6 @@ package com.sharry.lib.media.recorder;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -35,7 +33,7 @@ class FileUtil {
      */
     @NonNull
     @TargetApi(29)
-    static Uri createAudioUri(Context context, String relativePath, String mime, String suffix) {
+    static Uri createAudioPendingItem(Context context, String relativePath, String mime, String suffix) {
         String fileName = "audio_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + suffix;
         ContentValues values = new ContentValues();
@@ -44,6 +42,7 @@ class FileUtil {
         }
         values.put(MediaStore.Audio.Media.MIME_TYPE, mime);
         values.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.IS_PENDING, 1);
         ContentResolver resolver = context.getContentResolver();
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             return resolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
@@ -81,7 +80,7 @@ class FileUtil {
      */
     @NonNull
     @TargetApi(29)
-    static Uri createVideoUri(Context context, String relativePath, String mime, String suffix) {
+    static Uri createVideoPendingItem(Context context, String relativePath, String mime, String suffix) {
         String fileName = "video_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + suffix;
         ContentValues values = new ContentValues();
@@ -90,6 +89,7 @@ class FileUtil {
         }
         values.put(MediaStore.Video.Media.MIME_TYPE, mime);
         values.put(MediaStore.Video.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.IS_PENDING, 1);
         ContentResolver resolver = context.getContentResolver();
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             return resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
@@ -134,20 +134,34 @@ class FileUtil {
     /**
      * 删除 Uri
      */
-    @TargetApi(29)
     static void delete(Context context, Uri uri) {
-        context.getContentResolver().delete(uri, null, null);
+        if (context != null && uri != null) {
+            context.getContentResolver().delete(uri, null, null);
+        }
     }
 
     /**
      * 删除文件
      */
     static void delete(Context context, File file) {
-        if (file != null && file.exists() && file.isFile()) {
+        if (context != null && file != null && file.exists() && file.isFile()) {
             if (file.delete()) {
                 notifyMediaStore(context, file.getAbsolutePath());
             }
         }
+    }
+
+    /**
+     * 通知 MediaStore 文件发布
+     */
+    @TargetApi(29)
+    static void publishPendingItem(Context context, Uri item) {
+        if (context == null || item == null) {
+            return;
+        }
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.IS_PENDING, 0);
+        context.getContentResolver().update(item, values, null, null);
     }
 
     /**
@@ -163,7 +177,6 @@ class FileUtil {
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
     }
-
 
     /**
      * 根据视频 URI 获取视频路径

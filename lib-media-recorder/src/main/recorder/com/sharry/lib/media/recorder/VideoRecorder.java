@@ -56,7 +56,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         // Step2. Create an instance of video muxer and prepare.
         this.mMuxer = MuxerFactory.createEncoder(options.getMuxerType());
         if (VersionUtil.isQ()) {
-            this.mOutputUri = FileUtil.createVideoUri(context, options.getRelativePath(),
+            this.mOutputUri = FileUtil.createVideoPendingItem(context, options.getRelativePath(),
                     options.getMuxerType().getMIME(), options.getMuxerType().getFileSuffix());
             this.mOutputFile = new File(FileUtil.getVideoPath(context, mOutputUri));
         } else {
@@ -198,8 +198,9 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             public void run() {
                 // 释放资源
                 stop();
-                // 非 Android Q 则需要通知 MediaStore
-                if (!VersionUtil.isQ() && mOutputFile != null) {
+                if (VersionUtil.isQ()) {
+                    FileUtil.publishPendingItem(mContext, mOutputUri);
+                } else {
                     FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
                 }
                 // 回调完成

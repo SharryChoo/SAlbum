@@ -55,7 +55,7 @@ public class MediaMeta implements Parcelable {
         }
     };
 
-    static MediaMeta create(@NonNull Uri uri, @Nullable String filePath, boolean isPicture) {
+    static MediaMeta create(@NonNull Uri uri, @NonNull String filePath, boolean isPicture) {
         return new MediaMeta(uri, filePath, isPicture);
     }
 
@@ -106,7 +106,6 @@ public class MediaMeta implements Parcelable {
      */
     String mimeType;
 
-
     private MediaMeta(@NonNull Uri uri, @NonNull String filePath, boolean isPicture) {
         this.contentUri = uri;
         this.path = filePath;
@@ -144,8 +143,14 @@ public class MediaMeta implements Parcelable {
                 '}';
     }
 
+    @NonNull
     public Uri getContentUri() {
         return contentUri;
+    }
+
+    @NonNull
+    public String getPath() {
+        return path;
     }
 
     public boolean isPicture() {
@@ -171,10 +176,5 @@ public class MediaMeta implements Parcelable {
 
     public String getMimeType() {
         return mimeType;
-    }
-
-    @NonNull
-    public String getPath() {
-        return path;
     }
 }
