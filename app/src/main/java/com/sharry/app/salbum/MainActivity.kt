@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
                 .setFullScreen(true)
                 // 设置自定义 Renderer 的路径
-                .setRenderer(WatermarkPreviewerRenderer::class.java)
+//                .setRenderer(WatermarkPreviewerRenderer::class.java)
                 // 设置是否支持视频录制
                 .setVideoRecord(true)
                 // 设置录制最大时长

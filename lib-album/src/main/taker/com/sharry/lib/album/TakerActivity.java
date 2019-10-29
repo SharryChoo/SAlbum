@@ -187,6 +187,9 @@ public class TakerActivity extends AppCompatActivity implements
     public void setStatus(int status) {
         mStatus = status;
         switch (status) {
+            case STATUS_PICKED:
+                // Keeping.
+                break;
             case STATUS_VIDEO_PLAY:
                 // 停止预览
                 mCameraView.stopPreview();
