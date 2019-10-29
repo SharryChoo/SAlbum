@@ -218,6 +218,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
                 String path = FileUtil.getPath(mContext, uri);
                 MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
                 mediaMeta.date = System.currentTimeMillis();
+                mView.setResult(mediaMeta);
             } else {
                 File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());
                 Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
@@ -225,7 +226,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
                 CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getPictureQuality(),
                         mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
                 MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
-                // Android 10 一下需要手动更新媒体库
+                mediaMeta.date = System.currentTimeMillis();
+                // Android 10 以下需要手动更新媒体库
                 FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
                 mView.setResult(mediaMeta);
             }
