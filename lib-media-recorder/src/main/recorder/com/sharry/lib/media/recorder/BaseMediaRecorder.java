@@ -29,7 +29,7 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
     protected volatile boolean isRecording = false;
 
     /**
-     * Android Q 使用 Uri 进行文件存储
+     * Android Q 操作 URI
      */
     @TargetApi(29)
     protected Uri mOutputUri;
@@ -92,14 +92,13 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
      * 执行录制文件的删除
      */
     void deleteRecordFile() {
-        if (mOutputUri != null) {
+        if (VersionUtil.isQ()) {
             FileUtil.delete(mContext, mOutputUri);
-            mOutputUri = null;
-        }
-        if (mOutputFile != null) {
+        } else {
             FileUtil.delete(mContext, mOutputFile);
-            mOutputFile = null;
         }
+        mOutputUri = null;
+        mOutputFile = null;
     }
 
     @Override

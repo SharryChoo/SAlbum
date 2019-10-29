@@ -2,7 +2,6 @@ package com.sharry.lib.album;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -99,7 +97,10 @@ class FileUtil {
         String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
         ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + relativePath);
+        // 创建相对路径
+        if (!TextUtils.isEmpty(relativePath)) {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + relativePath);
+        }
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
         values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
         ContentResolver resolver = context.getContentResolver();
@@ -110,6 +111,9 @@ class FileUtil {
         }
     }
 
+    /**
+     * 创建 JPEG 图片文件
+     */
     static File createJpegFile(Context context, String relativePath) {
         // 创建拍照目标文件
         String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
@@ -152,17 +156,7 @@ class FileUtil {
      */
     @TargetApi(29)
     static void delete(Context context, Uri uri) {
-        if (uri.toString().startsWith("content://")) {
-            // content://开头的Uri
-            context.getContentResolver().delete(uri, null, null);
-        } else {
-            File file = new File(getPath(context, uri));
-            if (file.exists() && file.isFile()) {
-                if (file.delete()) {
-                    notifyMediaStore(context, file.getAbsolutePath());
-                }
-            }
-        }
+        context.getContentResolver().delete(uri, null, null);
     }
 
     /**
@@ -177,82 +171,67 @@ class FileUtil {
     }
 
     /**
-     * Try to return the absolute file path from the given Uri
+     * 根据图片 URI 获取图片路径
      */
-    static String getPath(Context context, Uri uri) {
-        String path = null;
-        // 以 file:// 开头的
-        if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
-            path = uri.getPath();
-            return path;
-        } else if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
-            if (DocumentsContract.isDocumentUri(context, uri)) {
-                if (isExternalStorageDocument(uri)) {
-                    // ExternalStorageProvider
-                    final String docId = DocumentsContract.getDocumentId(uri);
-                    final String[] split = docId.split(":");
-                    final String type = split[0];
-                    if ("primary".equalsIgnoreCase(type)) {
-                        path = Environment.getExternalStorageDirectory() + "/" + split[1];
-                        return path;
+    static String getImagePath(final Context context, final Uri uri) {
+        if (null == uri) {
+            return null;
+        }
+        final String scheme = uri.getScheme();
+        String data = null;
+
+        if (scheme == null) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            Cursor cursor = context.getContentResolver().query(uri,
+                    new String[]{MediaStore.Images.ImageColumns.DATA}, null,
+                    null, null
+            );
+            if (null != cursor) {
+                if (cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    if (index > -1) {
+                        data = cursor.getString(index);
                     }
-                } else if (isDownloadsDocument(uri)) {
-                    // DownloadsProvider
-                    final String id = DocumentsContract.getDocumentId(uri);
-                    final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
-                            Long.valueOf(id));
-                    path = getDataColumn(context, contentUri, null, null);
-                    return path;
-                } else if (isMediaDocument(uri)) {
-                    // MediaProvider
-                    final String docId = DocumentsContract.getDocumentId(uri);
-                    final String[] split = docId.split(":");
-                    final String type = split[0];
-                    Uri contentUri = null;
-                    if ("image".equals(type)) {
-                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    } else if ("video".equals(type)) {
-                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                    } else if ("audio".equals(type)) {
-                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                    }
-                    final String selection = "_id=?";
-                    final String[] selectionArgs = new String[]{split[1]};
-                    path = getDataColumn(context, contentUri, selection, selectionArgs);
-                    return path;
                 }
-            }
-        }
-        return null;
-    }
-
-    private static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
-        Cursor cursor = null;
-        final String column = "_data";
-        final String[] projection = {column};
-        try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                final int column_index = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(column_index);
-            }
-        } finally {
-            if (cursor != null)
                 cursor.close();
+            }
         }
-        return null;
+        return data;
     }
 
-    private static boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }
+    /**
+     * 根据视频 URI 获取视频路径
+     */
+    static String getVideoPath(final Context context, final Uri uri) {
+        if (null == uri) {
+            return null;
+        }
+        final String scheme = uri.getScheme();
+        String data = null;
 
-    private static boolean isDownloadsDocument(Uri uri) {
-        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
-    }
-
-    private static boolean isMediaDocument(Uri uri) {
-        return "com.android.providers.media.documents".equals(uri.getAuthority());
+        if (scheme == null) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            Cursor cursor = context.getContentResolver().query(uri,
+                    new String[]{MediaStore.Video.VideoColumns.DATA}, null,
+                    null, null
+            );
+            if (null != cursor) {
+                if (cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(MediaStore.Video.VideoColumns.DATA);
+                    if (index > -1) {
+                        data = cursor.getString(index);
+                    }
+                }
+                cursor.close();
+            }
+        }
+        return data;
     }
 
 }

@@ -92,9 +92,7 @@ public final class Previewer extends GLTextureView implements IPreviewer {
 
     @Override
     public Bitmap getBitmap() {
-        Bitmap bitmap = super.getBitmap();
-        Log.e("TAG", "bitmap width = " + bitmap.getWidth() + ", bitmap height = " + bitmap.getHeight());
-        return bitmap;
+        return super.getBitmap();
     }
 
     @Override

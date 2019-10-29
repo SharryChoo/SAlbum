@@ -119,7 +119,7 @@ public class CropperFragment extends Fragment {
                         Uri uri = FileUtil.createJpegUri(mContext, mConfig.getRelativePath());
                         ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
                         CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
-                        MediaMeta mediaMeta = MediaMeta.create(uri, FileUtil.getPath(mContext, uri), true);
+                        MediaMeta mediaMeta = MediaMeta.create(uri, FileUtil.getImagePath(mContext, uri), true);
                         mCropperCallback.onCropComplete(mediaMeta);
                     } else {
                         File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());

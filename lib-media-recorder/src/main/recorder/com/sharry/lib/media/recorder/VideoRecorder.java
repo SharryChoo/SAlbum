@@ -10,6 +10,7 @@ import androidx.annotation.WorkerThread;
 import com.sharry.lib.camera.SCameraView;
 import com.sharry.lib.camera.Size;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 
 import static com.sharry.lib.media.recorder.IRecorderCallback.ERROR_MUXER_FAILED;
@@ -57,9 +58,11 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         if (VersionUtil.isQ()) {
             this.mOutputUri = FileUtil.createVideoUri(context, options.getRelativePath(),
                     options.getMuxerType().getMIME(), options.getMuxerType().getFileSuffix());
+            this.mOutputFile = new File(FileUtil.getVideoPath(context, mOutputUri));
         } else {
             this.mOutputFile = FileUtil.createVideoFile(context, options.getRelativePath(),
                     options.getMuxerType().getFileSuffix());
+            this.mOutputUri = FileUtil.getUriFromFile(context, options.getAuthority(), mOutputFile);
         }
     }
 
@@ -195,9 +198,8 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             public void run() {
                 // 释放资源
                 stop();
-                // 处理成功回调
-                if (!VersionUtil.isQ()) {
-                    // 在文件管理器中刷新生成的文件
+                // 非 Android Q 则需要通知 MediaStore
+                if (!VersionUtil.isQ() && mOutputFile != null) {
                     FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
                 }
                 // 回调完成

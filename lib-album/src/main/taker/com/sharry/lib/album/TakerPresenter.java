@@ -196,13 +196,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mVideoUri = uri;
         mVideoFile = file;
         mView.setStatus(ITakerContract.IView.STATUS_VIDEO_PLAY);
-        if (mVideoUri != null) {
-            mView.startVideoPlayer(mVideoUri);
-        } else if (mVideoFile != null) {
-            mView.startVideoPlayer(
-                    FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mVideoFile)
-            );
-        }
+        mView.startVideoPlayer(mVideoUri);
     }
 
     /**
@@ -215,7 +209,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
                 ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
                 CompressUtil.doCompress(mFetchedBitmap, pfd.getFileDescriptor(), mConfig.getPictureQuality(),
                         mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
-                String path = FileUtil.getPath(mContext, uri);
+                String path = FileUtil.getImagePath(mContext, uri);
                 MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
                 mediaMeta.date = System.currentTimeMillis();
                 mView.setResult(mediaMeta);
@@ -242,24 +236,10 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
-        if (VersionUtil.isQ() && mVideoUri != null) {
-            MediaMeta mediaMeta = MediaMeta.create(mVideoUri, FileUtil.getPath(mContext, mVideoUri), false);
-            mediaMeta.date = currentTime;
-            mediaMeta.duration = mRecordDuration;
-            mView.setResult(mediaMeta);
-        } else if (mVideoFile != null) {
-            MediaMeta mediaMeta = MediaMeta.create(
-                    FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), mVideoFile),
-                    mVideoFile.getAbsolutePath(),
-                    false
-            );
-            mediaMeta.date = currentTime;
-            mediaMeta.duration = mRecordDuration;
-            // 通知媒体库的操作, 在 Recorder 中完成
-            mView.setResult(mediaMeta);
-        } else {
-            mView.toast(R.string.lib_album_taker_video_saved_failed);
-        }
+        MediaMeta mediaMeta = MediaMeta.create(mVideoUri, mVideoFile.getAbsolutePath(), false);
+        mediaMeta.date = currentTime;
+        mediaMeta.duration = mRecordDuration;
+        mView.setResult(mediaMeta);
     }
 
     /**
@@ -268,14 +248,13 @@ class TakerPresenter implements ITakerContract.IPresenter {
     private void recycle() {
         mFetchedBitmap = null;
         mCountTryAgain = 0;
-        if (mVideoUri != null) {
+        if (VersionUtil.isQ()) {
             FileUtil.delete(mContext, mVideoUri);
-            mVideoUri = null;
-        }
-        if (mVideoFile != null) {
+        } else {
             FileUtil.delete(mContext, mVideoFile);
-            mVideoFile = null;
         }
+        mVideoUri = null;
+        mVideoFile = null;
         mView.stopVideoPlayer();
     }
 

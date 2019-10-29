@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -240,6 +241,7 @@ public class TakerActivity extends AppCompatActivity implements
     public void setResult(@NonNull MediaMeta mediaMeta) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_MEDIA_META, mediaMeta);
+        Log.e("TAG", mediaMeta.toString());
         setResult(RESULT_OK, intent);
         finish();
     }

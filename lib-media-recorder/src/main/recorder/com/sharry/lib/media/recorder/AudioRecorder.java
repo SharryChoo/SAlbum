@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.WorkerThread;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -21,11 +22,6 @@ import java.nio.ByteBuffer;
  * @since 2019-07-15 17:36
  */
 final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Callback, IPCMProvider.OnPCMChangedListener {
-
-    /**
-     * Inner Constants.
-     */
-    private static final String FILE_PREFIX = "audio_";
 
     /**
      * Fields.
@@ -48,14 +44,18 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             FileDescriptor fd = null;
             if (!options.isJustEncode()) {
                 if (VersionUtil.isQ()) {
+                    // Android Q 以上以 URI 为主
                     mOutputUri = FileUtil.createAudioUri(context, options.getRelativePath(),
                             options.getAudioEncodeType().getMIME(),
                             options.getAudioEncodeType().getFileSuffix());
+                    mOutputFile = new File(FileUtil.getAudioPath(context, mOutputUri));
                     fd = context.getContentResolver().openFileDescriptor(mOutputUri, "w")
                             .getFileDescriptor();
                 } else {
+                    // Android Q 以下以文件为主
                     mOutputFile = FileUtil.createAudioFile(context, options.getRelativePath(),
                             options.getAudioEncodeType().getFileSuffix());
+                    mOutputUri = FileUtil.getUriFromFile(context, options.getAuthority(), mOutputFile);
                     Uri uri = FileUtil.getUriFromFile(context, options.getAuthority(), mOutputFile);
                     fd = context.getContentResolver().openFileDescriptor(uri, "w")
                             .getFileDescriptor();
@@ -192,13 +192,12 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
             public void run() {
                 // 停止录制
                 stop();
-                // 回调录制完成
-                if (mOutputUri != null) {
-                    // 通知媒体库更新
-                    FileUtil.notifyMediaStore(mContext, FileUtil.getPath(mContext, mOutputUri));
-                    // 回调录制完成
-                    mCallback.onComplete(mOutputUri, mOutputFile);
+                // 非 Android Q 则需要更新媒体库
+                if (!VersionUtil.isQ() && mOutputFile != null) {
+                    FileUtil.notifyMediaStore(mContext, mOutputFile.getAbsolutePath());
                 }
+                // 回调录制完成
+                mCallback.onComplete(mOutputUri, mOutputFile);
             }
         });
     }
