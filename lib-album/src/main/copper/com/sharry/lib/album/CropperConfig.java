@@ -182,7 +182,7 @@ public class CropperConfig implements Parcelable {
          * 相对路径: "SAlbum"
          * <p>
          * 注:
-         * Android 10 无法在外部存储卡随意创建文件, 因此会在可用的媒体目录下追加相对路径
+         * Android 10 无法在外部存储卡随意创建文件, 因此会在对应的媒体目录下追加相对路径
          * 如: "/storage/emulated/0/" + {@link android.os.Environment#DIRECTORY_PICTURES} + "SAlbum"
          *
          * @param relativePath 若是传 null, 则会在 {@link Context#getExternalFilesDir(String)} 中创建,

@@ -98,7 +98,9 @@ class FileUtil {
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
         ContentValues values = new ContentValues();
         // 创建相对路径
-        if (!TextUtils.isEmpty(relativePath)) {
+        if (TextUtils.isEmpty(relativePath)) {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+        } else {
             values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + relativePath);
         }
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
@@ -142,8 +144,8 @@ class FileUtil {
         // 创建拍照目标文件
         String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
-        File dir = TextUtils.isEmpty(relativePath) ? context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                : new File(Environment.getExternalStorageDirectory(), relativePath);
+        File dir = TextUtils.isEmpty(relativePath) ? Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                : new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), relativePath);
         try {
             // 获取默认路径
             if (!dir.exists()) {

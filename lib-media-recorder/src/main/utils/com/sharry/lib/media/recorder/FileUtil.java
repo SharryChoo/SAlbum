@@ -37,8 +37,11 @@ class FileUtil {
         String fileName = "audio_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + suffix;
         ContentValues values = new ContentValues();
-        if (!TextUtils.isEmpty(relativePath)) {
-            values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC + "/" + relativePath);
+        // 创建相对路径
+        if (TextUtils.isEmpty(relativePath)) {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC);
+        } else {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC + "/" + relativePath);
         }
         values.put(MediaStore.Audio.Media.MIME_TYPE, mime);
         values.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
@@ -57,8 +60,8 @@ class FileUtil {
     static File createAudioFile(Context context, String relativePath, String suffix) {
         String fileName = "audio_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + suffix;
-        File dir = TextUtils.isEmpty(relativePath) ?
-                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) : new File(relativePath);
+        File dir = TextUtils.isEmpty(relativePath) ? Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+                : new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), relativePath);
         try {
             // 获取默认路径
             if (!dir.exists()) {
@@ -84,8 +87,11 @@ class FileUtil {
         String fileName = "video_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + suffix;
         ContentValues values = new ContentValues();
-        if (!TextUtils.isEmpty(relativePath)) {
-            values.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/" + relativePath);
+        // 创建相对路径
+        if (TextUtils.isEmpty(relativePath)) {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES);
+        } else {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/" + relativePath);
         }
         values.put(MediaStore.Video.Media.MIME_TYPE, mime);
         values.put(MediaStore.Video.Media.DISPLAY_NAME, fileName);
@@ -105,8 +111,8 @@ class FileUtil {
     static File createVideoFile(Context context, String relativePath, String suffix) {
         String fileName = "video_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + suffix;
-        File dir = TextUtils.isEmpty(relativePath) ? context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
-                : new File(Environment.getExternalStorageDirectory(), relativePath);
+        File dir = TextUtils.isEmpty(relativePath) ? Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+                : new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), relativePath);
         try {
             // 获取默认路径
             if (!dir.exists()) {
