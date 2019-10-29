@@ -54,7 +54,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         this.mEncoder = EncoderFactory.create(options.getVideoEncodeType());
         // Step2. Create an instance of video muxer and prepare.
         this.mMuxer = MuxerFactory.createEncoder(options.getMuxerType());
-        this.mOutputUri = FileUtil.createVideoUri(context, options.getAuthority(), options.getOutputDir(),
+        this.mOutputUri = FileUtil.createVideoUri(context, options.getAuthority(), options.getRelativePath(),
                 options.getMuxerType().getFileSuffix());
     }
 
@@ -187,8 +187,7 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 // 释放资源
                 stop();
                 // 在文件管理器中刷新生成的文件
-                // TODO 通知媒体文件
-//                FileUtil.notifyMediaStore(mContext, mOutputUri.getAbsolutePath());
+                FileUtil.notifyMediaStore(mContext, FileUtil.getPath(mContext, mOutputUri));
                 // 回调完成
                 mCallback.onComplete(mOutputUri);
             }

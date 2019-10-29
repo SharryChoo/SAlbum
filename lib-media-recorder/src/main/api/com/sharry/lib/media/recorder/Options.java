@@ -53,7 +53,7 @@ public final class Options {
         /**
          * 录制后的 输出目录
          */
-        private String outputDir;
+        private String relativePath;
 
         private String authority;
 
@@ -84,8 +84,8 @@ public final class Options {
             return resolution;
         }
 
-        public String getOutputDir() {
-            return outputDir;
+        public String getRelativePath() {
+            return relativePath;
         }
 
         public Audio getAudioOptions() {
@@ -152,8 +152,8 @@ public final class Options {
              *
              * @param outputDir 指定一个用于输出视频文件的文件夹(内部会自行创建)
              */
-            public Builder setOutputDir(@NonNull String outputDir) {
-                mOps.outputDir = outputDir;
+            public Builder setRelativePath(@NonNull String outputDir) {
+                mOps.relativePath = outputDir;
                 return this;
             }
 

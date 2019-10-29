@@ -117,13 +117,12 @@ public class CropperFragment extends Fragment {
                     // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
                     Uri uri = FileUtil.createJpegUri(mContext, mConfig.getAuthority(), mConfig.getRelativePath());
                     ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
-                    if (pfd != null) {
-                        CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
-                        // TODO: 想办法解决 filePath 的问题
-                        MediaMeta mediaMeta = MediaMeta.create(uri, "", true);
-                        // 回调
-                        mCropperCallback.onCropComplete(mediaMeta);
-                    }
+                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                    String path = FileUtil.getPath(mContext, uri);
+                    MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
+                    FileUtil.notifyMediaStore(mContext, path);
+                    // 回调
+                    mCropperCallback.onCropComplete(mediaMeta);
                 } catch (Exception e) {
                     Log.e(TAG, "Picture compress failed after crop.", e);
                 } finally {

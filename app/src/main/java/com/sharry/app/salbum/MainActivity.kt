@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.sharry.lib.album.*
-import com.sharry.lib.album.TakerConfig.ASPECT_1_1
+import com.sharry.lib.album.TakerConfig.ASPECT_4_3
 import com.sharry.lib.album.toolbar.SToolbar
 import com.sharry.lib.media.recorder.Options
 import kotlinx.android.synthetic.main.app_activity_main.*
@@ -62,9 +62,9 @@ class MainActivity : AppCompatActivity() {
                 // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
                 .setAuthority("$packageName.FileProvider")
                 // 预览画面比例
-                .setPreviewAspect(ASPECT_1_1)
+                .setPreviewAspect(ASPECT_4_3)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
-                .setFullScreen(false)
+                .setFullScreen(true)
                 // 设置自定义 Renderer 的路径
                 .setRenderer(WatermarkPreviewerRenderer::class.java)
                 // 设置是否支持视频录制

@@ -81,7 +81,7 @@ abstract class BaseMediaRecorder implements IMediaRecorder {
      */
     void deleteRecordFile() {
         if (mOutputUri != null) {
-            mContext.getContentResolver().delete(mOutputUri, null, null);
+            FileUtil.delete(mContext, mOutputUri);
         }
         mOutputUri = null;
     }

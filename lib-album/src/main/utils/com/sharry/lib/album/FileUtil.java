@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -85,7 +86,7 @@ class FileUtil {
     }
 
     /**
-     * 创建图片路径
+     * 创建图片路径的 URI
      *
      * @param relativePath 文件目录路径
      */
@@ -93,14 +94,8 @@ class FileUtil {
         // 创建拍照目标文件
         String fileName = "camera_" + DateFormat.format("yyyyMMdd_HH_mm_ss",
                 Calendar.getInstance(Locale.CHINA)) + ".jpg";
-        if (VersionUtil.isQ()) {
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + relativePath);
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
-            values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
-            ContentResolver resolver = context.getContentResolver();
-            return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        } else {
+        // 未设置相对路径, 或者在 Android Q 以下
+        if (TextUtils.isEmpty(relativePath) || !VersionUtil.isQ()) {
             File dir = TextUtils.isEmpty(relativePath) ? context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                     : new File(Environment.getExternalStorageDirectory(), relativePath);
             try {
@@ -114,18 +109,64 @@ class FileUtil {
                 }
                 file.createNewFile();
                 Log.i(TAG, "create jpeg file success -> " + file.getAbsolutePath());
-                notifyMediaStore(context, file.getAbsolutePath());
                 return getUriFromFile(context, authority, file);
             } catch (Throwable e) {
                 throw new UnsupportedOperationException("Cannot create file at:  " + dir);
             }
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + relativePath);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+            ContentResolver resolver = context.getContentResolver();
+            return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         }
     }
 
-    static void delete(String filePath) {
-
+    /**
+     * 删除图片
+     */
+    static void delete(Context context, Uri uri) {
+        if (uri.toString().startsWith("content://")) {
+            // content://开头的Uri
+            context.getContentResolver().delete(uri, null, null);
+        } else {
+            File file = new File(getPath(context, uri));
+            if (file.exists() && file.isFile()) {
+                if (file.delete()) {
+                    notifyMediaStore(context, file.getAbsolutePath());
+                }
+            }
+        }
     }
 
+    /**
+     * Try to return the absolute file path from the given Uri
+     */
+    static String getPath(final Context context, final Uri uri) {
+        if (null == uri) return null;
+        final String scheme = uri.getScheme();
+        String data = null;
+        if (scheme == null) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            Cursor cursor = context.getContentResolver().query(
+                    uri, new String[]{MediaStore.Images.ImageColumns.DATA},
+                    null, null, null);
+            if (null != cursor) {
+                if (cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    if (index > -1) {
+                        data = cursor.getString(index);
+                    }
+                }
+                cursor.close();
+            }
+        }
+        return data;
+    }
 
     /**
      * 通知 MediaStore 文件更替

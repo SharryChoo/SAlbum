@@ -1,6 +1,5 @@
 package com.sharry.lib.media.recorder;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
@@ -8,10 +7,6 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 /**
  * Mp4 音视频封装器
@@ -56,7 +51,7 @@ class MPEG4Muxer implements IMuxer {
             );
         } else {
             mImpl = new MediaMuxer(
-                    FileUtil.getPath(uri),
+                    FileUtil.getPath(context, uri),
                     MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4
             );
         }

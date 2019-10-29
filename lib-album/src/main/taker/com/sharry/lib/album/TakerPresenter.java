@@ -66,7 +66,8 @@ class TakerPresenter implements ITakerContract.IPresenter {
 
         });
         this.mRecordOptions = new Options.Video.Builder()
-                .setOutputDir(mConfig.getRelativePath())
+                .setRelativePath(mConfig.getRelativePath())
+                .setAuthority(mConfig.getAuthority())
                 .setEncodeType(EncodeType.Video.H264)
                 .setMuxerType(MuxerType.MP4)
                 .setResolution(Options.Video.RESOLUTION_720P)
@@ -210,9 +211,11 @@ class TakerPresenter implements ITakerContract.IPresenter {
             ParcelFileDescriptor fd = ((Context) mView).getContentResolver().openFileDescriptor(uri, "w");
             CompressUtil.doCompress(mFetchedBitmap, fd.getFileDescriptor(), mConfig.getPictureQuality(),
                     mFetchedBitmap.getWidth(), mFetchedBitmap.getHeight());
-            // TODO 获取文件路径
-            MediaMeta mediaMeta = MediaMeta.create(uri, "", true);
+            String path = FileUtil.getPath(mContext, uri);
+            MediaMeta mediaMeta = MediaMeta.create(uri, path, true);
             mediaMeta.date = System.currentTimeMillis();
+            // 通知媒体库数据插入
+            FileUtil.notifyMediaStore(mContext, path);
             mView.setResult(mediaMeta);
         } catch (Throwable e) {
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
@@ -224,10 +227,12 @@ class TakerPresenter implements ITakerContract.IPresenter {
      */
     private void performVideoEnsure() {
         long currentTime = System.currentTimeMillis();
-        // TODO 获取文件路径
-        MediaMeta mediaMeta = MediaMeta.create(mVideoUri, "", false);
+        String path = FileUtil.getPath(mContext, mVideoUri);
+        MediaMeta mediaMeta = MediaMeta.create(mVideoUri, path, false);
         mediaMeta.date = currentTime;
         mediaMeta.duration = mRecordDuration;
+        // 通知媒体库数据插入
+        FileUtil.notifyMediaStore(mContext, path);
         mView.setResult(mediaMeta);
     }
 
@@ -239,7 +244,7 @@ class TakerPresenter implements ITakerContract.IPresenter {
         mCountTryAgain = 0;
         if (mVideoUri != null) {
             mView.stopVideoPlayer();
-            mContext.getContentResolver().delete(mVideoUri, null, null);
+            FileUtil.delete(mContext, mVideoUri);
             mVideoUri = null;
         }
     }

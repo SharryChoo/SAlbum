@@ -182,6 +182,8 @@ final class AudioRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
                 stop();
                 // 回调录制完成
                 if (mOutputUri != null) {
+                    // 通知媒体库更新
+                    FileUtil.notifyMediaStore(mContext, FileUtil.getPath(mContext, mOutputUri));
                     // 回调录制完成
                     mCallback.onComplete(mOutputUri);
                 }
