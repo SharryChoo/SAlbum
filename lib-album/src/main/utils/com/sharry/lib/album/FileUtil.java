@@ -114,11 +114,16 @@ class FileUtil {
                 }
                 file.createNewFile();
                 Log.i(TAG, "create jpeg file success -> " + file.getAbsolutePath());
+                notifyMediaStore(context, file.getAbsolutePath());
                 return getUriFromFile(context, authority, file);
             } catch (Throwable e) {
                 throw new UnsupportedOperationException("Cannot create file at:  " + dir);
             }
         }
+    }
+
+    static void delete(String filePath) {
+
     }
 
 

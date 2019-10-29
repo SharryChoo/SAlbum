@@ -60,8 +60,6 @@ public interface ITakerContract {
 
         void toast(@StringRes int resId);
 
-        void notifyFileDeleted(String filePath);
-
         void setResult(@NonNull MediaMeta mediaMeta);
 
     }

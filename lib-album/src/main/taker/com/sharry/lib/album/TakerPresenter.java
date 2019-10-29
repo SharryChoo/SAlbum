@@ -215,7 +215,6 @@ class TakerPresenter implements ITakerContract.IPresenter {
             mediaMeta.date = System.currentTimeMillis();
             mView.setResult(mediaMeta);
         } catch (Throwable e) {
-            e.printStackTrace();
             mView.toast(R.string.lib_album_taker_picture_saved_failed);
         }
     }

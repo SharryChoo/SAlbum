@@ -237,15 +237,9 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void notifyFileDeleted(String filePath) {
-        FileUtil.notifyMediaStore(this, filePath);
-    }
-
-    @Override
     public void setResult(@NonNull MediaMeta mediaMeta) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_MEDIA_META, mediaMeta);
-        FileUtil.notifyMediaStore(this, mediaMeta.path);
         setResult(RESULT_OK, intent);
         finish();
     }
