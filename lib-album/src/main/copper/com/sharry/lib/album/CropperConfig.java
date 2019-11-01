@@ -1,6 +1,5 @@
 package com.sharry.lib.album;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -65,7 +64,7 @@ public class CropperConfig implements Parcelable {
     }
 
     private Uri originUri;              // 需要裁剪的图片路径
-    private String relativePath;   // 可用的输出目录
+    private String relativePath;        // 可用的输出目录
     private boolean isCropCircle;       // 是否为圆形裁剪
     private String authority;           // fileProvider 的 authority 属性, 用于 7.0 之后, 查找文件的 URI
     private int aspectX = 1;            // 方形 X 的比率
@@ -178,15 +177,15 @@ public class CropperConfig implements Parcelable {
         /**
          * 设置文件输出相对路径, 拍摄后的图片会生成在目录下
          * <p>
-         * 绝对路径: "/storage/emulated/0/SAlbum"
+         * 绝对路径: "/storage/emulated/0/{@link android.os.Environment#DIRECTORY_PICTURES}/SAlbum"
          * 相对路径: "SAlbum"
          * <p>
          * 注:
          * Android 10 无法在外部存储卡随意创建文件, 因此会在对应的媒体目录下追加相对路径
          * 如: "/storage/emulated/0/" + {@link android.os.Environment#DIRECTORY_PICTURES} + "SAlbum"
          *
-         * @param relativePath 若是传 null, 则会在 {@link Context#getExternalFilesDir(String)} 中创建,
-         *                     在该目录中创建媒体文件无法在 MediaStore 中显示
+         * @param relativePath 若是传 null, 则会在 "/storage/emulated/0/"
+         *                     + {@link android.os.Environment#DIRECTORY_PICTURES} 中创建
          */
         public Builder setRelativePath(@Nullable String relativePath) {
             this.mConfig.relativePath = relativePath;
