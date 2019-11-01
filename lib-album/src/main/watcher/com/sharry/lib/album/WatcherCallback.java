@@ -1,5 +1,7 @@
 package com.sharry.lib.album;
 
+import java.util.ArrayList;
+
 /**
  * Created by Sharry on 2018/6/13.
  * Email: SharryChooCHN@Gmail.com
@@ -13,6 +15,6 @@ public interface WatcherCallback {
      *
      * @param isEnsure is clicked ensure button.
      */
-    void onWatcherPickedComplete(boolean isEnsure);
+    void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedSet);
 
 }

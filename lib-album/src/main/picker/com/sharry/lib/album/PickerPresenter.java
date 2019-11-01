@@ -201,7 +201,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     //////////////////////////////////////////////WatcherCallback/////////////////////////////////////////////////
 
     @Override
-    public void onWatcherPickedComplete(boolean isEnsure) {
+    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedSet) {
         // 执行确认事件
         if (isEnsure) {
             handleEnsureClicked();

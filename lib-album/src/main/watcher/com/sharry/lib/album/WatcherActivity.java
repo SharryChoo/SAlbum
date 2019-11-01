@@ -42,12 +42,15 @@ public class WatcherActivity extends AppCompatActivity implements
         DraggableViewPager.Callback,
         PickedPanelAdapter.Interaction {
 
+    private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
+    static final int REQUEST_CODE = 508;
+    static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
+    static final String RESULT_EXTRA_PICKED_SET = "result_extra_picked_set";
+
+
     static final String BROADCAST_PICKED_SET_CHANGED = "com.sharry.lib.album.watcheractivity.broadcast.picked.set.changed";
     static final String BROADCAST_EXTRA_DATA = "BROADCAST_EXTRA_DATA";
 
-    static final int REQUEST_CODE = 508;
-    static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
-    private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
 
     /**
      * 图片浏览器的配置, 使用静态变量暂存数据
@@ -355,9 +358,10 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setResult(boolean isEnsurePressed) {
+    public void setResult(boolean isEnsurePressed, ArrayList<MediaMeta> pickedSet) {
         Intent intent = new Intent();
         intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, isEnsurePressed);
+        intent.putExtra(RESULT_EXTRA_PICKED_SET, pickedSet);
         setResult(RESULT_OK, intent);
     }
 

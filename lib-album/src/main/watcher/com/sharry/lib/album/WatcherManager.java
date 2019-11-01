@@ -109,7 +109,8 @@ public class WatcherManager {
                 switch (requestCode) {
                     case WatcherActivity.REQUEST_CODE:
                         callback.onWatcherPickedComplete(
-                                data.getBooleanExtra(WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false)
+                                data.getBooleanExtra(WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false),
+                                data.<MediaMeta>getParcelableArrayListExtra(WatcherActivity.RESULT_EXTRA_PICKED_SET)
                         );
                         break;
                     default:

@@ -1,7 +1,6 @@
 package com.sharry.lib.album;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ interface WatcherContract {
 
         void showMsg(@NonNull String msg);
 
-        void setResult(boolean isEnsurePressed);
+        void setResult(boolean isEnsurePressed, ArrayList<MediaMeta> pickedSet);
 
         void finish();
 

@@ -21,7 +21,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     private final WatcherContract.IView mView;
     private final WatcherConfig mConfig;
     private final ArrayList<MediaMeta> mDisplayMetas;
-    private final ArrayList<MediaMeta> mPickedMetas;
+    private final ArrayList<MediaMeta> mPickedSet;
     private final SharedElementHelper.Bounds mSharedElementEnterData;
 
     private int mCurPosition;
@@ -35,7 +35,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         // 获取需要展示图片的 URI 集合
         this.mDisplayMetas = config.getPictureUris();
         // 获取已经选中的图片
-        this.mPickedMetas = config.getUserPickedSet();
+        this.mPickedSet = config.getUserPickedSet();
         // 获取当前需要展示的 Position 和 URI
         this.mCurPosition = config.getPosition();
         this.mCurDisplay = mDisplayMetas.get(mCurPosition);
@@ -53,7 +53,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         // 展示图片
         mView.displayAt(mCurPosition);
         if (mConfig.isPickerSupport()) {
-            mView.setIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
+            mView.setIndicatorChecked(mPickedSet.indexOf(mCurDisplay) != -1);
             mView.setIndicatorText(buildToolbarCheckedIndicatorText());
             mView.setEnsureText(buildEnsureText());
         }
@@ -63,18 +63,18 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     public void handleIndicatorClick(boolean isChecked) {
         if (isChecked) {
             // 移除选中数据与状态
-            int removedIndex = mPickedMetas.indexOf(mCurDisplay);
+            int removedIndex = mPickedSet.indexOf(mCurDisplay);
             if (removedIndex < 0) {
                 return;
             }
-            mPickedMetas.remove(removedIndex);
+            mPickedSet.remove(removedIndex);
             // 通知 RecyclerView 数据变更
             mView.notifyItemRemoved(mCurDisplay, removedIndex);
         } else {
             // 判断是否达到选择上限
-            if (mPickedMetas.size() < mConfig.getThreshold()) {
-                mPickedMetas.add(mCurDisplay);
-                int addedIndex = mPickedMetas.indexOf(mCurDisplay);
+            if (mPickedSet.size() < mConfig.getThreshold()) {
+                mPickedSet.add(mCurDisplay);
+                int addedIndex = mPickedSet.indexOf(mCurDisplay);
                 // 通知 RecyclerView 数据变更
                 mView.notifyItemPicked(mCurDisplay, addedIndex);
                 mView.pickedPanelSmoothScrollToPosition(addedIndex);
@@ -86,11 +86,11 @@ class WatcherPresenter implements WatcherContract.IPresenter {
                 );
             }
         }
-        mView.setIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
+        mView.setIndicatorChecked(mPickedSet.indexOf(mCurDisplay) != -1);
         mView.setIndicatorText(buildToolbarCheckedIndicatorText());
         mView.setEnsureText(buildEnsureText());
         // 控制底部导航栏的展示
-        if (mPickedMetas.isEmpty()) {
+        if (mPickedSet.isEmpty()) {
             mView.dismissPickedPanel();
         } else {
             mView.showPickedPanel();
@@ -107,7 +107,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
 
     @Override
     public void handleEnsureClicked() {
-        if (mPickedMetas.isEmpty()) {
+        if (mPickedSet.isEmpty()) {
             mView.showMsg(mView.getString(R.string.lib_album_watcher_tips_ensure_failed));
             return;
         }
@@ -153,7 +153,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
 
     @Override
     public void handleBeforeFinish() {
-        mView.setResult(mIsEnsurePressed);
+        mView.setResult(mIsEnsurePressed, mPickedSet);
     }
 
     private void setupViews() {
@@ -173,13 +173,13 @@ class WatcherPresenter implements WatcherContract.IPresenter {
                     mConfig.getIndicatorSolidColor(),
                     mConfig.getIndicatorTextColor()
             );
-            mView.setIndicatorChecked(mPickedMetas.indexOf(mCurDisplay) != -1);
+            mView.setIndicatorChecked(mPickedSet.indexOf(mCurDisplay) != -1);
             mView.setIndicatorText(buildToolbarCheckedIndicatorText());
             // 底部菜单
-            mView.setPickedAdapter(mPickedMetas);
+            mView.setPickedAdapter(mPickedSet);
             mView.setEnsureText(buildEnsureText());
             // 底部菜单延时弹出
-            if (!mPickedMetas.isEmpty()) {
+            if (!mPickedSet.isEmpty()) {
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -205,7 +205,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
      * 构建 Toolbar checked Indicator 的文本
      */
     private CharSequence buildToolbarCheckedIndicatorText() {
-        return String.valueOf(mPickedMetas.indexOf(mCurDisplay) + 1);
+        return String.valueOf(mPickedSet.indexOf(mCurDisplay) + 1);
     }
 
     /**
@@ -213,7 +213,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
      */
     private CharSequence buildEnsureText() {
         return MessageFormat.format("{0}({1}/{2})",
-                mView.getString(R.string.lib_album_watcher_ensure), mPickedMetas.size(), mConfig.getThreshold());
+                mView.getString(R.string.lib_album_watcher_ensure), mPickedSet.size(), mConfig.getThreshold());
     }
 
 }
