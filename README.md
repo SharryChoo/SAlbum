@@ -25,7 +25,9 @@ SAlbum 是一款对 Android 端提供 **图片的选取、裁剪、拍摄和短�
   - 考虑到依赖体积, 使用系统提供的 VideoView 实现
 - **已支持 Android 10**
   - Android 10 不支持随意访问外部存储 Storage 中的文件, 可通过 URI 进行图片加载
-  
+
+相关实现原理, 请查看 [wiki](https://github.com/SharryChoo/SAlbum/wiki)
+
 ## 功能集成
 [![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
 
