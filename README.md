@@ -23,6 +23,7 @@ SAlbum 是一款对 Android 端提供 **图片的选取、裁剪、拍摄和短�
   - 使用 MediaMuxer 合并为 mp4 文件
 - **视频的播放**
   - 考虑到依赖体积, 使用系统提供的 VideoView 实现
+- **已支持 Android 10**
 
 ## 功能集成
 [![](https://jitpack.io/v/SharryChoo/SAlbum.svg)](https://jitpack.io/#SharryChoo/SAlbum)
@@ -201,6 +202,10 @@ WatcherManager.with(context)
 TakerManager.with(context)
         .setConfig(
             TakerConfig.Builder()
+                // 指定 FileProvider 的 authority, 用于获取文件 URI
+                .setFileProviderAuthority("$packageName.FileProvider")
+                // 设置外部存储目录相对路径
+                .setRelativePath(RELATIVE_PATH)
                 // 预览画面比例, 支持 1:1, 4:3, 16:9
                 .setPreviewAspect(ASPECT_1_1)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
@@ -215,8 +220,6 @@ TakerManager.with(context)
                 .setMinRecordDuration(1 * 1000)
                 // 设置录制的分辨率
                 .setRecordResolution(Options.Video.RESOLUTION_720P)
-                // 设置文件存储路径
-                .setDirectoryPath(APP_DIRECTORY)
                 // 拍摄后质量压缩
                 .setPictureQuality(80)
                 // 注入裁剪配置, 非 null, 表示拍摄之后进行图片的裁剪
@@ -249,10 +252,10 @@ CropperManager.with(context)
             CropperConfig.Builder()
                 // 要裁剪的图片路径
                 .setOriginFile(...)
-                // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
+                // 指定 FileProvider 的 authority, 用于获取文件 URI
                 .setFileProviderAuthority("$packageName.FileProvider")
-                // 裁剪后文件输出的路径
-                .setCropDirectory(APP_DIRECTORY)
+                // 设置外部存储目录相对路径
+                .setRelativePath(RELATIVE_PATH)
                 // 裁剪期望的尺寸
                 .setCropSize(1000, 1000)
                 // 裁剪后的质量
