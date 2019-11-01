@@ -50,13 +50,14 @@ interface WatcherContract {
 
         void notifyItemPicked(@NonNull MediaMeta addedMeta, int addedIndex);
 
-        void setResult(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed);
-
-        void finish();
-
         String getString(@StringRes int resId);
 
         void showMsg(@NonNull String msg);
+
+        void setResult(boolean isEnsurePressed);
+
+        void finish();
+
     }
 
     interface IPresenter {

@@ -1,7 +1,5 @@
 package com.sharry.lib.album;
 
-import java.util.ArrayList;
-
 /**
  * Created by Sharry on 2018/6/13.
  * Email: SharryChooCHN@Gmail.com
@@ -13,9 +11,8 @@ public interface WatcherCallback {
     /**
      * The callback method will call when pick picture from watcher complete.
      *
-     * @param isEnsure    is clicked ensure button.
-     * @param pickedMetas picked pictures.
+     * @param isEnsure is clicked ensure button.
      */
-    void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas);
+    void onWatcherPickedComplete(boolean isEnsure);
 
 }

@@ -47,7 +47,7 @@ interface PickerContract {
 
         void setPreviewText(@NonNull CharSequence content);
 
-        void notifyPickedSetChanged();
+        void notifyDisplaySetItemChanged(int changedIndex);
 
         void notifyDisplaySetChanged();
 
@@ -69,6 +69,8 @@ interface PickerContract {
         boolean handlePictureChecked(@Nullable MediaMeta checkedMeta);
 
         void handlePictureUnchecked(@Nullable MediaMeta removedMeta);
+
+        void handlePickedSetChanged(MediaMeta mediaMeta);
 
         void handleCameraClicked();
 

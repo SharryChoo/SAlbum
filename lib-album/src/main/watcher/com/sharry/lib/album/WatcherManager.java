@@ -4,12 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
-import java.util.ArrayList;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * 图片查看器的管理类
@@ -109,11 +108,9 @@ public class WatcherManager {
                 }
                 switch (requestCode) {
                     case WatcherActivity.REQUEST_CODE:
-                        ArrayList<MediaMeta> metas = data.getParcelableArrayListExtra(
-                                WatcherActivity.RESULT_EXTRA_PICKED_PICTURES);
-                        boolean isEnsure = data.getBooleanExtra(
-                                WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false);
-                        callback.onWatcherPickedComplete(isEnsure, metas);
+                        callback.onWatcherPickedComplete(
+                                data.getBooleanExtra(WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false)
+                        );
                         break;
                     default:
                         break;

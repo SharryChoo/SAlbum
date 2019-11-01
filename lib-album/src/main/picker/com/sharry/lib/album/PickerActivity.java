@@ -2,7 +2,10 @@ package com.sharry.lib.album;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -17,6 +20,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -96,7 +100,80 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         setContentView(R.layout.lib_album_activity_picker);
         initTitle();
         initViews();
-        initData();
+        initPresenter();
+        registerLocalBroadcast();
+    }
+
+    protected void initTitle() {
+        // 初始化视图
+        mToolbar = findViewById(R.id.toolbar);
+        // 设置标题文本
+        mToolbar.setTitleText(getString(R.string.lib_album_picker_all_picture));
+        mTvToolbarFolderName = mToolbar.getTitleText();
+        // 添加图片确认按钮
+        mToolbar.addRightMenuText(
+                TextViewOptions.Builder()
+                        .setText(getString(R.string.lib_album_picker_ensure))
+                        .setTextSize(15)
+                        .setListener(this)
+                        .build()
+        );
+        mTvToolbarEnsure = mToolbar.getRightMenuView(0);
+    }
+
+    protected void initViews() {
+        // Pictures recycler view.
+        mRvPicker = findViewById(R.id.rv_picker);
+        mRvPicker.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                super.onDraw(c, parent, state);
+                mPresenter.handleRecycleViewDraw(parent);
+            }
+        });
+        // Bottom navigation menu.
+        mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);
+        mIvNavIndicator = findViewById(R.id.iv_nav_indicator);
+        mTvFolderName = findViewById(R.id.tv_folder_name);
+        mTvPreview = findViewById(R.id.tv_preview);
+        mRvFolders = findViewById(R.id.recycle_folders);
+        mTvFolderName.setOnClickListener(this);
+        mTvPreview.setOnClickListener(this);
+        mRvFolders.setLayoutManager(new LinearLayoutManager(this));
+        mRvFolders.setHasFixedSize(true);
+        mBottomMenuBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottom_menu));
+        mBottomMenuBehavior.setBottomSheetCallback(new BottomMenuNavigationCallback());
+        // Floating action bar.
+        mFab = findViewById(R.id.fab);
+        mFab.setOnClickListener(this);
+        mFabBehavior = PicturePickerFabBehavior.from(mFab);
+        // Progress bar.
+        mProgressBar = findViewById(R.id.progress_bar);
+    }
+
+    protected void initPresenter() {
+        PickerConfig config = getIntent().getParcelableExtra(EXTRA_CONFIG);
+        if (config != null) {
+            mPresenter = new PickerPresenter(this, config);
+        }
+    }
+
+    private final BroadcastReceiver mBrPickedSetChanged = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mPresenter != null) {
+                MediaMeta mediaMeta = intent.getParcelableExtra(WatcherActivity.BROADCAST_EXTRA_DATA);
+                mPresenter.handlePickedSetChanged(mediaMeta);
+            }
+        }
+    };
+
+    private void registerLocalBroadcast() {
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(
+                        mBrPickedSetChanged,
+                        new IntentFilter(WatcherActivity.BROADCAST_PICKED_SET_CHANGED)
+                );
     }
 
     @Override
@@ -110,8 +187,9 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBrPickedSetChanged);
         mPresenter.handleViewDestroy();
+        super.onDestroy();
     }
 
     //////////////////////////////////////////////PickerContract.IView/////////////////////////////////////////////////
@@ -197,10 +275,10 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     }
 
     @Override
-    public void notifyPickedSetChanged() {
+    public void notifyDisplaySetItemChanged(int changedIndex) {
         RecyclerView.Adapter adapter;
         if ((adapter = mRvPicker.getAdapter()) != null) {
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemChanged(changedIndex);
         }
     }
 
@@ -287,61 +365,6 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         else if (v == mTvToolbarEnsure || v.getId() == R.id.fab) {
             mPresenter.handleEnsureClicked();
         }
-    }
-
-    protected void initTitle() {
-        // 初始化视图
-        mToolbar = findViewById(R.id.toolbar);
-        // 设置标题文本
-        mToolbar.setTitleText(getString(R.string.lib_album_picker_all_picture));
-        mTvToolbarFolderName = mToolbar.getTitleText();
-        // 添加图片确认按钮
-        mToolbar.addRightMenuText(
-                TextViewOptions.Builder()
-                        .setText(getString(R.string.lib_album_picker_ensure))
-                        .setTextSize(15)
-                        .setListener(this)
-                        .build()
-        );
-        mTvToolbarEnsure = mToolbar.getRightMenuView(0);
-    }
-
-    protected void initViews() {
-        // Pictures recycler view.
-        mRvPicker = findViewById(R.id.rv_picker);
-        mRvPicker.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                super.onDraw(c, parent, state);
-                mPresenter.handleRecycleViewDraw(parent);
-            }
-        });
-
-        // Bottom navigation menu.
-        mMenuNavContainer = findViewById(R.id.rv_menu_nav_container);
-        mIvNavIndicator = findViewById(R.id.iv_nav_indicator);
-        mTvFolderName = findViewById(R.id.tv_folder_name);
-        mTvPreview = findViewById(R.id.tv_preview);
-        mRvFolders = findViewById(R.id.recycle_folders);
-        mTvFolderName.setOnClickListener(this);
-        mTvPreview.setOnClickListener(this);
-        mRvFolders.setLayoutManager(new LinearLayoutManager(this));
-        mRvFolders.setHasFixedSize(true);
-        mBottomMenuBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottom_menu));
-        mBottomMenuBehavior.setBottomSheetCallback(new BottomMenuNavigationCallback());
-
-        // Floating action bar.
-        mFab = findViewById(R.id.fab);
-        mFab.setOnClickListener(this);
-        mFabBehavior = PicturePickerFabBehavior.from(mFab);
-
-        // Progress bar.
-        mProgressBar = findViewById(R.id.progress_bar);
-    }
-
-    protected void initData() {
-        mPresenter = new PickerPresenter(this, this, (PickerConfig)
-                getIntent().getParcelableExtra(EXTRA_CONFIG));
     }
 
     /**

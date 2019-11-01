@@ -17,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,16 +42,17 @@ public class WatcherActivity extends AppCompatActivity implements
         DraggableViewPager.Callback,
         PickedPanelAdapter.Interaction {
 
-    public static final int REQUEST_CODE = 508;
-    public static final String RESULT_EXTRA_PICKED_PICTURES = "result_extra_picked_pictures";
-    public static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
+    static final String BROADCAST_PICKED_SET_CHANGED = "com.sharry.lib.album.watcheractivity.broadcast.picked.set.changed";
+    static final String BROADCAST_EXTRA_DATA = "BROADCAST_EXTRA_DATA";
 
+    static final int REQUEST_CODE = 508;
+    static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
     private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
 
     /**
      * 图片浏览器的配置, 使用静态变量暂存数据
      * <p>
-     * 防止图片资源超过 4MB, 导致 Binder 驱动无法传值
+     * 防止图片资源超过 1MB - 8k, 导致 Binder 驱动无法传值
      */
     private static WatcherConfig sConfig;
 
@@ -110,6 +112,57 @@ public class WatcherActivity extends AppCompatActivity implements
         initTitle();
         initViews();
         initPresenter();
+    }
+
+
+    ////////////////////////////////////////// Internal methods /////////////////////////////////////////////
+
+    private void initTitle() {
+        SToolbar toolbar = findViewById(R.id.toolbar);
+        mTvTitle = toolbar.getTitleText();
+        // 添加右部的索引
+        mCheckIndicator = new CheckedIndicatorView(this);
+        toolbar.addRightMenuView(mCheckIndicator, new ViewOptions.Builder()
+                .setVisibility(View.INVISIBLE)
+                .setWidthExcludePadding(DensityUtil.dp2px(this, 25))
+                .setHeightExcludePadding(DensityUtil.dp2px(this, 25))
+                .setPaddingRight(DensityUtil.dp2px(this, 10))
+                .setListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mPresenter.handleIndicatorClick(mCheckIndicator.isChecked());
+                    }
+                })
+                .build());
+    }
+
+    private void initViews() {
+        // 占位图
+        mIvPlaceHolder = findViewById(R.id.iv_se_place_holder);
+        // 1. 初始化 ViewPager
+        mDisplayPager = findViewById(R.id.view_pager);
+        mDisplayPager.setCallback(this);
+        mDisplayPager.setBackgroundColorRes(R.color.lib_album_watcher_bg_color);
+        // 2. 初始化底部菜单
+        mLlPickedPanelContainer = findViewById(R.id.ll_picked_panel_container);
+        mRvPickedPanel = findViewById(R.id.rv_picked_panel);
+        mRvPickedPanel.setLayoutManager(new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false));
+        mTvEnsure = findViewById(R.id.tv_ensure);
+        mTvEnsure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.handleEnsureClicked();
+            }
+        });
+    }
+
+    private void initPresenter() {
+        mPresenter = new WatcherPresenter(
+                this,
+                sConfig,
+                ((SharedElementHelper.Bounds) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
+        );
     }
 
     @Override
@@ -237,6 +290,9 @@ public class WatcherActivity extends AppCompatActivity implements
         if ((adapter = mRvPickedPanel.getAdapter()) != null) {
             adapter.notifyItemRemoved(removedIndex);
         }
+        Intent data = new Intent(BROADCAST_PICKED_SET_CHANGED);
+        data.putExtra(BROADCAST_EXTRA_DATA, removedMeta);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(data);
     }
 
     @Override
@@ -245,6 +301,9 @@ public class WatcherActivity extends AppCompatActivity implements
         if ((adapter = mRvPickedPanel.getAdapter()) != null) {
             adapter.notifyItemInserted(addedIndex);
         }
+        Intent data = new Intent(BROADCAST_PICKED_SET_CHANGED);
+        data.putExtra(BROADCAST_EXTRA_DATA, addedMeta);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(data);
     }
 
     @Override
@@ -296,9 +355,8 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setResult(@Nullable ArrayList<MediaMeta> pickedPaths, boolean isEnsurePressed) {
+    public void setResult(boolean isEnsurePressed) {
         Intent intent = new Intent();
-        intent.putExtra(RESULT_EXTRA_PICKED_PICTURES, pickedPaths);
         intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, isEnsurePressed);
         setResult(RESULT_OK, intent);
     }
@@ -329,54 +387,5 @@ public class WatcherActivity extends AppCompatActivity implements
         mPresenter.handlePickedItemClicked(meta);
     }
 
-    ////////////////////////////////////////// Internal methods /////////////////////////////////////////////
-
-    private void initTitle() {
-        SToolbar toolbar = findViewById(R.id.toolbar);
-        mTvTitle = toolbar.getTitleText();
-        // 添加右部的索引
-        mCheckIndicator = new CheckedIndicatorView(this);
-        toolbar.addRightMenuView(mCheckIndicator, new ViewOptions.Builder()
-                .setVisibility(View.INVISIBLE)
-                .setWidthExcludePadding(DensityUtil.dp2px(this, 25))
-                .setHeightExcludePadding(DensityUtil.dp2px(this, 25))
-                .setPaddingRight(DensityUtil.dp2px(this, 10))
-                .setListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mPresenter.handleIndicatorClick(mCheckIndicator.isChecked());
-                    }
-                })
-                .build());
-    }
-
-    private void initViews() {
-        // 占位图
-        mIvPlaceHolder = findViewById(R.id.iv_se_place_holder);
-        // 1. 初始化 ViewPager
-        mDisplayPager = findViewById(R.id.view_pager);
-        mDisplayPager.setCallback(this);
-        mDisplayPager.setBackgroundColorRes(R.color.lib_album_watcher_bg_color);
-        // 2. 初始化底部菜单
-        mLlPickedPanelContainer = findViewById(R.id.ll_picked_panel_container);
-        mRvPickedPanel = findViewById(R.id.rv_picked_panel);
-        mRvPickedPanel.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
-        mTvEnsure = findViewById(R.id.tv_ensure);
-        mTvEnsure.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPresenter.handleEnsureClicked();
-            }
-        });
-    }
-
-    private void initPresenter() {
-        mPresenter = new WatcherPresenter(
-                this,
-                sConfig,
-                ((SharedElementHelper.Bounds) getIntent().getParcelableExtra(EXTRA_SHARED_ELEMENT))
-        );
-    }
 
 }

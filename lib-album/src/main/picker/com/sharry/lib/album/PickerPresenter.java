@@ -56,8 +56,7 @@ class PickerPresenter implements PickerContract.IPresenter,
     private final ArrayList<MediaMeta> mDisplaySet = new ArrayList<>();
     private FolderModel mCheckedFolder;
 
-    PickerPresenter(@NonNull PickerContract.IView view,
-                    @NonNull Context context, @NonNull PickerConfig config) {
+    PickerPresenter(@NonNull PickerContract.IView view, @NonNull PickerConfig config) {
         this.mView = view;
         this.mPickerConfig = config;
         this.mPickedSet = mPickerConfig.getUserPickedSet();
@@ -73,7 +72,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                 .build();
         this.mModel = new PickerModel();
         setupView();
-        fetchData(context);
+        fetchData((Context) mView);
     }
 
     //////////////////////////////////////////////PickerContract.IPresenter/////////////////////////////////////////////////
@@ -93,6 +92,20 @@ class PickerPresenter implements PickerContract.IPresenter,
         if (mPickedSet.remove(removedMeta)) {
             mView.setToolbarEnsureText(buildEnsureText());
             mView.setPreviewText(buildPreviewText());
+        }
+    }
+
+    @Override
+    public void handlePickedSetChanged(MediaMeta mediaMeta) {
+        if (mediaMeta == null) {
+            return;
+        }
+        int changedPos = mDisplaySet.indexOf(mediaMeta);
+        if (changedPos != -1) {
+            mView.setToolbarEnsureText(buildEnsureText());
+            mView.setPreviewText(buildPreviewText());
+            mView.notifyDisplaySetItemChanged(mPickerConfig.isCameraSupport() ?
+                    changedPos + 1 : changedPos);
         }
     }
 
@@ -188,19 +201,10 @@ class PickerPresenter implements PickerContract.IPresenter,
     //////////////////////////////////////////////WatcherCallback/////////////////////////////////////////////////
 
     @Override
-    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedMetas) {
-        // 刷新用户选中的集合
-        mPickedSet.clear();
-        mPickedSet.addAll(pickedMetas);
-        // 展示标题和预览文本
-        mView.setToolbarEnsureText(buildEnsureText());
-        mView.setPreviewText(buildPreviewText());
+    public void onWatcherPickedComplete(boolean isEnsure) {
+        // 执行确认事件
         if (isEnsure) {
-            // 执行确认事件
             handleEnsureClicked();
-        } else {
-            // 通知更新
-            mView.notifyPickedSetChanged();
         }
     }
 

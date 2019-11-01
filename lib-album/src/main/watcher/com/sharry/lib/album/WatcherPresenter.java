@@ -153,7 +153,7 @@ class WatcherPresenter implements WatcherContract.IPresenter {
 
     @Override
     public void handleBeforeFinish() {
-        mView.setResult(mPickedMetas, mIsEnsurePressed);
+        mView.setResult(mIsEnsurePressed);
     }
 
     private void setupViews() {
