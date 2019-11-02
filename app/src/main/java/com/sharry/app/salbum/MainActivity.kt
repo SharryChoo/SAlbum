@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.app_activity_main.*
  * @version 1.0
  * @since 12/6/2018 10:49 AM
  */
+private const val FILE_PROVIDER = "com.sharry.app.salbum.FileProvider"
 private const val RELATIVE_PATH = "SAlbum"
 
 class MainActivity : AppCompatActivity() {
@@ -29,14 +30,14 @@ class MainActivity : AppCompatActivity() {
     /**
      * 用与图片选取的配置
      */
-    private val pickerConfig = PickerConfig.Builder().build()
+    private lateinit var pickerConfig: PickerConfig
 
     /**
      * 用与相机拍摄的配置
      */
     private val takerConfig = TakerConfig.Builder()
             // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
-            .setAuthority("$packageName.FileProvider")
+            .setAuthority(FILE_PROVIDER)
             // 设置外部存储目录相对路径
             .setRelativePath(RELATIVE_PATH)
             // 预览画面比例
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
      */
     private val cropperConfig = CropperConfig.Builder()
             // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
-            .setAuthority("$packageName.FileProvider")
+            .setAuthority(FILE_PROVIDER)
             // 设置外部存储目录相对路径
             .setRelativePath(RELATIVE_PATH)
             // 裁剪期望的尺寸
@@ -73,17 +74,22 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 图片加载器
+     *
+     * 注: Android 10 以后需要使用 URI 进行加载操作
      */
     private val pictureLoader = object : ILoaderEngine {
         override fun loadPicture(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+            // Android 10 以后, 需要使用 URI 进行加载
             Glide.with(context).asBitmap().load(mediaMeta.contentUri).into(imageView)
         }
 
         override fun loadGif(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+            // Android 10 以后, 需要使用 URI 进行加载
             Glide.with(context).asGif().load(mediaMeta.contentUri).into(imageView)
         }
 
         override fun loadVideoThumbnails(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+            // Android 10 以后, 需要使用 URI 进行加载
             Glide.with(context).asBitmap().load(mediaMeta.contentUri).into(imageView)
         }
     }
@@ -93,6 +99,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.app_activity_main)
         initTitle()
         initViews()
+        initData()
     }
 
     private fun initTitle() {
@@ -111,25 +118,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openAlbum() {
-        pickerConfig.rebuild()
+    private fun initData() {
+        pickerConfig = PickerConfig.Builder()
                 // Toolbar 背景设置
-                .setToolbarBackgroundColor(
-                        ContextCompat.getColor(this, R.color.colorPrimary)
-                )
+                .setToolbarBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
                 // 指示器填充色
-                .setIndicatorSolidColor(
-                        ContextCompat.getColor(this, R.color.colorPrimary)
-                )
+                .setIndicatorSolidColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                // 指示器边界的颜色
+                .setPickerItemBackgroundColor(ContextCompat.getColor(this, android.R.color.white))
                 // 选中指示器的颜色
                 .setIndicatorBorderColor(
                         ContextCompat.getColor(this, R.color.colorPrimary),
                         ContextCompat.getColor(this, android.R.color.white)
                 )
-                // 指示器边界的颜色
-                .setPickerItemBackgroundColor(
-                        ContextCompat.getColor(this, android.R.color.white)
-                )
+                .build()
+    }
+
+    private fun openAlbum() {
+        // 根据选择中数据重新构建 pickerConfig.
+        pickerConfig.rebuild()
                 // 阈值
                 .setThreshold(etAlbumThreshold.text.toString().toInt())
                 // 每行展示的数量
@@ -143,21 +150,9 @@ class MainActivity : AppCompatActivity() {
                 // 是否选择视频
                 .isPickVideo(cbVideo.isChecked)
                 // 设置相机配置, 非 null 说明支持相机(拍摄/录制)
-                .setCameraConfig(
-                        if (cbCamera.isChecked) {
-                            takerConfig
-                        } else {
-                            null
-                        }
-                )
+                .setCameraConfig(if (cbCamera.isChecked) takerConfig else null)
                 // 设置裁剪配置, 非 null 说明支持裁剪
-                .setCropConfig(
-                        if (cbCrop.isChecked) {
-                            cropperConfig
-                        } else {
-                            null
-                        }
-                )
+                .setCropConfig(if (cbCrop.isChecked) cropperConfig else null)
                 .build()
         PickerManager.with(this)
                 // 设置选择配置文件
