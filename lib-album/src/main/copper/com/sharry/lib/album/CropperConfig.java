@@ -167,9 +167,9 @@ public class CropperConfig implements Parcelable {
         }
 
         /**
-         * 设置需要裁剪的文件地址
+         * 设置需要裁剪的图片 URI 地址
          */
-        public Builder setOriginFile(@NonNull Uri originUri) {
+        public Builder setOriginUri(@NonNull Uri originUri) {
             this.mConfig.originUri = originUri;
             return this;
         }

@@ -73,7 +73,7 @@ allprojects {
 ### 视频播放
 ![视频的播放](https://raw.githubusercontent.com/SharryChoo/SAlbum/release/assert/VideoPlay.jpg)
 
-## 功能使用
+## 使用指南
 SPicturePicker 的所有功能提供, 均通过 **Manager** 对外提供, 其具体的功能选项通过 **Config** 来配置
 
 功能 | Manager | Config
@@ -83,24 +83,12 @@ SPicturePicker 的所有功能提供, 均通过 **Manager** 对外提供, 其具
 拍摄/录像 | TakerManager | TakerConfig
 裁剪 | CropperManager | CropperConfig
 
-### 选取
+### 一) 选取
 ```
 PickerManager.with(context)
-        // 设置选择配置文件
+        // 注入配置
         .setPickerConfig(
                 PickerConfig.Builder()
-                        // 阈值
-                        .setThreshold(etAlbumThreshold.text.toString().toInt())
-                        // 每行展示的数量
-                        .setSpanCount(etSpanCount.text.toString().toInt())
-                        // 是否开启 Toolbar Behavior 动画
-                        .isToolbarScrollable(cbAnimation.isChecked)
-                        // 是否开启 Fab Behavior 动画
-                        .isFabScrollable(cbAnimation.isChecked)
-                        // 是否选择 GIF 图
-                        .isPickGif(cbGif.isChecked)
-                        // 是否选择视频
-                        .isPickVideo(cbVideo.isChecked)
                         // Toolbar 背景设置
                         .setToolbarBackgroundColor(
                                 ContextCompat.getColor(this, R.color.colorPrimary)
@@ -118,6 +106,18 @@ PickerManager.with(context)
                         .setPickerItemBackgroundColor(
                                 ContextCompat.getColor(this, android.R.color.white)
                         )
+                        // 阈值
+                        .setThreshold(etAlbumThreshold.text.toString().toInt())
+                        // 每行展示的数量
+                        .setSpanCount(etSpanCount.text.toString().toInt())
+                        // 是否开启 Toolbar Behavior 动画
+                        .isToolbarScrollable(cbAnimation.isChecked)
+                        // 是否开启 Fab Behavior 动画
+                        .isFabScrollable(cbAnimation.isChecked)
+                        // 是否选择 GIF 图
+                        .isPickGif(cbGif.isChecked)
+                        // 是否选择视频
+                        .isPickVideo(cbVideo.isChecked)
                         // 注入用户已选中的图片集合
                         .setUserPickedSet(mPickedSet)
                         // 设置相机配置, 非 null 说明支持相机(拍摄/录制)
@@ -133,26 +133,19 @@ PickerManager.with(context)
         // 加载框架注入
         .setLoaderEngine(
                 object : ILoaderEngine {
-                    /**
-                     * 加载图片
-                     */
-                    override fun loadPicture(context: Context, uri: String, imageView: ImageView) {
-                        // 保证为静态图
-                        Glide.with(context).asBitmap().load(uri).into(imageView)
+                    override fun loadPicture(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+                        // Android 10 以后, 需要使用 URI 进行加载
+                        Glide.with(context).asBitmap().load(mediaMeta.contentUri).into(imageView)
                     }
-                    /**
-                     * 加载动态图
-                     */
-                    override fun loadGif(context: Context, uri: String, imageView: ImageView) {
-                        // 保证为 GIF 图
-                        Glide.with(context).asGif().load(uri).into(imageView)
+
+                    override fun loadGif(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+                        // Android 10 以后, 需要使用 URI 进行加载
+                        Glide.with(context).asGif().load(mediaMeta.contentUri).into(imageView)
                     }
-                    /**
-                     * 加载视频缩略图
-                     */
-                    override fun loadVideoThumbnails(context: Context, uri: String, thumbnailPath: String?, imageView: ImageView) {
-                        // Glide 可直接加载视频 uri 获取第一帧
-                        Glide.with(context).asBitmap().load(uri).into(imageView)
+
+                    override fun loadVideoThumbnails(context: Context, mediaMeta: MediaMeta, imageView: ImageView) {
+                        // Android 10 以后, 需要使用 URI 进行加载
+                        Glide.with(context).asBitmap().load(mediaMeta.contentUri).into(imageView)
                     }
                 }
         )
@@ -166,7 +159,7 @@ PickerManager.with(context)
 - 关于裁剪
   - 在 PickerConfig 中传入裁剪的配置, 则意为开启裁剪的功能
 
-### 浏览
+### 二) 浏览
 浏览的功能与选取类似, 打开图片选择器时, 会根据 PickerConfig 自动生成浏览的配置, 若想在外界单独使用图片浏览的功能, 可以通过以下方式
 ```
 WatcherManager.with(context)
@@ -199,16 +192,16 @@ WatcherManager.with(context)
 - 当 threshold > 0 时, 表示需要为图片浏览添加图片选择功能, 反之仅做图片查看使用
 
 
-### 拍摄
+### 三) 拍摄
 相机的使用与浏览类似, 可以集成在 Picker 中使用, 也可以单独使用
 ```
 TakerManager.with(context)
         .setConfig(
             TakerConfig.Builder()
-                // 指定 FileProvider 的 authority, 用于获取文件 URI
-                .setFileProviderAuthority("$packageName.FileProvider")
                 // 设置外部存储目录相对路径
                 .setRelativePath(RELATIVE_PATH)
+                // 指定 FileProvider 的 authority, 用于获取文件 URI
+                .setAuthority(FILE_PROVIDER)
                 // 预览画面比例, 支持 1:1, 4:3, 16:9
                 .setPreviewAspect(ASPECT_1_1)
                 // 是否全屏预览(在比例基础上进行 CenterCrop, 保证画面不畸形)
@@ -233,6 +226,20 @@ TakerManager.with(context)
 ```
 其中的注释比较清晰, 操作完成之后, 可通过回调获取到拍摄/录制的结果
 
+#### 1. RelativePath 
+Andorid 10 以后, 无法随意的在外部存储卡中创建文件, 因此使用了 RelativePath 
+```
+// 绝对路径
+"/storage/emulated/0/{@link android.os.Environment#DIRECTORY_PICTURES}/SAlbum"
+// 相对路径
+"SAlbum"
+```
+只需要设置了相对路径, SAlbum 会自动在 Android 媒体文件夹下创建工程的文件夹, 所有拍摄录制的图片均会保存在其中, 这也是 Android 希望我们遵守的规范
+
+#### 2. Authority
+需要获取文件的 URI, 7.0 之后获取 URI 需要通过 FileProvider, 因此这里需要传入 FileProvider 的 authority, 关于这一块网上的资料比较多, 这里就不再赘述了
+
+#### 3. Camera 渲染器
 **关于自定义 Camera 的渲染器, 需要用户自定义实现 IPreviewer.Renderer 这个接口**, Demo 中提供了一个水印效果的渲染器滤镜, 可以其参考实现自己的渲染器
 ```
 public Builder setRenderer(@NonNull Class<? extends IPreviewer.Renderer> rendererClass) {
@@ -248,15 +255,15 @@ public Builder setRenderer(@NonNull Class<? extends IPreviewer.Renderer> rendere
 ```
 传入渲染器实现的 class 文件, 需要保证提供一个参数为 Context 的构造方法, 否则在构建 TakerConfig 时会出现异常
 
-### 裁剪
+### 四) 裁剪
 ```
 CropperManager.with(context)
         .setConfig(
             CropperConfig.Builder()
-                // 要裁剪的图片路径
-                .setOriginFile(...)
-                // 指定 FileProvider 的 authority, 用于获取文件 URI
-                .setFileProviderAuthority("$packageName.FileProvider")
+                // 要裁剪的图片的 URI
+                .setOriginUri(...)
+                // 指定 FileProvider 的 authority, 用于 7.0 获取文件 URI
+                .setAuthority(FILE_PROVIDER)
                 // 设置外部存储目录相对路径
                 .setRelativePath(RELATIVE_PATH)
                 // 裁剪期望的尺寸
@@ -267,7 +274,6 @@ CropperManager.with(context)
         )
         .crop(this);
 ```
-裁剪目前使用系统提供的裁剪方式, 需要获取文件的 URI, 7.0 之后获取 URI 需要通过 FileProvider, 因此这里需要传入 FileProvider 的 authority, 关于这一块网上的资料比较多, 这里就不再赘述了
+裁剪目前使用系统提供的裁剪方式, 其使用方式也比较简单, 这里就不再赘述了
 
-## 其他
-更多功能请查看工程中提供的示例
+更多功能请查看工程中提供的[示例](https://github.com/SharryChoo/SAlbum/blob/release/app/src/main/java/com/sharry/app/salbum/MainActivity.kt)

@@ -168,7 +168,7 @@ class PickerPresenter implements PickerContract.IPresenter,
             CropperManager.with((Context) mView)
                     .setConfig(
                             mPickerConfig.getCropperConfig().rebuild()
-                                    .setOriginFile(mPickedSet.get(0).contentUri)
+                                    .setOriginUri(mPickedSet.get(0).contentUri)
                                     .build()
                     )
                     .crop(this);

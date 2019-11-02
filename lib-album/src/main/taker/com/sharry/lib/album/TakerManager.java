@@ -113,7 +113,7 @@ public class TakerManager {
                 .setConfig(
                         mConfig.getCropConfig().rebuild()
                                 // 需要裁剪的文件路径
-                                .setOriginFile(mediaMeta.getContentUri())
+                                .setOriginUri(mediaMeta.getContentUri())
                                 .build()
                 )
                 .crop(new CropperCallback() {
