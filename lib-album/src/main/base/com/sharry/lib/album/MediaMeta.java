@@ -8,12 +8,43 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
+ * 媒体资源描述
+ *
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
  * @since 2019-09-02 14:01
  */
 public class MediaMeta implements Parcelable {
 
+    /**
+     * 创建图片资源
+     */
+    public MediaMeta createPicture(@NonNull Uri uri) {
+        return create(uri, "", true);
+    }
+
+    /**
+     * 创建视频资源
+     */
+    public MediaMeta createVideo(@NonNull Uri uri) {
+        return create(uri, "", false);
+    }
+
+    static MediaMeta create(@NonNull Uri uri, String filePath, boolean isPicture) {
+        return new MediaMeta(uri, filePath, isPicture);
+    }
+
+    public static final Creator<MediaMeta> CREATOR = new Creator<MediaMeta>() {
+        @Override
+        public MediaMeta createFromParcel(Parcel in) {
+            return new MediaMeta(in);
+        }
+
+        @Override
+        public MediaMeta[] newArray(int size) {
+            return new MediaMeta[size];
+        }
+    };
 
     protected MediaMeta(Parcel in) {
         contentUri = in.readParcelable(Uri.class.getClassLoader());
@@ -43,22 +74,6 @@ public class MediaMeta implements Parcelable {
         return 0;
     }
 
-    public static final Creator<MediaMeta> CREATOR = new Creator<MediaMeta>() {
-        @Override
-        public MediaMeta createFromParcel(Parcel in) {
-            return new MediaMeta(in);
-        }
-
-        @Override
-        public MediaMeta[] newArray(int size) {
-            return new MediaMeta[size];
-        }
-    };
-
-    static MediaMeta create(@NonNull Uri uri, @NonNull String filePath, boolean isPicture) {
-        return new MediaMeta(uri, filePath, isPicture);
-    }
-
     /**
      * 文件的 URI
      * <p>
@@ -70,7 +85,7 @@ public class MediaMeta implements Parcelable {
     /**
      * 文件路径
      */
-    @NonNull
+    @Deprecated
     String path;
 
     /**
@@ -149,6 +164,7 @@ public class MediaMeta implements Parcelable {
     }
 
     @NonNull
+    @Deprecated
     public String getPath() {
         return path;
     }
@@ -177,4 +193,5 @@ public class MediaMeta implements Parcelable {
     public String getMimeType() {
         return mimeType;
     }
+
 }
