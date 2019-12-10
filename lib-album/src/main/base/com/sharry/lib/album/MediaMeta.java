@@ -19,14 +19,14 @@ public class MediaMeta implements Parcelable {
     /**
      * 创建图片资源
      */
-    public MediaMeta createPicture(@NonNull Uri uri) {
+    public static MediaMeta createPicture(@NonNull Uri uri) {
         return create(uri, "", true);
     }
 
     /**
      * 创建视频资源
      */
-    public MediaMeta createVideo(@NonNull Uri uri) {
+    public static MediaMeta createVideo(@NonNull Uri uri) {
         return create(uri, "", false);
     }
 
