@@ -77,7 +77,6 @@ public class WatcherManager {
      * 调用图片查看器, 一般用于相册
      */
     public void startForResult(@Nullable final WatcherCallback callback) {
-        Preconditions.checkNotNull(callback, "Please ensure WatcherCall not null!");
         Preconditions.checkNotNull(mConfig, "Please ensure U set WatcherConfig correct.");
         PermissionsHelper.with(mBind)
                 .request(sPermissions)
