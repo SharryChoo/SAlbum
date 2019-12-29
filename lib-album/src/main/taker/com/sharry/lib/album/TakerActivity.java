@@ -184,6 +184,11 @@ public class TakerActivity extends AppCompatActivity implements
     }
 
     @Override
+    public Bitmap getCameraBitmap() {
+        return mCameraView.takePicture();
+    }
+
+    @Override
     public void setStatus(int status) {
         mStatus = status;
         switch (status) {
@@ -259,7 +264,7 @@ public class TakerActivity extends AppCompatActivity implements
 
     @Override
     public void onTakePicture() {
-        mPresenter.handleTakePicture(mCameraView.takePicture());
+        mPresenter.handleTakePicture();
     }
 
     @Override

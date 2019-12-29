@@ -30,11 +30,13 @@ public class TakerConfig implements Parcelable {
         previewAspect = in.readInt();
         isFullScreen = in.readByte() != 0;
         isSupportVideoRecord = in.readByte() != 0;
+        isJustVideoRecord = in.readByte() != 0;
         maximumDuration = in.readLong();
         minimumDuration = in.readLong();
         recordProgressColor = in.readInt();
         recordResolution = in.readInt();
         rendererClsName = in.readString();
+        cropConfig = in.readParcelable(CropperConfig.class.getClassLoader());
     }
 
     @Override
@@ -45,11 +47,13 @@ public class TakerConfig implements Parcelable {
         dest.writeInt(previewAspect);
         dest.writeByte((byte) (isFullScreen ? 1 : 0));
         dest.writeByte((byte) (isSupportVideoRecord ? 1 : 0));
+        dest.writeByte((byte) (isJustVideoRecord ? 1 : 0));
         dest.writeLong(maximumDuration);
         dest.writeLong(minimumDuration);
         dest.writeInt(recordProgressColor);
         dest.writeInt(recordResolution);
         dest.writeString(rendererClsName);
+        dest.writeParcelable(cropConfig, flags);
     }
 
     @Override
@@ -122,6 +126,13 @@ public class TakerConfig implements Parcelable {
      * 若支持视频录制, 则裁剪无效
      */
     private boolean isSupportVideoRecord;
+
+    /**
+     * 仅开启视频录制
+     * <p>
+     * 若仅开启视频录制，则拍照无效
+     */
+    private boolean isJustVideoRecord;
 
     /**
      * 视频录制最大时长
@@ -219,6 +230,10 @@ public class TakerConfig implements Parcelable {
         return rendererClsName;
     }
 
+    public boolean isJustVideoRecord() {
+        return isJustVideoRecord;
+    }
+
     public static class Builder {
 
         private TakerConfig mConfig;
@@ -289,6 +304,16 @@ public class TakerConfig implements Parcelable {
          */
         public Builder setVideoRecord(boolean isSupportVideoRecord) {
             mConfig.isSupportVideoRecord = isSupportVideoRecord;
+            return this;
+        }
+
+        /**
+         * 是否仅支持视频录制
+         *
+         * @param isJustVideoRecord true is just recordVideo, false is support take picture.
+         */
+        public Builder setJustVideoRecord(boolean isJustVideoRecord) {
+            mConfig.isJustVideoRecord = isJustVideoRecord;
             return this;
         }
 

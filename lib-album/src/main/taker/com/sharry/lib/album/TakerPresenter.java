@@ -92,7 +92,11 @@ class TakerPresenter implements ITakerContract.IPresenter {
     }
 
     @Override
-    public void handleTakePicture(Bitmap bitmap) {
+    public void handleTakePicture() {
+        if (mConfig.isJustVideoRecord()) {
+            return;
+        }
+        Bitmap bitmap = mView.getCameraBitmap();
         if (bitmap == null) {
             mView.toast(R.string.lib_album_taker_take_picture_failed);
             return;

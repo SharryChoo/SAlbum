@@ -46,6 +46,8 @@ public interface ITakerContract {
         int STATUS_VIDEO_PLAY = 3;
         int STATUS_PICKED = 4;
 
+        Bitmap getCameraBitmap();
+
         @IntDef(value = {
                 STATUS_CAMERA_PREVIEW,
                 STATUS_PICTURE_PREVIEW,
@@ -72,7 +74,7 @@ public interface ITakerContract {
 
         void handleDenied();
 
-        void handleTakePicture(Bitmap bitmap);
+        void handleTakePicture();
 
         void handleRecordStart(SCameraView cameraView);
 
