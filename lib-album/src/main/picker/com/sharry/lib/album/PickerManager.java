@@ -119,22 +119,12 @@ public class PickerManager {
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (resultCode != RESULT_OK || null == data) {
+                ArrayList<MediaMeta> metas;
+                if (resultCode == RESULT_OK && requestCode == PickerActivity.REQUEST_CODE && null != data
+                        && (metas = data.getParcelableArrayListExtra(PickerActivity.RESULT_EXTRA_PICKED_PICTURES)) != null) {
+                    pickerCallback.onPickedComplete(metas);
+                } else {
                     pickerCallback.onPickedFailed();
-                    return;
-                }
-                switch (requestCode) {
-                    case PickerActivity.REQUEST_CODE:
-                        ArrayList<MediaMeta> metas = data.getParcelableArrayListExtra(
-                                PickerActivity.RESULT_EXTRA_PICKED_PICTURES);
-                        if (metas != null) {
-                            pickerCallback.onPickedComplete(metas);
-                        } else {
-                            pickerCallback.onPickedFailed();
-                        }
-                        break;
-                    default:
-                        break;
                 }
             }
         });

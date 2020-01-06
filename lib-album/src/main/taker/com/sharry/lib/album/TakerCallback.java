@@ -19,7 +19,7 @@ public interface TakerCallback {
     void onCameraTakeComplete(@NonNull MediaMeta newMeta);
 
     /**
-     * 获取失败
+     * 未进行有效的拍摄
      */
     void onTakeFailed();
 

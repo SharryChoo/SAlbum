@@ -121,12 +121,9 @@ public class WatcherManager {
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (resultCode == Activity.RESULT_OK && requestCode == WatcherActivity.REQUEST_CODE) {
-                    if (mConfig.getUserPickedSet() != null) {
-                        callback.onWatcherPickedComplete(mConfig.getUserPickedSet());
-                    } else {
-                        callback.onWatcherPickedFailed();
-                    }
+                if (resultCode == Activity.RESULT_OK && requestCode == WatcherActivity.REQUEST_CODE
+                        && mConfig.getUserPickedSet() != null) {
+                    callback.onWatcherPickedComplete(mConfig.getUserPickedSet());
                 } else {
                     callback.onWatcherPickedFailed();
                 }

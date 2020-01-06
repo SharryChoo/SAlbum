@@ -20,6 +20,9 @@ public interface PickerCallback {
      */
     void onPickedComplete(@NonNull ArrayList<MediaMeta> userPickedSet);
 
+    /**
+     * 未进行图片选取
+     */
     void onPickedFailed();
 
 }

@@ -13,7 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -111,43 +110,35 @@ public class CropperFragment extends Fragment {
         if (mCropperCallback == null) {
             return;
         }
-        if (resultCode != Activity.RESULT_OK) {
-            mCropperCallback.onCropFailed();
-            return;
-        }
-        switch (requestCode) {
-            case REQUEST_CODE_CROP:
-                try {
-                    // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
-                    if (VersionUtil.isQ()) {
-                        Uri uri = FileUtil.createJpegPendingItem(mContext, mConfig.getRelativePath());
-                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
-                        CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
-                        FileUtil.publishPendingItem(mContext, uri);
-                        MediaMeta mediaMeta = MediaMeta.create(uri, FileUtil.getImagePath(mContext, uri), true);
-                        mCropperCallback.onCropComplete(mediaMeta);
-                    } else {
-                        File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());
-                        Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
-                        ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
-                        CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
-                        FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
-                        MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
-                        mCropperCallback.onCropComplete(mediaMeta);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Picture compress failed after crop.", e);
-                    mCropperCallback.onCropFailed();
-                } finally {
-                    if (mTempFile != null) {
-                        mTempFile.delete();
-                    }
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_CROP) {
+            try {
+                // 创建最终的目标文件, 将图片从临时文件压缩到指定的目录
+                if (VersionUtil.isQ()) {
+                    Uri uri = FileUtil.createJpegPendingItem(mContext, mConfig.getRelativePath());
+                    ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                    FileUtil.publishPendingItem(mContext, uri);
+                    MediaMeta mediaMeta = MediaMeta.create(uri, FileUtil.getImagePath(mContext, uri), true);
+                    mCropperCallback.onCropComplete(mediaMeta);
+                } else {
+                    File file = FileUtil.createJpegFile(mContext, mConfig.getRelativePath());
+                    Uri uri = FileUtil.getUriFromFile(mContext, mConfig.getAuthority(), file);
+                    ParcelFileDescriptor pfd = mContext.getContentResolver().openFileDescriptor(uri, "w");
+                    CompressUtil.doCompress(mTempFile.getAbsolutePath(), pfd.getFileDescriptor(), mConfig.getDestQuality());
+                    FileUtil.notifyMediaStore(mContext, file.getAbsolutePath());
+                    MediaMeta mediaMeta = MediaMeta.create(uri, file.getAbsolutePath(), true);
+                    mCropperCallback.onCropComplete(mediaMeta);
                 }
-                break;
-            default:
-                break;
+            } catch (Exception e) {
+                mCropperCallback.onCropFailed();
+            } finally {
+                if (mTempFile != null) {
+                    mTempFile.delete();
+                }
+            }
+        } else {
+            mCropperCallback.onCropFailed();
         }
-
     }
 
     private void completion(Intent intent, CropperConfig config, Uri originUri, Uri tempUri) {

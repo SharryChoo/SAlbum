@@ -94,27 +94,17 @@ public class TakerManager {
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (resultCode != RESULT_OK || null == data) {
+                MediaMeta mediaMeta;
+                if (resultCode == RESULT_OK && requestCode == TakerActivity.REQUEST_CODE && data != null
+                        && (mediaMeta = data.getParcelableExtra(TakerActivity.RESULT_EXTRA_MEDIA_META)) != null) {
+                    // 处理图片裁剪
+                    if (mConfig.getCropConfig() != null && mediaMeta.isPicture) {
+                        performCropPicture(mediaMeta, callback);
+                    } else {
+                        callback.onCameraTakeComplete(mediaMeta);
+                    }
+                } else {
                     callback.onTakeFailed();
-                    return;
-                }
-                switch (requestCode) {
-                    case TakerActivity.REQUEST_CODE:
-                        MediaMeta mediaMeta = data.getParcelableExtra(TakerActivity.RESULT_EXTRA_MEDIA_META);
-                        if (mediaMeta == null) {
-                            callback.onTakeFailed();
-                            return;
-                        }
-                        // 2. 处理图片裁剪
-                        if (mConfig.getCropConfig() != null && mediaMeta.isPicture) {
-                            performCropPicture(mediaMeta, callback);
-                        } else {
-                            // 3. 回调
-                            callback.onCameraTakeComplete(mediaMeta);
-                        }
-                        break;
-                    default:
-                        break;
                 }
             }
         });
