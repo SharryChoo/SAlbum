@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.MessageFormat;
@@ -20,9 +21,8 @@ import java.util.ArrayList;
  * @since 2018/9/1 10:17
  */
 class PickerPresenter implements PickerContract.IPresenter,
-        WatcherCallback,
-        TakerCallback,
-        CropperCallback {
+        TakerCallbackLambda,
+        CropperCallbackLambda {
 
     /**
      * View associated with this presenter.
@@ -133,7 +133,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                                 .setDisplayDataSet(mDisplaySet, position)
                                 .build()
                 )
-                .startForResult(this);
+                .start();
     }
 
     @Override
@@ -148,7 +148,7 @@ class PickerPresenter implements PickerContract.IPresenter,
                                 .setDisplayDataSet(mPickedSet, 0)
                                 .build()
                 )
-                .startForResult(this);
+                .start();
     }
 
     @Override
@@ -198,20 +198,13 @@ class PickerPresenter implements PickerContract.IPresenter,
         SharedElementHelper.CACHES.clear();
     }
 
-    //////////////////////////////////////////////WatcherCallback/////////////////////////////////////////////////
-
-    @Override
-    public void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedSet) {
-        // 执行确认事件
-        if (isEnsure) {
-            handleEnsureClicked();
-        }
-    }
-
     //////////////////////////////////////////////TakerCallback/////////////////////////////////////////////////
 
     @Override
-    public void onCameraTakeComplete(@NonNull MediaMeta newMeta) {
+    public void onCameraTake(@Nullable MediaMeta newMeta) {
+        if (newMeta == null) {
+            return;
+        }
         // 1. 添加到 <当前展示> 的文件夹下
         mCheckedFolder.addMeta(newMeta);
         // 2. 添加到 <所有文件> 的文件夹下
@@ -232,10 +225,13 @@ class PickerPresenter implements PickerContract.IPresenter,
         mView.notifyFolderDataSetChanged();
     }
 
-    //////////////////////////////////////////////CropperCallback/////////////////////////////////////////////////
+    ////////////////////////////////////////////// CropperCallbackLambda /////////////////////////////////////////////////
 
     @Override
-    public void onCropComplete(@NonNull MediaMeta mediaMeta) {
+    public void onCropped(@Nullable MediaMeta mediaMeta) {
+        if (mediaMeta == null) {
+            return;
+        }
         mPickedSet.clear();
         mPickedSet.add(mediaMeta);
         mView.setResultAndFinish(mPickedSet);
@@ -373,4 +369,5 @@ class PickerPresenter implements PickerContract.IPresenter,
                 mPickedSet.size()
         );
     }
+
 }

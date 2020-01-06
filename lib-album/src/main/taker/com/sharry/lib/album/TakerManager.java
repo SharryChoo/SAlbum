@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -19,7 +18,6 @@ import static android.app.Activity.RESULT_OK;
  */
 public class TakerManager {
 
-    private static final String TAG = TakerManager.class.getSimpleName();
     private static String[] sRequirePermissions = {
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO,
@@ -54,6 +52,23 @@ public class TakerManager {
     /**
      * 获取拍摄照片
      */
+    public void take(@NonNull final TakerCallbackLambda callbackLambda) {
+        take(new TakerCallback() {
+            @Override
+            public void onCameraTakeComplete(@NonNull MediaMeta newMeta) {
+                callbackLambda.onCameraTake(newMeta);
+            }
+
+            @Override
+            public void onTakeFailed() {
+                callbackLambda.onCameraTake(null);
+            }
+        });
+    }
+
+    /**
+     * 获取拍摄照片
+     */
     public void take(@NonNull final TakerCallback callback) {
         Preconditions.checkNotNull(callback, "Please ensure callback not null!");
         Preconditions.checkNotNull(mConfig, "Please ensure U set TakerConfig correct!");
@@ -73,19 +88,21 @@ public class TakerManager {
         // 获取回调的 Fragment
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mBind);
         if (callbackFragment == null) {
-            Log.e(TAG, "Start Picture picker activity failed.");
+            callback.onTakeFailed();
             return;
         }
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
                 if (resultCode != RESULT_OK || null == data) {
+                    callback.onTakeFailed();
                     return;
                 }
                 switch (requestCode) {
                     case TakerActivity.REQUEST_CODE:
                         MediaMeta mediaMeta = data.getParcelableExtra(TakerActivity.RESULT_EXTRA_MEDIA_META);
                         if (mediaMeta == null) {
+                            callback.onTakeFailed();
                             return;
                         }
                         // 2. 处理图片裁剪
@@ -120,6 +137,11 @@ public class TakerManager {
                     @Override
                     public void onCropComplete(@NonNull MediaMeta meta) {
                         callback.onCameraTakeComplete(meta);
+                    }
+
+                    @Override
+                    public void onCropFailed() {
+                        callback.onTakeFailed();
                     }
                 });
     }

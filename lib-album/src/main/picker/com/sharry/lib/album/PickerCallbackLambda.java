@@ -1,6 +1,6 @@
 package com.sharry.lib.album;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -11,15 +11,13 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 4/28/2019 5:03 PM
  */
-public interface PickerCallback {
+public interface PickerCallbackLambda {
 
     /**
      * 获取选中集合
      *
      * @param userPickedSet 用户选中的集合
      */
-    void onPickedComplete(@NonNull ArrayList<MediaMeta> userPickedSet);
-
-    void onPickedFailed();
+    void onPicked(@Nullable ArrayList<MediaMeta> userPickedSet);
 
 }

@@ -4,8 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.annotation.NonNull;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -62,6 +62,26 @@ public class PickerManager {
     /**
      * 发起请求
      *
+     * @param callbackLambda 图片选中的回调
+     */
+    public void start(@NonNull final PickerCallbackLambda callbackLambda) {
+        Preconditions.checkNotNull(callbackLambda, "Please ensure PickerCallback not null!");
+        start(new PickerCallback() {
+            @Override
+            public void onPickedComplete(@NonNull ArrayList<MediaMeta> userPickedSet) {
+                callbackLambda.onPicked(userPickedSet);
+            }
+
+            @Override
+            public void onPickedFailed() {
+                callbackLambda.onPicked(null);
+            }
+        });
+    }
+
+    /**
+     * 发起请求
+     *
      * @param pickerCallback 图片选中的回调
      */
     public void start(@NonNull final PickerCallback pickerCallback) {
@@ -93,13 +113,14 @@ public class PickerManager {
         // 2. 获取回调的 Fragment
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mActivity);
         if (callbackFragment == null) {
-            Log.e(TAG, "Start Picture picker activity failed.");
+            pickerCallback.onPickedFailed();
             return;
         }
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
                 if (resultCode != RESULT_OK || null == data) {
+                    pickerCallback.onPickedFailed();
                     return;
                 }
                 switch (requestCode) {
@@ -109,7 +130,7 @@ public class PickerManager {
                         if (metas != null) {
                             pickerCallback.onPickedComplete(metas);
                         } else {
-                            Log.e(TAG, "Picked path from PickerActivity is null.");
+                            pickerCallback.onPickedFailed();
                         }
                         break;
                     default:

@@ -1,5 +1,7 @@
 package com.sharry.lib.album;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 
 /**
@@ -10,11 +12,27 @@ import java.util.ArrayList;
  */
 public interface WatcherCallback {
 
+    WatcherCallback DEFAULT = new WatcherCallback() {
+
+        @Override
+        public void onWatcherPickedComplete(@NonNull ArrayList<MediaMeta> pickedSet) {
+
+        }
+
+        @Override
+        public void onWatcherPickedFailed() {
+
+        }
+    };
+
     /**
      * The callback method will call when pick picture from watcher complete.
-     *
-     * @param isEnsure is clicked ensure button.
      */
-    void onWatcherPickedComplete(boolean isEnsure, ArrayList<MediaMeta> pickedSet);
+    void onWatcherPickedComplete(@NonNull ArrayList<MediaMeta> pickedSet);
+
+    /**
+     * DO nothing at Watcher page.
+     */
+    void onWatcherPickedFailed();
 
 }

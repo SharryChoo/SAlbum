@@ -23,10 +23,8 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     private final ArrayList<MediaMeta> mDisplayMetas;
     private final ArrayList<MediaMeta> mPickedSet;
     private final SharedElementHelper.Bounds mSharedElementEnterData;
-
     private int mCurPosition;
     private MediaMeta mCurDisplay;
-    private boolean mIsEnsurePressed = false;
 
     WatcherPresenter(WatcherContract.IView view, WatcherConfig config, SharedElementHelper.Bounds sharedElementModel) {
         this.mView = view;
@@ -41,6 +39,45 @@ class WatcherPresenter implements WatcherContract.IPresenter {
         this.mCurDisplay = mDisplayMetas.get(mCurPosition);
         // 配置视图
         setupViews();
+    }
+
+    private void setupViews() {
+        // 1. 设置 Toolbar 数据
+        mView.setLeftTitleText(buildToolbarLeftText());
+        mView.setIndicatorVisible(mConfig.isPickerSupport());
+
+        // 2. 设置 Pictures 数据
+        mView.setDisplayAdapter(mDisplayMetas);
+        mView.displayAt(mCurPosition);
+
+        // 3. 设置底部菜单和按钮选中的状态
+        if (mConfig.isPickerSupport()) {
+            mView.setIndicatorColors(
+                    mConfig.getIndicatorBorderCheckedColor(),
+                    mConfig.getIndicatorBorderUncheckedColor(),
+                    mConfig.getIndicatorSolidColor(),
+                    mConfig.getIndicatorTextColor()
+            );
+            mView.setIndicatorChecked(mPickedSet.indexOf(mCurDisplay) != -1);
+            mView.setIndicatorText(buildToolbarCheckedIndicatorText());
+            // 底部菜单
+            mView.setPickedAdapter(mPickedSet);
+            mView.setEnsureText(buildEnsureText());
+            // 底部菜单延时弹出
+            if (!mPickedSet.isEmpty()) {
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mView.showPickedPanel();
+                    }
+                }, mSharedElementEnterData != null ? 500 : 0);
+            }
+        }
+
+        // 4. 执行共享元素入场动画
+        if (mSharedElementEnterData != null) {
+            mView.showSharedElementEnter(mDisplayMetas.get(mCurPosition), mSharedElementEnterData);
+        }
     }
 
     @Override
@@ -111,19 +148,14 @@ class WatcherPresenter implements WatcherContract.IPresenter {
             mView.showMsg(mView.getString(R.string.lib_album_watcher_tips_ensure_failed));
             return;
         }
-        mIsEnsurePressed = true;
+        mView.sendEnsureBroadcast();
         mView.finish();
     }
 
     @Override
     public boolean handleDisplayPagerDismiss() {
-        // 若无共享元素入场动画, 则退出也不使用共享元素
-        if (mSharedElementEnterData == null) {
-            return false;
-        }
         // 尝试获取退出时共享元素的数据
-        SharedElementHelper.Bounds exitData = mSharedElementEnterData.position == mCurPosition ?
-                mSharedElementEnterData : SharedElementHelper.CACHES.get(mCurPosition);
+        SharedElementHelper.Bounds exitData = getExitSharedElement();
         // 若存在则消费这个 dismiss 事件
         if (exitData != null) {
             mView.showSharedElementExitAndFinish(exitData);
@@ -134,64 +166,12 @@ class WatcherPresenter implements WatcherContract.IPresenter {
     }
 
     @Override
-    public void handleBackPressed() {
-        // 若无共享元素入场动画, 则退出也不使用共享元素
+    public SharedElementHelper.Bounds getExitSharedElement() {
         if (mSharedElementEnterData == null) {
-            mView.finish();
-            return;
+            return null;
         }
-        // 尝试获取退出数据
-        SharedElementHelper.Bounds exitData = mSharedElementEnterData.position == mCurPosition ?
+        return mSharedElementEnterData.position == mCurPosition ?
                 mSharedElementEnterData : SharedElementHelper.CACHES.get(mCurPosition);
-        if (exitData != null) {
-            mView.showSharedElementExitAndFinish(exitData);
-            mView.dismissPickedPanel();
-        } else {
-            mView.finish();
-        }
-    }
-
-    @Override
-    public void handleBeforeFinish() {
-        mView.setResult(mIsEnsurePressed, mPickedSet);
-    }
-
-    private void setupViews() {
-        // 1. 设置 Toolbar 数据
-        mView.setLeftTitleText(buildToolbarLeftText());
-        mView.setIndicatorVisible(mConfig.isPickerSupport());
-
-        // 2. 设置 Pictures 数据
-        mView.setDisplayAdapter(mDisplayMetas);
-        mView.displayAt(mCurPosition);
-
-        // 3. 设置底部菜单和按钮选中的状态
-        if (mConfig.isPickerSupport()) {
-            mView.setIndicatorColors(
-                    mConfig.getIndicatorBorderCheckedColor(),
-                    mConfig.getIndicatorBorderUncheckedColor(),
-                    mConfig.getIndicatorSolidColor(),
-                    mConfig.getIndicatorTextColor()
-            );
-            mView.setIndicatorChecked(mPickedSet.indexOf(mCurDisplay) != -1);
-            mView.setIndicatorText(buildToolbarCheckedIndicatorText());
-            // 底部菜单
-            mView.setPickedAdapter(mPickedSet);
-            mView.setEnsureText(buildEnsureText());
-            // 底部菜单延时弹出
-            if (!mPickedSet.isEmpty()) {
-                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mView.showPickedPanel();
-                    }
-                }, mSharedElementEnterData != null ? 500 : 0);
-            }
-        }
-        // 4. 执行共享元素入场动画
-        if (mSharedElementEnterData != null) {
-            mView.showSharedElementEnter(mDisplayMetas.get(mCurPosition), mSharedElementEnterData);
-        }
     }
 
     /**

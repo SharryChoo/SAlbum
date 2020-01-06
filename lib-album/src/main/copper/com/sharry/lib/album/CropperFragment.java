@@ -101,14 +101,18 @@ public class CropperFragment extends Fragment {
             // launch crop Activity
             startActivityForResult(intent, REQUEST_CODE_CROP);
         } catch (Throwable e) {
-            // ignore.
+            mCropperCallback.onCropFailed();
         }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != Activity.RESULT_OK || null == mCropperCallback) {
+        if (mCropperCallback == null) {
+            return;
+        }
+        if (resultCode != Activity.RESULT_OK) {
+            mCropperCallback.onCropFailed();
             return;
         }
         switch (requestCode) {
@@ -133,6 +137,7 @@ public class CropperFragment extends Fragment {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Picture compress failed after crop.", e);
+                    mCropperCallback.onCropFailed();
                 } finally {
                     if (mTempFile != null) {
                         mTempFile.delete();

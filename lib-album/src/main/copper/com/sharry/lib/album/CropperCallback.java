@@ -16,4 +16,6 @@ public interface CropperCallback {
      */
     void onCropComplete(@NonNull MediaMeta meta);
 
+    void onCropFailed();
+
 }

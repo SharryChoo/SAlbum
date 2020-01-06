@@ -17,47 +17,7 @@ import java.util.ArrayList;
  * @version 1.0
  * @since 2018/9/22 17:56
  */
-public class WatcherConfig implements Parcelable {
-
-    protected WatcherConfig(Parcel in) {
-        mediaMetas = in.createTypedArrayList(MediaMeta.CREATOR);
-        userPickedSet = in.createTypedArrayList(MediaMeta.CREATOR);
-        threshold = in.readInt();
-        indicatorTextColor = in.readInt();
-        indicatorSolidColor = in.readInt();
-        indicatorBorderCheckedColor = in.readInt();
-        indicatorBorderUncheckedColor = in.readInt();
-        position = in.readInt();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(mediaMetas);
-        dest.writeTypedList(userPickedSet);
-        dest.writeInt(threshold);
-        dest.writeInt(indicatorTextColor);
-        dest.writeInt(indicatorSolidColor);
-        dest.writeInt(indicatorBorderCheckedColor);
-        dest.writeInt(indicatorBorderUncheckedColor);
-        dest.writeInt(position);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<WatcherConfig> CREATOR = new Creator<WatcherConfig>() {
-        @Override
-        public WatcherConfig createFromParcel(Parcel in) {
-            return new WatcherConfig(in);
-        }
-
-        @Override
-        public WatcherConfig[] newArray(int size) {
-            return new WatcherConfig[size];
-        }
-    };
+public class WatcherConfig {
 
     public static Builder Builder() {
         return new Builder();

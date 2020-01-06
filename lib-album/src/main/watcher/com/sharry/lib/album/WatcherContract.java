@@ -53,10 +53,9 @@ interface WatcherContract {
 
         void showMsg(@NonNull String msg);
 
-        void setResult(boolean isEnsurePressed, ArrayList<MediaMeta> pickedSet);
+        void sendEnsureBroadcast();
 
         void finish();
-
     }
 
     interface IPresenter {
@@ -69,11 +68,10 @@ interface WatcherContract {
 
         void handlePickedItemClicked(MediaMeta pickedUri);
 
-        void handleBackPressed();
-
-        void handleBeforeFinish();
-
         boolean handleDisplayPagerDismiss();
+
+        SharedElementHelper.Bounds getExitSharedElement();
+
     }
 
 }

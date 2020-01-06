@@ -168,11 +168,23 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
         }
     };
 
+    private final BroadcastReceiver mBrPickedSetEnsure = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mPresenter.handleEnsureClicked();
+        }
+    };
+
     private void registerLocalBroadcast() {
         LocalBroadcastManager.getInstance(this)
                 .registerReceiver(
                         mBrPickedSetChanged,
                         new IntentFilter(WatcherActivity.BROADCAST_PICKED_SET_CHANGED)
+                );
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(
+                        mBrPickedSetEnsure,
+                        new IntentFilter(WatcherActivity.BROADCAST_PICKED_SET_ENSURE)
                 );
     }
 
@@ -188,6 +200,7 @@ public class PickerActivity extends AppCompatActivity implements PickerContract.
     @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mBrPickedSetChanged);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBrPickedSetEnsure);
         mPresenter.handleViewDestroy();
         super.onDestroy();
     }

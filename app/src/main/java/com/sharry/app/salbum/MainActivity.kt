@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
                 .setLoaderEngine(pictureLoader)
                 // 开始选取
                 .start {
-                    it.forEach {
+                    it?.forEach {
                         Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show()
                     }
                 }

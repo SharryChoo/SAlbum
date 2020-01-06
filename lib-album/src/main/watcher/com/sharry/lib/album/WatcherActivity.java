@@ -44,13 +44,10 @@ public class WatcherActivity extends AppCompatActivity implements
 
     private static final String EXTRA_SHARED_ELEMENT = "start_intent_extra_shared_element";
     static final int REQUEST_CODE = 508;
-    static final String RESULT_EXTRA_IS_PICKED_ENSURE = "result_extra_is_picked_ensure";
-    static final String RESULT_EXTRA_PICKED_SET = "result_extra_picked_set";
-
 
     static final String BROADCAST_PICKED_SET_CHANGED = "com.sharry.lib.album.watcheractivity.broadcast.picked.set.changed";
+    static final String BROADCAST_PICKED_SET_ENSURE = "com.sharry.lib.album.watcheractivity.broadcast.picked.set.ensure";
     static final String BROADCAST_EXTRA_DATA = "BROADCAST_EXTRA_DATA";
-
 
     /**
      * 图片浏览器的配置, 使用静态变量暂存数据
@@ -107,6 +104,8 @@ public class WatcherActivity extends AppCompatActivity implements
     private ObjectAnimator mBottomPreviewShowAnimator;
     private ObjectAnimator mBottomPreviewDismissAnimator;
 
+    ////////////////////////////////////////// Lifecycle. /////////////////////////////////////////////
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         fixRequestOrientation(this);
@@ -116,9 +115,6 @@ public class WatcherActivity extends AppCompatActivity implements
         initViews();
         initPresenter();
     }
-
-
-    ////////////////////////////////////////// Internal methods /////////////////////////////////////////////
 
     private void initTitle() {
         SToolbar toolbar = findViewById(R.id.toolbar);
@@ -170,12 +166,21 @@ public class WatcherActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        mPresenter.handleBackPressed();
+        SharedElementHelper.Bounds exitData = mPresenter.getExitSharedElement();
+        // 使用动画退出
+        if (exitData != null) {
+            showSharedElementExitAndFinish(exitData);
+            dismissPickedPanel();
+        }
+        // 直接退出
+        else {
+            super.onBackPressed();
+        }
     }
 
     @Override
     public void finish() {
-        mPresenter.handleBeforeFinish();
+        setResult(RESULT_OK);
         super.finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
@@ -358,11 +363,9 @@ public class WatcherActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void setResult(boolean isEnsurePressed, ArrayList<MediaMeta> pickedSet) {
-        Intent intent = new Intent();
-        intent.putExtra(RESULT_EXTRA_IS_PICKED_ENSURE, isEnsurePressed);
-        intent.putExtra(RESULT_EXTRA_PICKED_SET, pickedSet);
-        setResult(RESULT_OK, intent);
+    public void sendEnsureBroadcast() {
+        Intent data = new Intent(BROADCAST_PICKED_SET_ENSURE);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(data);
     }
 
     ////////////////////////////////////////// DraggableViewPager.Callback /////////////////////////////////////////////
@@ -390,6 +393,5 @@ public class WatcherActivity extends AppCompatActivity implements
     public void onPreviewItemClicked(ImageView imageView, MediaMeta meta, int position) {
         mPresenter.handlePickedItemClicked(meta);
     }
-
 
 }

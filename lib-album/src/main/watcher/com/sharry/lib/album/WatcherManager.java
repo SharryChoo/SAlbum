@@ -4,11 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
 
 /**
  * 图片查看器的管理类
@@ -70,13 +70,32 @@ public class WatcherManager {
      * 调用图片查看器的方法
      */
     public void start() {
-        startForResult(null);
+        startForResult(WatcherCallback.DEFAULT);
     }
 
     /**
      * 调用图片查看器, 一般用于相册
      */
-    public void startForResult(@Nullable final WatcherCallback callback) {
+    public void startForResult(@NonNull final WatcherCallbackLambda callbackLambda) {
+        Preconditions.checkNotNull(callbackLambda, "Please ensure U set WatcherCallbackLambda correct.");
+        startForResult(new WatcherCallback() {
+            @Override
+            public void onWatcherPickedComplete(@NonNull ArrayList<MediaMeta> pickedSet) {
+                callbackLambda.onWatcherPicked(pickedSet);
+            }
+
+            @Override
+            public void onWatcherPickedFailed() {
+                callbackLambda.onWatcherPicked(null);
+            }
+        });
+    }
+
+    /**
+     * 调用图片查看器, 一般用于相册
+     */
+    public void startForResult(@NonNull final WatcherCallback callback) {
+        Preconditions.checkNotNull(callback, "Please ensure U set WatcherCallback correct.");
         Preconditions.checkNotNull(mConfig, "Please ensure U set WatcherConfig correct.");
         PermissionsHelper.with(mBind)
                 .request(sPermissions)
@@ -96,24 +115,20 @@ public class WatcherManager {
     private void startForResultActual(final WatcherCallback callback) {
         CallbackFragment callbackFragment = CallbackFragment.getInstance(mBind);
         if (callbackFragment == null) {
-            Log.e(TAG, "launch picture watcher failed.");
+            callback.onWatcherPickedFailed();
             return;
         }
         callbackFragment.setCallback(new CallbackFragment.Callback() {
             @Override
             public void onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (resultCode != Activity.RESULT_OK || null == data || null == callback) {
-                    return;
-                }
-                switch (requestCode) {
-                    case WatcherActivity.REQUEST_CODE:
-                        callback.onWatcherPickedComplete(
-                                data.getBooleanExtra(WatcherActivity.RESULT_EXTRA_IS_PICKED_ENSURE, false),
-                                data.<MediaMeta>getParcelableArrayListExtra(WatcherActivity.RESULT_EXTRA_PICKED_SET)
-                        );
-                        break;
-                    default:
-                        break;
+                if (resultCode == Activity.RESULT_OK && requestCode == WatcherActivity.REQUEST_CODE) {
+                    if (mConfig.getUserPickedSet() != null) {
+                        callback.onWatcherPickedComplete(mConfig.getUserPickedSet());
+                    } else {
+                        callback.onWatcherPickedFailed();
+                    }
+                } else {
+                    callback.onWatcherPickedFailed();
                 }
             }
         });
