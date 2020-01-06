@@ -48,6 +48,8 @@ class MainActivity : AppCompatActivity() {
             .setRenderer(WatermarkPreviewerRenderer::class.java)
             // 设置是否支持视频录制
             .setVideoRecord(true)
+            // 是否仅支持视频录制
+            .setJustVideoRecord(false)
             // 设置录制最大时长
             .setMaxRecordDuration(15 * 1000)
             // 设置录制最短时长

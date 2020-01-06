@@ -277,3 +277,6 @@ CropperManager.with(context)
 裁剪目前使用系统提供的裁剪方式, 其使用方式也比较简单, 这里就不再赘述了
 
 更多功能请查看工程中提供的[示例](https://github.com/SharryChoo/SAlbum/blob/release/app/src/main/java/com/sharry/app/salbum/MainActivity.kt)
+
+## 致谢
+[PhotoView](https://github.com/chrisbanes/PhotoView)
