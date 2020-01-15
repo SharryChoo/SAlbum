@@ -147,6 +147,8 @@ class MainActivity : AppCompatActivity() {
                 .isToolbarScrollable(cbAnimation.isChecked)
                 // 是否开启 Fab Behavior 动画
                 .isFabScrollable(cbAnimation.isChecked)
+                // 是否选择图片
+                .isPickPicture(cbPicture.isChecked)
                 // 是否选择 GIF 图
                 .isPickGif(cbGif.isChecked)
                 // 是否选择视频

@@ -20,7 +20,6 @@ import java.util.ArrayList;
  */
 public class PickerConfig implements Parcelable {
 
-
     static final int INVALIDATE_VALUE = -1;
     static final int COLOR_DEFAULT = Color.parseColor("#ff64b6f6");
 
@@ -38,6 +37,7 @@ public class PickerConfig implements Parcelable {
         indicatorBorderUncheckedColor = in.readInt();
         isToolbarBehavior = in.readByte() != 0;
         isFabBehavior = in.readByte() != 0;
+        isPickPicture = in.readByte() != 0;
         isPickVideo = in.readByte() != 0;
         isPickGif = in.readByte() != 0;
         takerConfig = in.readParcelable(TakerConfig.class.getClassLoader());
@@ -59,6 +59,7 @@ public class PickerConfig implements Parcelable {
         dest.writeInt(indicatorBorderUncheckedColor);
         dest.writeByte((byte) (isToolbarBehavior ? 1 : 0));
         dest.writeByte((byte) (isFabBehavior ? 1 : 0));
+        dest.writeByte((byte) (isPickPicture ? 1 : 0));
         dest.writeByte((byte) (isPickVideo ? 1 : 0));
         dest.writeByte((byte) (isPickGif ? 1 : 0));
         dest.writeParcelable(takerConfig, flags);
@@ -126,6 +127,7 @@ public class PickerConfig implements Parcelable {
      */
     private boolean isToolbarBehavior = false;
     private boolean isFabBehavior = false;
+    private boolean isPickPicture = true;
     private boolean isPickVideo = false;
     private boolean isPickGif = false;
 
@@ -197,6 +199,10 @@ public class PickerConfig implements Parcelable {
 
     public boolean isPickGif() {
         return isPickGif;
+    }
+
+    public boolean isPickPicture() {
+        return isPickPicture;
     }
 
     @Nullable
@@ -358,6 +364,17 @@ public class PickerConfig implements Parcelable {
             mConfig.isPickVideo = isPickVideo;
             return this;
         }
+
+        /**
+         * 是否支持选取视频
+         *
+         * @param isPickPicture if true is support.
+         */
+        public Builder isPickPicture(boolean isPickPicture) {
+            mConfig.isPickPicture = isPickPicture;
+            return this;
+        }
+
 
         /**
          * 是否支持选取 GIF 图

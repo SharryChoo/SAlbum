@@ -261,6 +261,7 @@ class PickerPresenter implements PickerContract.IPresenter,
         mView.setProgressBarVisible(true);
         mModel.fetchData(
                 context.getApplicationContext(),
+                mPickerConfig.isPickPicture(),
                 mPickerConfig.isPickGif(),
                 mPickerConfig.isPickVideo(),
                 new PickerContract.IModel.Callback() {

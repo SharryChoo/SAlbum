@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -48,14 +49,15 @@ class PickerModel implements PickerContract.IModel {
 
     static {
         FETCH_EXECUTOR = new ThreadPoolExecutor(
-                // 3 个线程并发即可满足需求
-                // 使用 4 个, 是为了预防因其中一个线程意外阻塞而导致任务无法正常执行的问题
-                4, 4,
-                30, TimeUnit.SECONDS,
+                // 4 个线程并发即可满足需求
+                // 使用 5 个, 是为了预防因其中一个线程意外阻塞而导致任务无法正常执行的问题
+                5, 5,
+                // 60 s 后自动销毁
+                60, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new ThreadFactory() {
                     @Override
-                    public Thread newThread(Runnable r) {
+                    public Thread newThread(@NonNull Runnable r) {
                         Thread thread = new Thread(r, PickerModel.class.getSimpleName());
                         thread.setDaemon(false);
                         return thread;
@@ -68,13 +70,14 @@ class PickerModel implements PickerContract.IModel {
 
     private Future mFetchDataFuture;
     private Future mFetchPictureFuture;
+    private Future mFetchGifFuture;
     private Future mFetchVideoFuture;
 
     PickerModel() {
     }
 
     @Override
-    public void fetchData(final Context context, final boolean supportGif,
+    public void fetchData(final Context context, final boolean supportPicture, final boolean supportGif,
                           final boolean supportVideo, final Callback callback) {
         mFetchDataFuture = FETCH_EXECUTOR.submit(new Runnable() {
 
@@ -95,9 +98,19 @@ class PickerModel implements PickerContract.IModel {
                 // 等待执行结束
                 try {
                     // 创建计数器
-                    CountDownLatch latch = new CountDownLatch(supportVideo ? 2 : 1);
+                    int count = 0;
+                    if (supportPicture) count++;
+                    if (supportGif) count++;
+                    if (supportVideo) count++;
+                    CountDownLatch latch = new CountDownLatch(count);
                     // 获取图片数据
-                    mFetchPictureFuture = FETCH_EXECUTOR.submit(new PictureFetchRunnable(context, supportGif, folders, folderAll, latch));
+                    if (supportPicture) {
+                        mFetchPictureFuture = FETCH_EXECUTOR.submit(new PictureFetchRunnable(context, folders, folderAll, latch));
+                    }
+                    // 获取 GIF 数据
+                    if (supportGif) {
+                        mFetchGifFuture = FETCH_EXECUTOR.submit(new GifFetchRunnable(context, folders, folderAll, latch));
+                    }
                     // 获取视频数据
                     if (supportVideo) {
                         mFetchVideoFuture = FETCH_EXECUTOR.submit(new VideoFetchRunnable(context, folders, folderAll, latch));
@@ -118,14 +131,17 @@ class PickerModel implements PickerContract.IModel {
 
     @Override
     public void stopIfFetching() {
-        if (mFetchDataFuture != null) {
-            mFetchDataFuture.cancel(true);
-        }
         if (mFetchPictureFuture != null) {
             mFetchPictureFuture.cancel(true);
         }
+        if (mFetchGifFuture != null) {
+            mFetchGifFuture.cancel(true);
+        }
         if (mFetchVideoFuture != null) {
             mFetchVideoFuture.cancel(true);
+        }
+        if (mFetchDataFuture != null) {
+            mFetchDataFuture.cancel(true);
         }
     }
 
@@ -135,18 +151,15 @@ class PickerModel implements PickerContract.IModel {
     private static class PictureFetchRunnable implements Runnable {
 
         private final Context context;
-        private final boolean supportGif;
         private final ConcurrentHashMap<String, FolderModel> folders;
         private final FolderModel folderAll;
         private final CountDownLatch latch;
 
         PictureFetchRunnable(Context context,
-                             boolean supportGif,
                              ConcurrentHashMap<String, FolderModel> folders,
                              FolderModel folderAll,
                              CountDownLatch latch) {
             this.context = context;
-            this.supportGif = supportGif;
             this.folderAll = folderAll;
             this.folders = folders;
             this.latch = latch;
@@ -154,7 +167,7 @@ class PickerModel implements PickerContract.IModel {
 
         @Override
         public void run() {
-            Cursor cursor = supportGif ? createPictureCursorWithGif() : createPictureCursorWithoutGif();
+            Cursor cursor = createPictureCursor();
             try {
                 while (cursor.moveToNext()) {
                     // 验证路径是否有效
@@ -233,7 +246,7 @@ class PickerModel implements PickerContract.IModel {
         /**
          * Create image cursor associated with this runnable.
          */
-        private Cursor createPictureCursorWithoutGif() {
+        private Cursor createPictureCursor() {
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String[] projection = new String[]{
                     MediaStore.Video.Media._ID,
@@ -248,6 +261,99 @@ class PickerModel implements PickerContract.IModel {
                     MIME_TYPE_JPEG,
                     MIME_TYPE_PNG,
                     MIME_TYPE_WEBP
+            };
+            String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+            return context.getContentResolver().query(uri, projection,
+                    selection, selectionArgs, sortOrder);
+        }
+
+    }
+
+    /**
+     * The runnable for fetch gif resources.
+     */
+    private static class GifFetchRunnable implements Runnable {
+
+        private final Context context;
+        private final ConcurrentHashMap<String, FolderModel> folders;
+        private final FolderModel folderAll;
+        private final CountDownLatch latch;
+
+        GifFetchRunnable(Context context,
+                         ConcurrentHashMap<String, FolderModel> folders,
+                         FolderModel folderAll,
+                         CountDownLatch latch) {
+            this.context = context;
+            this.folderAll = folderAll;
+            this.folders = folders;
+            this.latch = latch;
+        }
+
+        @Override
+        public void run() {
+            Cursor cursor = createGifCursor();
+            try {
+                while (cursor.moveToNext()) {
+                    // 验证路径是否有效
+                    String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                    if (TextUtils.isEmpty(path)) {
+                        continue;
+                    }
+                    // 构建数据源
+                    long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+                    MediaMeta meta = MediaMeta.create(
+                            Uri.withAppendedPath(
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                    String.valueOf(id)),
+                            path,
+                            true
+                    );
+                    meta.date = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
+                    meta.mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
+                    // 1. 添加到 <所有> 目录下
+                    folderAll.addMeta(meta);
+                    // 2. 添加到文件所在目录
+                    String folderPath = getParentFolderPath(path);
+                    if (TextUtils.isEmpty(folderPath)) {
+                        continue;
+                    }
+                    // 添加资源到缓存
+                    FolderModel folder = folders.get(folderPath);
+                    if (folder == null) {
+                        String folderName = getLastFileName(folderPath);
+                        if (TextUtils.isEmpty(folderName)) {
+                            folderName = context.getString(R.string.lib_album_picker_root_folder);
+                        }
+                        folder = new FolderModel(folderName);
+                        folders.put(folderPath, folder);
+                    }
+                    folder.addMeta(meta);
+                }
+                Log.i(TAG, "Fetch picture resource completed.");
+            } catch (Throwable throwable) {
+                // ignore.
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+                latch.countDown();
+            }
+        }
+
+        /**
+         * Create image cursor associated with this runnable.
+         */
+        private Cursor createGifCursor() {
+            Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            String[] projection = new String[]{
+                    MediaStore.Video.Media._ID,
+                    MediaStore.Images.Media.DATA,
+                    MediaStore.Images.Media.DATE_ADDED,
+                    MediaStore.Video.Media.MIME_TYPE
+            };
+            String selection = MediaStore.Images.Media.MIME_TYPE + "=?";
+            String[] selectionArgs = new String[]{
+                    MIME_TYPE_GIF
             };
             String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
             return context.getContentResolver().query(uri, projection,

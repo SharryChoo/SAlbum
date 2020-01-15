@@ -95,7 +95,7 @@ interface PickerContract {
 
         }
 
-        void fetchData(Context context, boolean supportGif, boolean supportVideo, final Callback listener);
+        void fetchData(Context context, boolean pickPicture, boolean supportGif, boolean supportVideo, final Callback listener);
 
         void stopIfFetching();
 
