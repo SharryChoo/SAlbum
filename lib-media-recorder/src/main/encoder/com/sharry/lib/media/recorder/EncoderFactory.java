@@ -35,7 +35,7 @@ class EncoderFactory {
         IAudioEncoder result;
         switch (type) {
             case AAC:
-                result = new ACCEncoder();
+                result = new AACEncoder();
                 break;
             default:
                 throw new UnsupportedOperationException();

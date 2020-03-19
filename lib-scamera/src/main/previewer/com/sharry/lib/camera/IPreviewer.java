@@ -6,8 +6,9 @@ import android.opengl.EGLContext;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.sharry.lib.opengles.ITextureRenderer;
+import com.sharry.lib.opengles.texture.ITextureRenderer;
 
 /**
  * 相机预览器的抽象描述
@@ -26,18 +27,28 @@ public interface IPreviewer {
     /**
      * 设置 previewer 的渲染器
      */
-    void setRenderer(@NonNull Renderer renderer);
+    void setRenderer(@Nullable Renderer renderer);
+
+    /**
+     * 设置旋转角度
+     */
+    void setRotate(int degrees);
+
+    /**
+     * 设置缩放类型
+     */
+    void setScaleType(ScaleType type, boolean landscape, Size dataSourceSize);
+
+    /**
+     * 获取渲染器
+     */
+    @NonNull
+    Renderer getRenderer();
 
     /**
      * 获取用于预览的 view
      */
     View getView();
-
-    /**
-     * 设置 previewer 的渲染器
-     */
-    @NonNull
-    Renderer getRenderer();
 
     /**
      * 获取渲染器的尺寸
@@ -53,7 +64,7 @@ public interface IPreviewer {
     /**
      * 获取当前的渲染环境
      */
-    EGLContext getEGLContext();
+    EGLContext getEglContext();
 
     /**
      * 相机预览器的 Renderer
@@ -66,22 +77,27 @@ public interface IPreviewer {
      */
     interface Renderer extends ITextureRenderer {
 
-        void onDataSourceChanged(SurfaceTexture oesTexture);
+        /**
+         * 要渲染的数据源变更了
+         *
+         * @param dataSource 相机输出的外部纹理
+         */
+        void setDataSource(SurfaceTexture dataSource);
 
-        int getTextureId();
+        /**
+         * 获取预览器输出的纹理 ID
+         */
+        int getPreviewerTextureId();
 
-        void setMatrix(@NonNull float[] matrix);
+        /**
+         * 设置旋转角度
+         */
+        void setRotate(int degrees);
 
-        @NonNull
-        float[] getMatrix();
-
-        void resetMatrix();
-
-        void rotate(int degrees);
-
-        void centerCrop(boolean isLandscape, Size surfaceSize, Size textureSize);
-
-        void applyMatrix();
+        /**
+         * 设置缩放类型
+         */
+        void setScaleType(ScaleType type, boolean landscape, Size dataSourceSize, Size viewSize);
 
     }
 

@@ -2,8 +2,6 @@ package com.sharry.lib.camera;
 
 import android.graphics.SurfaceTexture;
 
-import androidx.annotation.NonNull;
-
 /**
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
@@ -18,60 +16,44 @@ public abstract class PreviewerRendererWrapper implements IPreviewer.Renderer {
     }
 
     @Override
-    public void onEGLContextCreated() {
-        mImpl.onEGLContextCreated();
+    public void onAttach() {
+        mImpl.onAttach();
     }
 
     @Override
-    public void onSurfaceChanged(int width, int height) {
-        mImpl.onSurfaceChanged(width, height);
+    public void onSizeChanged(int width, int height) {
+        mImpl.onSizeChanged(width, height);
     }
 
     @Override
-    public void onDrawFrame() {
-        mImpl.onDrawFrame();
-        onDrawTexture(mImpl.getTextureId());
+    public void onDraw() {
+        mImpl.onDraw();
+        onDrawTexture(mImpl.getPreviewerTextureId());
     }
 
     @Override
-    public void onDataSourceChanged(SurfaceTexture oesTexture) {
-        mImpl.onDataSourceChanged(oesTexture);
+    public void onDetach() {
+        mImpl.onDetach();
     }
 
     @Override
-    public int getTextureId() {
-        return mImpl.getTextureId();
+    public void setDataSource(SurfaceTexture dataSource) {
+        mImpl.setDataSource(dataSource);
     }
 
     @Override
-    public void resetMatrix() {
-        mImpl.resetMatrix();
+    public int getPreviewerTextureId() {
+        return mImpl.getPreviewerTextureId();
     }
 
     @Override
-    public void rotate(int degrees) {
-        mImpl.rotate(degrees);
+    public void setRotate(int degrees) {
+        mImpl.setRotate(degrees);
     }
 
     @Override
-    public void centerCrop(boolean isLandscape, Size surfaceSize, Size textureSize) {
-        mImpl.centerCrop(isLandscape, surfaceSize, textureSize);
-    }
-
-    @Override
-    public void applyMatrix() {
-        mImpl.applyMatrix();
-    }
-
-    @NonNull
-    @Override
-    public float[] getMatrix() {
-        return mImpl.getMatrix();
-    }
-
-    @Override
-    public void setMatrix(@NonNull float[] matrix) {
-        mImpl.setMatrix(matrix);
+    public void setScaleType(ScaleType type, boolean landscape, Size dataSourceSize, Size viewSize) {
+        mImpl.setScaleType(type, landscape, dataSourceSize, viewSize);
     }
 
     protected abstract void onDrawTexture(int textureId);

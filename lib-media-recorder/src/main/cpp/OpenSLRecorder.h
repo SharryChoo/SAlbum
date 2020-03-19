@@ -20,13 +20,6 @@ public:
     pthread_t thread_opensl_es_recode;
 
     /**
-     * 用于安全 Stop 的锁与条件变量
-     */
-    bool requestStop = false;
-    pthread_mutex_t mutex_cond_request_stop;
-    pthread_cond_t cond_request_stop;
-
-    /**
      * OpenSL ES 相关变量
      */
     SLObjectItf sl_obj_engine = NULL;

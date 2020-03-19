@@ -2,7 +2,7 @@ package com.sharry.lib.media.recorder;
 
 import android.opengl.GLES20;
 
-import com.sharry.lib.opengles.ITextureRenderer;
+import com.sharry.lib.opengles.texture.ITextureRenderer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -51,7 +51,6 @@ public class H264Render implements ITextureRenderer {
     private int mProgram;
     private int vPosition;
     private int fPosition;
-
     private int mTextureId;
 
     H264Render(int textureId) {
@@ -61,7 +60,7 @@ public class H264Render implements ITextureRenderer {
     }
 
     @Override
-    public void onEGLContextCreated() {
+    public void onAttach() {
         mProgram = createProgram(vertexSource, fragmentSource);
         // 获取坐标
         vPosition = GLES20.glGetAttribLocation(mProgram, "v_Position");
@@ -83,12 +82,12 @@ public class H264Render implements ITextureRenderer {
     }
 
     @Override
-    public void onSurfaceChanged(int width, int height) {
+    public void onSizeChanged(int width, int height) {
         GLES20.glViewport(0, 0, width, height);
     }
 
     @Override
-    public void onDrawFrame() {
+    public void onDraw() {
         // 激活 program
         GLES20.glUseProgram(mProgram);
         // 绑定纹理
@@ -107,6 +106,21 @@ public class H264Render implements ITextureRenderer {
         // 解绑
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+    }
+
+    @Override
+    public void onDetach() {
+        // 释放着色器程序
+        if (mProgram != 0) {
+            GLES20.glDeleteProgram(mProgram);
+        }
+        // 释放 VBO
+        if (mVboId != 0) {
+            int size = 1;
+            int[] vboIds = new int[size];
+            vboIds[0] = mVboId;
+            GLES20.glDeleteBuffers(1, vboIds, 0);
+        }
     }
 
     private FloatBuffer createBuffer(float[] vertexData) {

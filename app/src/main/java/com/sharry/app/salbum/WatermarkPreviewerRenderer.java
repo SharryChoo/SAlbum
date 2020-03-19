@@ -8,7 +8,8 @@ import android.opengl.GLUtils;
 
 import com.sharry.lib.camera.PreviewerRendererImpl;
 import com.sharry.lib.camera.PreviewerRendererWrapper;
-import com.sharry.lib.opengles.GlUtil;
+import com.sharry.lib.opengles.util.FboHelper;
+import com.sharry.lib.opengles.util.GlUtil;
 
 import java.nio.FloatBuffer;
 
@@ -91,113 +92,34 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
     private final FloatBuffer mWatermarkTextureBuffer = GlUtil.createFloatBuffer(mWatermarkTextureCoords);
 
     private final Context mContext;
+    private final FboHelper mFboHelper;
     private int mProgramId;
     private int aVertexPosition;
     private int aTexturePosition;
     private int mVboId;
-    private int mFramebufferId;
-    private int mTextureId;
     private int uTexture;
-    private int mWaterTextureId = 0;
+    private int mWatermarkTextureId = 0;
+    private Bitmap mWatermarkBitmap;
 
     public WatermarkPreviewerRenderer(Context context) {
         super(new PreviewerRendererImpl(context));
         this.mContext = context;
+        this.mFboHelper = new FboHelper();
     }
 
     @Override
-    public void onEGLContextCreated() {
-        super.onEGLContextCreated();
-        // 上下文变更了, 重置数据
-        reset();
+    public void onAttach() {
+        super.onAttach();
+        mFboHelper.onAttach();
         // 初始化程序
         setupShaders();
         // 初始化顶点坐标
         setupCoordinates();
-    }
-
-    @Override
-    public void onSurfaceChanged(int width, int height) {
-        super.onSurfaceChanged(width, height);
-        // 启用透明
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        // 确定宽高
-        GLES20.glViewport(0, 0, width, height);
-        // 配置纹理
-        setupTexture(width, height);
-        // 配置水印
-        setupWatermark(width, height);
-        // 配置 fbo
-        setupFbo();
-    }
-
-    @Override
-    protected void onDrawTexture(int textureId) {
-        bindFramebuffer();
-        // 绘制纹理
-        drawCameraTexture2FBO(textureId);
-        // 绘制水印
-        drawWatermark2FBO();
-        // 解绑
-        unbindFramebuffer();
-        // 绘制到系统自带的缓冲上
-        drawToEGLSurface();
-    }
-
-    @Override
-    public int getTextureId() {
-        return mTextureId;
-    }
-
-    private void reset() {
-        this.mProgramId = 0;
-        this.mVboId = 0;
-        this.mTextureId = 0;
-        this.mFramebufferId = 0;
-    }
-
-    private void setupWatermark(int surfaceWidth, int surfaceHeight) {
-        Bitmap bitmap = createTextureFromRes(R.drawable.ic_demo_watermark);
-        float height = bitmap.getHeight();
-        float width = bitmap.getWidth();
-        height = height * (1 / (float) surfaceHeight);
-        width = width * (1 / (float) surfaceWidth);
-        float left = -0.9f;
-        float bottom = -0.9f;
-        // 设置水印的位置
-        // 左上
-        mWatermarkVertexCoords[0] = left;
-        mWatermarkVertexCoords[1] = bottom + height;
-        // 左下
-        mWatermarkVertexCoords[2] = left;
-        mWatermarkVertexCoords[3] = bottom;
-        // 右上
-        mWatermarkVertexCoords[4] = left + width;
-        mWatermarkVertexCoords[5] = bottom + height;
-        // 右下
-        mWatermarkVertexCoords[6] = left + width;
-        mWatermarkVertexCoords[7] = bottom;
-        // 更新 Buffer
-        mWatermarkVertexBuffer.put(mWatermarkVertexCoords, 0, mWatermarkVertexCoords.length)
-                .position(0);
-        // 更新 VBO
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
-        // 写入水印顶点坐标
-        GLES20.glBufferSubData(
-                GLES20.GL_ARRAY_BUFFER,
-                mCameraVertexCoords.length * 4 +
-                        mCameraTextureCoords.length * 4,
-                mWatermarkVertexCoords.length * 4,
-                mWatermarkVertexBuffer
-        );
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        // 初始化水印纹理
+        setupWatermarkTexture();
     }
 
     private void setupShaders() {
-        if (mProgramId != 0) {
-            return;
-        }
         mProgramId = GlUtil.createProgram(VERTEX_SHADER_STR, FRAGMENT_SHADER_STR);
         aVertexPosition = GLES20.glGetAttribLocation(mProgramId, "aVertexPosition");
         aTexturePosition = GLES20.glGetAttribLocation(mProgramId, "aTexturePosition");
@@ -205,9 +127,6 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
     }
 
     private void setupCoordinates() {
-        if (mVboId != 0) {
-            return;
-        }
         // 创建 vbo
         int vboSize = 1;
         int[] vboIds = new int[vboSize];
@@ -259,67 +178,87 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
-    private void setupTexture(int width, int height) {
-        if (mTextureId == 0) {
-            int[] textureIds = new int[1];
-            GLES20.glGenTextures(1, textureIds, 0);
-            mTextureId = textureIds[0];
-        }
-        // 绑定纹理
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
+    private void setupWatermarkTexture() {
+        int[] textureIds = new int[1];
+        GLES20.glGenTextures(1, textureIds, 0);
+        mWatermarkTextureId = textureIds[0];
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mWatermarkTextureId);
         // 设置纹理环绕方式
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
         // 设置纹理过滤方式
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        // 创建一个空的纹理画布
-        GLES20.glTexImage2D(
-                GLES20.GL_TEXTURE_2D,
-                0,
-                GLES20.GL_RGBA,
-                width, height,
-                0,
-                GLES20.GL_RGBA,
-                GLES20.GL_UNSIGNED_BYTE,
-                null
-        );
-        // 解绑纹理
+        // 创建 Bitmap, 将其写入纹理
+        mWatermarkBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_demo_watermark);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mWatermarkBitmap, 0);
+        // 解绑
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 
-    private void setupFbo() {
-        if (mFramebufferId != 0) {
-            return;
-        }
-        // 创建 fbo
-        int[] fBoIds = new int[1];
-        GLES20.glGenBuffers(1, fBoIds, 0);
-        mFramebufferId = fBoIds[0];
-        // 绑定 fbo
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFramebufferId);
-        // 将纹理绑定到 FBO 上, 作为颜色附件
-        GLES20.glFramebufferTexture2D(
-                GLES20.GL_FRAMEBUFFER,
-                GLES20.GL_COLOR_ATTACHMENT0,  // 描述为颜色附件
-                GLES20.GL_TEXTURE_2D,
-                mTextureId,
-                0
+    @Override
+    public void onSizeChanged(int width, int height) {
+        super.onSizeChanged(width, height);
+        mFboHelper.onSizeChanged(width, height);
+        // 启用透明
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glViewport(0, 0, width, height);
+        // 更新水印坐标
+        updateWatermarkCoors(width, height);
+    }
+
+    private void updateWatermarkCoors(int surfaceWidth, int surfaceHeight) {
+        float height = mWatermarkBitmap.getHeight();
+        float width = mWatermarkBitmap.getWidth();
+        height = height * (1 / (float) surfaceHeight);
+        width = width * (1 / (float) surfaceWidth);
+        float left = -0.9f;
+        float bottom = -0.9f;
+        // 设置水印的位置
+        // 左上
+        mWatermarkVertexCoords[0] = left;
+        mWatermarkVertexCoords[1] = bottom + height;
+        // 左下
+        mWatermarkVertexCoords[2] = left;
+        mWatermarkVertexCoords[3] = bottom;
+        // 右上
+        mWatermarkVertexCoords[4] = left + width;
+        mWatermarkVertexCoords[5] = bottom + height;
+        // 右下
+        mWatermarkVertexCoords[6] = left + width;
+        mWatermarkVertexCoords[7] = bottom;
+        // 更新 Buffer
+        mWatermarkVertexBuffer.put(mWatermarkVertexCoords, 0, mWatermarkVertexCoords.length)
+                .position(0);
+        // 更新 VBO
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
+        // 写入水印顶点坐标
+        GLES20.glBufferSubData(
+                GLES20.GL_ARRAY_BUFFER,
+                mCameraVertexCoords.length * 4 +
+                        mCameraTextureCoords.length * 4,
+                mWatermarkVertexCoords.length * 4,
+                mWatermarkVertexBuffer
         );
-        // 解绑 fbo
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
-    private void bindFramebuffer() {
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFramebufferId);
+    @Override
+    protected void onDrawTexture(int textureId) {
+        mFboHelper.bindFramebuffer();
+        // 绘制纹理
+        drawOriginTexture(textureId);
+        // 绘制水印
+        drawWatermark();
+        // 解绑
+        mFboHelper.unbindFramebuffer();
+        // 绘制到系统自带的缓冲上
+        drawToEGLSurface();
     }
 
-    private void unbindFramebuffer() {
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-    }
-
-    private void drawCameraTexture2FBO(int textureId) {
+    private void drawOriginTexture(int textureId) {
         GLES20.glUseProgram(mProgramId);
         // 绑定相机的纹理
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -341,11 +280,11 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 
-    private void drawWatermark2FBO() {
+    private void drawWatermark() {
         GLES20.glUseProgram(mProgramId);
         // 绑定纹理
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mWaterTextureId);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mWatermarkTextureId);
         // 写入水印顶点坐标
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
         GLES20.glEnableVertexAttribArray(aVertexPosition);
@@ -374,7 +313,7 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
         GLES20.glUseProgram(mProgramId);
         // 绑定纹理
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, getPreviewerTextureId());
         // 写入顶点坐标
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
         GLES20.glEnableVertexAttribArray(aVertexPosition);
@@ -393,24 +332,32 @@ public class WatermarkPreviewerRenderer extends PreviewerRendererWrapper {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 
-    private Bitmap createTextureFromRes(int resId) {
-        // 生成绑定纹理
-        int[] textures = new int[1];
-        GLES20.glGenTextures(1, textures, 0);
-        mWaterTextureId = textures[0];
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mWaterTextureId);
-        // 设置环绕方向
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
-        // 设置纹理过滤方式
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        // 将 Bitmap 生成 2D 纹理
-        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), resId);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-        // 解绑
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-        return bitmap;
+    @Override
+    public int getPreviewerTextureId() {
+        return mFboHelper.getTexture2DId();
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mFboHelper.onDetach();
+        // 释放着色器程序
+        if (mProgramId != 0) {
+            GLES20.glDeleteProgram(mProgramId);
+        }
+        // 释放 VBO
+        if (mVboId != 0) {
+            int size = 1;
+            int[] vboIds = new int[size];
+            vboIds[0] = mVboId;
+            GLES20.glDeleteBuffers(1, vboIds, 0);
+        }
+        // 释放纹理
+        if (mWatermarkTextureId != 0) {
+            int size = 1;
+            int[] textures = new int[size];
+            textures[0] = mWatermarkTextureId;
+            GLES20.glDeleteTextures(1, textures, 0);
+        }
+    }
 }

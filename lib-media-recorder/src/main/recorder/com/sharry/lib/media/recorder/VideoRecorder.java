@@ -47,8 +47,8 @@ final class VideoRecorder extends BaseMediaRecorder implements IAudioEncoder.Cal
         this.mEncodeContext = new IVideoEncoder.Context(
                 frameSize[0], frameSize[1],
                 options.getFrameRate(),
-                cameraView.getPreviewer().getRenderer().getTextureId(),
-                cameraView.getPreviewer().getEGLContext(),
+                cameraView.getPreviewer().getRenderer().getPreviewerTextureId(),
+                cameraView.getPreviewer().getEglContext(),
                 this
         );
         // Step1. Create an instance of video encoder.

@@ -3,13 +3,12 @@ package com.sharry.lib.media.recorder;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.os.Build;
 import android.util.Log;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
 
-import com.sharry.lib.opengles.EglCore;
+import com.sharry.lib.opengles.util.EglCore;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -37,7 +36,6 @@ public class H264Encoder implements IVideoEncoder {
      * 以下的属性在 prepare 中初始化
      */
     private MediaCodec mImpl;
-    private long mVideoPts = 0;
     private Context mContext;
     private Surface mInputSurface;
     private RendererThread mRenderThread;
@@ -86,11 +84,12 @@ public class H264Encoder implements IVideoEncoder {
 
     @Override
     public void stop() {
-        mIsEncoding = false;
         mIsPausing = false;
         synchronized (mPauseLock) {
             mPauseLock.notify();
         }
+        // 使用这个方法, 通知 MediaCodec 渲染结束
+        mImpl.signalEndOfInputStream();
         try {
             mRenderThread.join();
         } catch (Throwable e) {
@@ -112,14 +111,17 @@ public class H264Encoder implements IVideoEncoder {
      */
     private final class RendererThread extends Thread {
 
-        private boolean mIsContextCreated = true;
-        private boolean mIsSizeChanged = true;
+        private final long mFrameIntervalMills;
         private final EglCore mEglCore;
         private final H264Render mRenderer;
+        private boolean mIsContextCreated = true;
+        private boolean mIsSizeChanged = true;
+        private long nextFramePts;
 
         RendererThread() {
             mEglCore = new EglCore();
             mRenderer = new H264Render(mContext.textureId);
+            mFrameIntervalMills = 800L / mContext.frameRate;
         }
 
         @Override
@@ -130,7 +132,7 @@ public class H264Encoder implements IVideoEncoder {
                         try {
                             mPauseLock.wait();
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Log.w(TAG, e.getMessage());
                         }
                     }
                     continue;
@@ -138,18 +140,26 @@ public class H264Encoder implements IVideoEncoder {
                 if (mIsContextCreated) {
                     // 初始化创建 EGL 环境，然后回调 Renderer
                     mEglCore.initialize(mInputSurface, mContext.eglContext);
-                    mRenderer.onEGLContextCreated();
+                    mRenderer.onAttach();
                     mIsContextCreated = false;
                 }
                 // 说明手机横竖屏切换, 导致尺寸变更了
                 if (mIsSizeChanged) {
-                    mRenderer.onSurfaceChanged(mContext.frameWidth, mContext.frameHeight);
+                    mRenderer.onSizeChanged(mContext.frameWidth, mContext.frameHeight);
                     mIsSizeChanged = true;
                 }
                 // 不停的绘制
-                mRenderer.onDrawFrame();
-                // 将绘制的数据交换到 mInputSurface 中
+                mRenderer.onDraw();
+                mEglCore.setPresentationTime(nextFramePts);
                 mEglCore.swapBuffers();
+                // 更新下一帧渲染时间
+                nextFramePts += mFrameIntervalMills * 1000 * 1000;
+                // 睡眠一下, 等待下次绘制
+                try {
+                    sleep(mFrameIntervalMills);
+                } catch (InterruptedException e) {
+                    // ignore.
+                }
             }
             onDestroy();
         }
@@ -179,12 +189,24 @@ public class H264Encoder implements IVideoEncoder {
                     continue;
                 }
                 int indexOfOutputBuffer = mImpl.dequeueOutputBuffer(mBufferInfo, 0);
-                if (indexOfOutputBuffer == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                    mContext.callback.onVideoFormatChanged(mImpl.getOutputFormat());
-                } else {
-                    while (indexOfOutputBuffer >= 0) {
-                        // 3.1 处理编码后的输出数据
-                        ByteBuffer outputBuffer = null;
+                switch (indexOfOutputBuffer) {
+                    case MediaCodec.INFO_TRY_AGAIN_LATER:
+                    case  MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                        break;
+                    case   MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                        mContext.callback.onVideoFormatChanged(mImpl.getOutputFormat());
+                        break;
+                    default:
+                        if (indexOfOutputBuffer < 0) {
+                            continue;
+                        }
+                        // 存在 BUFFER_FLAG_END_OF_STREAM flag 则说明渲染结束了
+                        if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                            mIsEncoding = false;
+                            continue;
+                        }
+                        // 处理编码后的输出数据
+                        ByteBuffer outputBuffer;
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                             outputBuffer = mImpl.getOutputBuffer(indexOfOutputBuffer);
                         } else {
@@ -195,17 +217,11 @@ public class H264Encoder implements IVideoEncoder {
                         }
                         outputBuffer.position(mBufferInfo.offset);
                         outputBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
-                        // 记录时间戳, 用于 Muxer 时和音频同步
-                        if (mVideoPts == 0) {
-                            mVideoPts = mBufferInfo.presentationTimeUs;
-                        }
-                        mBufferInfo.presentationTimeUs -= mVideoPts;
                         // 回调 onAudioEncoded
                         mContext.callback.onVideoEncoded(outputBuffer, mBufferInfo);
                         // 3.2 释放指定位置的输出缓冲流
                         mImpl.releaseOutputBuffer(indexOfOutputBuffer, false);
-                        indexOfOutputBuffer = mImpl.dequeueOutputBuffer(mBufferInfo, 0);
-                    }
+                        break;
                 }
             }
             try {

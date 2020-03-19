@@ -149,16 +149,10 @@ public class SCameraView extends FrameLayout implements
     }
 
     @Override
-    public void onCameraReady(@NonNull SurfaceTexture cameraTexture, @NonNull Size textureSize, int needDegrees) {
-        mPreviewer.setDataSource(cameraTexture);
-        mPreviewer.getRenderer().resetMatrix();
-        mPreviewer.getRenderer().rotate(needDegrees);
-        mPreviewer.getRenderer().centerCrop(
-                mScreenOrientationDetector.isLandscape(),
-                mPreviewer.getSize(),
-                textureSize
-        );
-        mPreviewer.getRenderer().applyMatrix();
+    public void onCameraReady(@NonNull SurfaceTexture dataSource, @NonNull Size size, int rotation) {
+        mPreviewer.setDataSource(dataSource);
+        mPreviewer.setRotate(rotation);
+        mPreviewer.setScaleType(ScaleType.CENTER_CROP, mScreenOrientationDetector.isLandscape(), size);
     }
 
     @Override

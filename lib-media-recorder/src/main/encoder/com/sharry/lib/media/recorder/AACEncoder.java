@@ -19,9 +19,9 @@ import java.nio.ByteBuffer;
  * @version 1.0
  * @since 2018/11/22 10:22
  */
-public class ACCEncoder implements IAudioEncoder {
+public class AACEncoder implements IAudioEncoder {
 
-    private static final String TAG = ACCEncoder.class.getSimpleName();
+    private static final String TAG = AACEncoder.class.getSimpleName();
     /**
      * 音频常用的采样数组
      */
@@ -65,7 +65,7 @@ public class ACCEncoder implements IAudioEncoder {
         if (pcmBytes == null) {
             return;
         }
-        // 1. 将输入流传递给编码器的 inputBuffer 队列中
+        // 1. 将输入流传递给编码器的 inputBuffer 队列, 等待编码
         final int indexOfInputBuffer = mImpl.dequeueInputBuffer(0);
         if (indexOfInputBuffer >= 0) {
             final ByteBuffer inputBuffer;
@@ -87,32 +87,43 @@ public class ACCEncoder implements IAudioEncoder {
             // ignore.
             return;
         }
-        // 从 MediaCodec 中获取编码后的输出流
-        int indexOfOutputBuffer = mImpl.dequeueOutputBuffer(mBufferInfo, 0);
-        // 处理输出缓冲索引小于 0 的情况
-        if (indexOfOutputBuffer == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-            mContext.callback.onAudioFormatChanged(mImpl.getOutputFormat());
-        } else {
-            while (indexOfOutputBuffer >= 0) {
-                // 获取数据
-                final ByteBuffer outBuffer;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    outBuffer = mImpl.getOutputBuffer(indexOfOutputBuffer);
-                } else {
-                    outBuffer = mImpl.getOutputBuffers()[indexOfOutputBuffer];
-                }
-                if (null == outBuffer) {
-                    continue;
-                }
-                outBuffer.position(mBufferInfo.offset);
-                outBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
-                // 回调音频编码数据
-                mContext.callback.onAudioEncoded(outBuffer, mBufferInfo);
-                // 写到文件
-                writeToFile(outBuffer, mBufferInfo);
-                // 释放 encoderStatus 索引处的输出缓冲流
-                mImpl.releaseOutputBuffer(indexOfOutputBuffer, false);
-                indexOfOutputBuffer = mImpl.dequeueOutputBuffer(mBufferInfo, 0);
+        // 2. 从 MediaCodec 中获取编码后的数据
+        boolean isAvailable = true;
+        while (isAvailable) {
+            int indexOfOutputBuffer = mImpl.dequeueOutputBuffer(mBufferInfo, 0);
+            switch (indexOfOutputBuffer) {
+                case MediaCodec.INFO_TRY_AGAIN_LATER:
+                case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                    isAvailable = false;
+                    break;
+                case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                    mContext.callback.onAudioFormatChanged(mImpl.getOutputFormat());
+                    break;
+                default:
+                    if (indexOfOutputBuffer < 0) {
+                        isAvailable = false;
+                        break;
+                    }
+                    // 获取数据
+                    final ByteBuffer outBuffer;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                        outBuffer = mImpl.getOutputBuffer(indexOfOutputBuffer);
+                    } else {
+                        outBuffer = mImpl.getOutputBuffers()[indexOfOutputBuffer];
+                    }
+                    if (null == outBuffer) {
+                        isAvailable = false;
+                        break;
+                    }
+                    outBuffer.position(mBufferInfo.offset);
+                    outBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
+                    // 回调音频编码数据
+                    mContext.callback.onAudioEncoded(outBuffer, mBufferInfo);
+                    // 写到文件
+                    writeToFile(outBuffer, mBufferInfo);
+                    // 释放 encoderStatus 索引处的输出缓冲流
+                    mImpl.releaseOutputBuffer(indexOfOutputBuffer, false);
+                    break;
             }
         }
     }

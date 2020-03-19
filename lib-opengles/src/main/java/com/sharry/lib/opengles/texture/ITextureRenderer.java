@@ -1,4 +1,4 @@
-package com.sharry.lib.opengles;
+package com.sharry.lib.opengles.texture;
 
 import androidx.annotation.WorkerThread;
 
@@ -12,12 +12,16 @@ import androidx.annotation.WorkerThread;
 public interface ITextureRenderer {
 
     @WorkerThread
-    void onEGLContextCreated();
+    void onAttach();
 
     @WorkerThread
-    void onSurfaceChanged(int width, int height);
+    void onSizeChanged(int width, int height);
 
     @WorkerThread
-    void onDrawFrame();
+    void onDraw();
+
+    @WorkerThread
+    void onDetach();
 
 }
+

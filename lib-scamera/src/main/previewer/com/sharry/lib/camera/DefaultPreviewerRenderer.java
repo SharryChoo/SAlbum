@@ -3,7 +3,7 @@ package com.sharry.lib.camera;
 import android.content.Context;
 import android.opengl.GLES20;
 
-import com.sharry.lib.opengles.GlUtil;
+import com.sharry.lib.opengles.util.GlUtil;
 
 import java.nio.FloatBuffer;
 
@@ -58,49 +58,15 @@ public class DefaultPreviewerRenderer extends PreviewerRendererWrapper {
     }
 
     @Override
-    public void onEGLContextCreated() {
-        super.onEGLContextCreated();
-        // 上下文变更了, 重置数据
-        reset();
+    public void onAttach() {
+        super.onAttach();
         // 初始化程序
         setupShaders();
         // 初始化顶点坐标
         setupCoordinates();
     }
 
-    @Override
-    protected void onDrawTexture(int textureId) {
-        GLES20.glUseProgram(mProgramId);
-        // 绑定纹理
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-        // 写入顶点坐标
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
-        GLES20.glEnableVertexAttribArray(aVertexPosition);
-        GLES20.glVertexAttribPointer(aVertexPosition, 2, GLES20.GL_FLOAT, false,
-                8, 0);
-        // 写入纹理坐标
-        GLES20.glEnableVertexAttribArray(aTexturePosition);
-        GLES20.glVertexAttribPointer(aTexturePosition, 2, GLES20.GL_FLOAT, false,
-                8, mVertexCoordinate.length * 4);
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-        // 给 uTexture 赋值
-        GLES20.glUniform1i(uTexture, 0);
-        // 绘制到屏幕
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-        // 解绑纹理
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-    }
-
-    private void reset() {
-        this.mProgramId = 0;
-        this.mVboId = 0;
-    }
-
     private void setupShaders() {
-        if (mProgramId != 0) {
-            return;
-        }
         mProgramId = GlUtil.createProgram(VERTEX_SHADER_STR, FRAGMENT_SHADER_STR);
         aVertexPosition = GLES20.glGetAttribLocation(mProgramId, "aVertexPosition");
         aTexturePosition = GLES20.glGetAttribLocation(mProgramId, "aTexturePosition");
@@ -108,9 +74,6 @@ public class DefaultPreviewerRenderer extends PreviewerRendererWrapper {
     }
 
     private void setupCoordinates() {
-        if (mVboId != 0) {
-            return;
-        }
         // 创建 vbo
         int vboSize = 1;
         int[] vboIds = new int[vboSize];
@@ -141,4 +104,45 @@ public class DefaultPreviewerRenderer extends PreviewerRendererWrapper {
         );
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
+
+    @Override
+    protected void onDrawTexture(int textureId) {
+        GLES20.glUseProgram(mProgramId);
+        // 绑定纹理
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+        // 写入顶点坐标
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
+        GLES20.glEnableVertexAttribArray(aVertexPosition);
+        GLES20.glVertexAttribPointer(aVertexPosition, 2, GLES20.GL_FLOAT, false,
+                8, 0);
+        // 写入纹理坐标
+        GLES20.glEnableVertexAttribArray(aTexturePosition);
+        GLES20.glVertexAttribPointer(aTexturePosition, 2, GLES20.GL_FLOAT, false,
+                8, mVertexCoordinate.length * 4);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        // 给 uTexture 赋值
+        GLES20.glUniform1i(uTexture, 0);
+        // 绘制到屏幕
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+        // 解绑纹理
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // 释放着色器程序
+        if (mProgramId != 0) {
+            GLES20.glDeleteProgram(mProgramId);
+        }
+        // 释放 VBO
+        if (mVboId != 0) {
+            int size = 1;
+            int[] vboIds = new int[size];
+            vboIds[0] = mVboId;
+            GLES20.glDeleteBuffers(1, vboIds, 0);
+        }
+    }
+
 }

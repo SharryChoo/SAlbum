@@ -1,4 +1,4 @@
-package com.sharry.lib.opengles;
+package com.sharry.lib.opengles.surface;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;

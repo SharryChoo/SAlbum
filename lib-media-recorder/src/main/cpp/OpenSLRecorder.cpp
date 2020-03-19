@@ -10,16 +10,12 @@
 OpenSLRecorder::OpenSLRecorder(JNICall *jni_call) {
     this->jni_call = jni_call;
     this->buffer = new RecordBuffer(RECORD_BUFFER_SIZE);
-    pthread_mutex_init(&mutex_cond_request_stop, NULL);
-    pthread_cond_init(&cond_request_stop, NULL);
 }
 
 OpenSLRecorder::~OpenSLRecorder() {
     if (buffer != NULL) {
         delete buffer;
         buffer = NULL;
-        pthread_mutex_destroy(&mutex_cond_request_stop);
-        pthread_cond_destroy(&cond_request_stop);
     }
     if (sl_obj_recorder != NULL) {
         (*sl_obj_recorder)->Destroy(sl_obj_recorder);
@@ -35,35 +31,19 @@ OpenSLRecorder::~OpenSLRecorder() {
 }
 
 void recordCallback(SLAndroidSimpleBufferQueueItf caller, void *context) {
-    // 从队列中取数据播放......
     OpenSLRecorder *impl = static_cast<OpenSLRecorder *>(context);
-    if (impl->requestStop) {
-        // 停止 OpenSL ES 的录制
-        (*impl->sl_itf_recorder)->SetRecordState(impl->sl_itf_recorder, SL_RECORDSTATE_STOPPED);
-        // 当前已经停止, 此次请求完毕
-        impl->requestStop = false;
-        // 唤醒正在请求停止的线程
-        pthread_cond_signal(&impl->cond_request_stop);
-    } else {
-        // 通过 JNI 将数据回调到 Java 层
-        impl->jni_call->callOnPCMChanged(reinterpret_cast<uint8_t *>(impl->buffer->getNowBuffer()),
-                                         RECORD_BUFFER_SIZE);
-        // 将下一个 buffer 入队列
-        (*caller)->Enqueue(caller, impl->buffer->getRecordBuffer(), RECORD_BUFFER_SIZE);
-    }
-}
-
-void *openSLESRecord(void *context) {
-    OpenSLRecorder *impl = static_cast<OpenSLRecorder *>(context);
-    // 初始化
-    impl->initOpenSLES();
-    // 设置为开始录制状态
-    (*impl->sl_itf_recorder)->SetRecordState(impl->sl_itf_recorder, SL_RECORDSTATE_RECORDING);
-    return 0;
+    // 记录 OpenSL 录制线程的数据
+    impl->thread_opensl_es_recode = pthread_self();
+    // 通过 JNI 将数据回调到 Java 层
+    impl->jni_call->callOnPCMChanged(reinterpret_cast<uint8_t *>(impl->buffer->getNowBuffer()),
+                                     RECORD_BUFFER_SIZE);
+    // 将下一个 buffer 入队列
+    (*caller)->Enqueue(caller, impl->buffer->getRecordBuffer(), RECORD_BUFFER_SIZE);
 }
 
 void OpenSLRecorder::start() {
-    pthread_create(&thread_opensl_es_recode, NULL, openSLESRecord, this);
+    initOpenSLES();
+    (*sl_itf_recorder)->SetRecordState(sl_itf_recorder, SL_RECORDSTATE_RECORDING);
 }
 
 void OpenSLRecorder::pause() {
@@ -79,18 +59,16 @@ void OpenSLRecorder::resume() {
 }
 
 void OpenSLRecorder::stop() {
-    // 若当前正在请求停止, 则无需再次请求
-    if (requestStop) {
-        return;
+    // 停止 OpenSL ES 的录制
+    (*sl_itf_recorder)->SetRecordState(sl_itf_recorder, SL_RECORDSTATE_STOPPED);
+    // 等待录制线程终止
+    int res = pthread_kill(thread_opensl_es_recode, 0);
+    if (res == ESRCH) {
+        LOGI("thread_opensl_es_recode already killed");
+    } else {
+        pthread_join(thread_opensl_es_recode, NULL);
+        LOGI("thread_opensl_es_recode exit.");
     }
-    // 标记为正在请求停止
-    requestStop = true;
-    pthread_mutex_lock(&mutex_cond_request_stop);
-    while (requestStop) {
-        // looper waiting opensl es stopped
-        pthread_cond_wait(&cond_request_stop, &mutex_cond_request_stop);
-    }
-    pthread_mutex_unlock(&mutex_cond_request_stop);
 }
 
 void OpenSLRecorder::initOpenSLES() {

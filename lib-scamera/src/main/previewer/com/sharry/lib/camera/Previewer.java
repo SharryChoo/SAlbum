@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
-import android.opengl.EGLContext;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -12,8 +11,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.sharry.lib.opengles.GLTextureView;
+import com.sharry.lib.opengles.texture.GLTextureView;
 
 import java.lang.ref.WeakReference;
 
@@ -32,8 +32,7 @@ public final class Previewer extends GLTextureView implements IPreviewer {
     private static final String TAG = Previewer.class.getSimpleName();
 
     private final SurfaceTexture.OnFrameAvailableListener mFrameAvailableListener;
-    private SurfaceTexture mDataSource;
-    private Renderer mRenderer;
+    private Renderer mPreviewerRenderer;
 
     Previewer(Context context, FrameLayout parent) {
         super(context);
@@ -47,31 +46,64 @@ public final class Previewer extends GLTextureView implements IPreviewer {
         this.mFrameAvailableListener = new FrameAvailableListenerImpl(this);
     }
 
+    /**
+     * 暂存 Renderer 的状态值, 方便 Renderer 切换时快速还原
+     */
+    private SurfaceTexture mDataSource;
+    private Size mDataSourceSize = getSize();
+    private int mDegree = 0;
+    private ScaleType mScaleType = ScaleType.CENTER_CROP;
+    private boolean mLandscape = false;
+
     @Override
     public void setDataSource(@NonNull SurfaceTexture dataSource) {
         if (mDataSource == dataSource) {
             Log.i(TAG, "Data source not changed.");
             return;
         }
+        // set callback
+        dataSource.setOnFrameAvailableListener(mFrameAvailableListener);
+        // notify renderer
+        Renderer renderer = mPreviewerRenderer;
+        if (renderer != null) {
+            renderer.setDataSource(dataSource);
+        }
         // update dataSource
         mDataSource = dataSource;
-        // set callback
-        mDataSource.setOnFrameAvailableListener(mFrameAvailableListener);
-        // notify renderer
-        mRenderer.onDataSourceChanged(dataSource);
     }
 
     @Override
-    public void setRenderer(@NonNull Renderer renderer) {
-        Renderer before = mRenderer;
-        // Copy transform matrix from before.
-        if (before != null) {
-            renderer.setMatrix(before.getMatrix());
+    public void setRenderer(@Nullable Renderer newRenderer) {
+        if (mPreviewerRenderer == newRenderer) {
+            return;
         }
-        // update renderer.
-        mRenderer = renderer;
-        mRenderer.onDataSourceChanged(mDataSource);
-        super.setRenderer(mRenderer);
+        if (newRenderer != null) {
+            newRenderer.setDataSource(mDataSource);
+            newRenderer.setRotate(mDegree);
+            newRenderer.setScaleType(mScaleType, mLandscape, mDataSourceSize, getSize());
+        }
+        mPreviewerRenderer = newRenderer;
+        super.setRenderer(newRenderer);
+    }
+
+    @Override
+    public void setRotate(int degrees) {
+        Renderer renderer = mPreviewerRenderer;
+        if (renderer != null) {
+            renderer.setRotate(degrees);
+        }
+        mDegree = degrees;
+    }
+
+    @Override
+    public void setScaleType(ScaleType type, boolean landscape, Size dataSourceSize) {
+        Renderer renderer = mPreviewerRenderer;
+        if (renderer != null) {
+            renderer.setScaleType(type, landscape, dataSourceSize, getSize());
+        }
+        mScaleType = type;
+        mLandscape = landscape;
+        mDataSourceSize = dataSourceSize;
     }
 
     @Override
@@ -82,7 +114,7 @@ public final class Previewer extends GLTextureView implements IPreviewer {
     @NonNull
     @Override
     public Renderer getRenderer() {
-        return mRenderer;
+        return mPreviewerRenderer;
     }
 
     @Override
@@ -92,12 +124,9 @@ public final class Previewer extends GLTextureView implements IPreviewer {
 
     @Override
     public Bitmap getBitmap() {
-        return super.getBitmap();
-    }
-
-    @Override
-    public EGLContext getEGLContext() {
-        return getEglContext();
+        Bitmap bitmap = super.getBitmap();
+        Log.e(TAG, "bitmap width = " + bitmap.getWidth() + ", bitmap height = " + bitmap.getHeight());
+        return bitmap;
     }
 
     private static class FrameAvailableListenerImpl extends WeakReference<Previewer>

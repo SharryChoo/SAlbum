@@ -7,9 +7,8 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.sharry.lib.opengles.GlUtil;
+import com.sharry.lib.opengles.util.FboHelper;
+import com.sharry.lib.opengles.util.GlUtil;
 
 import java.nio.FloatBuffer;
 
@@ -17,7 +16,7 @@ import static android.opengl.GLES20.GL_FLOAT;
 import static android.opengl.GLES20.glGetUniformLocation;
 
 /**
- * 处理相机输出的 OES 输出到 2D Texture 中, 2D 纹理 ID  通过 {@link #getTextureId()} 获取
+ * 处理相机输出的 OES 输出到 2D Texture 中, 2D 纹理 ID  通过 {@link #getPreviewerTextureId()} 获取
  *
  * @author Sharry <a href="sharrychoochn@gmail.com">Contact me.</a>
  * @version 1.0
@@ -48,7 +47,7 @@ public class PreviewerRendererImpl implements IPreviewer.Renderer {
     /**
      * 着色器相关
      */
-    private int mProgram;
+    private int mProgram = 0;
     private int aVertexCoordinate;
     private int aTextureCoordinate;
     private int uTextureMatrix;
@@ -58,14 +57,18 @@ public class PreviewerRendererImpl implements IPreviewer.Renderer {
     /**
      * Vertex buffer object 相关
      */
-    private int mVboId;
+    private int mVboId = 0;
 
     /**
-     * 外部纹理
+     * 用于和数据源绑定的外部纹理 ID
      */
-    private int mOESTextureId = 0;
-    private volatile SurfaceTexture mOESTexture;
-    private final float[] mOESTextureMatrix = new float[16];
+    private int mOesTextureId = 0;
+
+    /**
+     * 数据源相关变量
+     */
+    private volatile SurfaceTexture mDataSource;
+    private final float[] mDataSourceMatrix = new float[16];
     private boolean mIsAttached = false;
 
     /**
@@ -78,133 +81,28 @@ public class PreviewerRendererImpl implements IPreviewer.Renderer {
     public PreviewerRendererImpl(Context context) {
         mContext = context;
         mFboHelper = new FboHelper();
-    }
-
-    @Override
-    public void onEGLContextCreated() {
-        // 上下文变更了, 重置数据
-        reset();
-        // 配置着色器
-        setupShaders();
-        // 配置坐标
-        setupCoordinates();
-    }
-
-    @Override
-    public void onSurfaceChanged(int width, int height) {
-        mFboHelper.onSurfaceSizeChanged(width, height);
-        GLES20.glViewport(0, 0, width, height);
-        // 清屏
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glClearColor(0f, 0f, 0f, 0f);
-    }
-
-    @Override
-    public void onDrawFrame() {
-        // 清屏
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glClearColor(0f, 0f, 0f, 0f);
-        // 获取 OES Texture 中的数据帧
-        if (mOESTexture != null) {
-            try {
-                setupOESTexture();
-                mOESTexture.updateTexImage();
-                mOESTexture.getTransformMatrix(mOESTextureMatrix);
-            } catch (Throwable e) {
-                // ignore.
-            }
-        }
-        // 绑定 FBO
-        mFboHelper.bindFramebuffer();
-        // 将外部纹理绘制到 FBO
-        drawOES2FBO();
-        // 解绑 FBO
-        mFboHelper.unbindFramebuffer();
-    }
-
-    @Override
-    public void onDataSourceChanged(SurfaceTexture oesTexture) {
-        if (mOESTexture != oesTexture) {
-            mOESTexture = oesTexture;
-            mIsAttached = false;
-        }
-    }
-
-    @Override
-    public void resetMatrix() {
+        // 初始化矩阵
         Matrix.setIdentityM(mProjectionMatrix, 0);
         Matrix.setIdentityM(mRotationMatrix, 0);
         Matrix.setIdentityM(mFinalMatrix, 0);
     }
 
-    @Override
-    public void rotate(int degrees) {
-        Matrix.rotateM(mRotationMatrix, 0, degrees, 0, 0, 1);
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    // 渲染器的生命周期
+    ////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void centerCrop(boolean isLandscape, Size surfaceSize, Size textureSize) {
-        // 设置正交投影
-        float aspectPlane = surfaceSize.getWidth() / (float) surfaceSize.getHeight();
-        float aspectTexture = isLandscape ? textureSize.getWidth() / (float) textureSize.getHeight()
-                : textureSize.getHeight() / (float) textureSize.getWidth();
-        float left, top, right, bottom;
-        // 1. 纹理比例 > 投影平面比例
-        if (aspectTexture > aspectPlane) {
-            left = -aspectPlane / aspectTexture;
-            right = -left;
-            top = 1;
-            bottom = -1;
-        }
-        // 2. 纹理比例 < 投影平面比例
-        else {
-            left = -1;
-            right = 1;
-            top = 1 / aspectPlane * aspectTexture;
-            bottom = -top;
-        }
-        Matrix.orthoM(
-                mProjectionMatrix, 0,
-                left, right, bottom, top,
-                1, -1
-        );
-        Log.e(TAG, "preview size = " + surfaceSize + ", camera size = " + textureSize);
-    }
-
-    @Override
-    public void applyMatrix() {
-        // 使裁剪矩阵合并旋转矩阵
-        Matrix.multiplyMM(mFinalMatrix, 0, mProjectionMatrix, 0,
-                mRotationMatrix, 0);
-    }
-
-    @NonNull
-    @Override
-    public float[] getMatrix() {
-        return mFinalMatrix;
-    }
-
-    @Override
-    public void setMatrix(@NonNull float[] matrix) {
-        System.arraycopy(matrix, 0, mFinalMatrix,
-                0, matrix.length);
-    }
-
-    @Override
-    public int getTextureId() {
-        return mFboHelper.getTexture2DId();
-    }
-
-    private void reset() {
-        this.mProgram = 0;
-        this.mVboId = 0;
-        this.mIsAttached = false;
+    public void onAttach() {
+        mFboHelper.onAttach();
+        // 配置着色器
+        setupShaders();
+        // 配置坐标
+        setupCoordinates();
+        // 创建一个 OES 的纹理 ID, 用于后续绑定 DataSource.
+        mOesTextureId = createOESTexture();
     }
 
     private void setupShaders() {
-        if (mProgram != 0) {
-            return;
-        }
         // 加载着色器
         String vertexSource = GlUtil.getGLResource(mContext, R.raw.camera_vertex_shader);
         String fragmentSource = GlUtil.getGLResource(mContext, R.raw.camera_fragment_shader);
@@ -218,9 +116,6 @@ public class PreviewerRendererImpl implements IPreviewer.Renderer {
     }
 
     private void setupCoordinates() {
-        if (mVboId != 0) {
-            return;
-        }
         // 创建 vbo
         int vboSize = 1;
         int[] vboIds = new int[vboSize];
@@ -252,62 +147,6 @@ public class PreviewerRendererImpl implements IPreviewer.Renderer {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
-    private void setupOESTexture() {
-        if (mOESTexture == null || mIsAttached) {
-            return;
-        }
-        try {
-            mOESTexture.detachFromGLContext();
-        } catch (Throwable e) {
-            // ignore.
-        }
-        try {
-            // 绑定纹理
-            mOESTextureId = createOESTexture();
-            mOESTexture.attachToGLContext(mOESTextureId);
-            mIsAttached = true;
-        } catch (Throwable e) {
-            // ignore.
-        }
-    }
-
-    private void drawOES2FBO() {
-        // 激活着色器
-        GLES20.glUseProgram(mProgram);
-
-        /*
-         顶点着色器
-         */
-        // 顶点坐标赋值
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
-        GLES20.glEnableVertexAttribArray(aVertexCoordinate);
-        GLES20.glVertexAttribPointer(aVertexCoordinate, 2, GL_FLOAT, false,
-                8, 0);
-        // 纹理坐标赋值
-        GLES20.glEnableVertexAttribArray(aTextureCoordinate);
-        GLES20.glVertexAttribPointer(aTextureCoordinate, 2, GL_FLOAT, false,
-                8, mVertexCoordinate.length * 4);
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-        // 顶点变换矩阵赋值
-        GLES20.glUniformMatrix4fv(uVertexMatrix, 1, false, mFinalMatrix, 0);
-
-        // 纹理变换矩阵赋值
-        GLES20.glUniformMatrix4fv(uTextureMatrix, 1, false, mOESTextureMatrix, 0);
-
-        /*
-         片元着色器, 为 uTexture 赋值
-         */
-        GLES20.glUniform1i(uTexture, 0);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOESTextureId);
-
-        // 绘制矩形区域
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-
-        // 解绑纹理
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
-    }
-
     private int createOESTexture() {
         // 生成绑定纹理
         int[] textures = new int[1];
@@ -325,89 +164,173 @@ public class PreviewerRendererImpl implements IPreviewer.Renderer {
         return textureId;
     }
 
-    /**
-     * 用于离屏渲染
-     */
-    private static class FboHelper {
+    @Override
+    public void onSizeChanged(int width, int height) {
+        mFboHelper.onSizeChanged(width, height);
+        // 设置画布尺寸
+        GLES20.glViewport(0, 0, width, height);
+        // 清屏
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClearColor(0f, 0f, 0f, 0f);
+    }
 
-        private int mFramebufferId;
-        private int mTextureId;
-
-        FboHelper() {
-        }
-
-        void onSurfaceSizeChanged(int width, int height) {
-            GLES20.glViewport(0, 0, width, height);
-            // 配置纹理
-            setupTexture(width, height);
-            // 配置 fbo
-            setupFbo();
-        }
-
-        void bindFramebuffer() {
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFramebufferId);
-        }
-
-        void unbindFramebuffer() {
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        }
-
-        int getTexture2DId() {
-            return mTextureId;
-        }
-
-        private void setupTexture(int width, int height) {
-            if (mTextureId == 0) {
-                int[] textureIds = new int[1];
-                GLES20.glGenTextures(1, textureIds, 0);
-                mTextureId = textureIds[0];
+    @Override
+    public void onDraw() {
+        // 清屏
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glClearColor(0f, 0f, 0f, 0f);
+        // 获取 OES Texture 中的数据帧
+        if (mDataSource != null) {
+            try {
+                // 为数据源绑定纹理 ID
+                if (!mIsAttached) {
+                    attachDataSource();
+                }
+                // 从获取数据源中获取数据
+                mDataSource.updateTexImage();
+                // 获取数据源的 transform 矩阵
+                mDataSource.getTransformMatrix(mDataSourceMatrix);
+            } catch (Throwable e) {
+                // ignore.
             }
-            // 绑定纹理
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
-            // 设置纹理环绕方式
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
-            // 设置纹理过滤方式
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-            // 创建一个空的纹理画布
-            GLES20.glTexImage2D(
-                    GLES20.GL_TEXTURE_2D,
-                    0,
-                    GLES20.GL_RGBA,
-                    width, height,
-                    0,
-                    GLES20.GL_RGBA,
-                    GLES20.GL_UNSIGNED_BYTE,
-                    null
-            );
-            // 解绑纹理
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }
+        // 绑定 FBO
+        mFboHelper.bindFramebuffer();
+        // 将外部纹理绘制到 FBO
+        draw();
+        // 解绑 FBO
+        mFboHelper.unbindFramebuffer();
+    }
 
-        private void setupFbo() {
-            if (mFramebufferId != 0) {
-                return;
-            }
-            // 创建 fbo
-            int[] fBoIds = new int[1];
-            GLES20.glGenBuffers(1, fBoIds, 0);
-            mFramebufferId = fBoIds[0];
-            // 绑定 fbo
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFramebufferId);
-            // 将纹理绑定到 FBO 上, 作为颜色附件
-            GLES20.glFramebufferTexture2D(
-                    GLES20.GL_FRAMEBUFFER,
-                    GLES20.GL_COLOR_ATTACHMENT0,  // 描述为颜色附件
-                    GLES20.GL_TEXTURE_2D,
-                    mTextureId,
-                    0
-            );
-            // 解绑 fbo
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+    private void attachDataSource() {
+        try {
+            mDataSource.detachFromGLContext();
+        } catch (Throwable e) {
+            // ignore.
         }
+        try {
+            mDataSource.attachToGLContext(mOesTextureId);
+            mIsAttached = true;
+        } catch (Throwable e) {
+            // ignore.
+        }
+    }
 
+    private void draw() {
+        // 激活着色器
+        GLES20.glUseProgram(mProgram);
+        /*
+         顶点着色器
+         */
+        // 顶点坐标赋值
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVboId);
+        GLES20.glEnableVertexAttribArray(aVertexCoordinate);
+        GLES20.glVertexAttribPointer(aVertexCoordinate, 2, GL_FLOAT, false,
+                8, 0);
+        // 纹理坐标赋值
+        GLES20.glEnableVertexAttribArray(aTextureCoordinate);
+        GLES20.glVertexAttribPointer(aTextureCoordinate, 2, GL_FLOAT, false,
+                8, mVertexCoordinate.length * 4);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        // 使裁剪矩阵合并旋转矩阵
+        Matrix.multiplyMM(mFinalMatrix, 0, mProjectionMatrix, 0,
+                mRotationMatrix, 0);
+        // 顶点变换矩阵赋值
+        GLES20.glUniformMatrix4fv(uVertexMatrix, 1, false, mFinalMatrix, 0);
+
+        // 纹理变换矩阵赋值
+        GLES20.glUniformMatrix4fv(uTextureMatrix, 1, false, mDataSourceMatrix, 0);
+
+        /*
+         片元着色器, 为 uTexture 赋值
+         */
+        GLES20.glUniform1i(uTexture, 0);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOesTextureId);
+
+        // 绘制矩形区域
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
+        // 解绑纹理
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+    }
+
+    @Override
+    public void onDetach() {
+        mFboHelper.onDetach();
+        // 释放着色器程序
+        if (mProgram != 0) {
+            GLES20.glDeleteProgram(mProgram);
+        }
+        // 释放 VBO
+        if (mVboId != 0) {
+            int size = 1;
+            int[] vboIds = new int[size];
+            vboIds[0] = mVboId;
+            GLES20.glDeleteBuffers(1, vboIds, 0);
+        }
+        // 释放纹理
+        if (mOesTextureId != 0) {
+            int size = 1;
+            int[] textures = new int[size];
+            textures[0] = mOesTextureId;
+            GLES20.glDeleteTextures(1, textures, 0);
+        }
+        mIsAttached = false;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 其他
+    ////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void setDataSource(SurfaceTexture dataSource) {
+        if (mDataSource != dataSource) {
+            mDataSource = dataSource;
+            mIsAttached = false;
+        }
+    }
+
+    @Override
+    public void setRotate(int degrees) {
+        Matrix.rotateM(mRotationMatrix, 0, degrees, 0, 0, 1);
+    }
+
+    @Override
+    public void setScaleType(ScaleType type, boolean isLandscape, Size dataSourceSize, Size viewSize) {
+        if (type != ScaleType.CENTER_CROP) {
+            return;
+        }
+        // 设置正交投影
+        float aspectPlane = viewSize.getWidth() / (float) viewSize.getHeight();
+        float aspectTexture = isLandscape ? dataSourceSize.getWidth() / (float) dataSourceSize.getHeight()
+                : dataSourceSize.getHeight() / (float) dataSourceSize.getWidth();
+        float left, top, right, bottom;
+        // 1. 纹理比例 > 投影平面比例
+        if (aspectTexture > aspectPlane) {
+            left = -aspectPlane / aspectTexture;
+            right = -left;
+            top = 1;
+            bottom = -1;
+        }
+        // 2. 纹理比例 < 投影平面比例
+        else {
+            left = -1;
+            right = 1;
+            top = 1 / aspectPlane * aspectTexture;
+            bottom = -top;
+        }
+        Matrix.orthoM(
+                mProjectionMatrix, 0,
+                left, right, bottom, top,
+                1, -1
+        );
+        Log.e(TAG, "view size = " + viewSize + ", data source size = " + dataSourceSize);
+    }
+
+    @Override
+    public int getPreviewerTextureId() {
+        return mFboHelper.getTexture2DId();
     }
 
 }
