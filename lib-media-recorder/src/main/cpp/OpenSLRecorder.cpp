@@ -62,8 +62,7 @@ void OpenSLRecorder::stop() {
     // 停止 OpenSL ES 的录制
     (*sl_itf_recorder)->SetRecordState(sl_itf_recorder, SL_RECORDSTATE_STOPPED);
     // 等待录制线程终止
-    int res = pthread_kill(thread_opensl_es_recode, 0);
-    if (res == ESRCH) {
+    if (pthread_kill(thread_opensl_es_recode, 0)) {
         LOGI("thread_opensl_es_recode already killed");
     } else {
         pthread_join(thread_opensl_es_recode, NULL);
