@@ -9,6 +9,11 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         vectorDrawables.useSupportLibrary true
+        externalNativeBuild {
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
+        }
     }
 }
 
